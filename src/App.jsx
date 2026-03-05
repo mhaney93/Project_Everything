@@ -17,7 +17,7 @@ const debugLog = (...args) => {
 
 // Recenter map when root node is selected, using latest layout and viewport
 // (This useEffect should be placed after all state and ref declarations in the App component)
-const H_GAP = 45;
+const H_GAP = 5;
 const V_GAP = 45;
 const PADDING = 90;
 const DOTS_OFFSET = 12;
@@ -1108,10 +1108,25 @@ function App() {
       setBasePanOffset({ x: 0, y: 0 })
     } else {
       // Children are hidden or don't exist - reveal and add predefined ones
-      // First, unhide any existing hidden children
-      let updatedNodes = nodes.map((node) =>
-        node.parentId === parentNodeId && node.hidden ? { ...node, hidden: false } : node
-      )
+      // First, unhide direct children and hide their descendants
+      let updatedNodes = nodes.map((node) => {
+        if (node.parentId === parentNodeId && node.hidden) {
+          return { ...node, hidden: false }
+        }
+        // Hide all descendants of this parent
+        if (node.parentId !== parentNodeId) {
+          const ancestors = new Set()
+          let current = node
+          while (current && current.parentId) {
+            ancestors.add(current.parentId)
+            current = nodes.find(n => n.id === current.parentId)
+          }
+          if (ancestors.has(parentNodeId)) {
+            return { ...node, hidden: true }
+          }
+        }
+        return node
+      })
       
       // If there are no predefined children (hidden or visible), add them
       const allChildren = updatedNodes.filter((node) => node.parentId === parentNodeId)

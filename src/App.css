@@ -354,7 +354,7 @@ button:not(:disabled):hover {
   grid-template-columns: minmax(0, 1fr);
   gap: 1.75rem;
   align-items: start;
-  padding: 0 clamp(1.5rem, 4vw, 4rem);
+  padding: 0;
   padding-bottom: 0;
   margin-top: 80px;
 }
@@ -375,7 +375,7 @@ button:not(:disabled):hover {
   width: 100%;
   height: calc(100vh - 80px);
   max-height: calc(100vh - 80px);
-  padding: 1.25rem;
+  padding: 0;
   box-sizing: border-box;
   user-select: none;
   -webkit-user-select: none;
