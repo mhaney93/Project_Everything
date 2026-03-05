@@ -1,7 +1,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import './App.css';
-import { getAuthToken, authAPI, mapsAPI, filesAPI, setAuthToken } from './api';
+import { authAPI, mapsAPI, filesAPI } from './api';
 
 const NODE_WIDTH = 176;
 const NODE_HEIGHT = 52;
@@ -328,7 +328,7 @@ function App() {
 
   const layout = useMemo(() => buildLayout(nodes, TOPIC_SUBDIVISIONS), [nodes, recenterKey, TOPIC_SUBDIVISIONS])
   const selectedNode = nodes.find((node) => node.id === selectedId)
-  const isAuthenticated = Boolean(currentUser && getAuthToken())
+  const isAuthenticated = Boolean(currentUser)
 
   // Deselect if the selected node becomes hidden
   useEffect(() => {
@@ -1332,18 +1332,15 @@ function App() {
     }
   }, [windowSize.width, panelOpen])
 
-  // Load user and maps from backend if token exists
+  // Load user and maps from backend if authenticated
   useEffect(() => {
     const loadUserData = async () => {
-      const token = getAuthToken()
-      
       // Try to get cached user email first
       const cachedUserEmail = localStorage.getItem('everything_user_email')
-      
-      if (!token) return
 
       try {
-        // Try to verify token by loading maps
+        // Try to verify authentication by loading maps
+        // The cookie will be sent automatically with credentials: 'include'
         const mapData = await mapsAPI.getMap()
         if (Array.isArray(mapData.nodes) && mapData.nodes.length > 0) {
           const nodesWithHidden = mapData.nodes.map((node) =>
@@ -1359,8 +1356,7 @@ function App() {
           setCurrentUser({ authenticated: true })
         }
       } catch (err) {
-        // Token is invalid, clear it
-        setAuthToken(null)
+        // Not authenticated, clear cached email
         localStorage.removeItem('everything_user_email')
         console.log('User session invalid')
       }
@@ -1369,7 +1365,7 @@ function App() {
   }, [])
 
   useEffect(() => {
-    if (!currentUser || !getAuthToken()) return;
+    if (!currentUser) return;
 
     if (skipNextAutoSave.current) {
       skipNextAutoSave.current = false;
@@ -1593,7 +1589,6 @@ function App() {
         : await authAPI.login(loginForm.email, loginForm.password)
 
       setCurrentUser(response.user)
-      setAuthToken(response.token)
       localStorage.setItem('everything_user_email', response.user.email)
       setLoginForm({ email: '', password: '' })
       setOpenTooltip(null)
@@ -1617,9 +1612,13 @@ function App() {
     }
   }
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await authAPI.logout()
+    } catch (err) {
+      console.log('Logout error:', err.message)
+    }
     setCurrentUser(null)
-    setAuthToken(null)
     localStorage.removeItem('everything_user_email')
     setNodesFromBackend(INITIAL_NODES)
     setOpenTooltip(null)
