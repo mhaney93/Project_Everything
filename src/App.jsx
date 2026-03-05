@@ -17,7 +17,7 @@ const debugLog = (...args) => {
 
 // Recenter map when root node is selected, using latest layout and viewport
 // (This useEffect should be placed after all state and ref declarations in the App component)
-const H_GAP = 80;
+const H_GAP = 60;
 const V_GAP = 45;
 const PADDING = 90;
 const DOTS_OFFSET = 12;
