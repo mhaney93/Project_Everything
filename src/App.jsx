@@ -201,6 +201,7 @@ function App() {
   const [editingNodeId, setEditingNodeId] = useState(null)
   const [deleteConfirmation, setDeleteConfirmation] = useState(null) // { nodeId, message }
   const [editingSummaryId, setEditingSummaryId] = useState(null)
+  const [notification, setNotification] = useState(null) // { message, type: 'error' | 'success' | 'info' }
 
   const canvasRef = useRef(null)
   const editInputRef = useRef(null)
@@ -216,6 +217,15 @@ function App() {
   const lastFocusedIdRef = useRef(null)
   const didDragRef = useRef(false)
   const suppressClickRef = useRef(false)
+
+  // Auto-dismiss notification after 5 seconds
+  useEffect(() => {
+    if (!notification) return
+    const timer = setTimeout(() => {
+      setNotification(null)
+    }, 5000)
+    return () => clearTimeout(timer)
+  }, [notification])
 
   // Knowledge base mapping topics to their meaningful subdivisions (must be before layout useMemo)
   const TOPIC_SUBDIVISIONS = {
@@ -1934,7 +1944,10 @@ function App() {
     const path = findNodePath(searchTerm)
 
     if (!path) {
-      alert('Node not found in knowledge base. Try searching for topics like "Logic", "Physics", or "Humanities".')
+      setNotification({
+        message: 'Node not found in knowledge base. Try searching for topics like "Logic", "Physics", or "Humanities".',
+        type: 'error'
+      })
       return
     }
 
@@ -2693,6 +2706,21 @@ function App() {
                 Delete
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {notification && (
+        <div className={`notification notification-${notification.type}`}>
+          <div className="notification-content">
+            <p>{notification.message}</p>
+            <button 
+              className="notification-close"
+              onClick={() => setNotification(null)}
+              aria-label="Close notification"
+            >
+              ✕
+            </button>
           </div>
         </div>
       )}
