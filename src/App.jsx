@@ -2107,6 +2107,7 @@ function App() {
                       prev > 0 ? prev - 1 : searchSuggestions.length - 1
                     )
                   } else if (e.key === 'Enter') {
+                    e.preventDefault()
                     if (highlightedSuggestion >= 0 && highlightedSuggestion < searchSuggestions.length) {
                       handleSuggestionClick(searchSuggestions[highlightedSuggestion])
                     } else {
@@ -2117,8 +2118,8 @@ function App() {
                     setHighlightedSuggestion(-1)
                   }
                 } else if (e.key === 'Enter') {
+                  e.preventDefault()
                   handleSearchWithQuery(searchQuery)
-                }
               }}
               onBlur={() => {
                 // Wait a bit before hiding suggestions to allow clicking
