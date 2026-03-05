@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Help</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <style>
+    body { font-family: sans-serif; margin: 0; padding: 0; background: #f7f7f7; }
+    .container { max-width: 900px; margin: 40px auto; background: #fff; border-radius: 8px; box-shadow: 0 2px 8px #0001; padding: 32px; }
+    h1 { text-align: center; margin-bottom: 24px; }
+    .diagram { display: flex; justify-content: center; margin-bottom: 32px; }
+    .notes { margin-top: 24px; }
+    .arrow { stroke: #1d6fdc; stroke-width: 2; marker-end: url(#arrowhead); }
+    .node { fill: #e3eaff; stroke: #1d6fdc; stroke-width: 2; }
+    .label { font-size: 16px; fill: #1d6fdc; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1 style="text-align:center;">Help</h1>
+    <div class="diagram" style="display:flex;justify-content:center;align-items:flex-start;height:40vh;margin-top:32px;">
+      <svg width="420" height="450">
+        <defs>
+          <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="8" refY="3.5" orient="auto" markerUnits="strokeWidth">
+            <polygon points="0 0, 10 3.5, 0 7" fill="#1d6fdc" />
+          </marker>
+        </defs>
+        <!-- Node -->
+        <!-- First instruction: Sidebar opens when you click a node -->
+        <!-- Node for clarity -->
+        <rect x="150" y="30" width="120" height="60" rx="12" fill="#90c2f9" stroke="#1d6fdc" stroke-width="2" />
+        <text x="210" y="65" text-anchor="middle" font-size="20" fill="#1d6fdc">Node</text>
+        <!-- Arrow from instruction text to center of node -->
+        <text x="210" y="160" text-anchor="middle" font-size="16" fill="#fff">Sidebar opens when you click a node</text>
+        <line x1="210" y1="150" x2="210" y2="85" stroke="#1d6fdc" stroke-width="3" marker-end="url(#arrowhead)" />
+
+        <!-- Second instruction: Node and expand dots -->
+        <rect x="150" y="200" width="120" height="60" rx="12" fill="#90c2f9" stroke="#1d6fdc" stroke-width="2" />
+        <text x="210" y="235" text-anchor="middle" font-size="20" fill="#1d6fdc">Node</text>
+        <circle cx="180" cy="280" r="5" fill="#fff" stroke="#1d6fdc" stroke-width="2" />
+        <circle cx="210" cy="280" r="5" fill="#fff" stroke="#1d6fdc" stroke-width="2" />
+        <circle cx="240" cy="280" r="5" fill="#fff" stroke="#1d6fdc" stroke-width="2" />
+        <line x1="210" y1="340" x2="210" y2="285" stroke="#1d6fdc" stroke-width="3" marker-end="url(#arrowhead)" />
+        <text x="210" y="375" text-anchor="middle" font-size="16" fill="#fff">Click to expand and show the node's children nodes</text>
+      </svg>
+    </div>
+    <div style="margin-top: 20px; padding-top: 12px; border-top: 1px solid #ddd;">
+      <h2 style="text-align: center; color: #1d6fdc; margin-bottom: 16px;">Keyboard Shortcuts</h2>
+      <ul style="list-style: none; padding: 0; max-width: 500px; margin: 0 auto;">
+        <li style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
+          <strong style="color: #1d6fdc;">Ctrl+S / Cmd+S</strong> <span style="float: right;">Focus search bar</span>
+        </li>
+        <li style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
+          <strong style="color: #1d6fdc;">Arrow Keys</strong> <span style="float: right;">Navigate between nodes</span>
+        </li>
+        <li style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
+          <strong style="color: #1d6fdc;">Enter</strong> <span style="float: right;">Select focused node</span>
+        </li>
+        <li style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
+          <strong style="color: #1d6fdc;">Shift+Enter</strong> <span style="float: right;">Add custom child node (when signed in)</span>
+        </li>
+        <li style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
+          <strong style="color: #1d6fdc;">Tab</strong> <span style="float: right;">Add custom sibling node (when signed in)</span>
+        </li>
+        <li style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
+          <strong style="color: #1d6fdc;">Double-Click</strong> <span style="float: right;">Edit custom node name (when signed in)</span>
+        </li>
+        <li style="padding: 8px 0;">
+          <strong style="color: #1d6fdc;">Enter / Escape</strong> <span style="float: right;">Save / Cancel inline editing</span>
+        </li>
+      </ul>
+    </div>
+  </div>
+</body>
+</html>

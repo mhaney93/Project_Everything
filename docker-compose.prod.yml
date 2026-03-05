@@ -1,0 +1,52 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: project_everything_web:latest
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "80:80"
+    networks:
+      - app_network
+
+  api:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    image: project_everything_api:latest
+    restart: unless-stopped
+    env_file:
+      - ./server/.env
+    depends_on:
+      - db
+    volumes:
+      - app_uploads:/app/uploads
+    expose:
+      - "5000"
+    networks:
+      - app_network
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: everything_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-change_me}
+    volumes:
+      - app_db_data:/var/lib/postgresql/data
+      - ./server/db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+    expose:
+      - "5432"
+    networks:
+      - app_network
+
+volumes:
+  app_uploads:
+  app_db_data:
+
+networks:
+  app_network:
