@@ -258,7 +258,7 @@ function App() {
     '1453 - present Modern Era': ['1453 - 1789 Early Modern Period', '1789 - 1945 Late Modern Period', '1945 - present Contemporary Period'],
     '1453 - 1789 Early Modern Period': ['1300 - 1600 Renaissance', '1400 - 1800 Age of Discovery', '1517 - 1648 Reformation', '1637 - 1800 Enlightenment', '1543 - 1687 Scientific Revolution'],
     '1789 - 1945 Late Modern Period': ['1760 - 1840 Industrial Revolution', '1774 - 1849 Age of Revolutions', '1800 - 1945 Imperialism', '1914 - 1918 World War I', '1918 - 1939 Interwar Period', '1939 - 1945 World War II'],
-    '1945 - present Contemporary Period': ['1914 - 1918 World War I', '1918 - 1939 Interwar Period', '1939 - 1945 World War II', '1947 - 1991 Cold War', '1991 - 2001 Post-Cold War Era', '2001 - present 21st Century'],
+    '1945 - present Contemporary Period': ['1947 - 1991 Cold War', '1991 - 2001 Post-Cold War Era', '2001 - present 21st Century'],
     
     // Literature
     'Literature': ['Fiction', 'Poetry', 'Drama', 'Literary Theory', 'World Literature', 'Classics'],
