@@ -851,13 +851,7 @@ function App() {
       return TOPIC_SUBDIVISIONS[parentLabel]
     }
     
-    // Otherwise try Wikipedia's category API
-    const wikiSuggestions = await fetchWikipediaSuggestions(parentLabel)
-    if (wikiSuggestions.length > 0) {
-      return wikiSuggestions
-    }
-    
-    // Fallback to generic labels
+    // Fallback to generic labels (will be replaced with curated content over time)
     return ['Concept A', 'Concept B']
   }
 
