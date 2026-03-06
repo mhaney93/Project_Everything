@@ -3322,6 +3322,7 @@ function App() {
         ? data
             .map((item) => item?.word)
             .filter((word) => typeof word === 'string' && word.trim())
+            .filter((word) => isSuggestionActionable(word))
         : []
       datamuseSuggestionCacheRef.current.set(normalizedQuery, suggestions)
       return suggestions
@@ -3345,6 +3346,39 @@ function App() {
     })
 
     return merged.slice(0, 8)
+  }
+
+  const findNodePath = (label) => {
+    const target = String(label || '').trim().toLowerCase()
+    if (!target) return null
+
+    const visited = new Set()
+    const search = (parentLabel, path) => {
+      if (visited.has(parentLabel)) return null
+      visited.add(parentLabel)
+
+      if (parentLabel.toLowerCase() === target) {
+        return path
+      }
+
+      const children = TOPIC_SUBDIVISIONS[parentLabel] || []
+      for (const childLabel of children) {
+        const result = search(childLabel, [...path, childLabel])
+        if (result) return result
+      }
+
+      return null
+    }
+
+    return search('Everything', ['Everything'])
+  }
+
+  const isSuggestionActionable = (label) => {
+    if (typeof label !== 'string' || !label.trim()) return false
+    const searchTerm = label.trim().toLowerCase()
+    const exactNodeExists = nodes.some((node) => typeof node.label === 'string' && node.label.toLowerCase() === searchTerm)
+    if (exactNodeExists) return true
+    return Boolean(findNodePath(searchTerm))
   }
 
   const generateRelatedIdeas = (query, currentSuggestions = []) => {
@@ -3613,29 +3647,6 @@ function App() {
       setSearchSuggestions([])
       setRelatedIdeas([])
       return
-    }
-
-    // If not found, search in the knowledge base to find where it should be
-    const findNodePath = (label) => {
-      const visited = new Set()
-      
-      const search = (parentLabel, path) => {
-        if (visited.has(parentLabel)) return null
-        visited.add(parentLabel)
-
-        if (parentLabel.toLowerCase() === label) {
-          return path
-        }
-
-        const children = TOPIC_SUBDIVISIONS[parentLabel] || []
-        for (const childLabel of children) {
-          const result = search(childLabel, [...path, childLabel])
-          if (result) return result
-        }
-        return null
-      }
-
-      return search('Everything', ['Everything'])
     }
 
     const path = findNodePath(searchTerm)
