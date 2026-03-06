@@ -1385,7 +1385,6 @@ function App() {
     const saveTimer = setTimeout(async () => {
       try {
         await mapsAPI.saveMap(nodes);
-        console.log('Map saved successfully');
       } catch (err) {
         console.error('Failed to save map:', err);
       }
@@ -1615,7 +1614,6 @@ function App() {
           setNodesFromBackend(collapseNodesToRoot(nodesWithHidden))
         }
       } catch (err) {
-        console.log('No saved map found or error loading map')
       }
     } catch (err) {
       alert(err.message || 'Authentication failed')
@@ -1891,7 +1889,6 @@ function App() {
   }
 
   const handleSuggestionClick = (suggestion) => {
-    console.log('handleSuggestionClick called with:', suggestion)
     setSearchQuery(suggestion)
     setSearchSuggestions([])
     setHighlightedSuggestion(-1)
@@ -1902,20 +1899,16 @@ function App() {
   }
 
   const handleSearchWithQuery = (query) => {
-    console.log('handleSearchWithQuery called with:', query)
     if (!query.trim()) return
     const searchTerm = query.toLowerCase()
-    console.log('searchTerm:', searchTerm)
 
     // First check if the node exists in the current tree
     let matchingNode = nodes.find((node) =>
       node.label.toLowerCase() === searchTerm
     )
-    console.log('matchingNode:', matchingNode)
 
     if (matchingNode) {
       // Node exists, select it
-      console.log('Setting selectedId to:', matchingNode.id)
       
       // Unhide the node, all its ancestors, and all siblings along the path
       const unhideNodeAndAncestors = (nodeId) => {
@@ -2177,16 +2170,11 @@ function App() {
                       prev > 0 ? prev - 1 : searchSuggestions.length - 1
                     )
                   } else if (e.key === 'Enter') {
-                    console.log('Enter with suggestions - calling preventDefault and stopPropagation')
-                    console.log('highlightedSuggestion:', highlightedSuggestion)
-                    console.log('searchSuggestions:', searchSuggestions)
                     e.preventDefault()
                     e.stopPropagation()
                     if (highlightedSuggestion >= 0 && highlightedSuggestion < searchSuggestions.length) {
-                      console.log('Calling handleSuggestionClick with:', searchSuggestions[highlightedSuggestion])
                       handleSuggestionClick(searchSuggestions[highlightedSuggestion])
                     } else {
-                      console.log('Calling handleSearchWithQuery directly with:', searchQuery)
                       handleSearchWithQuery(searchQuery)
                     }
                     return false
@@ -2195,8 +2183,6 @@ function App() {
                     setHighlightedSuggestion(-1)
                   }
                 } else if (e.key === 'Enter') {
-                  console.log('Enter without suggestions - calling preventDefault and stopPropagation')
-                  e.preventDefault()
                   e.stopPropagation()
                   handleSearchWithQuery(searchQuery)
                   return false
