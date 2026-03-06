@@ -1681,24 +1681,8 @@ function App() {
     }
     // If a summary exists, use it
     if (summaries[label]) return summaries[label];
-    // If label is a known node but has no custom summary, generate a more specific fallback
-    if (allLabels.has(label)) {
-      // Try to infer a better fallback based on parent topic
-      // Find parent topic
-      let parent = null;
-      for (const [key, children] of Object.entries(TOPIC_SUBDIVISIONS)) {
-        if (children.includes(label)) {
-          parent = key;
-          break;
-        }
-      }
-      if (parent) {
-        return `${label} is a major topic within ${parent}, encompassing key concepts, developments, and debates in the field.`;
-      }
-      return `${label} is a recognized area of knowledge in this map.`;
-    }
-    // Otherwise, generic fallback
-    return `A field exploring the topic of ${label}.`;
+    // No custom summary available - return empty string instead of placeholder
+    return '';
   }
 
   // Knowledge base mapping topics to their meaningful subdivisions
@@ -3793,7 +3777,9 @@ function App() {
                   )}
                 </div>
               ) : (
-                <p className="panel-summary">{generateSummary(selectedNode.label)}</p>
+                generateSummary(selectedNode.label) && (
+                  <p className="panel-summary">{generateSummary(selectedNode.label)}</p>
+                )
               )}
               <div className="panel-notes">
                 <div className="panel-notes-header">
