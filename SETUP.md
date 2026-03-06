@@ -147,6 +147,35 @@ NODE_ENV=development
 - Passwords are hashed with bcrypt before storage
 - Maps are stored as JSONB for flexible schema
 
+## Data Migrations
+
+Node label migrations are handled in `src/App.jsx` through a versioned map:
+
+- `LABEL_MIGRATIONS_BY_VERSION`
+- `applyLabelMigrations(...)`
+
+When a user map loads from the backend, migrations are applied before rendering. If any labels change, the app automatically saves the migrated nodes back to the backend so the fix is permanent.
+
+### Add a new label rename
+
+1. Open `src/App.jsx`.
+2. Add a new numeric version entry in `LABEL_MIGRATIONS_BY_VERSION`.
+3. Put `oldLabel: 'New Label'` pairs in that version map.
+4. Keep existing versions unchanged.
+
+Example:
+
+```js
+const LABEL_MIGRATIONS_BY_VERSION = {
+  1: {
+    Art: 'Arts',
+  },
+  2: {
+    'Natural Science': 'Sciences',
+  },
+}
+```
+
 ## Deploy to AWS (Recommended: EC2 + RDS)
 
 This repo now includes production Docker files and `docker-compose.prod.yml`.
