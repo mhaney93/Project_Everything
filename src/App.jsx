@@ -3700,6 +3700,7 @@ function App() {
                                 e.stopPropagation()
                               }}
                               onBlur={(e) => {
+                                console.log('Tree input blur, node.id:', node.id, 'value:', e.target.value)
                                 updateNodeLabel(node.id, e.target.value)
                               }}
                             />
@@ -3776,7 +3777,7 @@ function App() {
                         setTimeout(() => {
                           console.log('Delayed focus')
                           el.focus()
-                          el.select()
+                          // Removed el.select() - might be causing blur
                         }, 0)
                       }
                     }}
