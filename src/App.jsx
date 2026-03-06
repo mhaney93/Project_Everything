@@ -150,17 +150,21 @@ function App() {
     };
 
     const normalizeLoadedNodes = (mapNodes) => {
-      if (!Array.isArray(mapNodes)) return []
+      if (!Array.isArray(mapNodes)) return { nodes: [], changed: false }
 
-      return mapNodes.map((node) => {
+      let changed = false
+      const normalizedNodes = mapNodes.map((node) => {
         const normalizedLabel = LEGACY_LABEL_ALIASES[node.label] || node.label
         if (normalizedLabel === node.label) return node
 
+        changed = true
         return {
           ...node,
           label: normalizedLabel,
         }
       })
+
+      return { nodes: normalizedNodes, changed }
     }
 
     const collapseNodesToRoot = (mapNodes) => {
@@ -2178,7 +2182,10 @@ function App() {
         // The cookie will be sent automatically with credentials: 'include'
         const mapData = await mapsAPI.getMap()
         if (Array.isArray(mapData.nodes) && mapData.nodes.length > 0) {
-          const normalizedNodes = normalizeLoadedNodes(mapData.nodes)
+          const { nodes: normalizedNodes, changed } = normalizeLoadedNodes(mapData.nodes)
+          if (changed) {
+            await mapsAPI.saveMap(normalizedNodes)
+          }
           const nodesWithHidden = normalizedNodes.map((node) =>
             ('hidden' in node) ? node : { ...node, hidden: false }
           )
@@ -2433,7 +2440,10 @@ function App() {
       try {
         const mapData = await mapsAPI.getMap()
         if (mapData.nodes && mapData.nodes.length > 0) {
-          const normalizedNodes = normalizeLoadedNodes(mapData.nodes)
+          const { nodes: normalizedNodes, changed } = normalizeLoadedNodes(mapData.nodes)
+          if (changed) {
+            await mapsAPI.saveMap(normalizedNodes)
+          }
           // Ensure all nodes have hidden field
           const nodesWithHidden = normalizedNodes.map(node => 
             ('hidden' in node) ? node : { ...node, hidden: false }
