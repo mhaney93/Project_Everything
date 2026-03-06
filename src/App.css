@@ -749,6 +749,12 @@ button:not(:disabled):hover {
   transition: all 0.2s ease;
 }
 
+.file-upload-icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
 .file-upload-button:hover {
   background: rgba(123, 63, 228, 0.22);
 }
