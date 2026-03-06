@@ -1554,7 +1554,7 @@ function App() {
 
   // Knowledge base mapping topics to their meaningful subdivisions
   const hasKnownSubdivisions = (label) => {
-    return TOPIC_SUBDIVISIONS.hasOwnProperty(label)
+    return TOPIC_SUBDIVISIONS.hasOwnProperty(label) && TOPIC_SUBDIVISIONS[label].length > 0
   }
 
   const fetchWikipediaSuggestions = async (query) => {
