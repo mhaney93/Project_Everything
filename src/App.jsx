@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import './App.css';
 import { authAPI, mapsAPI, filesAPI } from './api';
 
+// v2: Humanities integration complete
 const NODE_WIDTH = 176;
 const NODE_HEIGHT = 52;
 
