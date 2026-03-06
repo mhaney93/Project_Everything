@@ -514,11 +514,44 @@ function App() {
       '476 - 1453 Medieval Period',
       '1453 - present Modern Era'
     ],
-    '3.3 million years ago - 3,200 BC Prehistory': ['3.3 million years ago - 3,300 BC Stone Age', '3,300 BC - 1,200 BC Bronze Age', '1,200 BC - 600 BC Iron Age'],
-    '3.3 million years ago - 3,300 BC Stone Age': [],
-    '3,300 BC - 1,200 BC Bronze Age': [],
+    '3.3 million years ago - 3,200 BC Prehistory': ['3.3 million years ago - 3,300 BC Stone Age', '3,300 BC - 3,200 BC Bronze Age (Prehistoric)'],
+    '3.3 million years ago - 3,300 BC Stone Age': ['3.3 million years ago - 10,000 BC Paleolithic Era', '10,000 BC - 8,000 BC Mesolithic Era', '8,000 BC - 4,500 BC Neolithic Era', '4,500 BC - 3,300 BC Copper Age'],
+    
+    // Paleolithic Era
+    '3.3 million years ago - 10,000 BC Paleolithic Era': ['3.3 million years ago - 300,000 years ago Lower Paleolithic', '300,000 years ago - 40,000 years ago Middle Paleolithic', '40,000 years ago - 10,000 BC Upper Paleolithic'],
+    '3.3 million years ago - 300,000 years ago Lower Paleolithic': [],
+    '300,000 years ago - 40,000 years ago Middle Paleolithic': ['300,000 years ago - 120,000 years ago Early Middle Paleolithic', '120,000 years ago - 40,000 years ago Last Glacial Period (Middle Paleolithic)'],
+    '300,000 years ago - 120,000 years ago Early Middle Paleolithic': [],
+    '120,000 years ago - 40,000 years ago Last Glacial Period (Middle Paleolithic)': [],
+    '40,000 years ago - 10,000 BC Upper Paleolithic': ['40,000 years ago - 10,000 BC Last Glacial Period (Upper Paleolithic)', '10,875 BC - 10,000 BC Younger Dryas Event (Upper Paleolithic)'],
+    '40,000 years ago - 10,000 BC Last Glacial Period (Upper Paleolithic)': [],
+    '10,875 BC - 10,000 BC Younger Dryas Event (Upper Paleolithic)': [],
+    
+    // Mesolithic Era
+    '10,000 BC - 8,000 BC Mesolithic Era': ['10,000 BC - 9,675 BC Last Glacial Period End (Mesolithic)', '9,675 BC - 8,000 BC Late Mesolithic'],
+    '10,000 BC - 9,675 BC Last Glacial Period End (Mesolithic)': ['10,000 BC - 9,675 BC Younger Dryas Event (Mesolithic)', '9,675 BC - 9,575 BC Younger Dryas End (Late Mesolithic)'],
+    '10,000 BC - 9,675 BC Younger Dryas Event (Mesolithic)': [],
+    '9,675 BC - 9,575 BC Younger Dryas End (Late Mesolithic)': [],
+    '9,675 BC - 8,000 BC Late Mesolithic': [],
+    
+    // Neolithic Era
+    '8,000 BC - 4,500 BC Neolithic Era': [],
+    
+    // Copper Age
+    '4,500 BC - 3,300 BC Copper Age': ['4,100 BC - 3,300 BC Sumerian Civilization (Copper Age)', '4,100 BC - 3,300 BC Predynastic Egypt (Copper Age)', '3,500 BC - 3,300 BC Ebla Civilization (Copper Age)'],
+    '4,100 BC - 3,300 BC Sumerian Civilization (Copper Age)': ['4,100 BC - 3,300 BC Uruk Period'],
+    '4,100 BC - 3,300 BC Uruk Period': [],
+    '4,100 BC - 3,300 BC Predynastic Egypt (Copper Age)': [],
+    '3,500 BC - 3,300 BC Ebla Civilization (Copper Age)': [],
+    
+    // Bronze Age (Prehistoric)
+    '3,300 BC - 3,200 BC Bronze Age (Prehistoric)': ['3,300 BC - 3,200 BC Early Bronze Age (Prehistoric)'],
+    '3,300 BC - 3,200 BC Early Bronze Age (Prehistoric)': ['3,300 BC - 3,200 BC Indus Valley Civilization (Prehistoric)', '3,300 BC - 3,200 BC Cycladic Civilization (Prehistoric)'],
+    '3,300 BC - 3,200 BC Indus Valley Civilization (Prehistoric)': [],
+    '3,300 BC - 3,200 BC Cycladic Civilization (Prehistoric)': [],
+    '3,200 BC - 476 AD Ancient History': ['3,200 BC - 1,200 BC Bronze Age (Ancient)', '1,200 BC - 600 BC Iron Age', '3,100 BC - 30 BC Ancient Egypt', '3,500 BC - 539 BC Ancient Mesopotamia', '3,300 BC - 600 AD Ancient India', '2,070 BC - 220 AD Ancient China', '800 BC - 146 BC Ancient Greece', '753 BC - 476 AD Ancient Rome'],
+    '3,200 BC - 1,200 BC Bronze Age (Ancient)': [],
     '1,200 BC - 600 BC Iron Age': [],
-    '3,200 BC - 476 AD Ancient History': ['3,100 BC - 30 BC Ancient Egypt', '3,500 BC - 539 BC Ancient Mesopotamia', '3,300 BC - 600 AD Ancient India', '2,070 BC - 220 AD Ancient China', '800 BC - 146 BC Ancient Greece', '753 BC - 476 AD Ancient Rome'],
     '3,100 BC - 30 BC Ancient Egypt': [],
     '3,500 BC - 539 BC Ancient Mesopotamia': [],
     '3,300 BC - 600 AD Ancient India': [],
