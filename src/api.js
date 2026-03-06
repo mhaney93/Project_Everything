@@ -104,4 +104,13 @@ export const filesAPI = {
     if (!res.ok) throw new Error(data.error);
     return data;
   },
+
+  getStorageUsage: async () => {
+    const res = await fetch(`${API_BASE_URL}/files/storage/usage`, {
+      ...defaultFetchOptions,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    return data;
+  },
 };

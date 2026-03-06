@@ -279,6 +279,7 @@ function App() {
   const [uploadingNodeId, setUploadingNodeId] = useState(null)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [loginForm, setLoginForm] = useState({ email: '', password: '' })
+  const [storageUsage, setStorageUsage] = useState(null)
   const [isSignUp, setIsSignUp] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchSuggestions, setSearchSuggestions] = useState([])
@@ -3779,7 +3780,18 @@ function App() {
             <button 
               className="top-link" 
               type="button"
-              onClick={() => setOpenTooltip(openTooltip === 'profile' ? null : 'profile')}
+              onClick={async () => {
+                const newState = openTooltip === 'profile' ? null : 'profile'
+                setOpenTooltip(newState)
+                if (newState === 'profile' && currentUser) {
+                  try {
+                    const usage = await filesAPI.getStorageUsage()
+                    setStorageUsage(usage)
+                  } catch (err) {
+                    console.error('Failed to load storage usage:', err)
+                  }
+                }
+              }}
             >
               Profile
             </button>
@@ -3790,6 +3802,46 @@ function App() {
                     <h3>Profile</h3>
                     <p className="profile-info">{currentUser.email}</p>
                     <p className="profile-detail">Signed in</p>
+                    
+                    {storageUsage && (
+                      <div className="storage-section">
+                        <div className="storage-header">
+                          <span className="storage-label">Storage Usage</span>
+                          <span className="storage-amount">{storageUsage.usedGB} / {storageUsage.limitGB} GB</span>
+                        </div>
+                        <div className="storage-bar">
+                          <div 
+                            className="storage-bar-fill storage-bar-files" 
+                            style={{ width: `${(storageUsage.fileStorage / storageUsage.limit) * 100}%` }}
+                            title={`Files: ${storageUsage.fileStorageGB} GB`}
+                          />
+                          <div 
+                            className="storage-bar-fill storage-bar-notes" 
+                            style={{ width: `${(storageUsage.mapStorage / storageUsage.limit) * 100}%` }}
+                            title={`Notes/Nodes: ${storageUsage.mapStorageGB} GB`}
+                          />
+                        </div>
+                        <div className="storage-legend">
+                          <div className="storage-legend-item">
+                            <span className="storage-legend-color storage-legend-files"></span>
+                            <span className="storage-legend-text">Files ({storageUsage.fileStorageGB} GB)</span>
+                          </div>
+                          <div className="storage-legend-item">
+                            <span className="storage-legend-color storage-legend-notes"></span>
+                            <span className="storage-legend-text">Notes ({storageUsage.mapStorageGB} GB)</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <button 
+                      className="profile-action profile-action-secondary" 
+                      type="button"
+                      onClick={() => alert('Storage upgrade coming soon!')}
+                    >
+                      Upgrade Storage
+                    </button>
+                    
                     <button 
                       className="profile-action" 
                       type="button"
