@@ -217,6 +217,7 @@ function App() {
   const lastFocusedIdRef = useRef(null)
   const didDragRef = useRef(false)
   const suppressClickRef = useRef(false)
+  const noteInputRefs = useRef({})
 
   // Auto-dismiss notification after 5 seconds
   useEffect(() => {
@@ -1190,20 +1191,43 @@ function App() {
     }
   }
 
-  const addNoteToNode = (nodeId) => {
+  const addNoteToNode = (nodeId, options = {}) => {
+    const { afterNoteId = null, level = 0 } = options
     const newNote = {
       id: `note-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       text: '',
+      level: Math.max(0, Math.min(5, level)),
       createdAt: new Date().toISOString(),
     }
 
     setNodes((prev) =>
       prev.map((node) =>
         node.id === nodeId
-          ? { ...node, notes: [...(node.notes || []), newNote] }
+          ? {
+              ...node,
+              notes: (() => {
+                const notes = [...(node.notes || [])]
+                if (!afterNoteId) return [...notes, newNote]
+                const insertIndex = notes.findIndex((note) => note.id === afterNoteId)
+                if (insertIndex === -1) return [...notes, newNote]
+                return [
+                  ...notes.slice(0, insertIndex + 1),
+                  newNote,
+                  ...notes.slice(insertIndex + 1),
+                ]
+              })(),
+            }
           : node
       )
     )
+
+    requestAnimationFrame(() => {
+      const input = noteInputRefs.current[newNote.id]
+      if (input) {
+        input.focus()
+        input.setSelectionRange(input.value.length, input.value.length)
+      }
+    })
   }
 
   const updateNoteText = (nodeId, noteId, text) => {
@@ -1219,6 +1243,52 @@ function App() {
           : node
       )
     )
+  }
+
+  const updateNoteLevel = (nodeId, noteId, delta) => {
+    setNodes((prev) =>
+      prev.map((node) =>
+        node.id === nodeId
+          ? {
+              ...node,
+              notes: (node.notes || []).map((note) => {
+                if (note.id !== noteId) return note
+                const currentLevel = Number.isFinite(note.level) ? note.level : 0
+                return {
+                  ...note,
+                  level: Math.max(0, Math.min(5, currentLevel + delta)),
+                }
+              }),
+            }
+          : node
+      )
+    )
+  }
+
+  const removeNoteFromNode = (nodeId, noteId) => {
+    setNodes((prev) =>
+      prev.map((node) =>
+        node.id === nodeId
+          ? { ...node, notes: (node.notes || []).filter((note) => note.id !== noteId) }
+          : node
+      )
+    )
+  }
+
+  const handleNoteKeyDown = (event, nodeId, note) => {
+    if (event.key === 'Enter') {
+      event.preventDefault()
+      event.stopPropagation()
+      const noteLevel = Number.isFinite(note.level) ? note.level : 0
+      addNoteToNode(nodeId, { afterNoteId: note.id, level: noteLevel })
+      return
+    }
+
+    if (event.key === 'Tab') {
+      event.preventDefault()
+      event.stopPropagation()
+      updateNoteLevel(nodeId, note.id, event.shiftKey ? -1 : 1)
+    }
   }
 
   const updateNodeSummary = (nodeId, summary) => {
@@ -2670,16 +2740,40 @@ function App() {
                 {selectedNode.notes && selectedNode.notes.length > 0 ? (
                   <div className="notes-list">
                     {selectedNode.notes.map((note) => (
-                      <textarea
+                      <div
                         key={note.id}
-                        className="note-textarea personal-note"
-                        value={note.text}
-                        onChange={(event) =>
-                          updateNoteText(selectedNode.id, note.id, event.target.value)
-                        }
-                        placeholder="Add a personal note..."
-                        rows={3}
-                      />
+                        className="note-item"
+                        style={{ marginLeft: `${(Number.isFinite(note.level) ? note.level : 0) * 16}px` }}
+                      >
+                        <span className="note-bullet" aria-hidden="true">•</span>
+                        <input
+                          ref={(element) => {
+                            if (element) {
+                              noteInputRefs.current[note.id] = element
+                            } else {
+                              delete noteInputRefs.current[note.id]
+                            }
+                          }}
+                          className="note-input personal-note"
+                          value={note.text}
+                          onChange={(event) =>
+                            updateNoteText(selectedNode.id, note.id, event.target.value)
+                          }
+                          onKeyDown={(event) => handleNoteKeyDown(event, selectedNode.id, note)}
+                          placeholder="Add a bullet point..."
+                        />
+                        {isAuthenticated ? (
+                          <button
+                            type="button"
+                            className="note-delete-button"
+                            onClick={() => removeNoteFromNode(selectedNode.id, note.id)}
+                            aria-label="Delete note"
+                            title="Delete note"
+                          >
+                            ×
+                          </button>
+                        ) : null}
+                      </div>
                     ))}
                   </div>
                 ) : (

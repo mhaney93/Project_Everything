@@ -691,24 +691,55 @@ button:not(:disabled):hover {
 .notes-list {
   display: flex;
   flex-direction: column;
-  gap: 0.65rem;
+  gap: 0.5rem;
 }
 
-.note-textarea {
+.note-item {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.note-bullet {
+  color: #6a2bd8;
+  font-size: 1rem;
+  line-height: 1;
+}
+
+.note-input {
   width: 100%;
-  min-height: 72px;
-  resize: vertical;
-  padding: 0.65rem 0.75rem;
+  min-height: 34px;
+  padding: 0.4rem 0.55rem;
   border-radius: 10px;
   border: 1px solid rgba(123, 63, 228, 0.35);
   background: rgba(123, 63, 228, 0.08);
   color: #5a22c7;
   font-size: 0.9rem;
-  line-height: 1.4;
+  line-height: 1.35;
 }
 
-.note-textarea::placeholder {
+.note-input::placeholder {
   color: rgba(90, 34, 199, 0.6);
+}
+
+.note-delete-button {
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  border: 1px solid rgba(123, 63, 228, 0.35);
+  background: rgba(123, 63, 228, 0.12);
+  color: #6a2bd8;
+  font-size: 1rem;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.note-delete-button:hover {
+  background: rgba(123, 63, 228, 0.2);
 }
 
 .note-empty {
