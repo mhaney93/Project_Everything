@@ -3304,7 +3304,7 @@ function App() {
     if (tokens.length === 0) return false
 
     const validity = await Promise.all(tokens.map((token) => isValidWord(token)))
-    return validity.every(Boolean)
+    return validity.some(Boolean)
   }
 
   const fetchDatamuseSuggestions = async (query) => {
