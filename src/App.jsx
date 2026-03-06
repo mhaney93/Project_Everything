@@ -347,7 +347,7 @@ function App() {
     'Sciences': ['Physics', 'Chemistry', 'Biology', 'Earth Science', 'Astronomy', 'Mathematics'],
     
     // Philosophy
-    'Philosophy': ['Metaphysics', 'Epistemology', 'Ethics', 'Aesthetics', 'Logic', 'Political Philosophy', 'History of Philosophy', 'Metaphilosophy'],
+    'Philosophy': ['Metaphysics', 'Epistemology', 'Ethics', 'Aesthetics', 'Logic', 'Political Philosophy', 'Phenomenology', 'History of Philosophy', 'Metaphilosophy'],
     
     // Ethics (Restructured with Normative/Metaethics/Applied)
     'Ethics': ['Normative Ethics', 'Metaethics', 'Applied Ethics'],
@@ -680,7 +680,7 @@ function App() {
     'Modern Drama': [],
     'Contemporary Drama': [],
     'Melodrama': [],
-    'Literary Theory': ['Structuralism', 'Deconstruction', 'Phenomenology', 'Rhetoric', 'Semiotics', 'Narratology', 'Literary Criticism'],
+    'Literary Theory': ['Structuralism', 'Deconstruction', 'Rhetoric', 'Semiotics', 'Narratology', 'Literary Criticism'],
     'Structuralism': [],
     'Deconstruction': [],
     'Phenomenology': [],
