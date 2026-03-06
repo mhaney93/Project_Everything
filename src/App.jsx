@@ -1023,6 +1023,16 @@ function App() {
   const selectedNode = nodes.find((node) => node.id === selectedId)
   const isAuthenticated = Boolean(currentUser)
 
+  // Calculate font size based on label length to ensure text fits in node
+  const getNodeFontSize = (label) => {
+    const length = label.length
+    if (length <= 15) return '1rem'        // Short text - default size
+    if (length <= 25) return '0.9rem'      // Medium text
+    if (length <= 35) return '0.8rem'      // Long text
+    if (length <= 45) return '0.7rem'      // Very long text
+    return '0.6rem'                        // Extra long text
+  }
+
   // Deselect if the selected node becomes hidden
   useEffect(() => {
     if (selectedId !== null) {
@@ -3678,7 +3688,7 @@ function App() {
                               }}
                             />
                           ) : (
-                            <span>{node.label}</span>
+                            <span style={{ fontSize: getNodeFontSize(node.label) }}>{node.label}</span>
                           )}
                         </button>
                         {(hasKnownSubdivisions(node.label) || nodes.some((n) => n.parentId === node.id && n.isCustom)) ? (
