@@ -3554,27 +3554,10 @@ function App() {
             <button 
               className="top-link" 
               type="button"
-              onClick={() => setOpenTooltip(openTooltip === 'help' ? null : 'help')}
+              onClick={() => window.open('/help-diagram.html', '_blank')}
             >
               Help
             </button>
-            {openTooltip === 'help' && (
-              <div className="tooltip help-tooltip">
-                <h3>Keyboard Shortcuts</h3>
-                <ul>
-                  <li><kbd>Click</kbd> - Select a node</li>
-                  <li><kbd>Click again</kbd> - Deselect node</li>
-                  <li><kbd>Drag</kbd> - Pan the map</li>
-                  <li><kbd>⋮</kbd> button - Expand node</li>
-                  <li><kbd>Arrow keys</kbd> - Navigate between nodes</li>
-                  <li><kbd>Enter</kbd> - Open selected node</li>
-                  <li><kbd>Shift+Enter</kbd> - Add custom child node</li>
-                  <li><kbd>Tab</kbd> - Add custom sibling node</li>
-                  <li><kbd>Delete</kbd> - Delete selected custom node</li>
-                  <li><kbd>Ctrl+S</kbd> / <kbd>⌘+S</kbd> - Focus search</li>
-                </ul>
-              </div>
-            )}
           </div>
 
           <div className="top-button-group">
