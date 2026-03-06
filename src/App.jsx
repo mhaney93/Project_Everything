@@ -290,6 +290,7 @@ function App() {
   const [editingSummaryId, setEditingSummaryId] = useState(null)
   const [notification, setNotification] = useState(null) // { message, type: 'error' | 'success' | 'info' }
   const [lastCreatedGridId, setLastCreatedGridId] = useState(null) // Track newly created grid for Tab indent
+  const [deleteModalChoice, setDeleteModalChoice] = useState('cancel') // 'cancel' | 'delete'
 
   const canvasRef = useRef(null)
   const editInputRef = useRef(null)
@@ -307,6 +308,8 @@ function App() {
   const didDragRef = useRef(false)
   const suppressClickRef = useRef(false)
   const noteInputRefs = useRef({})
+  const deleteCancelButtonRef = useRef(null)
+  const deleteConfirmButtonRef = useRef(null)
 
   // Auto-dismiss notification after 5 seconds
   useEffect(() => {
@@ -316,6 +319,13 @@ function App() {
     }, 5000)
     return () => clearTimeout(timer)
   }, [notification])
+
+  // Keep keyboard focus aligned with the selected delete modal option.
+  useEffect(() => {
+    if (!deleteConfirmation) return
+    const targetRef = deleteModalChoice === 'delete' ? deleteConfirmButtonRef : deleteCancelButtonRef
+    targetRef.current?.focus()
+  }, [deleteConfirmation, deleteModalChoice])
 
   // Auto-scroll highlighted suggestion into view
   useEffect(() => {
@@ -1889,6 +1899,7 @@ function App() {
       : `Delete "${nodeToDelete.label}"?`
 
     // Show modern confirmation modal instead of window.confirm
+    setDeleteModalChoice('cancel')
     setDeleteConfirmation({ nodeId, message: confirmMessage, includeChildren: hasChildren })
   }
 
@@ -1919,10 +1930,12 @@ function App() {
       setFocusedElement(null)
     }
 
+    setDeleteModalChoice('cancel')
     setDeleteConfirmation(null)
   }
 
   const cancelDelete = () => {
+    setDeleteModalChoice('cancel')
     setDeleteConfirmation(null)
   }
 
@@ -1932,6 +1945,7 @@ function App() {
       const node = nodes.find(n => n.id === nodeId)
       if (node && node.isCustom) {
         // Show modern modal instead of window.confirm
+        setDeleteModalChoice('cancel')
         setDeleteConfirmation({ nodeId, message: 'Delete this empty node?', includeChildren: false })
       }
       setEditingNodeId(null)
@@ -2811,6 +2825,31 @@ function App() {
 
   useEffect(() => {
     const handleShortcut = (event) => {
+      if (deleteConfirmation) {
+        const modalNavKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter', 'Escape']
+        if (!modalNavKeys.includes(event.key)) return
+
+        event.preventDefault()
+        event.stopPropagation()
+
+        if (event.key === 'Escape') {
+          cancelDelete()
+          return
+        }
+
+        if (event.key === 'Enter') {
+          if (deleteModalChoice === 'delete') {
+            confirmDelete()
+          } else {
+            cancelDelete()
+          }
+          return
+        }
+
+        setDeleteModalChoice((prev) => (prev === 'cancel' ? 'delete' : 'cancel'))
+        return
+      }
+
       const isSaveShortcut = (event.ctrlKey || event.metaKey) && (event.key === 's' || event.key === 'S')
       if (isSaveShortcut) {
         event.preventDefault()
@@ -3076,7 +3115,7 @@ function App() {
     return () => {
       window.removeEventListener('keydown', handleShortcut)
     }
-  }, [selectedId, focusedElement, nodes, layout.positions, hasKnownSubdivisions, addChildren, addCustomChild, addCustomSibling, deleteCustomNode, isAuthenticated])
+  }, [selectedId, focusedElement, nodes, layout.positions, hasKnownSubdivisions, addChildren, addCustomChild, addCustomSibling, deleteCustomNode, isAuthenticated, deleteConfirmation, deleteModalChoice])
 
   // Close search suggestions when clicking outside the search row
   useEffect(() => {
@@ -4378,10 +4417,24 @@ function App() {
               <p>{deleteConfirmation.message}</p>
             </div>
             <div className="modal-footer">
-              <button className="modal-button modal-button-cancel" onClick={cancelDelete}>
+              <button
+                ref={deleteCancelButtonRef}
+                className="modal-button modal-button-cancel"
+                onMouseEnter={() => setDeleteModalChoice('cancel')}
+                onFocus={() => setDeleteModalChoice('cancel')}
+                style={{ outline: deleteModalChoice === 'cancel' ? '2px solid #1d6fdc' : 'none' }}
+                onClick={cancelDelete}
+              >
                 Cancel
               </button>
-              <button className="modal-button modal-button-delete" onClick={confirmDelete}>
+              <button
+                ref={deleteConfirmButtonRef}
+                className="modal-button modal-button-delete"
+                onMouseEnter={() => setDeleteModalChoice('delete')}
+                onFocus={() => setDeleteModalChoice('delete')}
+                style={{ outline: deleteModalChoice === 'delete' ? '2px solid #1d6fdc' : 'none' }}
+                onClick={confirmDelete}
+              >
                 Delete
               </button>
             </div>
