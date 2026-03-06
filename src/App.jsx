@@ -3192,6 +3192,18 @@ function App() {
 
     const lowerQuery = trimmedQuery.toLowerCase()
     const queryWords = lowerQuery.split(/\s+/)
+    const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const matchesQuery = (label) => {
+      const lowerLabel = label.toLowerCase()
+      if (queryWords.length === 1) {
+        const regex = new RegExp(`\\b${escapeRegex(lowerQuery)}`, 'i')
+        return regex.test(label) || lowerLabel.startsWith(lowerQuery)
+      }
+      return queryWords.every((word) => {
+        const regex = new RegExp(`\\b${escapeRegex(word)}`, 'i')
+        return regex.test(label)
+      })
+    }
     const allTopics = Object.keys(TOPIC_SUBDIVISIONS)
     
     // Get all topics (include both keys and their values)
@@ -3208,22 +3220,6 @@ function App() {
     })
 
     const labels = Array.from(allLabels).filter((label) => typeof label === 'string')
-
-    // For multi-word queries, check if all words are present in the label
-    // Use word boundary matching to avoid matching substrings inside words
-    const matchesQuery = (label) => {
-      const lowerLabel = label.toLowerCase()
-      if (queryWords.length === 1) {
-        // Check for word boundary match or starts with
-        const regex = new RegExp(`\\b${lowerQuery}`, 'i')
-        return regex.test(label) || lowerLabel.startsWith(lowerQuery)
-      }
-      // All query words must be present as whole words or at start of words
-      return queryWords.every(word => {
-        const regex = new RegExp(`\\b${word}`, 'i')
-        return regex.test(label)
-      })
-    }
 
     const suggestions = labels
       .filter(matchesQuery)
@@ -3360,6 +3356,18 @@ function App() {
 
     const lowerQuery = trimmedQuery.toLowerCase()
     const queryWords = lowerQuery.split(/\s+/)
+    const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+    const matchesQuery = (label) => {
+      const lowerLabel = label.toLowerCase()
+      if (queryWords.length === 1) {
+        const regex = new RegExp(`\\b${escapeRegex(lowerQuery)}`, 'i')
+        return regex.test(label) || lowerLabel.startsWith(lowerQuery)
+      }
+      return queryWords.every((word) => {
+        const regex = new RegExp(`\\b${escapeRegex(word)}`, 'i')
+        return regex.test(label)
+      })
+    }
     const relatedSet = new Set()
 
     // Find the query in the taxonomy
@@ -3480,9 +3488,19 @@ function App() {
       }
     }
 
-    // Filter out any topics that are already in search suggestions
+    // Filter out topics already in search suggestions
     const suggestionSet = new Set(currentSuggestions.map(s => s.toLowerCase()))
     related = related.filter(idea => !suggestionSet.has(idea.toLowerCase()))
+
+    // Any item that still matches the query belongs in the main matches section.
+    const promotedMatches = related.filter((idea) => matchesQuery(idea))
+    if (promotedMatches.length > 0) {
+      const promotedSuggestions = mergeSuggestions(currentSuggestions, promotedMatches)
+      setSearchSuggestions(promotedSuggestions)
+      setHighlightedSuggestion(promotedSuggestions.length > 0 ? 0 : -1)
+      const promotedSet = new Set(promotedMatches.map((item) => item.toLowerCase()))
+      related = related.filter((idea) => !promotedSet.has(idea.toLowerCase()))
+    }
 
     related = related.slice(0, 6)
     setRelatedIdeas(related)
