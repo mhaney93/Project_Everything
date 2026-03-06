@@ -3015,7 +3015,7 @@ function App() {
 
     if (!path) {
       setNotification({
-        message: 'Node not found in knowledge base. Try searching for topics like "Logic", "Physics", or "Humanities".',
+        message: 'Node not found.',
         type: 'error'
       })
       return
