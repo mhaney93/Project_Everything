@@ -284,7 +284,8 @@ function App() {
   const [searchSuggestions, setSearchSuggestions] = useState([])
   const [highlightedSuggestion, setHighlightedSuggestion] = useState(-1)
   const [relatedIdeas, setRelatedIdeas] = useState([])
-  const [editingNodeId, setEditingNodeId] = useState(null)
+  const [editingNodeId, setEditingNodeId] = useState(null) // For tree view editing
+  const [editingSidebarNodeId, setEditingSidebarNodeId] = useState(null) // For sidebar title editing
   const [deleteConfirmation, setDeleteConfirmation] = useState(null) // { nodeId, message }
   const [editingSummaryId, setEditingSummaryId] = useState(null)
   const [notification, setNotification] = useState(null) // { message, type: 'error' | 'success' | 'info' }
@@ -293,6 +294,11 @@ function App() {
   useEffect(() => {
     console.log('editingNodeId changed to:', editingNodeId)
   }, [editingNodeId])
+
+  // Debug: log editingSidebarNodeId changes
+  useEffect(() => {
+    console.log('editingSidebarNodeId changed to:', editingSidebarNodeId)
+  }, [editingSidebarNodeId])
 
   const canvasRef = useRef(null)
   const editInputRef = useRef(null)
@@ -3767,7 +3773,7 @@ function App() {
                 >
                   {panelExpanded ? '→' : '←'}
                 </button>
-                {editingNodeId === selectedNode.id ? (
+                {editingSidebarNodeId === selectedNode.id ? (
                   <input
                     key={`editing-${selectedNode.id}`}
                     ref={(el) => {
@@ -3790,14 +3796,16 @@ function App() {
                       if (e.key === 'Enter') {
                         e.preventDefault()
                         updateNodeLabel(selectedNode.id, e.target.value)
+                        setEditingSidebarNodeId(null)
                       } else if (e.key === 'Escape') {
                         e.preventDefault()
-                        setEditingNodeId(null)
+                        setEditingSidebarNodeId(null)
                       }
                     }}
                     onBlur={(e) => {
                       console.log('Input blur, saving. Value:', e.target.value, 'Original:', selectedNode.label)
                       updateNodeLabel(selectedNode.id, e.target.value)
+                      setEditingSidebarNodeId(null)
                     }}
                   />
                 ) : (
@@ -3807,8 +3815,8 @@ function App() {
                       console.log('H2 clicked!', { isCustom: selectedNode.isCustom, isAuthenticated, id: selectedNode.id })
                       if (selectedNode.isCustom && isAuthenticated) {
                         e.stopPropagation()
-                        console.log('Setting editingNodeId to:', selectedNode.id)
-                        setEditingNodeId(selectedNode.id)
+                        console.log('Setting editingSidebarNodeId to:', selectedNode.id)
+                        setEditingSidebarNodeId(selectedNode.id)
                       }
                     }}
                     title={selectedNode.isCustom && isAuthenticated ? 'Click to edit title' : ''}
