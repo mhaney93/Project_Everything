@@ -3285,6 +3285,7 @@ function App() {
   const isValidWord = async (token) => {
     if (!token) return false
     if (token === 'a' || token === 'i') return true
+    if (token.length === 1) return false
     if (datamuseWordValidityCacheRef.current.has(token)) {
       return datamuseWordValidityCacheRef.current.get(token)
     }
@@ -3498,11 +3499,13 @@ function App() {
       clearTimeout(searchDebounceTimeoutRef.current)
     }
 
+    // Optimistically clear suggestions while debounced validation runs.
+    setHasValidSearchWords(false)
+    setSearchSuggestions([])
+    setRelatedIdeas([])
+    setHighlightedSuggestion(-1)
+
     if (!value.trim()) {
-      setHasValidSearchWords(false)
-      setSearchSuggestions([])
-      setRelatedIdeas([])
-      setHighlightedSuggestion(-1)
       return
     }
 
