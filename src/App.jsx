@@ -27,6 +27,10 @@ const INITIAL_NODES = [
   { id: 1, label: 'Everything', parentId: null, hidden: false },
 ];
 
+const LEGACY_LABEL_ALIASES = {
+  Art: 'Arts',
+};
+
 const buildLayout = (nodes, topicSubdivisions = {}) => {
   if (nodes.length === 0) {
     return { positions: new Map(), edges: [], bounds: null };
@@ -144,6 +148,20 @@ function App() {
       skipNextAutoSave.current = true;
       setNodes(newNodes);
     };
+
+    const normalizeLoadedNodes = (mapNodes) => {
+      if (!Array.isArray(mapNodes)) return []
+
+      return mapNodes.map((node) => {
+        const normalizedLabel = LEGACY_LABEL_ALIASES[node.label] || node.label
+        if (normalizedLabel === node.label) return node
+
+        return {
+          ...node,
+          label: normalizedLabel,
+        }
+      })
+    }
 
     const collapseNodesToRoot = (mapNodes) => {
       return mapNodes.map((node) => ({
@@ -2160,7 +2178,8 @@ function App() {
         // The cookie will be sent automatically with credentials: 'include'
         const mapData = await mapsAPI.getMap()
         if (Array.isArray(mapData.nodes) && mapData.nodes.length > 0) {
-          const nodesWithHidden = mapData.nodes.map((node) =>
+          const normalizedNodes = normalizeLoadedNodes(mapData.nodes)
+          const nodesWithHidden = normalizedNodes.map((node) =>
             ('hidden' in node) ? node : { ...node, hidden: false }
           )
           setNodesFromBackend(collapseNodesToRoot(nodesWithHidden))
@@ -2414,8 +2433,9 @@ function App() {
       try {
         const mapData = await mapsAPI.getMap()
         if (mapData.nodes && mapData.nodes.length > 0) {
+          const normalizedNodes = normalizeLoadedNodes(mapData.nodes)
           // Ensure all nodes have hidden field
-          const nodesWithHidden = mapData.nodes.map(node => 
+          const nodesWithHidden = normalizedNodes.map(node => 
             ('hidden' in node) ? node : { ...node, hidden: false }
           );
           setNodesFromBackend(collapseNodesToRoot(nodesWithHidden))
