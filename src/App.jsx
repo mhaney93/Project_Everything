@@ -2108,21 +2108,25 @@ function App() {
                       prev > 0 ? prev - 1 : searchSuggestions.length - 1
                     )
                   } else if (e.key === 'Enter') {
-                    console.log('Enter with suggestions - calling preventDefault')
+                    console.log('Enter with suggestions - calling preventDefault and stopPropagation')
                     e.preventDefault()
+                    e.stopPropagation()
                     if (highlightedSuggestion >= 0 && highlightedSuggestion < searchSuggestions.length) {
                       handleSuggestionClick(searchSuggestions[highlightedSuggestion])
                     } else {
                       handleSearchWithQuery(searchQuery)
                     }
+                    return false
                   } else if (e.key === 'Escape') {
                     setSearchSuggestions([])
                     setHighlightedSuggestion(-1)
                   }
                 } else if (e.key === 'Enter') {
-                  console.log('Enter without suggestions - calling preventDefault')
+                  console.log('Enter without suggestions - calling preventDefault and stopPropagation')
                   e.preventDefault()
+                  e.stopPropagation()
                   handleSearchWithQuery(searchQuery)
+                  return false
                 }
               }}
               onBlur={() => {
