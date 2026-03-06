@@ -7,10 +7,34 @@
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html { margin: 0; padding: 0; }
+    html { margin: 0; padding: 0; scroll-behavior: smooth; }
     body { font-family: sans-serif; margin: 0; padding: 0; background: #f7f7f7; }
     .container { max-width: 900px; margin: 0 auto; background: #fff; border-radius: 0 0 8px 8px; box-shadow: 0 2px 8px #0001; padding: 0 32px 32px 32px; }
     h1 { text-align: center; margin: 0; padding: 16px 0 8px 0; }
+    .nav-toolbar { 
+      position: sticky; 
+      top: 0; 
+      background: #fff; 
+      z-index: 100; 
+      padding: 12px 0; 
+      border-bottom: 2px solid #1d6fdc; 
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .nav-link {
+      color: #1d6fdc;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 6px;
+      transition: background 0.2s;
+    }
+    .nav-link:hover {
+      background: #e3eaff;
+    }
     .diagram { display: flex; justify-content: center; margin-bottom: 12px; }
     .notes { margin-top: 24px; }
     .arrow { stroke: #1d6fdc; stroke-width: 2; marker-end: url(#arrowhead); }
@@ -21,6 +45,11 @@
 <body>
   <div class="container">
     <h1 style="text-align:center;">Help</h1>
+    <nav class="nav-toolbar">
+      <a href="#keyboard-shortcuts" class="nav-link">Keyboard Shortcuts</a>
+      <a href="#upload-guidelines" class="nav-link">File Upload Guidelines</a>
+      <a href="#contact" class="nav-link">Contact</a>
+    </nav>
     <div class="diagram" style="display:flex;justify-content:center;align-items:flex-start;margin-top:12px;">
       <svg width="420" height="400">
         <defs>
@@ -47,7 +76,7 @@
         <text x="210" y="375" text-anchor="middle" font-size="16" fill="#fff">Click to expand and show the node's children nodes</text>
       </svg>
     </div>
-    <div style="margin-top: 0; padding-top: 12px; border-top: 1px solid #ddd;">
+    <div id="keyboard-shortcuts" style="margin-top: 0; padding-top: 12px; border-top: 1px solid #ddd;">
       <h2 style="text-align: center; color: #1d6fdc; margin-bottom: 16px;">Keyboard Shortcuts</h2>
       <ul style="list-style: none; padding: 0; max-width: 500px; margin: 0 auto;">
         <li style="padding: 8px 0; border-bottom: 1px solid #f0f0f0;">
@@ -76,7 +105,7 @@
         </li>
       </ul>
     </div>
-    <div style="margin-top: 20px; padding-top: 12px; border-top: 1px solid #ddd;">
+    <div id="upload-guidelines" style="margin-top: 20px; padding-top: 12px; border-top: 1px solid #ddd;">
       <h2 style="text-align: center; color: #1d6fdc; margin-bottom: 16px;">File Upload Guidelines</h2>
       <div style="max-width: 600px; margin: 0 auto; color: #333;">
         <p style="margin: 0 0 12px 0;"><strong style="color: #1d6fdc;">Storage Limit:</strong> Each user account has a 10GB storage limit for file uploads.</p>
@@ -91,7 +120,7 @@
         <p style="margin: 0; color: #666; font-size: 14px;"><em>Note: You can check your current storage usage at any time when viewing your files.</em></p>
       </div>
     </div>
-    <div style="margin-top: 20px; padding-top: 12px; border-top: 1px solid #ddd;">
+    <div id="contact" style="margin-top: 20px; padding-top: 12px; border-top: 1px solid #ddd;">
       <h2 style="text-align: center; color: #1d6fdc; margin-bottom: 16px;">Contact</h2>
       <div style="text-align: center; padding: 16px;">
         <p style="margin: 0 0 12px 0; color: #555;">Have feedback, questions, or found an issue?</p>
