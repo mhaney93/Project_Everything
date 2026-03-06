@@ -3499,15 +3499,22 @@ function App() {
       clearTimeout(searchDebounceTimeoutRef.current)
     }
 
-    // Optimistically clear suggestions while debounced validation runs.
-    setHasValidSearchWords(false)
-    setSearchSuggestions([])
-    setRelatedIdeas([])
-    setHighlightedSuggestion(-1)
-
     if (!value.trim()) {
+      setHasValidSearchWords(false)
+      setSearchSuggestions([])
+      setRelatedIdeas([])
+      setHighlightedSuggestion(-1)
       return
     }
+
+    // Always show local query matches immediately, even before word validation.
+    const localSuggestions = generateSearchSuggestions(value) || []
+    setSearchSuggestions(localSuggestions)
+    setHighlightedSuggestion(localSuggestions.length > 0 ? 0 : -1)
+
+    // Suggested Topics should only appear after validated real-word input.
+    setHasValidSearchWords(false)
+    setRelatedIdeas([])
 
     searchDebounceTimeoutRef.current = setTimeout(async () => {
       const hasRealWords = await queryContainsOnlyRealWords(value)
@@ -3516,13 +3523,10 @@ function App() {
       setHasValidSearchWords(hasRealWords)
 
       if (!hasRealWords) {
-        setSearchSuggestions([])
         setRelatedIdeas([])
-        setHighlightedSuggestion(-1)
         return
       }
 
-      const localSuggestions = generateSearchSuggestions(value) || []
       const apiSuggestions = await fetchDatamuseSuggestions(value)
       if (requestId !== searchRequestIdRef.current) return
 
