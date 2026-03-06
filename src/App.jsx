@@ -683,7 +683,6 @@ function App() {
     'Literary Theory': ['Structuralism', 'Deconstruction', 'Rhetoric', 'Semiotics', 'Narratology', 'Literary Criticism'],
     'Structuralism': [],
     'Deconstruction': [],
-    'Phenomenology': [],
     'Rhetoric': [],
     'Semiotics': [],
     'Narratology': [],
