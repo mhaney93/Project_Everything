@@ -3165,13 +3165,15 @@ function App() {
   }, [searchSuggestions.length])
 
   const generateSearchSuggestions = (query) => {
-    if (!query.trim()) {
+    const trimmedQuery = query.trim()
+    if (!trimmedQuery) {
       setSearchSuggestions([])
       setRelatedIdeas([])
       return
     }
 
-    const lowerQuery = query.toLowerCase()
+    const lowerQuery = trimmedQuery.toLowerCase()
+    const queryWords = lowerQuery.split(/\s+/)
     const allTopics = Object.keys(TOPIC_SUBDIVISIONS)
     
     // Get all topics (include both keys and their values)
@@ -3189,15 +3191,49 @@ function App() {
 
     const labels = Array.from(allLabels).filter((label) => typeof label === 'string')
 
-    // Filter topics that start with or contain the query (substring match only)
+    // For multi-word queries, check if all words are present in the label
+    // For single-word queries, use simple substring match
+    const matchesQuery = (label) => {
+      const lowerLabel = label.toLowerCase()
+      if (queryWords.length === 1) {
+        return lowerLabel.includes(lowerQuery)
+      }
+      // All query words must be present in the label
+      return queryWords.every(word => lowerLabel.includes(word))
+    }
+
     const suggestions = labels
-      .filter((label) => label.toLowerCase().includes(lowerQuery))
+      .filter(matchesQuery)
       .sort((a, b) => {
-        // Prioritize exact starts
-        const aStarts = a.toLowerCase().startsWith(lowerQuery)
-        const bStarts = b.toLowerCase().startsWith(lowerQuery)
-        if (aStarts && !bStarts) return -1
-        if (!aStarts && bStarts) return 1
+        const lowerA = a.toLowerCase()
+        const lowerB = b.toLowerCase()
+        
+        // Prioritize exact starts with the full query or first word
+        const aStartsFull = lowerA.startsWith(lowerQuery)
+        const bStartsFull = lowerB.startsWith(lowerQuery)
+        if (aStartsFull && !bStartsFull) return -1
+        if (!aStartsFull && bStartsFull) return 1
+        
+        // For multi-word, prioritize labels where words appear in order
+        if (queryWords.length > 1) {
+          const aInOrder = queryWords.every((word, i) => {
+            const idx = lowerA.indexOf(word)
+            if (idx === -1) return false
+            if (i === 0) return true
+            const prevIdx = lowerA.indexOf(queryWords[i - 1])
+            return idx > prevIdx
+          })
+          const bInOrder = queryWords.every((word, i) => {
+            const idx = lowerB.indexOf(word)
+            if (idx === -1) return false
+            if (i === 0) return true
+            const prevIdx = lowerB.indexOf(queryWords[i - 1])
+            return idx > prevIdx
+          })
+          if (aInOrder && !bInOrder) return -1
+          if (!aInOrder && bInOrder) return 1
+        }
+        
         return a.localeCompare(b)
       })
       .slice(0, 8) // Limit to 8 suggestions
@@ -3210,12 +3246,14 @@ function App() {
   }
 
   const generateRelatedIdeas = (query, currentSuggestions = []) => {
-    if (!query.trim()) {
+    const trimmedQuery = query.trim()
+    if (!trimmedQuery) {
       setRelatedIdeas([])
       return
     }
 
-    const lowerQuery = query.toLowerCase()
+    const lowerQuery = trimmedQuery.toLowerCase()
+    const queryWords = lowerQuery.split(/\s+/)
     const relatedSet = new Set()
 
     // Find the query in the taxonomy
@@ -3251,12 +3289,11 @@ function App() {
     }
 
     // Also add any custom nodes with keyword matching or connection
-    const keywords = lowerQuery.split(/\s+/)
     nodes.forEach((node) => {
       if (typeof node.label !== 'string' || !node.label.trim()) return
       const nodeWords = node.label.toLowerCase().split(/\s+/)
       const hasOverlap = nodeWords.some((word) =>
-        keywords.some((keyword) => word.includes(keyword) || keyword.includes(word))
+        queryWords.some((keyword) => word.includes(keyword) || keyword.includes(word))
       )
       if (hasOverlap && !relatedSet.has(node.label)) {
         relatedSet.add(node.label)
@@ -3280,33 +3317,44 @@ function App() {
         children.forEach((child) => allLabels.add(child))
       })
 
+      // For multi-word queries, check if all words are present
+      const matchesAllWords = (label) => {
+        const normalized = label.toLowerCase()
+        if (queryWords.length === 1) {
+          return normalized.includes(lowerQuery)
+        }
+        return queryWords.every(word => normalized.includes(word))
+      }
+
       related = Array.from(allLabels)
         .filter((label) => typeof label === 'string')
-        .filter((label) => {
-          const normalized = label.toLowerCase()
-          return normalized.includes(lowerQuery)
-        })
+        .filter(matchesAllWords)
         .filter((label) => label.toLowerCase() !== lowerQuery)
         .sort((a, b) => a.length - b.length || a.localeCompare(b))
     }
 
     // Final fallback: if still empty, use semantic keyword matching
     if (related.length === 0) {
-      const lowerLookup = lowerQuery.toLowerCase()
-      
       // Check TOPIC_KEYWORDS for semantic matches
       for (const [topic, keywords] of Object.entries(TOPIC_KEYWORDS)) {
         const hasMatch = keywords.some((keyword) => {
-          // For short queries (5 chars or less), require exact match
-          if (lowerLookup.length <= 5) {
-            return keyword === lowerLookup
+          // For multi-word queries, check if keyword matches any query word
+          if (queryWords.length > 1) {
+            return queryWords.some(qWord => {
+              if (qWord.length <= 5) return keyword === qWord
+              if (qWord.length <= 8) return keyword.startsWith(qWord)
+              return qWord.includes(keyword) || keyword.includes(qWord)
+            })
           }
-          // For medium queries (6-8 chars), allow prefix match
-          if (lowerLookup.length <= 8) {
-            return keyword.startsWith(lowerLookup)
+          
+          // Single-word query logic
+          if (lowerQuery.length <= 5) {
+            return keyword === lowerQuery
           }
-          // For longer queries, allow bidirectional substring matching
-          return lowerLookup.includes(keyword) || keyword.includes(lowerLookup)
+          if (lowerQuery.length <= 8) {
+            return keyword.startsWith(lowerQuery)
+          }
+          return lowerQuery.includes(keyword) || keyword.includes(lowerQuery)
         })
         
         if (hasMatch) {
