@@ -274,6 +274,16 @@ function App() {
     return () => clearTimeout(timer)
   }, [notification])
 
+  // Auto-scroll highlighted suggestion into view
+  useEffect(() => {
+    if (highlightedSuggestion >= 0) {
+      const highlightedElement = document.querySelector(`[data-suggestion-index="${highlightedSuggestion}"]`)
+      if (highlightedElement) {
+        highlightedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+      }
+    }
+  }, [highlightedSuggestion])
+
   // Knowledge base mapping topics to their meaningful subdivisions (must be before layout useMemo)
   const TOPIC_SUBDIVISIONS = {
     // Root level
@@ -3164,6 +3174,7 @@ function App() {
                 {searchSuggestions.map((suggestion, idx) => (
                   <button
                     key={suggestion}
+                    data-suggestion-index={idx}
                     className={
                       "suggestion-item" +
                       (idx === highlightedSuggestion ? " highlighted" : "")
