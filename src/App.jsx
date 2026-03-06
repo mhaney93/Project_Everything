@@ -3274,8 +3274,9 @@ function App() {
 
   const getValidQueryWords = (query) => {
     const tokens = extractWordTokens(query)
-    // Filter to only include tokens that are 2+ characters OR valid single letters ('a', 'i')
-    return tokens.filter((token) => token.length > 1 || token === 'a' || token === 'i')
+    // Filter to only include tokens that are 3+ characters OR valid single letters ('a', 'i')
+    // 2-character tokens are too ambiguous (could be incomplete)
+    return tokens.filter((token) => token.length >= 3 || token === 'a' || token === 'i')
   }
 
   const isExactWordMatch = (results, token) => {
