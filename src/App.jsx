@@ -2067,11 +2067,12 @@ function App() {
 
   // Drag handlers
     const clampPanOffset = (offset) => {
-      // Clamp pan offset to reasonable bounds (±2000px) to prevent "wonky" behavior at extreme distances
-      const MAX_PAN = 2000;
+      // Allow wider horizontal panning for large trees while retaining reasonable limits
+      const MAX_PAN_X = Math.max(2000, Math.ceil(mapWidth));
+      const MAX_PAN_Y = 2000;
       return {
-        x: Math.max(-MAX_PAN, Math.min(MAX_PAN, offset.x)),
-        y: Math.max(-MAX_PAN, Math.min(MAX_PAN, offset.y)),
+        x: Math.max(-MAX_PAN_X, Math.min(MAX_PAN_X, offset.x)),
+        y: Math.max(-MAX_PAN_Y, Math.min(MAX_PAN_Y, offset.y)),
       };
     };
 
