@@ -313,6 +313,7 @@ function App() {
   const deleteCancelButtonRef = useRef(null)
   const deleteConfirmButtonRef = useRef(null)
   const searchRequestIdRef = useRef(0)
+  const searchDebounceTimeoutRef = useRef(null)
   const datamuseWordValidityCacheRef = useRef(new Map())
   const datamuseSuggestionCacheRef = useRef(new Map())
 
@@ -324,6 +325,14 @@ function App() {
     }, 5000)
     return () => clearTimeout(timer)
   }, [notification])
+
+  useEffect(() => {
+    return () => {
+      if (searchDebounceTimeoutRef.current) {
+        clearTimeout(searchDebounceTimeoutRef.current)
+      }
+    }
+  }, [])
 
   // Keep keyboard focus aligned with the selected delete modal option.
   useEffect(() => {
@@ -3485,6 +3494,10 @@ function App() {
     const requestId = searchRequestIdRef.current + 1
     searchRequestIdRef.current = requestId
 
+    if (searchDebounceTimeoutRef.current) {
+      clearTimeout(searchDebounceTimeoutRef.current)
+    }
+
     if (!value.trim()) {
       setHasValidSearchWords(false)
       setSearchSuggestions([])
@@ -3493,26 +3506,28 @@ function App() {
       return
     }
 
-    const hasRealWords = await queryContainsOnlyRealWords(value)
-    if (requestId !== searchRequestIdRef.current) return
+    searchDebounceTimeoutRef.current = setTimeout(async () => {
+      const hasRealWords = await queryContainsOnlyRealWords(value)
+      if (requestId !== searchRequestIdRef.current) return
 
-    setHasValidSearchWords(hasRealWords)
+      setHasValidSearchWords(hasRealWords)
 
-    if (!hasRealWords) {
-      setSearchSuggestions([])
-      setRelatedIdeas([])
-      setHighlightedSuggestion(-1)
-      return
-    }
+      if (!hasRealWords) {
+        setSearchSuggestions([])
+        setRelatedIdeas([])
+        setHighlightedSuggestion(-1)
+        return
+      }
 
-    const localSuggestions = generateSearchSuggestions(value) || []
-    const apiSuggestions = await fetchDatamuseSuggestions(value)
-    if (requestId !== searchRequestIdRef.current) return
+      const localSuggestions = generateSearchSuggestions(value) || []
+      const apiSuggestions = await fetchDatamuseSuggestions(value)
+      if (requestId !== searchRequestIdRef.current) return
 
-    const suggestions = mergeSuggestions(localSuggestions, apiSuggestions)
-    setSearchSuggestions(suggestions)
-    setHighlightedSuggestion(suggestions.length > 0 ? 0 : -1)
-    generateRelatedIdeas(value, suggestions)
+      const suggestions = mergeSuggestions(localSuggestions, apiSuggestions)
+      setSearchSuggestions(suggestions)
+      setHighlightedSuggestion(suggestions.length > 0 ? 0 : -1)
+      generateRelatedIdeas(value, suggestions)
+    }, 200)
   }
 
   const handleSuggestionClick = (suggestion) => {
