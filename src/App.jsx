@@ -2851,6 +2851,16 @@ function App() {
         .sort((a, b) => a.length - b.length || a.localeCompare(b))
     }
 
+    // Final fallback: if still empty, suggest top-level concepts
+    if (related.length === 0) {
+      const topLevel = Object.keys(TOPIC_SUBDIVISIONS).filter((label) => {
+        const isTopLevel = !Object.values(TOPIC_SUBDIVISIONS).some((children) => children.includes(label))
+        return isTopLevel && label !== 'Everything'
+      })
+      // Return a few random top-level concepts
+      related = topLevel.sort(() => Math.random() - 0.5).slice(0, 3)
+    }
+
     related = related.slice(0, 6)
     setRelatedIdeas(related)
   }
