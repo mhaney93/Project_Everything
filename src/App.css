@@ -583,6 +583,31 @@ button:not(:disabled):hover {
   flex: 1;
 }
 
+.panel-header h2.editable {
+  cursor: pointer;
+  padding: 0.25rem 0.5rem;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+}
+
+.panel-header h2.editable:hover {
+  background: rgba(29, 111, 220, 0.08);
+}
+
+.panel-title-input {
+  flex: 1;
+  margin: 0;
+  padding: 0.25rem 0.5rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  font-family: inherit;
+  background: rgba(29, 111, 220, 0.08);
+  border: 2px solid var(--accent);
+  border-radius: 6px;
+  outline: none;
+  color: var(--ink);
+}
+
 .panel-expand {
   padding: 0.4rem 0.6rem;
   font-size: 1rem;

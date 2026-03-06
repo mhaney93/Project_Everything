@@ -3758,7 +3758,43 @@ function App() {
                 >
                   {panelExpanded ? '→' : '←'}
                 </button>
-                <h2>{selectedNode.label}</h2>
+                {editingNodeId === selectedNode.id ? (
+                  <input
+                    ref={(el) => {
+                      if (el) {
+                        el.focus()
+                        el.select()
+                      }
+                    }}
+                    type="text"
+                    defaultValue={selectedNode.label}
+                    className="panel-title-input"
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        updateNodeLabel(selectedNode.id, e.target.value)
+                      } else if (e.key === 'Escape') {
+                        e.preventDefault()
+                        setEditingNodeId(null)
+                      }
+                    }}
+                    onBlur={(e) => {
+                      updateNodeLabel(selectedNode.id, e.target.value)
+                    }}
+                  />
+                ) : (
+                  <h2
+                    className={selectedNode.isCustom && isAuthenticated ? 'editable' : ''}
+                    onClick={() => {
+                      if (selectedNode.isCustom && isAuthenticated) {
+                        setEditingNodeId(selectedNode.id)
+                      }
+                    }}
+                    title={selectedNode.isCustom && isAuthenticated ? 'Click to edit title' : ''}
+                  >
+                    {selectedNode.label}
+                  </h2>
+                )}
                 <button
                   className="panel-close"
                   type="button"
