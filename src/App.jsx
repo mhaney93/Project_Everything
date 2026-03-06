@@ -39,6 +39,27 @@ const ORDERED_CHILDREN_PARENTS = new Set([
   'History',
 ]);
 
+// Topic keywords for semantic search fallback - helps suggest related topics when no exact match
+const TOPIC_KEYWORDS = {
+  'Philosophy': ['metaphysics', 'epistem', 'ethics', 'logic', 'ontology', 'kant', 'plato', 'aristotle', 'logic'],
+  'Biology': ['organism', 'genetic', 'cell', 'evolution', 'species', 'anatomy', 'physiology', 'reproductive', 'penis', 'dna', 'protein'],
+  'Chemistry': ['chemical', 'molecule', 'element', 'compound', 'reaction', 'atom', 'periodic', 'carbon', 'hydrogen'],
+  'Physics': ['motion', 'energy', 'force', 'quantum', 'relativity', 'gravity', 'wave', 'particle', 'einstein'],
+  'Mathematics': ['number', 'algebra', 'geometry', 'calculus', 'equation', 'theorem', 'proof', 'probability', 'linear'],
+  'History': ['ancient', 'medieval', 'modern', 'era', 'period', 'century', 'war', 'civilization', 'revolution'],
+  'Religious Studies': ['religion', 'theology', 'faith', 'spiritual', 'church', 'prayer', 'sermon', 'scripture', 'god'],
+  'Psychology': ['mind', 'behavior', 'conscious', 'mental', 'cognitive', 'freud', 'brain', 'emotion', 'therapy'],
+  'Sociology': ['society', 'social', 'culture', 'community', 'group', 'institution', 'class', 'identity'],
+  'Economics': ['market', 'trade', 'money', 'economy', 'business', 'price', 'supply', 'demand', 'investment'],
+  'Political Philosophy': ['government', 'state', 'power', 'rights', 'freedom', 'justice', 'law', 'democracy', 'politics'],
+  'Arts': ['art', 'visual', 'painting', 'sculpture', 'gallery', 'creative', 'aesthetic', 'design'],
+  'Music': ['musical', 'song', 'melody', 'harmony', 'composition', 'instrument', 'audio', 'rhythm'],
+  'Literature': ['novel', 'poetry', 'writing', 'author', 'story', 'narrative', 'character', 'plot'],
+  'Languages': ['language', 'linguistic', 'grammar', 'syntax', 'translation', 'dialect', 'communication'],
+  'Earth Science': ['geology', 'earth', 'weather', 'climate', 'geology', 'geology', 'climate', 'environment'],
+  'Astronomy': ['space', 'star', 'planet', 'galaxy', 'cosmic', 'universe', 'asteroid', 'satellite'],
+}
+
 const applyLabelMigrations = (mapNodes) => {
   if (!Array.isArray(mapNodes)) return { nodes: [], changed: false }
 
@@ -2851,25 +2872,23 @@ function App() {
         .sort((a, b) => a.length - b.length || a.localeCompare(b))
     }
 
-    // Final fallback: if still empty, suggest concepts with keyword overlap
+    // Final fallback: if still empty, use semantic keyword matching
     if (related.length === 0) {
-      const allConcepts = Object.keys(TOPIC_SUBDIVISIONS).filter((label) => label !== 'Everything')
-      const queryWords = lowerQuery.split(/\s+/).filter((w) => w.length > 2)
+      const lowerLookup = lowerQuery.toLowerCase()
       
-      // Find concepts that share words with the query
-      const keywordMatches = allConcepts.filter((concept) => {
-        const conceptWords = concept.toLowerCase().split(/\s+/)
-        return queryWords.some((queryWord) =>
-          conceptWords.some((conceptWord) =>
-            conceptWord.includes(queryWord) || queryWord.includes(conceptWord)
-          )
-        )
-      })
+      // Check TOPIC_KEYWORDS for semantic matches
+      for (const [topic, keywords] of Object.entries(TOPIC_KEYWORDS)) {
+        if (keywords.some((keyword) => lowerLookup.includes(keyword) || keyword.includes(lowerLookup))) {
+          related.push(topic)
+          if (related.length >= 3) break
+        }
+      }
       
-      // If we found keyword matches, use those; otherwise use random
-      related = keywordMatches.length > 0
-        ? keywordMatches
-        : allConcepts.sort(() => Math.random() - 0.5).slice(0, 3)
+      // If still no matches, suggest random concepts
+      if (related.length === 0) {
+        const allConcepts = Object.keys(TOPIC_SUBDIVISIONS).filter((label) => label !== 'Everything')
+        related = allConcepts.sort(() => Math.random() - 0.5).slice(0, 3)
+      }
     }
 
     related = related.slice(0, 6)
