@@ -255,6 +255,7 @@ function App() {
   const headerRef = useRef(null)
   const searchInputRef = useRef(null)
   const searchRowRef = useRef(null)
+  const searchSuggestionsRef = useRef(null)
   const anchorSizeRef = useRef({ width: 0, height: 0 })
   const nextId = useRef(2)
   const prevSelectedIdRef = useRef(null)
@@ -276,10 +277,22 @@ function App() {
 
   // Auto-scroll highlighted suggestion into view
   useEffect(() => {
-    if (highlightedSuggestion >= 0) {
-      const highlightedElement = document.querySelector(`[data-suggestion-index="${highlightedSuggestion}"]`)
-      if (highlightedElement) {
-        highlightedElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
+    if (highlightedSuggestion >= 0 && searchSuggestionsRef.current) {
+      const container = searchSuggestionsRef.current
+      const items = container.querySelectorAll('[data-suggestion-index]')
+      if (items[highlightedSuggestion]) {
+        const item = items[highlightedSuggestion]
+        // Scroll the parent container if needed
+        const containerRect = container.getBoundingClientRect()
+        const itemRect = item.getBoundingClientRect()
+        
+        if (itemRect.bottom > containerRect.bottom) {
+          // Scroll down
+          container.scrollTop += itemRect.bottom - containerRect.bottom + 10
+        } else if (itemRect.top < containerRect.top) {
+          // Scroll up
+          container.scrollTop -= containerRect.top - itemRect.top + 10
+        }
       }
     }
   }, [highlightedSuggestion])
@@ -3170,7 +3183,7 @@ function App() {
               Search
             </button>
             {(searchSuggestions.length > 0 || relatedIdeas.length > 0) && (
-              <div className="search-suggestions">
+              <div className="search-suggestions" ref={searchSuggestionsRef}>
                 {searchSuggestions.map((suggestion, idx) => (
                   <button
                     key={suggestion}
