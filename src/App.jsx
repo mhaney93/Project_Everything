@@ -3788,8 +3788,10 @@ function App() {
                   <h2
                     className={selectedNode.isCustom && isAuthenticated ? 'editable' : ''}
                     onClick={(e) => {
+                      console.log('H2 clicked!', { isCustom: selectedNode.isCustom, isAuthenticated, id: selectedNode.id })
                       if (selectedNode.isCustom && isAuthenticated) {
                         e.stopPropagation()
+                        console.log('Setting editingNodeId to:', selectedNode.id)
                         setEditingNodeId(selectedNode.id)
                       }
                     }}
