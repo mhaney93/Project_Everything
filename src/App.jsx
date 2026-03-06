@@ -2096,7 +2096,14 @@ function App() {
       if (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8) {
         didDragRef.current = true
       }
-      setDragOffset({ x: deltaX, y: deltaY })
+      const clampedPreviewPan = clampPanOffset({
+        x: basePanOffset.x + deltaX,
+        y: basePanOffset.y + deltaY,
+      })
+      setDragOffset({
+        x: clampedPreviewPan.x - basePanOffset.x,
+        y: clampedPreviewPan.y - basePanOffset.y,
+      })
     }
   }
 
