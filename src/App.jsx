@@ -2727,9 +2727,25 @@ function App() {
       }
     })
 
+    const labels = Array.from(allLabels).filter((label) => typeof label === 'string')
+
+    const isSubsequenceMatch = (needle, haystack) => {
+      let needleIndex = 0
+      let haystackIndex = 0
+
+      while (needleIndex < needle.length && haystackIndex < haystack.length) {
+        if (needle[needleIndex] === haystack[haystackIndex]) {
+          needleIndex += 1
+        }
+        haystackIndex += 1
+      }
+
+      return needleIndex === needle.length
+    }
+
     // Filter topics that start with or contain the query
-    const suggestions = Array.from(allLabels)
-      .filter((label) => typeof label === 'string' && label.toLowerCase().includes(lowerQuery))
+    let suggestions = labels
+      .filter((label) => label.toLowerCase().includes(lowerQuery))
       .sort((a, b) => {
         // Prioritize exact starts
         const aStarts = a.toLowerCase().startsWith(lowerQuery)
@@ -2738,7 +2754,18 @@ function App() {
         if (!aStarts && bStarts) return 1
         return a.localeCompare(b)
       })
-      .slice(0, 8) // Limit to 8 suggestions
+
+    // Fallback: fuzzy subsequence matching for partial/inexact input (e.g., "pen" -> "Phenomenology")
+    if (suggestions.length === 0) {
+      suggestions = labels
+        .filter((label) => {
+          const normalized = label.toLowerCase()
+          return isSubsequenceMatch(lowerQuery, normalized)
+        })
+        .sort((a, b) => a.length - b.length || a.localeCompare(b))
+    }
+
+    suggestions = suggestions.slice(0, 8) // Limit to 8 suggestions
 
     setSearchSuggestions(suggestions)
     // Auto-select the first suggestion
@@ -2807,7 +2834,26 @@ function App() {
     }
 
     // Convert to array and limit to 6
-    const related = Array.from(relatedSet).slice(0, 6)
+    let related = Array.from(relatedSet)
+
+    // Fallback: if graph-based related ideas are empty, suggest fuzzy label matches
+    if (related.length === 0) {
+      const allLabels = new Set(Object.keys(TOPIC_SUBDIVISIONS))
+      Object.values(TOPIC_SUBDIVISIONS).forEach((children) => {
+        children.forEach((child) => allLabels.add(child))
+      })
+
+      related = Array.from(allLabels)
+        .filter((label) => typeof label === 'string')
+        .filter((label) => {
+          const normalized = label.toLowerCase()
+          return normalized.includes(lowerQuery) || lowerQuery.split('').every((ch) => normalized.includes(ch))
+        })
+        .filter((label) => label.toLowerCase() !== lowerQuery)
+        .sort((a, b) => a.length - b.length || a.localeCompare(b))
+    }
+
+    related = related.slice(0, 6)
     setRelatedIdeas(related)
   }
 
