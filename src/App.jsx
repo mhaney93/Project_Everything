@@ -2762,6 +2762,24 @@ function App() {
   });
   const renderableNodeIds = new Set(renderableNodes.map((node) => node.id));
 
+  // Separate set for edge rendering: only hide edges for nodes above header, not for horizontal off-screen nodes
+  const nodesForEdgeRendering = nodes.filter((node) => {
+    // Always exclude explicitly hidden nodes
+    if (node.hidden === true) return false;
+    
+    const pos = layout.positions.get(node.id);
+    if (!pos) return true;
+    
+    // Calculate node position on screen
+    const screenY = pos.y + offsetY + renderOffsetY;
+    
+    // Only exclude nodes whose top edge is at or above the header (vertical culling only)
+    if (screenY < headerHeight) return false;
+    
+    return true;
+  });
+  const nodeIdsForEdges = new Set(nodesForEdgeRendering.map((node) => node.id));
+
   // Determine if the root node is above the header (search bar)
   let isRootAboveHeader = false;
   if (rootNode) {
@@ -3848,8 +3866,8 @@ function App() {
                 aria-hidden="true"
               >
                 {layout.edges.map((edge) => {
-                  // Hide lines when either connected node is hidden above the header
-                  if (!renderableNodeIds.has(edge.from) || !renderableNodeIds.has(edge.to)) {
+                  // Hide lines when either connected node is hidden or above the header (but not horizontally off-screen)
+                  if (!nodeIdsForEdges.has(edge.from) || !nodeIdsForEdges.has(edge.to)) {
                     return null;
                   }
                   // Skip edges involving the hidden root node if root is above header
