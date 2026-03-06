@@ -3844,7 +3844,6 @@ function App() {
               onChange={handleSearchInputChange}
               onKeyDown={(e) => {
                 const totalItems = searchSuggestions.length + relatedIdeas.length
-                console.log('Key pressed:', e.key, 'Suggestions:', searchSuggestions.length, 'Related:', relatedIdeas.length, 'Total:', totalItems)
                 if (totalItems > 0) {
                   if (e.key === 'ArrowDown') {
                     e.preventDefault()
