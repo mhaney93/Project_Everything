@@ -472,7 +472,7 @@ function App() {
     'Model Theory': [],
     
     // Aesthetics
-    'Aesthetics': ['Beauty', 'Art Theory', 'Taste', 'Sublime', 'Expression Theory', 'Formalism'],
+    'Aesthetics': ['Beauty', 'Art Theory', 'Taste', 'Sublime', 'Expression Theory'],
     'Beauty': ['Classical Beauty', 'Kant on Beauty', 'Aesthetic Experience', 'Form and Content', 'Subjective Beauty', 'Objective Beauty'],
     'Classical Beauty': [],
     'Kant on Beauty': [],
@@ -609,7 +609,7 @@ function App() {
     'Vajrayana': [],
     'Buddhist Philosophy': [],
     'Buddhist History': [],
-    'Hinduism': ['Vedanta', 'Yoga', 'Hindu Mythology', 'Hindu Philosophy', 'Hindu History'],
+    'Hinduism': ['Vedanta', 'Yoga', 'Hindu Philosophy', 'Hindu History'],
     'Vedanta': [],
     'Yoga': [],
     'Hindu Mythology': [],
@@ -765,7 +765,6 @@ function App() {
     'Jazz Dance': [],
     'Hip Hop Dance': [],
     'Performance Art': [],
-    'Opera': [],
     'Musical Theatre': [],
     
     // Music
