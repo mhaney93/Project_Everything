@@ -2722,12 +2722,14 @@ function App() {
 
     // Add custom nodes from current state
     nodes.forEach((node) => {
-      allLabels.add(node.label)
+      if (typeof node.label === 'string' && node.label.trim()) {
+        allLabels.add(node.label)
+      }
     })
 
     // Filter topics that start with or contain the query
     const suggestions = Array.from(allLabels)
-      .filter((label) => label.toLowerCase().includes(lowerQuery))
+      .filter((label) => typeof label === 'string' && label.toLowerCase().includes(lowerQuery))
       .sort((a, b) => {
         // Prioritize exact starts
         const aStarts = a.toLowerCase().startsWith(lowerQuery)
@@ -2761,10 +2763,10 @@ function App() {
       }
 
       // If query is a child, find its parent and siblings
-      if (children.includes(query)) {
+      if (children.some((child) => child.toLowerCase() === lowerQuery)) {
         // Add all siblings
         children.forEach((child) => {
-          if (child !== query) relatedSet.add(child)
+          if (child.toLowerCase() !== lowerQuery) relatedSet.add(child)
         })
         // Add the parent
         relatedSet.add(parent)
@@ -2787,6 +2789,7 @@ function App() {
     // Also add any custom nodes with keyword matching or connection
     const keywords = lowerQuery.split(/\s+/)
     nodes.forEach((node) => {
+      if (typeof node.label !== 'string' || !node.label.trim()) return
       const nodeWords = node.label.toLowerCase().split(/\s+/)
       const hasOverlap = nodeWords.some((word) =>
         keywords.some((keyword) => word.includes(keyword) || keyword.includes(word))
@@ -2797,7 +2800,11 @@ function App() {
     })
 
     // Remove the query itself from related ideas
-    relatedSet.delete(query)
+    for (const idea of Array.from(relatedSet)) {
+      if (idea.toLowerCase() === lowerQuery) {
+        relatedSet.delete(idea)
+      }
+    }
 
     // Convert to array and limit to 6
     const related = Array.from(relatedSet).slice(0, 6)
