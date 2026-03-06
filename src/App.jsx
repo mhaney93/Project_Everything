@@ -2808,9 +2808,11 @@ function App() {
     setSearchSuggestions(suggestions)
     // Auto-select the first suggestion
     setHighlightedSuggestion(suggestions.length > 0 ? 0 : -1)
+    
+    return suggestions
   }
 
-  const generateRelatedIdeas = (query) => {
+  const generateRelatedIdeas = (query, currentSuggestions = []) => {
     if (!query.trim()) {
       setRelatedIdeas([])
       return
@@ -2917,6 +2919,10 @@ function App() {
       }
     }
 
+    // Filter out any topics that are already in search suggestions
+    const suggestionSet = new Set(currentSuggestions.map(s => s.toLowerCase()))
+    related = related.filter(idea => !suggestionSet.has(idea.toLowerCase()))
+
     related = related.slice(0, 6)
     setRelatedIdeas(related)
   }
@@ -2924,8 +2930,8 @@ function App() {
   const handleSearchInputChange = (e) => {
     const value = e.target.value
     setSearchQuery(value)
-    generateSearchSuggestions(value)
-    generateRelatedIdeas(value)
+    const suggestions = generateSearchSuggestions(value)
+    generateRelatedIdeas(value, suggestions || [])
   }
 
   const handleSuggestionClick = (suggestion) => {
