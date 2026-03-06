@@ -289,6 +289,11 @@ function App() {
   const [editingSummaryId, setEditingSummaryId] = useState(null)
   const [notification, setNotification] = useState(null) // { message, type: 'error' | 'success' | 'info' }
 
+  // Debug: log editingNodeId changes
+  useEffect(() => {
+    console.log('editingNodeId changed to:', editingNodeId)
+  }, [editingNodeId])
+
   const canvasRef = useRef(null)
   const editInputRef = useRef(null)
   const mapPanelRef = useRef(null)
@@ -3758,7 +3763,9 @@ function App() {
                 >
                   {panelExpanded ? '→' : '←'}
                 </button>
-                {editingNodeId === selectedNode.id ? (
+                {(() => {
+                  console.log('Rendering title, editingNodeId:', editingNodeId, 'selectedNode.id:', selectedNode.id, 'match:', editingNodeId === selectedNode.id)
+                  return editingNodeId === selectedNode.id ? (
                   <input
                     ref={(el) => {
                       if (el) {
@@ -3799,7 +3806,7 @@ function App() {
                   >
                     {selectedNode.label}
                   </h2>
-                )}
+                )})()}
                 <button
                   className="panel-close"
                   type="button"
