@@ -2851,11 +2851,25 @@ function App() {
         .sort((a, b) => a.length - b.length || a.localeCompare(b))
     }
 
-    // Final fallback: if still empty, suggest some random concepts
+    // Final fallback: if still empty, suggest concepts with keyword overlap
     if (related.length === 0) {
       const allConcepts = Object.keys(TOPIC_SUBDIVISIONS).filter((label) => label !== 'Everything')
-      // Return a few random concepts
-      related = allConcepts.sort(() => Math.random() - 0.5).slice(0, 3)
+      const queryWords = lowerQuery.split(/\s+/).filter((w) => w.length > 2)
+      
+      // Find concepts that share words with the query
+      const keywordMatches = allConcepts.filter((concept) => {
+        const conceptWords = concept.toLowerCase().split(/\s+/)
+        return queryWords.some((queryWord) =>
+          conceptWords.some((conceptWord) =>
+            conceptWord.includes(queryWord) || queryWord.includes(conceptWord)
+          )
+        )
+      })
+      
+      // If we found keyword matches, use those; otherwise use random
+      related = keywordMatches.length > 0
+        ? keywordMatches
+        : allConcepts.sort(() => Math.random() - 0.5).slice(0, 3)
     }
 
     related = related.slice(0, 6)
