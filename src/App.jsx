@@ -1917,17 +1917,25 @@ function App() {
       // Node exists, select it
       console.log('Setting selectedId to:', matchingNode.id)
       
-      // Unhide the node and all its ancestors
+      // Unhide the node, all its ancestors, and all siblings along the path
       const unhideNodeAndAncestors = (nodeId) => {
         setNodes((prevNodes) => {
           const nodesToUnhide = new Set()
           
-          // Trace up the tree to find all ancestors
+          // Trace up the tree to find all ancestors and their siblings
           let currentId = nodeId
           while (currentId !== null) {
             nodesToUnhide.add(currentId)
             const currentNode = prevNodes.find(n => n.id === currentId)
-            currentId = currentNode?.parentId ?? null
+            const parentId = currentNode?.parentId ?? null
+            
+            // Add all siblings of the current node
+            if (parentId !== null) {
+              const siblings = prevNodes.filter(n => n.parentId === parentId)
+              siblings.forEach(sibling => nodesToUnhide.add(sibling.id))
+            }
+            
+            currentId = parentId
           }
           
           // Update all nodes to unhide the necessary ones
@@ -2028,17 +2036,25 @@ function App() {
                        nodes.find((n) => n.label.toLowerCase() === searchTerm)
     
     if (targetNode) {
-      // Unhide the target node and all its ancestors
+      // Unhide the target node, all its ancestors, and all siblings along the path
       setTimeout(() => {
         setNodes((prevNodes) => {
           const nodesToUnhide = new Set()
           
-          // Trace up the tree to find all ancestors
+          // Trace up the tree to find all ancestors and their siblings
           let currentId = targetNode.id
           while (currentId !== null) {
             nodesToUnhide.add(currentId)
             const currentNode = prevNodes.find(n => n.id === currentId)
-            currentId = currentNode?.parentId ?? null
+            const parentId = currentNode?.parentId ?? null
+            
+            // Add all siblings of the current node
+            if (parentId !== null) {
+              const siblings = prevNodes.filter(n => n.parentId === parentId)
+              siblings.forEach(sibling => nodesToUnhide.add(sibling.id))
+            }
+            
+            currentId = parentId
           }
           
           // Update all nodes to unhide the necessary ones
