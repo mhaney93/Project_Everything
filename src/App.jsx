@@ -1998,7 +1998,7 @@ function App() {
 
   const addChildren = async (parentNodeId) => {
     const parent = nodes.find((node) => node.id === parentNodeId)
-    if (!parent) return
+    if (!parent) return { expanded: false }
 
     const existingChildren = nodes.filter((node) => node.parentId === parentNodeId && !node.hidden)
     const nonCustomChildren = existingChildren.filter((node) => !node.isCustom)
@@ -2014,6 +2014,7 @@ function App() {
       setAnimatingIds(new Set())
       setSelectedId(null)
       setBasePanOffset({ x: 0, y: 0 })
+      return { expanded: false }
     } else {
       // Children are hidden or don't exist - reveal and add predefined ones
       // First, unhide direct children and hide their descendants
@@ -2081,9 +2082,14 @@ function App() {
           updatedNodes = [...updatedNodes, ...newNodes]
           setNodes(updatedNodes)
         }
+        // Return the first child's ID
+        return { expanded: true, firstChildId: newNodes[0]?.id }
       } else {
         // Just unhiding existing children
         setNodes(updatedNodes)
+        // Return the first visible child's ID
+        const firstChild = updatedNodes.find((node) => node.parentId === parentNodeId && !node.hidden)
+        return { expanded: true, firstChildId: firstChild?.id }
       }
     }
   }
@@ -2842,7 +2848,7 @@ function App() {
   }
 
   useEffect(() => {
-    const handleShortcut = (event) => {
+    const handleShortcut = async (event) => {
       if (deleteConfirmation) {
         const modalNavKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter', 'Escape']
         if (!modalNavKeys.includes(event.key)) return
@@ -2914,8 +2920,13 @@ function App() {
           setPanelExpanded(false)
           setFocusedElement(null)
         } else if (focusedElement.type === 'dots') {
-          addChildren(focusedElement.nodeId)
-          setFocusedElement(null)
+          const result = await addChildren(focusedElement.nodeId)
+          if (result?.expanded && result?.firstChildId) {
+            // Focus on the first child after expansion
+            setFocusedElement({ nodeId: result.firstChildId, type: 'node' })
+          } else {
+            setFocusedElement(null)
+          }
         }
         return
       }
