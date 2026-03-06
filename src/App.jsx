@@ -27,9 +27,39 @@ const INITIAL_NODES = [
   { id: 1, label: 'Everything', parentId: null, hidden: false },
 ];
 
-const LEGACY_LABEL_ALIASES = {
-  Art: 'Arts',
+const LABEL_MIGRATIONS_BY_VERSION = {
+  1: {
+    Art: 'Arts',
+  },
 };
+
+const applyLabelMigrations = (mapNodes) => {
+  if (!Array.isArray(mapNodes)) return { nodes: [], changed: false }
+
+  const orderedVersions = Object.keys(LABEL_MIGRATIONS_BY_VERSION)
+    .map((version) => Number(version))
+    .sort((a, b) => a - b)
+
+  let changed = false
+  const migratedNodes = mapNodes.map((node) => {
+    let nextLabel = node.label
+
+    orderedVersions.forEach((version) => {
+      const versionMap = LABEL_MIGRATIONS_BY_VERSION[version]
+      nextLabel = versionMap[nextLabel] || nextLabel
+    })
+
+    if (nextLabel === node.label) return node
+
+    changed = true
+    return {
+      ...node,
+      label: nextLabel,
+    }
+  })
+
+  return { nodes: migratedNodes, changed }
+}
 
 const buildLayout = (nodes, topicSubdivisions = {}) => {
   if (nodes.length === 0) {
@@ -150,21 +180,7 @@ function App() {
     };
 
     const normalizeLoadedNodes = (mapNodes) => {
-      if (!Array.isArray(mapNodes)) return { nodes: [], changed: false }
-
-      let changed = false
-      const normalizedNodes = mapNodes.map((node) => {
-        const normalizedLabel = LEGACY_LABEL_ALIASES[node.label] || node.label
-        if (normalizedLabel === node.label) return node
-
-        changed = true
-        return {
-          ...node,
-          label: normalizedLabel,
-        }
-      })
-
-      return { nodes: normalizedNodes, changed }
+      return applyLabelMigrations(mapNodes)
     }
 
     const collapseNodesToRoot = (mapNodes) => {
