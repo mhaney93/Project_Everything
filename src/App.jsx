@@ -514,7 +514,7 @@ function App() {
       '476 - 1453 Medieval Period',
       '1453 - present Modern Era'
     ],
-    '3.3 million years ago - 3,200 BC Prehistory': ['3.3 million years ago - 3,300 BC Stone Age', '3,300 BC - 3,200 BC Bronze Age (Prehistoric)'],
+    '3.3 million years ago - 3,200 BC Prehistory': ['3.3 million years ago - 3,300 BC Stone Age', '3,300 BC - 3,200 BC Early Bronze Age (Prehistoric)'],
     '3.3 million years ago - 3,300 BC Stone Age': ['3.3 million years ago - 10,000 BC Paleolithic Era', '10,000 BC - 8,000 BC Mesolithic Era', '8,000 BC - 4,500 BC Neolithic Era', '4,500 BC - 3,300 BC Copper Age'],
     
     // Paleolithic Era
@@ -544,8 +544,7 @@ function App() {
     '4,100 BC - 3,300 BC Predynastic Egypt (Copper Age)': [],
     '3,500 BC - 3,300 BC Ebla Civilization (Copper Age)': [],
     
-    // Bronze Age (Prehistoric)
-    '3,300 BC - 3,200 BC Bronze Age (Prehistoric)': ['3,300 BC - 3,200 BC Early Bronze Age (Prehistoric)'],
+    // Early Bronze Age (Prehistoric)
     '3,300 BC - 3,200 BC Early Bronze Age (Prehistoric)': ['3,300 BC - 3,200 BC Indus Valley Civilization (Prehistoric)', '3,300 BC - 3,200 BC Cycladic Civilization (Prehistoric)'],
     '3,300 BC - 3,200 BC Indus Valley Civilization (Prehistoric)': [],
     '3,300 BC - 3,200 BC Cycladic Civilization (Prehistoric)': [],
