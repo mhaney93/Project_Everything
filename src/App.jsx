@@ -2255,11 +2255,34 @@ function App() {
 
     if (event.key === 'Backspace') {
       const gridLevel = Number.isFinite(grid.level) ? grid.level : 0
-      if (gridLevel > 0 && event.target.tagName !== 'INPUT') {
-        event.preventDefault()
-        event.stopPropagation()
-        updateNoteLevel(nodeId, gridId, -1)
+      if (gridLevel <= 0) return
+
+      // Match note behavior: only outdent when cursor is at the start.
+      // For grids, this applies only to the top-left cell (row 0, col 0).
+      const target = event.target
+      const isGridInput = target.classList && target.classList.contains('grid-cell-input')
+
+      if (isGridInput) {
+        const atStart = target.selectionStart === 0 && target.selectionEnd === 0
+        if (!atStart) return
+
+        const currentTd = target.closest('td')
+        const currentTr = target.closest('tr')
+        const isFirstCol = currentTd && currentTd.previousElementSibling === null
+        const isFirstRow = currentTr && currentTr.previousElementSibling === null
+
+        if (isFirstRow && isFirstCol) {
+          event.preventDefault()
+          event.stopPropagation()
+          updateNoteLevel(nodeId, gridId, -1)
+        }
+        return
       }
+
+      // Allow outdent when the grid container itself has focus.
+      event.preventDefault()
+      event.stopPropagation()
+      updateNoteLevel(nodeId, gridId, -1)
     }
   }
 
