@@ -33,6 +33,12 @@ const LABEL_MIGRATIONS_BY_VERSION = {
   },
 };
 
+// Parents whose children should use TOPIC_SUBDIVISIONS defined order (e.g., chronological)
+// All other parents will be alphabetized by default
+const ORDERED_CHILDREN_PARENTS = new Set([
+  'History',
+]);
+
 const applyLabelMigrations = (mapNodes) => {
   if (!Array.isArray(mapNodes)) return { nodes: [], changed: false }
 
@@ -77,13 +83,13 @@ const buildLayout = (nodes, topicSubdivisions = {}) => {
     }
   });
 
-  // Sort children: use topicSubdivisions order if available, otherwise alphabetically
+  // Sort children: use topicSubdivisions order for specific parents, otherwise alphabetically
   childrenById.forEach((children, parentId) => {
     const parentNode = nodes.find(n => n.id === parentId);
     const parentLabel = parentNode?.label;
     
-    // If this parent has a defined order in topicSubdivisions, preserve that order
-    if (parentLabel && topicSubdivisions[parentLabel]) {
+    // If this parent is marked for ordered children, use topicSubdivisions order; otherwise alphabetize
+    if (parentLabel && topicSubdivisions[parentLabel] && ORDERED_CHILDREN_PARENTS.has(parentLabel)) {
       const definedOrder = topicSubdivisions[parentLabel];
       children.sort((a, b) => {
         if (a.isCustom || b.isCustom) {
