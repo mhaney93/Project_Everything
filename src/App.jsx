@@ -1931,6 +1931,7 @@ function App() {
   }
 
   const updateNodeLabel = (nodeId, newLabel) => {
+    console.log('updateNodeLabel called with:', nodeId, newLabel)
     if (!newLabel.trim()) {
       // If empty, revert to default or delete the node
       const node = nodes.find(n => n.id === nodeId)
@@ -1938,6 +1939,7 @@ function App() {
         // Show modern modal instead of window.confirm
         setDeleteConfirmation({ nodeId, message: 'Delete this empty node?', includeChildren: false })
       }
+      console.log('Empty label, setting editingNodeId to null (from updateNodeLabel line 1941)')
       setEditingNodeId(null)
       return
     }
@@ -1976,6 +1978,7 @@ function App() {
       return updated
     })
     
+    console.log('Label updated, setting editingNodeId to null (from updateNodeLabel line 1979)')
     setEditingNodeId(null)
 
     // Auto-select and open sidebar for custom nodes after editing
@@ -3767,10 +3770,14 @@ function App() {
                   <input
                     key={`editing-${selectedNode.id}`}
                     ref={(el) => {
+                      console.log('Input ref callback, el:', el)
                       if (el) {
                         console.log('Input mounted, focusing')
-                        el.focus()
-                        el.select()
+                        setTimeout(() => {
+                          console.log('Delayed focus')
+                          el.focus()
+                          el.select()
+                        }, 0)
                       }
                     }}
                     type="text"
@@ -3788,7 +3795,7 @@ function App() {
                       }
                     }}
                     onBlur={(e) => {
-                      console.log('Input blur, saving')
+                      console.log('Input blur, saving. Value:', e.target.value, 'Original:', selectedNode.label)
                       updateNodeLabel(selectedNode.id, e.target.value)
                     }}
                   />
