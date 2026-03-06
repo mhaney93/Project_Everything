@@ -544,6 +544,7 @@ button:not(:disabled):hover {
   transition: all 0.3s ease;
   overflow-y: auto;
   scrollbar-width: none;
+  padding-bottom: 60px;
 }
 
 .side-panel::-webkit-scrollbar {
@@ -562,8 +563,6 @@ button:not(:disabled):hover {
   padding: 0;
   border: none;
   box-shadow: none;
-  position: relative;
-  padding-bottom: 50px;
 }
 
 .panel-header {
@@ -915,9 +914,10 @@ button:not(:disabled):hover {
 }
 
 .panel-delete-section {
-  position: absolute;
+  position: fixed;
   bottom: 12px;
   right: 12px;
+  z-index: 11;
 }
 
 .delete-node-button {
