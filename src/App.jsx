@@ -2898,8 +2898,12 @@ function App() {
       // Check TOPIC_KEYWORDS for semantic matches
       for (const [topic, keywords] of Object.entries(TOPIC_KEYWORDS)) {
         const hasMatch = keywords.some((keyword) => {
-          // For short queries (3-4 chars), require query to match start of keyword
-          if (lowerLookup.length <= 4) {
+          // For very short queries (3 chars or less), require exact match
+          if (lowerLookup.length <= 3) {
+            return keyword === lowerLookup
+          }
+          // For short queries (4-5 chars), require prefix match
+          if (lowerLookup.length <= 5) {
             return keyword.startsWith(lowerLookup)
           }
           // For longer queries, allow bidirectional substring matching
