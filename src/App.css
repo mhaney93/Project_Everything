@@ -153,11 +153,15 @@
 .search-row {
   width: min(560px, 90vw);
   margin-top: 0.35rem;
+  pointer-events: auto;
+  position: relative;
+}
+
+.search-row form {
   display: flex;
   gap: 0.6rem;
   align-items: center;
-  pointer-events: auto;
-  position: relative;
+  width: 100%;
 }
 
 .search-input {
