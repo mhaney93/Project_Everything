@@ -243,6 +243,7 @@ function App() {
   const [searchQuery, setSearchQuery] = useState('')
   const [searchSuggestions, setSearchSuggestions] = useState([])
   const [highlightedSuggestion, setHighlightedSuggestion] = useState(-1)
+  const [relatedIdeas, setRelatedIdeas] = useState([])
   const [editingNodeId, setEditingNodeId] = useState(null)
   const [deleteConfirmation, setDeleteConfirmation] = useState(null) // { nodeId, message }
   const [editingSummaryId, setEditingSummaryId] = useState(null)
@@ -2706,6 +2707,7 @@ function App() {
   const generateSearchSuggestions = (query) => {
     if (!query.trim()) {
       setSearchSuggestions([])
+      setRelatedIdeas([])
       return
     }
 
@@ -2741,15 +2743,78 @@ function App() {
     setHighlightedSuggestion(suggestions.length > 0 ? 0 : -1)
   }
 
+  const generateRelatedIdeas = (query) => {
+    if (!query.trim()) {
+      setRelatedIdeas([])
+      return
+    }
+
+    const lowerQuery = query.toLowerCase()
+    const relatedSet = new Set()
+
+    // Find the query in the taxonomy
+    for (const [parent, children] of Object.entries(TOPIC_SUBDIVISIONS)) {
+      if (parent.toLowerCase() === lowerQuery) {
+        // If query is a parent, suggest its children
+        children.forEach((child) => relatedSet.add(child))
+        break
+      }
+
+      // If query is a child, find its parent and siblings
+      if (children.includes(query)) {
+        // Add all siblings
+        children.forEach((child) => {
+          if (child !== query) relatedSet.add(child)
+        })
+        // Add the parent
+        relatedSet.add(parent)
+        
+        // Check if parent has a parent (grandparent)
+        for (const [grandparent, siblingParents] of Object.entries(TOPIC_SUBDIVISIONS)) {
+          if (siblingParents.includes(parent)) {
+            relatedSet.add(grandparent)
+            // Add aunt/uncle nodes
+            siblingParents.forEach((sibling) => {
+              if (sibling !== parent) relatedSet.add(sibling)
+            })
+            break
+          }
+        }
+        break
+      }
+    }
+
+    // Also add any custom nodes with keyword matching or connection
+    const keywords = lowerQuery.split(/\s+/)
+    nodes.forEach((node) => {
+      const nodeWords = node.label.toLowerCase().split(/\s+/)
+      const hasOverlap = nodeWords.some((word) =>
+        keywords.some((keyword) => word.includes(keyword) || keyword.includes(word))
+      )
+      if (hasOverlap && !relatedSet.has(node.label)) {
+        relatedSet.add(node.label)
+      }
+    })
+
+    // Remove the query itself from related ideas
+    relatedSet.delete(query)
+
+    // Convert to array and limit to 6
+    const related = Array.from(relatedSet).slice(0, 6)
+    setRelatedIdeas(related)
+  }
+
   const handleSearchInputChange = (e) => {
     const value = e.target.value
     setSearchQuery(value)
     generateSearchSuggestions(value)
+    generateRelatedIdeas(value)
   }
 
   const handleSuggestionClick = (suggestion) => {
     setSearchQuery(suggestion)
     setSearchSuggestions([])
+    setRelatedIdeas([])
     setHighlightedSuggestion(-1)
     // Trigger search after a short delay to ensure query is updated
     setTimeout(() => {
@@ -2802,6 +2867,7 @@ function App() {
       setPanelOpen(true)
       setSearchQuery('')
       setSearchSuggestions([])
+      setRelatedIdeas([])
       return
     }
 
@@ -3058,6 +3124,7 @@ function App() {
               onBlur={() => {
                 // Wait a bit before hiding suggestions to allow clicking
                 setTimeout(() => setSearchSuggestions([]), 200)
+                setTimeout(() => setRelatedIdeas([]), 200)
                 setHighlightedSuggestion(-1)
               }}
             />
@@ -3079,6 +3146,27 @@ function App() {
                     onMouseLeave={() => setHighlightedSuggestion(-1)}
                   >
                     {suggestion}
+                  </button>
+                ))}
+              </div>
+            )}
+            {relatedIdeas.length > 0 && searchSuggestions.length === 0 && (
+              <div className="search-suggestions related-ideas">
+                <div className="related-ideas-title">💡 Ideas you might explore</div>
+                {relatedIdeas.map((idea) => (
+                  <button
+                    key={idea}
+                    className="suggestion-item related-idea-item"
+                    type="button"
+                    onClick={() => {
+                      setSearchQuery(idea)
+                      setRelatedIdeas([])
+                      setTimeout(() => {
+                        handleSearchWithQuery(idea)
+                      }, 0)
+                    }}
+                  >
+                    {idea}
                   </button>
                 ))}
               </div>

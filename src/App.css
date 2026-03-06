@@ -223,6 +223,32 @@
   outline: none;
 }
 
+.related-ideas {
+  border-top: 2px solid rgba(29, 111, 220, 0.1);
+  margin-top: 0;
+  padding: 0;
+}
+
+.related-ideas-title {
+  padding: 0.75rem 1.25rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: rgba(29, 111, 220, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(29, 111, 220, 0.08);
+}
+
+.related-idea-item {
+  opacity: 0.85;
+  font-size: 0.9rem;
+}
+
+.related-idea-item:hover {
+  opacity: 1;
+  background-color: rgba(100, 200, 100, 0.08);
+}
+
 .search-button {
   border-radius: 999px;
   padding: 0.7rem 1.4rem;
