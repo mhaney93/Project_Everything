@@ -1742,8 +1742,13 @@ function App() {
       }
       
       // Return categories that look like subcategories (contain the query term or are plausible topics)
+      // Use word boundary matching to avoid matching substrings inside words
       return categories
-        .filter((cat) => cat.toLowerCase().includes(query.toLowerCase()) && cat.length > 5)
+        .filter((cat) => {
+          if (cat.length <= 5) return false
+          const regex = new RegExp(`\\b${query.toLowerCase()}`, 'i')
+          return regex.test(cat) || cat.toLowerCase().startsWith(query.toLowerCase())
+        })
     } catch (error) {
       console.error('Failed to fetch Wikipedia suggestions:', error)
       return []
@@ -3294,12 +3299,13 @@ function App() {
     }
 
     // Also add any custom nodes with keyword matching or connection
+    // Use word boundary matching to avoid matching substrings
     nodes.forEach((node) => {
       if (typeof node.label !== 'string' || !node.label.trim()) return
-      const nodeWords = node.label.toLowerCase().split(/\s+/)
-      const hasOverlap = nodeWords.some((word) =>
-        queryWords.some((keyword) => word.includes(keyword) || keyword.includes(word))
-      )
+      const hasOverlap = queryWords.some((keyword) => {
+        const regex = new RegExp(`\\b${keyword}`, 'i')
+        return regex.test(node.label) || node.label.toLowerCase().startsWith(keyword)
+      })
       if (hasOverlap && !relatedSet.has(node.label)) {
         relatedSet.add(node.label)
       }
@@ -3345,7 +3351,7 @@ function App() {
 
     // Final fallback: if still empty, use semantic keyword matching
     if (related.length === 0) {
-      // Check TOPIC_KEYWORDS for semantic matches
+      // Check TOPIC_KEYWORDS for semantic matches using word boundaries
       for (const [topic, keywords] of Object.entries(TOPIC_KEYWORDS)) {
         const hasMatch = keywords.some((keyword) => {
           // For multi-word queries, check if keyword matches any query word
@@ -3353,7 +3359,9 @@ function App() {
             return queryWords.some(qWord => {
               if (qWord.length <= 5) return keyword === qWord
               if (qWord.length <= 8) return keyword.startsWith(qWord)
-              return qWord.includes(keyword) || keyword.includes(qWord)
+              // Use word boundary for longer queries
+              const regex = new RegExp(`\\b${qWord}`, 'i')
+              return regex.test(keyword) || keyword.startsWith(qWord)
             })
           }
           
@@ -3364,7 +3372,9 @@ function App() {
           if (lowerQuery.length <= 8) {
             return keyword.startsWith(lowerQuery)
           }
-          return lowerQuery.includes(keyword) || keyword.includes(lowerQuery)
+          // Use word boundary for longer queries
+          const regex = new RegExp(`\\b${lowerQuery}`, 'i')
+          return regex.test(keyword) || keyword.startsWith(lowerQuery)
         })
         
         if (hasMatch) {
