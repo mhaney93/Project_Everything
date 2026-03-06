@@ -795,13 +795,13 @@ button:not(:disabled):hover {
   border-radius: 10px;
   border: 1px solid rgba(184, 106, 0, 0.35);
   background: rgba(184, 106, 0, 0.08);
-  color: #5a22c7;
+  color: #b86a00;
   font-size: 0.9rem;
   line-height: 1.35;
 }
 
 .note-input::placeholder {
-  color: rgba(90, 34, 199, 0.6);
+  color: rgba(184, 106, 0, 0.6);
 }
 
 .note-delete-button {
