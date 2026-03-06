@@ -3141,12 +3141,13 @@ function App() {
               value={searchQuery}
               onChange={handleSearchInputChange}
               onKeyDown={(e) => {
-                console.log('Key pressed:', e.key, 'Suggestions:', searchSuggestions.length)
-                if (searchSuggestions.length > 0) {
+                const totalItems = searchSuggestions.length + relatedIdeas.length
+                console.log('Key pressed:', e.key, 'Suggestions:', searchSuggestions.length, 'Related:', relatedIdeas.length, 'Total:', totalItems)
+                if (totalItems > 0) {
                   if (e.key === 'ArrowDown') {
                     e.preventDefault()
                     setHighlightedSuggestion((prev) =>
-                      prev < searchSuggestions.length - 1 ? prev + 1 : prev
+                      prev < totalItems - 1 ? prev + 1 : prev
                     )
                   } else if (e.key === 'ArrowUp') {
                     e.preventDefault()
@@ -3156,8 +3157,19 @@ function App() {
                   } else if (e.key === 'Enter') {
                     e.preventDefault()
                     e.stopPropagation()
-                    if (highlightedSuggestion >= 0 && highlightedSuggestion < searchSuggestions.length) {
-                      handleSuggestionClick(searchSuggestions[highlightedSuggestion])
+                    if (highlightedSuggestion >= 0) {
+                      if (highlightedSuggestion < searchSuggestions.length) {
+                        handleSuggestionClick(searchSuggestions[highlightedSuggestion])
+                      } else {
+                        const relatedIdx = highlightedSuggestion - searchSuggestions.length
+                        if (relatedIdx >= 0 && relatedIdx < relatedIdeas.length) {
+                          setSearchQuery(relatedIdeas[relatedIdx])
+                          setRelatedIdeas([])
+                          setTimeout(() => {
+                            handleSearchWithQuery(relatedIdeas[relatedIdx])
+                          }, 0)
+                        }
+                      }
                     } else {
                       handleSearchWithQuery(searchQuery)
                     }
@@ -3203,22 +3215,27 @@ function App() {
                 {relatedIdeas.length > 0 && (
                   <div className="related-ideas">
                     <div className="related-ideas-title">Related Ideas</div>
-                    {relatedIdeas.map((idea) => (
-                      <button
-                        key={idea}
-                        className="suggestion-item related-idea-item"
-                        type="button"
-                        onClick={() => {
-                          setSearchQuery(idea)
-                          setRelatedIdeas([])
-                          setTimeout(() => {
-                            handleSearchWithQuery(idea)
-                          }, 0)
-                        }}
-                      >
-                        {idea}
-                      </button>
-                    ))}
+                    {relatedIdeas.map((idea, idx) => {
+                      const highlightIdx = searchSuggestions.length + idx
+                      return (
+                        <button
+                          key={idea}
+                          className={"suggestion-item related-idea-item" + (highlightIdx === highlightedSuggestion ? " highlighted" : "")}
+                          type="button"
+                          onClick={() => {
+                            setSearchQuery(idea)
+                            setRelatedIdeas([])
+                            setTimeout(() => {
+                              handleSearchWithQuery(idea)
+                            }, 0)
+                          }}
+                          onMouseEnter={() => setHighlightedSuggestion(highlightIdx)}
+                          onMouseLeave={() => setHighlightedSuggestion(-1)}
+                        >
+                          {idea}
+                        </button>
+                      )
+                    })}
                   </div>
                 )}
               </div>
