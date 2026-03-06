@@ -2897,7 +2897,16 @@ function App() {
       
       // Check TOPIC_KEYWORDS for semantic matches
       for (const [topic, keywords] of Object.entries(TOPIC_KEYWORDS)) {
-        if (keywords.some((keyword) => lowerLookup.includes(keyword) || keyword.includes(lowerLookup))) {
+        const hasMatch = keywords.some((keyword) => {
+          // For short queries (3-4 chars), require query to match start of keyword
+          if (lowerLookup.length <= 4) {
+            return keyword.startsWith(lowerLookup)
+          }
+          // For longer queries, allow bidirectional substring matching
+          return lowerLookup.includes(keyword) || keyword.includes(lowerLookup)
+        })
+        
+        if (hasMatch) {
           related.push(topic)
           if (related.length >= 3) break
         }
