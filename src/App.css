@@ -758,16 +758,16 @@ button:not(:disabled):hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(139, 92, 246, 0.16);
-  color: var(--accent);
-  border: 1px solid rgba(139, 92, 246, 0.35);
+  background: rgba(123, 63, 228, 0.16);
+  color: #6a2bd8;
+  border: 1px solid rgba(123, 63, 228, 0.35);
   font-size: 1.25rem;
   line-height: 1;
   box-shadow: none;
 }
 
 .grid-add-button:hover {
-  background: rgba(139, 92, 246, 0.22);
+  background: rgba(123, 63, 228, 0.22);
 }
 
 .notes-list {
@@ -851,9 +851,9 @@ button:not(:disabled):hover {
   min-width: 200px;
   min-height: 100px;
   max-width: 100%;
-  border: 2px solid rgba(139, 92, 246, 0.25);
+  border: 2px solid rgba(123, 63, 228, 0.25);
   border-radius: 8px;
-  background: rgba(139, 92, 246, 0.04);
+  background: rgba(123, 63, 228, 0.04);
 }
 
 .note-grid {
@@ -863,7 +863,7 @@ button:not(:disabled):hover {
 }
 
 .note-grid td {
-  border: 1px solid rgba(139, 92, 246, 0.2);
+  border: 1px solid rgba(123, 63, 228, 0.2);
   padding: 0;
   min-width: 60px;
 }
@@ -881,7 +881,7 @@ button:not(:disabled):hover {
 }
 
 .grid-cell-input:focus {
-  background: rgba(139, 92, 246, 0.08);
+  background: rgba(123, 63, 228, 0.08);
 }
 
 .grid-controls {
@@ -911,7 +911,7 @@ button:not(:disabled):hover {
 
 .grid-size-display {
   font-size: 0.85rem;
-  color: var(--accent);
+  color: #6a2bd8;
   font-weight: 600;
   min-width: 1.5rem;
   text-align: center;
@@ -921,9 +921,9 @@ button:not(:disabled):hover {
   width: 22px;
   height: 22px;
   border-radius: 4px;
-  border: 1px solid rgba(139, 92, 246, 0.3);
-  background: rgba(139, 92, 246, 0.1);
-  color: var(--accent);
+  border: 1px solid rgba(123, 63, 228, 0.3);
+  background: rgba(123, 63, 228, 0.1);
+  color: #6a2bd8;
   font-size: 0.9rem;
   line-height: 1;
   display: inline-flex;
@@ -934,7 +934,7 @@ button:not(:disabled):hover {
 }
 
 .grid-control-button:hover:not(:disabled) {
-  background: rgba(139, 92, 246, 0.18);
+  background: rgba(123, 63, 228, 0.18);
 }
 
 .grid-control-button:disabled {
@@ -946,9 +946,9 @@ button:not(:disabled):hover {
   width: 24px;
   height: 24px;
   border-radius: 999px;
-  border: 1px solid rgba(139, 92, 246, 0.35);
-  background: rgba(139, 92, 246, 0.12);
-  color: var(--accent);
+  border: 1px solid rgba(123, 63, 228, 0.35);
+  background: rgba(123, 63, 228, 0.12);
+  color: #6a2bd8;
   font-size: 1rem;
   line-height: 1;
   display: inline-flex;
@@ -959,7 +959,7 @@ button:not(:disabled):hover {
 }
 
 .grid-delete-button:hover {
-  background: rgba(139, 92, 246, 0.2);
+  background: rgba(123, 63, 228, 0.2);
 }
 
 .panel-files {
