@@ -3192,14 +3192,19 @@ function App() {
     const labels = Array.from(allLabels).filter((label) => typeof label === 'string')
 
     // For multi-word queries, check if all words are present in the label
-    // For single-word queries, use simple substring match
+    // Use word boundary matching to avoid matching substrings inside words
     const matchesQuery = (label) => {
       const lowerLabel = label.toLowerCase()
       if (queryWords.length === 1) {
-        return lowerLabel.includes(lowerQuery)
+        // Check for word boundary match or starts with
+        const regex = new RegExp(`\\b${lowerQuery}`, 'i')
+        return regex.test(label) || lowerLabel.startsWith(lowerQuery)
       }
-      // All query words must be present in the label
-      return queryWords.every(word => lowerLabel.includes(word))
+      // All query words must be present as whole words or at start of words
+      return queryWords.every(word => {
+        const regex = new RegExp(`\\b${word}`, 'i')
+        return regex.test(label)
+      })
     }
 
     const suggestions = labels
@@ -3317,13 +3322,18 @@ function App() {
         children.forEach((child) => allLabels.add(child))
       })
 
-      // For multi-word queries, check if all words are present
+      // For multi-word queries, check if all words are present as whole words
       const matchesAllWords = (label) => {
-        const normalized = label.toLowerCase()
         if (queryWords.length === 1) {
-          return normalized.includes(lowerQuery)
+          // Check for word boundary match or starts with
+          const regex = new RegExp(`\\b${lowerQuery}`, 'i')
+          return regex.test(label) || label.toLowerCase().startsWith(lowerQuery)
         }
-        return queryWords.every(word => normalized.includes(word))
+        // All query words must be present as whole words
+        return queryWords.every(word => {
+          const regex = new RegExp(`\\b${word}`, 'i')
+          return regex.test(label)
+        })
       }
 
       related = Array.from(allLabels)
