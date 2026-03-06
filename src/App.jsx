@@ -2853,6 +2853,49 @@ function App() {
       // Arrow key navigation: focus nodes and dots without selecting them
       const arrowKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']
       if (arrowKeys.includes(event.key) && (selectedId !== null || focusedElement !== null)) {
+        // If we're inside a grid cell input, handle grid navigation instead of node navigation
+        if (event.target.classList && event.target.classList.contains('grid-cell-input')) {
+          event.preventDefault()
+          
+          const currentCell = event.target
+          const currentTd = currentCell.parentElement
+          const currentTr = currentTd.parentElement
+          const currentTbody = currentTr.parentElement
+          
+          let targetCell = null
+          
+          if (event.key === 'ArrowUp') {
+            const prevRow = currentTr.previousElementSibling
+            if (prevRow) {
+              const cellIndex = Array.from(currentTr.children).indexOf(currentTd)
+              targetCell = prevRow.children[cellIndex]?.querySelector('input')
+            }
+          } else if (event.key === 'ArrowDown') {
+            const nextRow = currentTr.nextElementSibling
+            if (nextRow) {
+              const cellIndex = Array.from(currentTr.children).indexOf(currentTd)
+              targetCell = nextRow.children[cellIndex]?.querySelector('input')
+            }
+          } else if (event.key === 'ArrowLeft') {
+            const prevTd = currentTd.previousElementSibling
+            if (prevTd) {
+              targetCell = prevTd.querySelector('input')
+            }
+          } else if (event.key === 'ArrowRight') {
+            const nextTd = currentTd.nextElementSibling
+            if (nextTd) {
+              targetCell = nextTd.querySelector('input')
+            }
+          }
+          
+          if (targetCell) {
+            targetCell.focus()
+            targetCell.select()
+          }
+          
+          return
+        }
+        
         event.preventDefault()
         
         // Use focusedElement if set, otherwise use selectedId as the starting point
