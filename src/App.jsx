@@ -290,16 +290,6 @@ function App() {
   const [editingSummaryId, setEditingSummaryId] = useState(null)
   const [notification, setNotification] = useState(null) // { message, type: 'error' | 'success' | 'info' }
 
-  // Debug: log editingNodeId changes
-  useEffect(() => {
-    console.log('editingNodeId changed to:', editingNodeId)
-  }, [editingNodeId])
-
-  // Debug: log editingSidebarNodeId changes
-  useEffect(() => {
-    console.log('editingSidebarNodeId changed to:', editingSidebarNodeId)
-  }, [editingSidebarNodeId])
-
   const canvasRef = useRef(null)
   const editInputRef = useRef(null)
   const mapPanelRef = useRef(null)
@@ -1937,7 +1927,6 @@ function App() {
   }
 
   const updateNodeLabel = (nodeId, newLabel) => {
-    console.log('updateNodeLabel called with:', nodeId, newLabel)
     if (!newLabel.trim()) {
       // If empty, revert to default or delete the node
       const node = nodes.find(n => n.id === nodeId)
@@ -1945,7 +1934,6 @@ function App() {
         // Show modern modal instead of window.confirm
         setDeleteConfirmation({ nodeId, message: 'Delete this empty node?', includeChildren: false })
       }
-      console.log('Empty label, setting editingNodeId to null (from updateNodeLabel line 1941)')
       setEditingNodeId(null)
       return
     }
@@ -1984,7 +1972,6 @@ function App() {
       return updated
     })
     
-    console.log('Label updated, setting editingNodeId to null (from updateNodeLabel line 1979)')
     setEditingNodeId(null)
 
     // Auto-select and open sidebar for custom nodes after editing
@@ -3706,7 +3693,6 @@ function App() {
                                 e.stopPropagation()
                               }}
                               onBlur={(e) => {
-                                console.log('Tree input blur, node.id:', node.id, 'value:', e.target.value)
                                 updateNodeLabel(node.id, e.target.value)
                               }}
                             />
@@ -3777,14 +3763,9 @@ function App() {
                   <input
                     key={`editing-${selectedNode.id}`}
                     ref={(el) => {
-                      console.log('Input ref callback, el:', el)
                       if (el) {
-                        console.log('Input mounted, focusing')
-                        setTimeout(() => {
-                          console.log('Delayed focus')
-                          el.focus()
-                          // Removed el.select() - might be causing blur
-                        }, 0)
+                        el.focus()
+                        el.select()
                       }
                     }}
                     type="text"
@@ -3803,7 +3784,6 @@ function App() {
                       }
                     }}
                     onBlur={(e) => {
-                      console.log('Input blur, saving. Value:', e.target.value, 'Original:', selectedNode.label)
                       updateNodeLabel(selectedNode.id, e.target.value)
                       setEditingSidebarNodeId(null)
                     }}
@@ -3812,10 +3792,8 @@ function App() {
                   <h2
                     className={selectedNode.isCustom && isAuthenticated ? 'editable' : ''}
                     onClick={(e) => {
-                      console.log('H2 clicked!', { isCustom: selectedNode.isCustom, isAuthenticated, id: selectedNode.id })
                       if (selectedNode.isCustom && isAuthenticated) {
                         e.stopPropagation()
-                        console.log('Setting editingSidebarNodeId to:', selectedNode.id)
                         setEditingSidebarNodeId(selectedNode.id)
                       }
                     }}
