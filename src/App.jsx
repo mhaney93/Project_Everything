@@ -2915,12 +2915,6 @@ function App() {
           if (related.length >= 3) break
         }
       }
-      
-      // If still no matches, suggest random concepts
-      if (related.length === 0) {
-        const allConcepts = Object.keys(TOPIC_SUBDIVISIONS).filter((label) => label !== 'Everything')
-        related = allConcepts.sort(() => Math.random() - 0.5).slice(0, 3)
-      }
     }
 
     related = related.slice(0, 6)
