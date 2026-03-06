@@ -285,6 +285,7 @@ function App() {
   const [searchSuggestions, setSearchSuggestions] = useState([])
   const [highlightedSuggestion, setHighlightedSuggestion] = useState(-1)
   const [relatedIdeas, setRelatedIdeas] = useState([])
+  const [hasValidSearchWords, setHasValidSearchWords] = useState(false)
   const [editingNodeId, setEditingNodeId] = useState(null) // For tree view editing
   const [editingSidebarNodeId, setEditingSidebarNodeId] = useState(null) // For sidebar title editing
   const [deleteConfirmation, setDeleteConfirmation] = useState(null) // { nodeId, message }
@@ -311,6 +312,9 @@ function App() {
   const noteInputRefs = useRef({})
   const deleteCancelButtonRef = useRef(null)
   const deleteConfirmButtonRef = useRef(null)
+  const searchRequestIdRef = useRef(0)
+  const datamuseWordValidityCacheRef = useRef(new Map())
+  const datamuseSuggestionCacheRef = useRef(new Map())
 
   // Auto-dismiss notification after 5 seconds
   useEffect(() => {
@@ -3255,6 +3259,88 @@ function App() {
     return suggestions
   }
 
+  const extractWordTokens = (value) => {
+    if (typeof value !== 'string') return []
+    const matches = value.toLowerCase().match(/[a-z]+(?:'[a-z]+)?/g)
+    return matches || []
+  }
+
+  const isExactWordMatch = (results, token) => {
+    if (!Array.isArray(results)) return false
+    return results.some((item) => {
+      if (!item || typeof item.word !== 'string') return false
+      return item.word.toLowerCase() === token
+    })
+  }
+
+  const isValidWord = async (token) => {
+    if (!token) return false
+    if (token === 'a' || token === 'i') return true
+    if (datamuseWordValidityCacheRef.current.has(token)) {
+      return datamuseWordValidityCacheRef.current.get(token)
+    }
+
+    try {
+      const response = await fetch(`https://api.datamuse.com/words?sp=${encodeURIComponent(token)}&max=12`)
+      const data = await response.json()
+      const valid = isExactWordMatch(data, token)
+      datamuseWordValidityCacheRef.current.set(token, valid)
+      return valid
+    } catch (error) {
+      // Conservative fallback: suppress suggestions if word validation is unavailable.
+      datamuseWordValidityCacheRef.current.set(token, false)
+      return false
+    }
+  }
+
+  const queryContainsOnlyRealWords = async (query) => {
+    const tokens = extractWordTokens(query)
+    if (tokens.length === 0) return false
+
+    const validity = await Promise.all(tokens.map((token) => isValidWord(token)))
+    return validity.every(Boolean)
+  }
+
+  const fetchDatamuseSuggestions = async (query) => {
+    const normalizedQuery = query.trim().toLowerCase()
+    if (!normalizedQuery) return []
+
+    if (datamuseSuggestionCacheRef.current.has(normalizedQuery)) {
+      return datamuseSuggestionCacheRef.current.get(normalizedQuery)
+    }
+
+    try {
+      const response = await fetch(`https://api.datamuse.com/sug?s=${encodeURIComponent(normalizedQuery)}&max=8`)
+      const data = await response.json()
+      const suggestions = Array.isArray(data)
+        ? data
+            .map((item) => item?.word)
+            .filter((word) => typeof word === 'string' && word.trim())
+        : []
+      datamuseSuggestionCacheRef.current.set(normalizedQuery, suggestions)
+      return suggestions
+    } catch (error) {
+      return []
+    }
+  }
+
+  const mergeSuggestions = (localSuggestions, apiSuggestions) => {
+    const merged = []
+    const seen = new Set()
+
+    ;[...(localSuggestions || []), ...(apiSuggestions || [])].forEach((item) => {
+      if (typeof item !== 'string') return
+      const trimmed = item.trim()
+      if (!trimmed) return
+      const key = trimmed.toLowerCase()
+      if (seen.has(key)) return
+      seen.add(key)
+      merged.push(trimmed)
+    })
+
+    return merged.slice(0, 8)
+  }
+
   const generateRelatedIdeas = (query, currentSuggestions = []) => {
     const trimmedQuery = query.trim()
     if (!trimmedQuery) {
@@ -3392,11 +3478,41 @@ function App() {
     setRelatedIdeas(related)
   }
 
-  const handleSearchInputChange = (e) => {
+  const handleSearchInputChange = async (e) => {
     const value = e.target.value
     setSearchQuery(value)
-    const suggestions = generateSearchSuggestions(value)
-    generateRelatedIdeas(value, suggestions || [])
+
+    const requestId = searchRequestIdRef.current + 1
+    searchRequestIdRef.current = requestId
+
+    if (!value.trim()) {
+      setHasValidSearchWords(false)
+      setSearchSuggestions([])
+      setRelatedIdeas([])
+      setHighlightedSuggestion(-1)
+      return
+    }
+
+    const hasRealWords = await queryContainsOnlyRealWords(value)
+    if (requestId !== searchRequestIdRef.current) return
+
+    setHasValidSearchWords(hasRealWords)
+
+    if (!hasRealWords) {
+      setSearchSuggestions([])
+      setRelatedIdeas([])
+      setHighlightedSuggestion(-1)
+      return
+    }
+
+    const localSuggestions = generateSearchSuggestions(value) || []
+    const apiSuggestions = await fetchDatamuseSuggestions(value)
+    if (requestId !== searchRequestIdRef.current) return
+
+    const suggestions = mergeSuggestions(localSuggestions, apiSuggestions)
+    setSearchSuggestions(suggestions)
+    setHighlightedSuggestion(suggestions.length > 0 ? 0 : -1)
+    generateRelatedIdeas(value, suggestions)
   }
 
   const handleSuggestionClick = (suggestion) => {
@@ -3748,7 +3864,7 @@ function App() {
                     {suggestion}
                   </button>
                 ))}
-                {searchQuery.trim().length >= 3 && relatedIdeas.length > 0 && (
+                {hasValidSearchWords && relatedIdeas.length > 0 && (
                   <div className="related-ideas">
                     <div className="related-ideas-title">Suggested Topics</div>
                     {relatedIdeas.map((idea, idx) => {
