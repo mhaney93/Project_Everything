@@ -2868,10 +2868,7 @@ function App() {
                   <button
                     className="delete-node-button"
                     type="button"
-                    onClick={() => {
-                      deleteCustomNode(selectedNode.id)
-                      setPanelOpen(false)
-                    }}
+                    onClick={() => deleteCustomNode(selectedNode.id)}
                     title="Delete this custom node"
                   >
                     Delete node
