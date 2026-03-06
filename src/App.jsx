@@ -1244,7 +1244,6 @@ function App() {
       '3,300 BC - 3,200 BC Indus Valley Civilization (Prehistoric)': 'The earliest phase of the Harappan civilization in South Asia featuring planned cities and trade networks, from 3,300 BC to 3,200 BC.',
       '3,300 BC - 3,200 BC Cycladic Civilization (Prehistoric)': 'The early Bronze Age culture of the Cycladic islands in the Aegean Sea known for distinctive marble figurines, from 3,300 BC to 3,200 BC.',
       '3,200 BC - 1,200 BC Bronze Age (Ancient)': 'The historical period characterized by bronze metallurgy, the rise of civilizations, and the invention of writing, from 3,200 BC to 1,200 BC.',
-      '1,200 BC - 600 BC Iron Age': 'The period when iron replaced bronze as the primary metal for tools and weapons, enabling new technologies and empires, from 1,200 BC to 600 BC.',
       'Literature': 'Written works considered to have artistic or intellectual value, including fiction, poetry, and drama.',
       'Fiction': 'Imaginative narrative works including novels, short stories, and various genres.',
       'Novels': 'Extended works of prose fiction exploring characters, themes, and narratives.',
