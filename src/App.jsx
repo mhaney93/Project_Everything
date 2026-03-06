@@ -49,7 +49,7 @@ const TOPIC_KEYWORDS = {
   'Logic': ['argument', 'premise', 'conclusion', 'valid', 'fallacy', 'symbolic', 'propositional', 'predicate'],
   'Political Philosophy': ['government', 'state', 'power', 'rights', 'freedom', 'justice', 'law', 'democracy', 'politics', 'authority', 'social contract', 'sovereignty', 'constitution'],
   
-  'Biology': ['organism', 'genetic', 'cell', 'evolution', 'species', 'anatomy', 'physiology', 'reproductive', 'penis', 'dna', 'protein', 'enzyme', 'metabolism', 'photosynthesis', 'biodiversity', 'ecology', 'mutation'],
+  'Biology': ['organism', 'genetic', 'cell', 'evolution', 'species', 'anatomy', 'physiology', 'reproductive', 'dna', 'protein', 'enzyme', 'metabolism', 'photosynthesis', 'biodiversity', 'ecology', 'mutation'],
   'Chemistry': ['chemical', 'molecule', 'element', 'compound', 'reaction', 'atom', 'periodic', 'carbon', 'hydrogen', 'bond', 'oxidation', 'crystalline', 'ionic', 'valence', 'electrolyte'],
   'Physics': ['motion', 'energy', 'force', 'quantum', 'relativity', 'gravity', 'wave', 'particle', 'einstein', 'newtonian', 'acceleration', 'velocity', 'momentum', 'thermodynamic', 'electromag'],
   'Mathematics': ['number', 'algebra', 'geometry', 'calculus', 'equation', 'theorem', 'proof', 'probability', 'linear', 'matrix', 'trigonometry', 'topology', 'set theory', 'function', 'integral', 'derivative'],
