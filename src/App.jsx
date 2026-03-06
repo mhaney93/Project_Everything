@@ -3308,6 +3308,14 @@ function App() {
   }
 
   const fetchDatamuseSuggestions = async (query) => {
+    const tokens = extractWordTokens(query)
+    const lastToken = tokens[tokens.length - 1]
+    
+    // Don't fetch Datamuse if the last word is a single incomplete letter
+    if (lastToken && lastToken.length === 1) {
+      return []
+    }
+
     const normalizedQuery = query.trim().toLowerCase()
     if (!normalizedQuery) return []
 
