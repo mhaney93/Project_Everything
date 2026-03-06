@@ -1121,9 +1121,9 @@ button:not(:disabled):hover {
 .notification-under-search {
   position: absolute;
   top: calc(100% + 0.5rem);
-  left: 46%;
+  left: 0.5rem;
   right: auto;
-  transform: translateX(-50%);
+  transform: none;
   width: auto;
   max-width: min(280px, 90vw);
   padding: 0.55rem 0.75rem;
