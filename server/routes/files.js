@@ -4,12 +4,13 @@ const path = require('path');
 const fs = require('fs');
 const pool = require('../db/config');
 const { verifyToken } = require('../middleware/auth');
+const { 
+  TOTAL_STORAGE_LIMIT_PER_USER, 
+  getTotalStorageUsage, 
+  isUserAdmin 
+} = require('../utils/storage');
 
 const router = express.Router();
-
-// Storage limit per user in bytes (10GB)
-const STORAGE_LIMIT_PER_USER = 10 * 1024 * 1024 * 1024; // 10GB
-const ADMIN_EMAIL = 'matthew.haney1993@gmail.com';
 
 // Create uploads directory if it doesn't exist
 const uploadsDir = path.join(__dirname, '../uploads');
@@ -52,14 +53,7 @@ const upload = multer({
   }
 });
 
-// Get user's total storage usage
-const getUserStorageUsage = async (userId) => {
-  const result = await pool.query(
-    'SELECT COALESCE(SUM(file_size), 0) as total_size FROM files WHERE user_id = $1',
-    [userId]
-  );
-  return result.rows[0].total_size;
-};
+// Deprecated: use getTotalStorageUsage from utils/storage.js instead
 
 // Upload file
 router.post('/upload', verifyToken, upload.single('file'), async (req, res) => {
@@ -73,25 +67,23 @@ router.post('/upload', verifyToken, upload.single('file'), async (req, res) => {
       return res.status(400).json({ error: 'nodeId is required' });
     }
 
-    // Get user email and check if they're admin
-    const userResult = await pool.query('SELECT email FROM users WHERE id = $1', [req.userId]);
-    const userEmail = userResult.rows[0]?.email;
-    const isAdmin = userEmail === ADMIN_EMAIL;
-
     // Check storage limit for non-admin users
+    const isAdmin = await isUserAdmin(req.userId);
     if (!isAdmin) {
-      const currentUsage = await getUserStorageUsage(req.userId);
-      const newTotalSize = currentUsage + req.file.size;
+      const storageUsage = await getTotalStorageUsage(req.userId);
+      const newTotalSize = storageUsage.total + req.file.size;
 
-      if (newTotalSize > STORAGE_LIMIT_PER_USER) {
+      if (newTotalSize > TOTAL_STORAGE_LIMIT_PER_USER) {
         // Clean up uploaded file
         fs.unlink(req.file.path, (unlinkErr) => {
           if (unlinkErr) console.error('Failed to delete file:', unlinkErr);
         });
-        const limitGB = STORAGE_LIMIT_PER_USER / (1024 * 1024 * 1024);
-        const usedGB = (currentUsage / (1024 * 1024 * 1024)).toFixed(2);
+        const limitGB = (TOTAL_STORAGE_LIMIT_PER_USER / (1024 * 1024 * 1024)).toFixed(1);
+        const usedGB = (storageUsage.total / (1024 * 1024 * 1024)).toFixed(2);
+        const fileUsedGB = (storageUsage.fileStorage / (1024 * 1024 * 1024)).toFixed(2);
+        const mapUsedGB = (storageUsage.mapStorage / (1024 * 1024 * 1024)).toFixed(2);
         return res.status(413).json({ 
-          error: `Storage limit exceeded. You have ${limitGB}GB total, currently using ${usedGB}GB.` 
+          error: `Storage limit exceeded. You have ${limitGB}GB total. Currently using ${usedGB}GB (${fileUsedGB}GB files + ${mapUsedGB}GB notes/nodes).` 
         });
       }
     }
@@ -211,19 +203,24 @@ router.delete('/:fileId', verifyToken, async (req, res) => {
 // Get user's storage usage
 router.get('/storage/usage', verifyToken, async (req, res) => {
   try {
-    const totalBytes = await getUserStorageUsage(req.userId);
-    const limitGB = STORAGE_LIMIT_PER_USER / (1024 * 1024 * 1024);
+    const storageUsage = await getTotalStorageUsage(req.userId);
+    const totalBytes = storageUsage.total;
+    const limitGB = TOTAL_STORAGE_LIMIT_PER_USER / (1024 * 1024 * 1024);
     const usedGB = totalBytes / (1024 * 1024 * 1024);
-    const remainingGB = (STORAGE_LIMIT_PER_USER - totalBytes) / (1024 * 1024 * 1024);
+    const remainingGB = (TOTAL_STORAGE_LIMIT_PER_USER - totalBytes) / (1024 * 1024 * 1024);
     
     res.json({
       used: totalBytes,
       usedGB: usedGB.toFixed(2),
-      limit: STORAGE_LIMIT_PER_USER,
+      fileStorage: storageUsage.fileStorage,
+      fileStorageGB: (storageUsage.fileStorage / (1024 * 1024 * 1024)).toFixed(2),
+      mapStorage: storageUsage.mapStorage,
+      mapStorageGB: (storageUsage.mapStorage / (1024 * 1024 * 1024)).toFixed(2),
+      limit: TOTAL_STORAGE_LIMIT_PER_USER,
       limitGB: limitGB.toFixed(2),
-      remaining: Math.max(0, STORAGE_LIMIT_PER_USER - totalBytes),
+      remaining: Math.max(0, TOTAL_STORAGE_LIMIT_PER_USER - totalBytes),
       remainingGB: Math.max(0, remainingGB).toFixed(2),
-      percentUsed: ((totalBytes / STORAGE_LIMIT_PER_USER) * 100).toFixed(1)
+      percentUsed: ((totalBytes / TOTAL_STORAGE_LIMIT_PER_USER) * 100).toFixed(1)
     });
   } catch (err) {
     console.error('Get storage usage error:', err);

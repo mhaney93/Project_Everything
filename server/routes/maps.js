@@ -1,6 +1,11 @@
 const express = require('express');
 const pool = require('../db/config');
 const { verifyToken } = require('../middleware/auth');
+const { 
+  TOTAL_STORAGE_LIMIT_PER_USER, 
+  getFileStorageUsage, 
+  isUserAdmin 
+} = require('../utils/storage');
 
 const router = express.Router();
 
@@ -44,6 +49,25 @@ router.post('/', verifyToken, async (req, res) => {
 
     if (!Array.isArray(nodes)) {
       return res.status(400).json({ error: 'Nodes must be an array' });
+    }
+
+    // Check storage limit for non-admin users
+    const isAdmin = await isUserAdmin(req.userId);
+    if (!isAdmin) {
+      const nodesJson = JSON.stringify(nodes);
+      const newMapSize = Buffer.byteLength(nodesJson, 'utf8');
+      const fileStorage = await getFileStorageUsage(req.userId);
+      const newTotalSize = fileStorage + newMapSize;
+
+      if (newTotalSize > TOTAL_STORAGE_LIMIT_PER_USER) {
+        const limitGB = (TOTAL_STORAGE_LIMIT_PER_USER / (1024 * 1024 * 1024)).toFixed(1);
+        const totalUsedGB = (newTotalSize / (1024 * 1024 * 1024)).toFixed(2);
+        const fileUsedGB = (fileStorage / (1024 * 1024 * 1024)).toFixed(2);
+        const mapUsedGB = (newMapSize / (1024 * 1024 * 1024)).toFixed(2);
+        return res.status(413).json({ 
+          error: `Storage limit exceeded. You have ${limitGB}GB total. This would use ${totalUsedGB}GB (${fileUsedGB}GB files + ${mapUsedGB}GB notes/nodes).` 
+        });
+      }
     }
 
     const result = await pool.query(
