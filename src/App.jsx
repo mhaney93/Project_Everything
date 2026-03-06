@@ -3131,7 +3131,7 @@ function App() {
             <button className="search-button" type="button" onClick={() => handleSearchWithQuery(searchQuery)}>
               Search
             </button>
-            {searchSuggestions.length > 0 && (
+            {(searchSuggestions.length > 0 || relatedIdeas.length > 0) && (
               <div className="search-suggestions">
                 {searchSuggestions.map((suggestion, idx) => (
                   <button
@@ -3148,27 +3148,27 @@ function App() {
                     {suggestion}
                   </button>
                 ))}
-              </div>
-            )}
-            {relatedIdeas.length > 0 && (
-              <div className="search-suggestions related-ideas">
-                <div className="related-ideas-title">💡 Ideas you might explore</div>
-                {relatedIdeas.map((idea) => (
-                  <button
-                    key={idea}
-                    className="suggestion-item related-idea-item"
-                    type="button"
-                    onClick={() => {
-                      setSearchQuery(idea)
-                      setRelatedIdeas([])
-                      setTimeout(() => {
-                        handleSearchWithQuery(idea)
-                      }, 0)
-                    }}
-                  >
-                    {idea}
-                  </button>
-                ))}
+                {relatedIdeas.length > 0 && (
+                  <div className="related-ideas">
+                    <div className="related-ideas-title">Related Ideas</div>
+                    {relatedIdeas.map((idea) => (
+                      <button
+                        key={idea}
+                        className="suggestion-item related-idea-item"
+                        type="button"
+                        onClick={() => {
+                          setSearchQuery(idea)
+                          setRelatedIdeas([])
+                          setTimeout(() => {
+                            handleSearchWithQuery(idea)
+                          }, 0)
+                        }}
+                      >
+                        {idea}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
             </form>
