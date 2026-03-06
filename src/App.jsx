@@ -3728,9 +3728,9 @@ function App() {
                     {suggestion}
                   </button>
                 ))}
-                {relatedIdeas.length > 0 && (
+                {searchQuery.trim() && relatedIdeas.length > 0 && (
                   <div className="related-ideas">
-                    <div className="related-ideas-title">Related Ideas</div>
+                    <div className="related-ideas-title">Suggested Topics</div>
                     {relatedIdeas.map((idea, idx) => {
                       const highlightIdx = searchSuggestions.length + idx
                       return (
