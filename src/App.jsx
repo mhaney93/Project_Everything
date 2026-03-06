@@ -3095,12 +3095,12 @@ function App() {
                   if (e.key === 'ArrowDown') {
                     e.preventDefault()
                     setHighlightedSuggestion((prev) =>
-                      prev < searchSuggestions.length - 1 ? prev + 1 : 0
+                      prev < searchSuggestions.length - 1 ? prev + 1 : prev
                     )
                   } else if (e.key === 'ArrowUp') {
                     e.preventDefault()
                     setHighlightedSuggestion((prev) =>
-                      prev > 0 ? prev - 1 : searchSuggestions.length - 1
+                      prev > 0 ? prev - 1 : prev
                     )
                   } else if (e.key === 'Enter') {
                     e.preventDefault()
@@ -3150,7 +3150,7 @@ function App() {
                 ))}
               </div>
             )}
-            {relatedIdeas.length > 0 && searchSuggestions.length === 0 && (
+            {relatedIdeas.length > 0 && (
               <div className="search-suggestions related-ideas">
                 <div className="related-ideas-title">💡 Ideas you might explore</div>
                 {relatedIdeas.map((idea) => (
