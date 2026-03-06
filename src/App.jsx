@@ -49,7 +49,7 @@ const TOPIC_KEYWORDS = {
   'Logic': ['argument', 'premise', 'conclusion', 'valid', 'fallacy', 'symbolic', 'propositional', 'predicate'],
   'Political Philosophy': ['government', 'state', 'power', 'rights', 'freedom', 'justice', 'law', 'democracy', 'politics', 'authority', 'social contract', 'sovereignty', 'constitution'],
   
-  'Biology': ['organism', 'genetic', 'cell', 'evolution', 'species', 'anatomy', 'physiology', 'reproductive', 'dna', 'protein', 'enzyme', 'metabolism', 'photosynthesis', 'biodiversity', 'ecology', 'mutation'],
+  'Biology': ['organism', 'genetic', 'cell', 'evolution', 'species', 'anatomy', 'physiology', 'reproductive', 'penis', 'dna', 'protein', 'enzyme', 'metabolism', 'photosynthesis', 'biodiversity', 'ecology', 'mutation'],
   'Chemistry': ['chemical', 'molecule', 'element', 'compound', 'reaction', 'atom', 'periodic', 'carbon', 'hydrogen', 'bond', 'oxidation', 'crystalline', 'ionic', 'valence', 'electrolyte'],
   'Physics': ['motion', 'energy', 'force', 'quantum', 'relativity', 'gravity', 'wave', 'particle', 'einstein', 'newtonian', 'acceleration', 'velocity', 'momentum', 'thermodynamic', 'electromag'],
   'Mathematics': ['number', 'algebra', 'geometry', 'calculus', 'equation', 'theorem', 'proof', 'probability', 'linear', 'matrix', 'trigonometry', 'topology', 'set theory', 'function', 'integral', 'derivative'],
@@ -2898,12 +2898,12 @@ function App() {
       // Check TOPIC_KEYWORDS for semantic matches
       for (const [topic, keywords] of Object.entries(TOPIC_KEYWORDS)) {
         const hasMatch = keywords.some((keyword) => {
-          // For very short queries (3 chars or less), require exact match
-          if (lowerLookup.length <= 3) {
+          // For short queries (5 chars or less), require exact match
+          if (lowerLookup.length <= 5) {
             return keyword === lowerLookup
           }
-          // For short queries (4-5 chars), require prefix match
-          if (lowerLookup.length <= 5) {
+          // For medium queries (6-8 chars), allow prefix match
+          if (lowerLookup.length <= 8) {
             return keyword.startsWith(lowerLookup)
           }
           // For longer queries, allow bidirectional substring matching
