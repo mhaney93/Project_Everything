@@ -732,16 +732,16 @@ button:not(:disabled):hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(123, 63, 228, 0.16);
-  color: #6a2bd8;
-  border: 1px solid rgba(123, 63, 228, 0.35);
+  background: rgba(184, 106, 0, 0.16);
+  color: #b86a00;
+  border: 1px solid rgba(184, 106, 0, 0.35);
   font-size: 1.25rem;
   line-height: 1;
   box-shadow: none;
 }
 
 .note-add-button:hover {
-  background: rgba(123, 63, 228, 0.22);
+  background: rgba(184, 106, 0, 0.22);
 }
 
 .panel-notes-actions {
@@ -758,16 +758,16 @@ button:not(:disabled):hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(123, 63, 228, 0.16);
-  color: #6a2bd8;
-  border: 1px solid rgba(123, 63, 228, 0.35);
+  background: rgba(184, 106, 0, 0.16);
+  color: #b86a00;
+  border: 1px solid rgba(184, 106, 0, 0.35);
   font-size: 1.25rem;
   line-height: 1;
   box-shadow: none;
 }
 
 .grid-add-button:hover {
-  background: rgba(123, 63, 228, 0.22);
+  background: rgba(184, 106, 0, 0.22);
 }
 
 .notes-list {
@@ -783,7 +783,7 @@ button:not(:disabled):hover {
 }
 
 .note-bullet {
-  color: #6a2bd8;
+  color: #b86a00;
   font-size: 1rem;
   line-height: 1;
 }
@@ -793,8 +793,8 @@ button:not(:disabled):hover {
   min-height: 34px;
   padding: 0.4rem 0.55rem;
   border-radius: 10px;
-  border: 1px solid rgba(123, 63, 228, 0.35);
-  background: rgba(123, 63, 228, 0.08);
+  border: 1px solid rgba(184, 106, 0, 0.35);
+  background: rgba(184, 106, 0, 0.08);
   color: #5a22c7;
   font-size: 0.9rem;
   line-height: 1.35;
@@ -808,9 +808,9 @@ button:not(:disabled):hover {
   width: 24px;
   height: 24px;
   border-radius: 999px;
-  border: 1px solid rgba(123, 63, 228, 0.35);
-  background: rgba(123, 63, 228, 0.12);
-  color: #6a2bd8;
+  border: 1px solid rgba(184, 106, 0, 0.35);
+  background: rgba(184, 106, 0, 0.12);
+  color: #b86a00;
   font-size: 1rem;
   line-height: 1;
   display: inline-flex;
@@ -821,7 +821,7 @@ button:not(:disabled):hover {
 }
 
 .note-delete-button:hover {
-  background: rgba(123, 63, 228, 0.2);
+  background: rgba(184, 106, 0, 0.2);
 }
 
 .note-empty {
@@ -851,9 +851,9 @@ button:not(:disabled):hover {
   min-width: 200px;
   min-height: 100px;
   max-width: 100%;
-  border: 2px solid rgba(123, 63, 228, 0.25);
+  border: 2px solid rgba(184, 106, 0, 0.25);
   border-radius: 8px;
-  background: rgba(123, 63, 228, 0.04);
+  background: rgba(184, 106, 0, 0.04);
 }
 
 .note-grid {
@@ -863,7 +863,7 @@ button:not(:disabled):hover {
 }
 
 .note-grid td {
-  border: 1px solid rgba(123, 63, 228, 0.2);
+  border: 1px solid rgba(184, 106, 0, 0.2);
   padding: 0;
   min-width: 60px;
 }
@@ -881,7 +881,7 @@ button:not(:disabled):hover {
 }
 
 .grid-cell-input:focus {
-  background: rgba(123, 63, 228, 0.08);
+  background: rgba(184, 106, 0, 0.08);
 }
 
 .grid-controls {
@@ -911,7 +911,7 @@ button:not(:disabled):hover {
 
 .grid-size-display {
   font-size: 0.85rem;
-  color: #6a2bd8;
+  color: #b86a00;
   font-weight: 600;
   min-width: 1.5rem;
   text-align: center;
@@ -921,9 +921,9 @@ button:not(:disabled):hover {
   width: 22px;
   height: 22px;
   border-radius: 4px;
-  border: 1px solid rgba(123, 63, 228, 0.3);
-  background: rgba(123, 63, 228, 0.1);
-  color: #6a2bd8;
+  border: 1px solid rgba(184, 106, 0, 0.3);
+  background: rgba(184, 106, 0, 0.1);
+  color: #b86a00;
   font-size: 0.9rem;
   line-height: 1;
   display: inline-flex;
@@ -934,7 +934,7 @@ button:not(:disabled):hover {
 }
 
 .grid-control-button:hover:not(:disabled) {
-  background: rgba(123, 63, 228, 0.18);
+  background: rgba(184, 106, 0, 0.18);
 }
 
 .grid-control-button:disabled {
@@ -946,9 +946,9 @@ button:not(:disabled):hover {
   width: 24px;
   height: 24px;
   border-radius: 999px;
-  border: 1px solid rgba(123, 63, 228, 0.35);
-  background: rgba(123, 63, 228, 0.12);
-  color: #6a2bd8;
+  border: 1px solid rgba(184, 106, 0, 0.35);
+  background: rgba(184, 106, 0, 0.12);
+  color: #b86a00;
   font-size: 1rem;
   line-height: 1;
   display: inline-flex;
@@ -959,7 +959,7 @@ button:not(:disabled):hover {
 }
 
 .grid-delete-button:hover {
-  background: rgba(123, 63, 228, 0.2);
+  background: rgba(184, 106, 0, 0.2);
 }
 
 .panel-files {
@@ -984,9 +984,9 @@ button:not(:disabled):hover {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: rgba(123, 63, 228, 0.16);
-  color: #6a2bd8;
-  border: 1px solid rgba(123, 63, 228, 0.35);
+  background: rgba(184, 106, 0, 0.16);
+  color: #b86a00;
+  border: 1px solid rgba(184, 106, 0, 0.35);
   font-size: 1.25rem;
   line-height: 1;
   box-shadow: none;
@@ -1001,7 +1001,7 @@ button:not(:disabled):hover {
 }
 
 .file-upload-button:hover {
-  background: rgba(123, 63, 228, 0.22);
+  background: rgba(184, 106, 0, 0.22);
 }
 
 .file-upload-button:disabled {
@@ -1021,14 +1021,14 @@ button:not(:disabled):hover {
   justify-content: space-between;
   padding: 0.65rem 0.75rem;
   border-radius: 10px;
-  border: 1px solid rgba(123, 63, 228, 0.35);
-  background: rgba(123, 63, 228, 0.08);
+  border: 1px solid rgba(184, 106, 0, 0.35);
+  background: rgba(184, 106, 0, 0.08);
   gap: 0.5rem;
 }
 
 .file-link {
   flex: 1;
-  color: #6a2bd8;
+  color: #b86a00;
   text-decoration: none;
   font-size: 0.9rem;
   white-space: nowrap;
@@ -1048,9 +1048,9 @@ button:not(:disabled):hover {
   height: 24px;
   padding: 0;
   border-radius: 50%;
-  border: 1px solid rgba(123, 63, 228, 0.35);
+  border: 1px solid rgba(184, 106, 0, 0.35);
   background: transparent;
-  color: #6a2bd8;
+  color: #b86a00;
   font-size: 0.75rem;
   cursor: pointer;
   display: flex;
