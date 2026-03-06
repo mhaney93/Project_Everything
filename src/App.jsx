@@ -3397,7 +3397,9 @@ function App() {
     }
 
     const lowerQuery = trimmedQuery.toLowerCase()
-    const queryWords = lowerQuery.split(/\s+/)
+    const allQueryWords = lowerQuery.split(/\s+/)
+    // Filter to exclude single-letter incomplete tokens from keyword matching
+    const queryWords = allQueryWords.filter((word) => word.length > 1)
     const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     const matchesQuery = (label) => {
       const lowerLabel = label.toLowerCase()
