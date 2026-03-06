@@ -2095,6 +2095,7 @@ function App() {
               value={searchQuery}
               onChange={handleSearchInputChange}
               onKeyDown={(e) => {
+                console.log('Key pressed:', e.key, 'Suggestions:', searchSuggestions.length)
                 if (searchSuggestions.length > 0) {
                   if (e.key === 'ArrowDown') {
                     e.preventDefault()
@@ -2107,6 +2108,7 @@ function App() {
                       prev > 0 ? prev - 1 : searchSuggestions.length - 1
                     )
                   } else if (e.key === 'Enter') {
+                    console.log('Enter with suggestions - calling preventDefault')
                     e.preventDefault()
                     if (highlightedSuggestion >= 0 && highlightedSuggestion < searchSuggestions.length) {
                       handleSuggestionClick(searchSuggestions[highlightedSuggestion])
@@ -2118,6 +2120,7 @@ function App() {
                     setHighlightedSuggestion(-1)
                   }
                 } else if (e.key === 'Enter') {
+                  console.log('Enter without suggestions - calling preventDefault')
                   e.preventDefault()
                   handleSearchWithQuery(searchQuery)
                 }
