@@ -2251,6 +2251,99 @@ function App() {
       updateNoteLevel(nodeId, gridId, event.shiftKey ? -1 : 1)
       return
     }
+
+    if (event.key === 'Backspace') {
+      const gridLevel = Number.isFinite(grid.level) ? grid.level : 0
+      if (gridLevel > 0 && event.target.tagName !== 'INPUT') {
+        event.preventDefault()
+        event.stopPropagation()
+        updateNoteLevel(nodeId, gridId, -1)
+      }
+    }
+  }
+
+  const addGridRow = (nodeId, gridId) => {
+    setNodes((prev) =>
+      prev.map((node) =>
+        node.id === nodeId
+          ? {
+              ...node,
+              notes: (node.notes || []).map((note) =>
+                note.id === gridId && note.type === 'grid'
+                  ? {
+                      ...note,
+                      rows: note.rows + 1,
+                      data: [...note.data, Array(note.cols).fill('')],
+                    }
+                  : note
+              ),
+            }
+          : node
+      )
+    )
+  }
+
+  const removeGridRow = (nodeId, gridId) => {
+    setNodes((prev) =>
+      prev.map((node) =>
+        node.id === nodeId
+          ? {
+              ...node,
+              notes: (node.notes || []).map((note) =>
+                note.id === gridId && note.type === 'grid' && note.rows > 1
+                  ? {
+                      ...note,
+                      rows: note.rows - 1,
+                      data: note.data.slice(0, -1),
+                    }
+                  : note
+              ),
+            }
+          : node
+      )
+    )
+  }
+
+  const addGridColumn = (nodeId, gridId) => {
+    setNodes((prev) =>
+      prev.map((node) =>
+        node.id === nodeId
+          ? {
+              ...node,
+              notes: (node.notes || []).map((note) =>
+                note.id === gridId && note.type === 'grid'
+                  ? {
+                      ...note,
+                      cols: note.cols + 1,
+                      data: note.data.map((row) => [...row, '']),
+                    }
+                  : note
+              ),
+            }
+          : node
+      )
+    )
+  }
+
+  const removeGridColumn = (nodeId, gridId) => {
+    setNodes((prev) =>
+      prev.map((node) =>
+        node.id === nodeId
+          ? {
+              ...node,
+              notes: (node.notes || []).map((note) =>
+                note.id === gridId && note.type === 'grid' && note.cols > 1
+                  ? {
+                      ...note,
+                      cols: note.cols - 1,
+                      data: note.data.map((row) => row.slice(0, -1)),
+                    }
+                  : note
+              ),
+            }
+          : node
+      )
+    )
   }
 
   const updateNodeSummary = (nodeId, summary) => {
@@ -3953,37 +4046,85 @@ function App() {
                           tabIndex={0}
                         >
                           <div className="grid-container">
-                            <table className="note-grid">
-                              <tbody>
-                                {note.data.map((row, rowIdx) => (
-                                  <tr key={rowIdx}>
-                                    {row.map((cell, colIdx) => (
-                                      <td key={colIdx}>
-                                        <input
-                                          type="text"
-                                          className="grid-cell-input"
-                                          value={cell}
-                                          onChange={(event) =>
-                                            updateGridCell(selectedNode.id, note.id, rowIdx, colIdx, event.target.value)
-                                          }
-                                          placeholder=""
-                                        />
-                                      </td>
-                                    ))}
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
+                            <div className="grid-wrapper">
+                              <table className="note-grid">
+                                <tbody>
+                                  {note.data.map((row, rowIdx) => (
+                                    <tr key={rowIdx}>
+                                      {row.map((cell, colIdx) => (
+                                        <td key={colIdx}>
+                                          <input
+                                            type="text"
+                                            className="grid-cell-input"
+                                            value={cell}
+                                            onChange={(event) =>
+                                              updateGridCell(selectedNode.id, note.id, rowIdx, colIdx, event.target.value)
+                                            }
+                                            placeholder=""
+                                          />
+                                        </td>
+                                      ))}
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
                             {isAuthenticated ? (
-                              <button
-                                type="button"
-                                className="grid-delete-button"
-                                onClick={() => removeNoteFromNode(selectedNode.id, note.id)}
-                                aria-label="Delete grid"
-                                title="Delete grid"
-                              >
-                                ×
-                              </button>
+                              <div className="grid-controls">
+                                <div className="grid-size-controls">
+                                  <div className="grid-control-group">
+                                    <span className="grid-control-label">Rows:</span>
+                                    <button
+                                      type="button"
+                                      className="grid-control-button"
+                                      onClick={() => removeGridRow(selectedNode.id, note.id)}
+                                      disabled={note.rows <= 1}
+                                      aria-label="Remove row"
+                                    >
+                                      −
+                                    </button>
+                                    <span className="grid-size-display">{note.rows}</span>
+                                    <button
+                                      type="button"
+                                      className="grid-control-button"
+                                      onClick={() => addGridRow(selectedNode.id, note.id)}
+                                      aria-label="Add row"
+                                    >
+                                      +
+                                    </button>
+                                  </div>
+                                  <div className="grid-control-group">
+                                    <span className="grid-control-label">Cols:</span>
+                                    <button
+                                      type="button"
+                                      className="grid-control-button"
+                                      onClick={() => removeGridColumn(selectedNode.id, note.id)}
+                                      disabled={note.cols <= 1}
+                                      aria-label="Remove column"
+                                    >
+                                      −
+                                    </button>
+                                    <span className="grid-size-display">{note.cols}</span>
+                                    <button
+                                      type="button"
+                                      className="grid-control-button"
+                                      onClick={() => addGridColumn(selectedNode.id, note.id)}
+                                      aria-label="Add column"
+                                    >
+                                      +
+                                    </button>
+                                  </div>
+                                </div>
+                                <button
+                                  type="button"
+                                  className="grid-delete-button"
+                                  onClick={() => removeNoteFromNode(selectedNode.id, note.id)}
+                                  aria-label="Delete grid"
+                                  title="Delete grid"
+                                >
+                                  ×
+                                </button>
+                              </div>
                             ) : null}
                           </div>
                         </div>
