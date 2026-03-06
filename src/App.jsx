@@ -2876,8 +2876,14 @@ function App() {
       // Arrow key navigation: focus nodes and dots without selecting them
       const arrowKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']
       if (arrowKeys.includes(event.key) && (selectedId !== null || focusedElement !== null)) {
+        const isGridInput = event.target.classList && event.target.classList.contains('grid-cell-input')
+        const isTextEditable =
+          event.target.tagName === 'INPUT' ||
+          event.target.tagName === 'TEXTAREA' ||
+          event.target.isContentEditable
+
         // If we're inside a grid cell input, handle grid navigation instead of node navigation
-        if (event.target.classList && event.target.classList.contains('grid-cell-input')) {
+        if (isGridInput) {
           event.preventDefault()
           
           const currentCell = event.target
@@ -2916,6 +2922,11 @@ function App() {
             targetCell.select()
           }
           
+          return
+        }
+
+        // If we're typing in a regular text field (notes, summary, etc.), keep normal caret movement.
+        if (isTextEditable) {
           return
         }
         
