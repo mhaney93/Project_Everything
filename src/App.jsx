@@ -3728,7 +3728,7 @@ function App() {
                     {suggestion}
                   </button>
                 ))}
-                {searchQuery.trim() && relatedIdeas.length > 0 && (
+                {searchQuery.trim().length >= 3 && relatedIdeas.length > 0 && (
                   <div className="related-ideas">
                     <div className="related-ideas-title">Suggested Topics</div>
                     {relatedIdeas.map((idea, idx) => {
