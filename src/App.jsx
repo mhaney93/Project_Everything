@@ -2874,7 +2874,7 @@ function App() {
                     }}
                     title="Delete this custom node"
                   >
-                    🗑️ Delete Node
+                    Delete node
                   </button>
                 </div>
               ) : null}
