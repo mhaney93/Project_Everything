@@ -2086,6 +2086,12 @@ function App() {
             </p>
           </div>
           <div className="search-row" ref={searchRowRef}>
+            <form onSubmit={(e) => {
+              e.preventDefault()
+              e.stopPropagation()
+              console.log('Form submit prevented')
+              return false
+            }}>
             <input
               ref={searchInputRef}
               className="search-input"
@@ -2157,6 +2163,7 @@ function App() {
                 ))}
               </div>
             )}
+            </form>
           </div>
         </div>
         <div className="top-right">
