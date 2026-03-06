@@ -3829,9 +3829,9 @@ function App() {
                           style={{
                             width: NODE_WIDTH,
                             height: NODE_HEIGHT,
-                            color: selectedId === node.id ? '#1d6fdc' : 'inherit',
-                            backgroundColor: focusedElement?.nodeId === node.id && focusedElement?.type === 'node' ? 'rgba(29, 111, 220, 0.1)' : '#ffffff',
-                            outline: focusedElement?.nodeId === node.id && focusedElement?.type === 'node' ? '2px solid #1d6fdc' : 'none',
+                            color: (selectedId === node.id || (focusedElement?.nodeId === node.id && focusedElement?.type === 'node')) ? '#1d6fdc' : 'inherit',
+                            backgroundColor: (selectedId === node.id || (focusedElement?.nodeId === node.id && focusedElement?.type === 'node')) ? 'rgba(29, 111, 220, 0.1)' : '#ffffff',
+                            outline: (selectedId === node.id || (focusedElement?.nodeId === node.id && focusedElement?.type === 'node')) ? '2px solid #1d6fdc' : 'none',
                           }}
                           onMouseDown={(e) => {
                             if (e.button === 0) e.stopPropagation() // Only stop propagation for left-click
@@ -3856,15 +3856,18 @@ function App() {
                               setBasePanOffset({ x: 0, y: 0 })
                               setRecenterKey((k) => k + 1)
                               setSelectedId(node.id)
+                                                            setFocusedElement({ nodeId: node.id, type: 'node' })
                               prevSelectedIdRef.current = null
                               // ...existing code...
                             } else if (selectedId === node.id) {
                               debugLog('Node deselected:', node);
+                                                            setFocusedElement(null)
                               setSelectedId(null)
                               setPanelOpen(false)
                               setPanelExpanded(false)
                             } else {
                               debugLog('Node selected:', node);
+                                                            setFocusedElement({ nodeId: node.id, type: 'node' })
                               setPanelOpen(true)
                               setPanelExpanded(false)
                               setIsDragging(false)
