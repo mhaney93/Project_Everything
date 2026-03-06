@@ -1,5 +1,7 @@
 # Deployment Guide - HTTP-Only Cookie Auth
 
+> **Data Migrations:** Before deploying, review any pending label renames in `src/App.jsx` under `LABEL_MIGRATIONS_BY_VERSION`. See [SETUP.md](SETUP.md#data-migrations) or [README.md](README.md#data-migrations) for details.
+
 ## Completed: Frontend & Backend Cookie Migration
 
 **Date:** March 5, 2026  
