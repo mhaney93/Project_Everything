@@ -3194,9 +3194,7 @@ function App() {
           <div className="search-row" ref={searchRowRef}>
             <form onSubmit={(e) => {
               e.preventDefault()
-              e.stopPropagation()
-              console.log('Form submit prevented')
-              return false
+              handleSearchWithQuery(searchQuery)
             }}>
             <input
               ref={searchInputRef}
@@ -3245,6 +3243,7 @@ function App() {
                     setHighlightedSuggestion(-1)
                   }
                 } else if (e.key === 'Enter') {
+                  e.preventDefault()
                   e.stopPropagation()
                   handleSearchWithQuery(searchQuery)
                   return false
@@ -3257,7 +3256,7 @@ function App() {
                 setHighlightedSuggestion(-1)
               }}
             />
-            <button className="search-button" type="button" onClick={() => handleSearchWithQuery(searchQuery)}>
+            <button className="search-button" type="submit">
               Search
             </button>
             {(searchSuggestions.length > 0 || relatedIdeas.length > 0) && (

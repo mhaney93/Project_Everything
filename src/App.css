@@ -1121,12 +1121,30 @@ button:not(:disabled):hover {
 .notification-under-search {
   position: absolute;
   top: calc(100% + 0.5rem);
-  left: 0;
-  right: 0;
-  transform: none;
-  max-width: none;
+  left: 50%;
+  right: auto;
+  transform: translateX(-50%);
+  width: auto;
+  max-width: min(280px, 90vw);
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  font-size: 0.85rem;
+  line-height: 1.3;
+  gap: 0.35rem;
   z-index: 1001;
   animation: notificationFadeIn 0.2s ease-out forwards, notificationFadeOut 0.3s ease-out 4.7s forwards;
+}
+
+.notification-under-search .notification-content {
+  gap: 0.5rem;
+}
+
+.notification-under-search .notification-content p {
+  flex: 0 1 auto;
+}
+
+.notification-under-search .notification-close {
+  font-size: 1rem;
 }
 
 .notification-content {
@@ -1228,9 +1246,11 @@ button:not(:disabled):hover {
   }
 
   .notification-under-search {
-    left: 0;
-    right: 0;
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
     bottom: auto;
+    max-width: min(280px, calc(100vw - 2rem));
   }
 }
 
