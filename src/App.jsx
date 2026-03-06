@@ -1891,6 +1891,7 @@ function App() {
   }
 
   const handleSuggestionClick = (suggestion) => {
+    console.log('handleSuggestionClick called with:', suggestion)
     setSearchQuery(suggestion)
     setSearchSuggestions([])
     setHighlightedSuggestion(-1)
@@ -1901,16 +1902,20 @@ function App() {
   }
 
   const handleSearchWithQuery = (query) => {
+    console.log('handleSearchWithQuery called with:', query)
     if (!query.trim()) return
     const searchTerm = query.toLowerCase()
+    console.log('searchTerm:', searchTerm)
 
     // First check if the node exists in the current tree
     let matchingNode = nodes.find((node) =>
       node.label.toLowerCase() === searchTerm
     )
+    console.log('matchingNode:', matchingNode)
 
     if (matchingNode) {
       // Node exists, select it
+      console.log('Setting selectedId to:', matchingNode.id)
       setSelectedId(matchingNode.id)
       setPanelOpen(true)
       setSearchQuery('')
@@ -2115,11 +2120,15 @@ function App() {
                     )
                   } else if (e.key === 'Enter') {
                     console.log('Enter with suggestions - calling preventDefault and stopPropagation')
+                    console.log('highlightedSuggestion:', highlightedSuggestion)
+                    console.log('searchSuggestions:', searchSuggestions)
                     e.preventDefault()
                     e.stopPropagation()
                     if (highlightedSuggestion >= 0 && highlightedSuggestion < searchSuggestions.length) {
+                      console.log('Calling handleSuggestionClick with:', searchSuggestions[highlightedSuggestion])
                       handleSuggestionClick(searchSuggestions[highlightedSuggestion])
                     } else {
+                      console.log('Calling handleSearchWithQuery directly with:', searchQuery)
                       handleSearchWithQuery(searchQuery)
                     }
                     return false
