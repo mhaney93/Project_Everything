@@ -588,6 +588,7 @@ button:not(:disabled):hover {
   padding: 0.25rem 0.5rem;
   border-radius: 6px;
   transition: background-color 0.2s ease;
+  user-select: none;
 }
 
 .panel-header h2.editable:hover {

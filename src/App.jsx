@@ -3769,6 +3769,8 @@ function App() {
                     type="text"
                     defaultValue={selectedNode.label}
                     className="panel-title-input"
+                    onClick={(e) => e.stopPropagation()}
+                    onMouseDown={(e) => e.stopPropagation()}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') {
                         e.preventDefault()
@@ -3785,8 +3787,9 @@ function App() {
                 ) : (
                   <h2
                     className={selectedNode.isCustom && isAuthenticated ? 'editable' : ''}
-                    onClick={() => {
+                    onClick={(e) => {
                       if (selectedNode.isCustom && isAuthenticated) {
+                        e.stopPropagation()
                         setEditingNodeId(selectedNode.id)
                       }
                     }}
