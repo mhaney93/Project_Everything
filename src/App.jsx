@@ -3220,6 +3220,7 @@ function App() {
                       return (
                         <button
                           key={idea}
+                          data-suggestion-index={highlightIdx}
                           className={"suggestion-item related-idea-item" + (highlightIdx === highlightedSuggestion ? " highlighted" : "")}
                           type="button"
                           onClick={() => {
