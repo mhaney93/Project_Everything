@@ -289,6 +289,7 @@ function App() {
   const [deleteConfirmation, setDeleteConfirmation] = useState(null) // { nodeId, message }
   const [editingSummaryId, setEditingSummaryId] = useState(null)
   const [notification, setNotification] = useState(null) // { message, type: 'error' | 'success' | 'info' }
+  const [lastCreatedGridId, setLastCreatedGridId] = useState(null) // Track newly created grid for Tab indent
 
   const canvasRef = useRef(null)
   const editInputRef = useRef(null)
@@ -2218,6 +2219,7 @@ function App() {
           : node
       )
     )
+    setLastCreatedGridId(newGrid.id)
   }
 
   const updateGridCell = (nodeId, gridId, rowIndex, colIndex, value) => {
@@ -2784,11 +2786,21 @@ function App() {
         return
       }
 
-      // Handle Tab: add custom sibling node
+      // Handle Tab: indent grid if just created, otherwise add custom sibling node
       if (event.key === 'Tab' && (selectedId !== null || focusedElement !== null)) {
         event.preventDefault()
         const targetNodeId = focusedElement?.nodeId || selectedId
         if (targetNodeId !== null) {
+          // Check if last created grid is in this node and indent it instead of creating sibling
+          if (lastCreatedGridId) {
+            const selectedNode = nodes.find((n) => n.id === targetNodeId)
+            const lastNote = selectedNode?.notes?.[selectedNode.notes.length - 1]
+            if (lastNote?.id === lastCreatedGridId) {
+              updateNoteLevel(targetNodeId, lastCreatedGridId, 1)
+              setLastCreatedGridId(null)
+              return
+            }
+          }
           addCustomSibling(targetNodeId)
         }
         return
