@@ -1288,6 +1288,18 @@ function App() {
       event.preventDefault()
       event.stopPropagation()
       updateNoteLevel(nodeId, note.id, event.shiftKey ? -1 : 1)
+      return
+    }
+
+    if (event.key === 'Backspace') {
+      const target = event.currentTarget
+      const noteLevel = Number.isFinite(note.level) ? note.level : 0
+      const atStart = target.selectionStart === 0 && target.selectionEnd === 0
+      if (atStart && noteLevel > 0) {
+        event.preventDefault()
+        event.stopPropagation()
+        updateNoteLevel(nodeId, note.id, -1)
+      }
     }
   }
 
