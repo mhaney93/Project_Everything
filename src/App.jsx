@@ -2186,6 +2186,73 @@ function App() {
     }
   }
 
+  const addGridToNode = (nodeId, options = {}) => {
+    const { afterNoteId = null, level = 0, rows = 3, cols = 3 } = options
+    const newGrid = {
+      id: `grid-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+      type: 'grid',
+      rows,
+      cols,
+      data: Array(rows).fill(null).map(() => Array(cols).fill('')),
+      level: Math.max(0, Math.min(5, level)),
+      createdAt: new Date().toISOString(),
+    }
+
+    setNodes((prev) =>
+      prev.map((node) =>
+        node.id === nodeId
+          ? {
+              ...node,
+              notes: (() => {
+                const notes = [...(node.notes || [])]
+                if (!afterNoteId) return [...notes, newGrid]
+                const insertIndex = notes.findIndex((note) => note.id === afterNoteId)
+                if (insertIndex === -1) return [...notes, newGrid]
+                return [
+                  ...notes.slice(0, insertIndex + 1),
+                  newGrid,
+                  ...notes.slice(insertIndex + 1),
+                ]
+              })(),
+            }
+          : node
+      )
+    )
+  }
+
+  const updateGridCell = (nodeId, gridId, rowIndex, colIndex, value) => {
+    setNodes((prev) =>
+      prev.map((node) =>
+        node.id === nodeId
+          ? {
+              ...node,
+              notes: (node.notes || []).map((note) =>
+                note.id === gridId && note.type === 'grid'
+                  ? {
+                      ...note,
+                      data: note.data.map((row, rIdx) =>
+                        rIdx === rowIndex
+                          ? row.map((cell, cIdx) => (cIdx === colIndex ? value : cell))
+                          : row
+                      ),
+                    }
+                  : note
+              ),
+            }
+          : node
+      )
+    )
+  }
+
+  const handleGridKeyDown = (event, nodeId, gridId, grid) => {
+    if (event.key === 'Tab') {
+      event.preventDefault()
+      event.stopPropagation()
+      updateNoteLevel(nodeId, gridId, event.shiftKey ? -1 : 1)
+      return
+    }
+  }
+
   const updateNodeSummary = (nodeId, summary) => {
     setNodes((prev) =>
       prev.map((node) =>
@@ -3852,54 +3919,110 @@ function App() {
                 <div className="panel-notes-header">
                   <p className="panel-label">Notes</p>
                   {isAuthenticated ? (
-                    <button
-                      className="note-add-button"
-                      type="button"
-                      onClick={() => addNoteToNode(selectedNode.id)}
-                      aria-label="Add note"
-                      title="Add note"
-                    >
-                      +
-                    </button>
+                    <div className="panel-notes-actions">
+                      <button
+                        className="note-add-button"
+                        type="button"
+                        onClick={() => addNoteToNode(selectedNode.id)}
+                        aria-label="Add note"
+                        title="Add note"
+                      >
+                        +
+                      </button>
+                      <button
+                        className="grid-add-button"
+                        type="button"
+                        onClick={() => addGridToNode(selectedNode.id)}
+                        aria-label="Add grid"
+                        title="Add grid"
+                      >
+                        ⊞
+                      </button>
+                    </div>
                   ) : null}
                 </div>
                 {selectedNode.notes && selectedNode.notes.length > 0 ? (
                   <div className="notes-list">
                     {selectedNode.notes.map((note) => (
-                      <div
-                        key={note.id}
-                        className="note-item"
-                        style={{ marginLeft: `${(Number.isFinite(note.level) ? note.level : 0) * 16}px` }}
-                      >
-                        <span className="note-bullet" aria-hidden="true">•</span>
-                        <input
-                          ref={(element) => {
-                            if (element) {
-                              noteInputRefs.current[note.id] = element
-                            } else {
-                              delete noteInputRefs.current[note.id]
+                      note.type === 'grid' ? (
+                        <div
+                          key={note.id}
+                          className="grid-item"
+                          style={{ marginLeft: `${(Number.isFinite(note.level) ? note.level : 0) * 16}px` }}
+                          onKeyDown={(event) => handleGridKeyDown(event, selectedNode.id, note.id, note)}
+                          tabIndex={0}
+                        >
+                          <div className="grid-container">
+                            <table className="note-grid">
+                              <tbody>
+                                {note.data.map((row, rowIdx) => (
+                                  <tr key={rowIdx}>
+                                    {row.map((cell, colIdx) => (
+                                      <td key={colIdx}>
+                                        <input
+                                          type="text"
+                                          className="grid-cell-input"
+                                          value={cell}
+                                          onChange={(event) =>
+                                            updateGridCell(selectedNode.id, note.id, rowIdx, colIdx, event.target.value)
+                                          }
+                                          placeholder=""
+                                        />
+                                      </td>
+                                    ))}
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                            {isAuthenticated ? (
+                              <button
+                                type="button"
+                                className="grid-delete-button"
+                                onClick={() => removeNoteFromNode(selectedNode.id, note.id)}
+                                aria-label="Delete grid"
+                                title="Delete grid"
+                              >
+                                ×
+                              </button>
+                            ) : null}
+                          </div>
+                        </div>
+                      ) : (
+                        <div
+                          key={note.id}
+                          className="note-item"
+                          style={{ marginLeft: `${(Number.isFinite(note.level) ? note.level : 0) * 16}px` }}
+                        >
+                          <span className="note-bullet" aria-hidden="true">•</span>
+                          <input
+                            ref={(element) => {
+                              if (element) {
+                                noteInputRefs.current[note.id] = element
+                              } else {
+                                delete noteInputRefs.current[note.id]
+                              }
+                            }}
+                            className="note-input personal-note"
+                            value={note.text}
+                            onChange={(event) =>
+                              updateNoteText(selectedNode.id, note.id, event.target.value)
                             }
-                          }}
-                          className="note-input personal-note"
-                          value={note.text}
-                          onChange={(event) =>
-                            updateNoteText(selectedNode.id, note.id, event.target.value)
-                          }
-                          onKeyDown={(event) => handleNoteKeyDown(event, selectedNode.id, note)}
-                          placeholder="Add a bullet point..."
-                        />
-                        {isAuthenticated ? (
-                          <button
-                            type="button"
-                            className="note-delete-button"
-                            onClick={() => removeNoteFromNode(selectedNode.id, note.id)}
-                            aria-label="Delete note"
-                            title="Delete note"
-                          >
-                            ×
-                          </button>
-                        ) : null}
-                      </div>
+                            onKeyDown={(event) => handleNoteKeyDown(event, selectedNode.id, note)}
+                            placeholder="Add a bullet point..."
+                          />
+                          {isAuthenticated ? (
+                            <button
+                              type="button"
+                              className="note-delete-button"
+                              onClick={() => removeNoteFromNode(selectedNode.id, note.id)}
+                              aria-label="Delete note"
+                              title="Delete note"
+                            >
+                              ×
+                            </button>
+                          ) : null}
+                        </div>
+                      )
                     ))}
                   </div>
                 ) : (
