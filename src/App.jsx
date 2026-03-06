@@ -3763,12 +3763,12 @@ function App() {
                 >
                   {panelExpanded ? '→' : '←'}
                 </button>
-                {(() => {
-                  console.log('Rendering title, editingNodeId:', editingNodeId, 'selectedNode.id:', selectedNode.id, 'match:', editingNodeId === selectedNode.id)
-                  return editingNodeId === selectedNode.id ? (
+                {editingNodeId === selectedNode.id ? (
                   <input
+                    key={`editing-${selectedNode.id}`}
                     ref={(el) => {
                       if (el) {
+                        console.log('Input mounted, focusing')
                         el.focus()
                         el.select()
                       }
@@ -3788,6 +3788,7 @@ function App() {
                       }
                     }}
                     onBlur={(e) => {
+                      console.log('Input blur, saving')
                       updateNodeLabel(selectedNode.id, e.target.value)
                     }}
                   />
@@ -3806,7 +3807,7 @@ function App() {
                   >
                     {selectedNode.label}
                   </h2>
-                )})()}
+                )}
                 <button
                   className="panel-close"
                   type="button"
