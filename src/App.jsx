@@ -3307,6 +3307,20 @@ function App() {
                 )}
               </div>
             )}
+            {notification && (
+              <div className={`notification notification-${notification.type} notification-under-search`}>
+                <div className="notification-content">
+                  <p>{notification.message}</p>
+                  <button
+                    className="notification-close"
+                    onClick={() => setNotification(null)}
+                    aria-label="Close notification"
+                  >
+                    ✕
+                  </button>
+                </div>
+              </div>
+            )}
             </form>
           </div>
         </div>
@@ -3900,21 +3914,6 @@ function App() {
                 Delete
               </button>
             </div>
-          </div>
-        </div>
-      )}
-
-      {notification && (
-        <div className={`notification notification-${notification.type}`}>
-          <div className="notification-content">
-            <p>{notification.message}</p>
-            <button 
-              className="notification-close"
-              onClick={() => setNotification(null)}
-              aria-label="Close notification"
-            >
-              ✕
-            </button>
           </div>
         </div>
       )}
