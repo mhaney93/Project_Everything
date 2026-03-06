@@ -1916,6 +1916,28 @@ function App() {
     if (matchingNode) {
       // Node exists, select it
       console.log('Setting selectedId to:', matchingNode.id)
+      
+      // Unhide the node and all its ancestors
+      const unhideNodeAndAncestors = (nodeId) => {
+        setNodes((prevNodes) => {
+          const nodesToUnhide = new Set()
+          
+          // Trace up the tree to find all ancestors
+          let currentId = nodeId
+          while (currentId !== null) {
+            nodesToUnhide.add(currentId)
+            const currentNode = prevNodes.find(n => n.id === currentId)
+            currentId = currentNode?.parentId ?? null
+          }
+          
+          // Update all nodes to unhide the necessary ones
+          return prevNodes.map(node => 
+            nodesToUnhide.has(node.id) ? { ...node, hidden: false } : node
+          )
+        })
+      }
+      
+      unhideNodeAndAncestors(matchingNode.id)
       setSelectedId(matchingNode.id)
       setPanelOpen(true)
       setSearchQuery('')
@@ -2006,6 +2028,26 @@ function App() {
                        nodes.find((n) => n.label.toLowerCase() === searchTerm)
     
     if (targetNode) {
+      // Unhide the target node and all its ancestors
+      setTimeout(() => {
+        setNodes((prevNodes) => {
+          const nodesToUnhide = new Set()
+          
+          // Trace up the tree to find all ancestors
+          let currentId = targetNode.id
+          while (currentId !== null) {
+            nodesToUnhide.add(currentId)
+            const currentNode = prevNodes.find(n => n.id === currentId)
+            currentId = currentNode?.parentId ?? null
+          }
+          
+          // Update all nodes to unhide the necessary ones
+          return prevNodes.map(node => 
+            nodesToUnhide.has(node.id) ? { ...node, hidden: false } : node
+          )
+        })
+      }, 0)
+      
       setSelectedId(targetNode.id)
       setPanelOpen(true)
     }
