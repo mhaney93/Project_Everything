@@ -403,7 +403,7 @@ function App() {
     'Computer Ethics': [],
     
     // Metaphysics
-    'Metaphysics': ['Ontology', 'Cosmology', 'Free Will', 'Causality', 'Substance Theory', 'Time', 'Philosophy of Mind'],
+    'Metaphysics': ['Ontology', 'Free Will', 'Causality', 'Substance Theory', 'Time', 'Philosophy of Mind'],
     'Ontology': ['Being', 'Existence', 'Categories', 'Properties', 'Relations', 'Universals'],
     'Being': [],
     'Existence': [],
@@ -411,13 +411,6 @@ function App() {
     'Properties': [],
     'Relations': [],
     'Universals': [],
-    'Cosmology': ['Origin of Universe', 'Structure of Universe', 'Big Bang', 'Black Holes', 'Dark Matter', 'Multiverse'],
-    'Origin of Universe': [],
-    'Structure of Universe': [],
-    'Big Bang': [],
-    'Black Holes': [],
-    'Dark Matter': [],
-    'Multiverse': [],
     'Free Will': ['Determinism', 'Indeterminism', 'Compatibilism', 'Agency', 'Responsibility', 'Libertarianism'],
     'Determinism': [],
     'Indeterminism': [],
@@ -749,7 +742,7 @@ function App() {
     'Printmaking': [],
     
     // Performing Arts
-    'Performing Arts': ['Theatre', 'Dance', 'Performance Art', 'Opera', 'Musical Theatre'],
+    'Performing Arts': ['Theatre', 'Dance', 'Performance Art', 'Musical Theatre'],
     'Theatre': ['Classical Theatre', 'Modern Theatre', 'Contemporary Theatre', 'Theatre Theory', 'Directing', 'Acting', 'Stage Design'],
     'Classical Theatre': [],
     'Modern Theatre': [],
@@ -879,7 +872,7 @@ function App() {
     'Solid State Chemistry': [],
     'Crystal Chemistry': [],
     'Geochemistry': [],
-    'Physical Chemistry': ['Thermodynamics', 'Kinetics', 'Quantum Chemistry', 'Spectroscopy', 'Electrochemistry', 'Surface Chemistry'],
+    'Physical Chemistry': ['Kinetics', 'Quantum Chemistry', 'Spectroscopy', 'Electrochemistry', 'Surface Chemistry'],
     'Kinetics': [],
     'Quantum Chemistry': [],
     'Spectroscopy': [],
@@ -941,7 +934,7 @@ function App() {
     'Developmental Biology': [],
     
     // Mathematics
-    'Mathematics': ['Algebra', 'Geometry', 'Calculus', 'Statistics', 'Logic', 'Number Theory'],
+    'Mathematics': ['Algebra', 'Geometry', 'Calculus', 'Statistics', 'Number Theory'],
     'Algebra': ['Linear Algebra', 'Abstract Algebra', 'Commutative Algebra', 'Homological Algebra', 'Representation Theory', 'Category Theory'],
     'Linear Algebra': [],
     'Abstract Algebra': [],
@@ -1018,6 +1011,13 @@ function App() {
     'Neutron Stars': [],
     'Galactic Astronomy': [],
     'Extragalactic Astronomy': [],
+    'Cosmology': ['Origin of Universe', 'Structure of Universe', 'Big Bang', 'Black Holes', 'Dark Matter', 'Multiverse'],
+    'Origin of Universe': [],
+    'Structure of Universe': [],
+    'Big Bang': [],
+    'Black Holes': [],
+    'Dark Matter': [],
+    'Multiverse': [],
   }
 
   const layout = useMemo(() => buildLayout(nodes, TOPIC_SUBDIVISIONS), [nodes, recenterKey, TOPIC_SUBDIVISIONS])
