@@ -2120,6 +2120,7 @@ function App() {
                 } else if (e.key === 'Enter') {
                   e.preventDefault()
                   handleSearchWithQuery(searchQuery)
+                }
               }}
               onBlur={() => {
                 // Wait a bit before hiding suggestions to allow clicking
