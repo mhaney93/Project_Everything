@@ -2809,6 +2809,16 @@ function App() {
         return
       }
 
+      // Handle Delete key: delete custom node
+      if (event.key === 'Delete' && selectedId !== null && isAuthenticated) {
+        const selectedNode = nodes.find((n) => n.id === selectedId)
+        if (selectedNode && selectedNode.isCustom) {
+          event.preventDefault()
+          deleteCustomNode(selectedId)
+        }
+        return
+      }
+
       // Arrow key navigation: focus nodes and dots without selecting them
       const arrowKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']
       if (arrowKeys.includes(event.key) && (selectedId !== null || focusedElement !== null)) {
