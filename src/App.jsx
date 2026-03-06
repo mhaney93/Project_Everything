@@ -3191,15 +3191,17 @@ function App() {
     }
 
     const lowerQuery = trimmedQuery.toLowerCase()
-    const queryWords = lowerQuery.split(/\s+/)
+    const validQueryWords = getValidQueryWords(trimmedQuery)
     const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     const matchesQuery = (label) => {
       const lowerLabel = label.toLowerCase()
-      if (queryWords.length === 1) {
-        const regex = new RegExp(`\\b${escapeRegex(lowerQuery)}`, 'i')
-        return regex.test(label) || lowerLabel.startsWith(lowerQuery)
+      if (validQueryWords.length === 0) return false
+      if (validQueryWords.length === 1) {
+        const word = validQueryWords[0]
+        const regex = new RegExp(`\\b${escapeRegex(word)}`, 'i')
+        return regex.test(label) || lowerLabel.startsWith(word)
       }
-      return queryWords.every((word) => {
+      return validQueryWords.every((word) => {
         const regex = new RegExp(`\\b${escapeRegex(word)}`, 'i')
         return regex.test(label)
       })
@@ -3234,19 +3236,19 @@ function App() {
         if (!aStartsFull && bStartsFull) return 1
         
         // For multi-word, prioritize labels where words appear in order
-        if (queryWords.length > 1) {
-          const aInOrder = queryWords.every((word, i) => {
+        if (validQueryWords.length > 1) {
+          const aInOrder = validQueryWords.every((word, i) => {
             const idx = lowerA.indexOf(word)
             if (idx === -1) return false
             if (i === 0) return true
-            const prevIdx = lowerA.indexOf(queryWords[i - 1])
+            const prevIdx = lowerA.indexOf(validQueryWords[i - 1])
             return idx > prevIdx
           })
-          const bInOrder = queryWords.every((word, i) => {
+          const bInOrder = validQueryWords.every((word, i) => {
             const idx = lowerB.indexOf(word)
             if (idx === -1) return false
             if (i === 0) return true
-            const prevIdx = lowerB.indexOf(queryWords[i - 1])
+            const prevIdx = lowerB.indexOf(validQueryWords[i - 1])
             return idx > prevIdx
           })
           if (aInOrder && !bInOrder) return -1
@@ -3268,6 +3270,12 @@ function App() {
     if (typeof value !== 'string') return []
     const matches = value.toLowerCase().match(/[a-z]+(?:'[a-z]+)?/g)
     return matches || []
+  }
+
+  const getValidQueryWords = (query) => {
+    const tokens = extractWordTokens(query)
+    // Filter to only include tokens that are 2+ characters OR valid single letters ('a', 'i')
+    return tokens.filter((token) => token.length > 1 || token === 'a' || token === 'i')
   }
 
   const isExactWordMatch = (results, token) => {
@@ -3397,9 +3405,7 @@ function App() {
     }
 
     const lowerQuery = trimmedQuery.toLowerCase()
-    const allQueryWords = lowerQuery.split(/\s+/)
-    // Filter to exclude single-letter incomplete tokens from keyword matching
-    const queryWords = allQueryWords.filter((word) => word.length > 1)
+    const queryWords = getValidQueryWords(trimmedQuery)
     const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     const matchesQuery = (label) => {
       const lowerLabel = label.toLowerCase()
