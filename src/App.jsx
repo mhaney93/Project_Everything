@@ -1743,7 +1743,7 @@ function App() {
       
       // Return categories that look like subcategories (contain the query term or are plausible topics)
       return categories
-        .filter((cat) => cat.toLowerCase().includes(query.toLowerCase().split(' ')[0]) && cat.length > 5)
+        .filter((cat) => cat.toLowerCase().includes(query.toLowerCase()) && cat.length > 5)
     } catch (error) {
       console.error('Failed to fetch Wikipedia suggestions:', error)
       return []
