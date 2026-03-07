@@ -1079,11 +1079,14 @@ function App() {
   // Calculate font size based on label length to ensure text fits in node
   const getNodeFontSize = (label) => {
     const length = label.length
-    if (length <= 15) return '1rem'        // Short text - default size
-    if (length <= 25) return '0.9rem'      // Medium text
-    if (length <= 35) return '0.8rem'      // Long text
-    if (length <= 45) return '0.7rem'      // Very long text
-    return '0.6rem'                        // Extra long text
+    let baseSizeRem = 0.6
+    if (length <= 15) baseSizeRem = 1.0
+    else if (length <= 25) baseSizeRem = 0.9
+    else if (length <= 35) baseSizeRem = 0.8
+    else if (length <= 45) baseSizeRem = 0.7
+
+    const scaledSize = baseSizeRem * nodeSizeScale
+    return `${scaledSize.toFixed(2)}rem`
   }
 
   // Deselect if the selected node becomes hidden
