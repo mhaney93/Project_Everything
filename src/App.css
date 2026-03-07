@@ -1514,11 +1514,19 @@ button:not(:disabled):hover {
     display: inline-flex;
     gap: 0.5rem;
     margin-bottom: 0.5rem;
+    position: static;
+    top: auto;
+    left: auto;
+    right: auto;
   }
 
   .top-right {
     display: inline-flex;
     gap: 0.5rem;
+    position: static;
+    top: auto;
+    left: auto;
+    right: auto;
   }
 
   .top-button-group {
