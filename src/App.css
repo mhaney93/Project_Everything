@@ -59,6 +59,17 @@
   pointer-events: none;
 }
 
+.top-left {
+  display: flex;
+  gap: 0.65rem;
+  align-items: center;
+  position: absolute;
+  left: clamp(1.5rem, 4vw, 4rem);
+  top: 2.75rem;
+  z-index: 101;
+  pointer-events: auto;
+}
+
 .top-right {
   display: flex;
   gap: 0.65rem;
@@ -1268,6 +1279,33 @@ button:not(:disabled):hover {
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--ink);
+}
+
+.top-link {
+  background: rgba(29, 111, 220, 0.08);
+  color: var(--ink);
+  border: 1px solid rgba(29, 111, 220, 0.2);
+  transition: all 160ms ease;
+}
+
+.top-link:hover:not(:disabled) {
+  background: rgba(29, 111, 220, 0.15);
+  border-color: rgba(29, 111, 220, 0.4);
+  box-shadow: 0 4px 12px rgba(29, 111, 220, 0.1);
+}
+
+.top-link.active {
+  background: rgba(29, 111, 220, 0.25);
+  border-color: rgba(29, 111, 220, 0.6);
+  color: #1d6fdc;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(29, 111, 220, 0.2);
+}
+
+.top-link.active:hover:not(:disabled) {
+  background: rgba(29, 111, 220, 0.35);
+  border-color: #1d6fdc;
+  box-shadow: 0 6px 16px rgba(29, 111, 220, 0.3);
 }
 
 /* ===== Responsive Header & Controls ===== */

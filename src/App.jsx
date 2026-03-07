@@ -304,6 +304,7 @@ function App() {
   const [notification, setNotification] = useState(null) // { message, type: 'error' | 'success' | 'info' }
   const [lastCreatedGridId, setLastCreatedGridId] = useState(null) // Track newly created grid for Tab indent
   const [deleteModalChoice, setDeleteModalChoice] = useState('cancel') // 'cancel' | 'delete'
+  const [createNodeMode, setCreateNodeMode] = useState(null) // 'child' | 'sibling' | null - for button-based node creation
 
   const canvasRef = useRef(null)
   const editInputRef = useRef(null)
@@ -4102,6 +4103,28 @@ function App() {
             </form>
           </div>
         </div>
+        <div className="top-left">
+          <div className="top-button-group">
+            <button
+              className={`top-link ${createNodeMode === 'child' ? 'active' : ''}`}
+              type="button"
+              title="Click to enable, then click a node to create a child"
+              onClick={() => setCreateNodeMode(createNodeMode === 'child' ? null : 'child')}
+            >
+              Add Child
+            </button>
+          </div>
+          <div className="top-button-group">
+            <button
+              className={`top-link ${createNodeMode === 'sibling' ? 'active' : ''}`}
+              type="button"
+              title="Click to enable, then click a node to create a sibling"
+              onClick={() => setCreateNodeMode(createNodeMode === 'sibling' ? null : 'sibling')}
+            >
+              Add Sibling
+            </button>
+          </div>
+        </div>
         <div className="top-right">
           <div className="top-button-group">
             <button 
@@ -4418,6 +4441,19 @@ function App() {
                           onClick={(e) => {
                             e.stopPropagation()
                             e.preventDefault()
+                            
+                            // Handle button-based node creation for mobile users
+                            if (createNodeMode === 'child') {
+                              addCustomChild(node.id)
+                              setCreateNodeMode(null)
+                              return
+                            }
+                            if (createNodeMode === 'sibling') {
+                              addCustomSibling(node.id)
+                              setCreateNodeMode(null)
+                              return
+                            }
+                            
                             // Allow deselection to always work, but suppress selection after drag
                             const shouldSuppress = suppressClickRef.current && selectedId !== node.id
                             suppressClickRef.current = false
