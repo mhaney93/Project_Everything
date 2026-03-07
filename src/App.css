@@ -1278,6 +1278,62 @@ button:not(:disabled):hover {
   color: var(--ink);
 }
 
+/* ===== Responsive Node Size Controls ===== */
+/* Shrink buttons on narrower screens to prevent overlap with title */
+@media (max-width: 950px) {
+  .node-size-controls {
+    gap: 0.25rem;
+  }
+
+  .node-size-button,
+  .node-size-reset {
+    padding: 0.15rem 0.35rem;
+    font-size: 0.75rem;
+  }
+
+  .node-size-button {
+    min-width: 24px;
+  }
+
+  .node-size-reset {
+    padding: 0.15rem 0.4rem;
+  }
+
+  .node-size-value {
+    min-width: 2.5rem;
+    font-size: 0.72rem;
+  }
+}
+
+@media (max-width: 850px) {
+  .node-size-controls {
+    gap: 0.2rem;
+  }
+
+  .node-size-button,
+  .node-size-reset {
+    padding: 0.1rem 0.3rem;
+    font-size: 0.7rem;
+  }
+
+  .node-size-button {
+    min-width: 22px;
+  }
+
+  .node-size-reset {
+    padding: 0.1rem 0.35rem;
+  }
+
+  .node-size-value {
+    min-width: 2.2rem;
+    font-size: 0.68rem;
+  }
+
+  .top-right {
+    gap: 0.5rem;
+  }
+}
+
 /* ===== Mobile Optimizations ===== */
 @media (max-width: 768px) {
   /* Compact header for mobile */
