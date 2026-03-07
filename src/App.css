@@ -439,12 +439,11 @@
 }
 
 .title-stack {
-  display: inline-grid;
-  grid-template-columns: max-content max-content;
-  grid-template-rows: auto auto;
-  column-gap: 0.1em;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
   row-gap: 0.05rem;
-  align-items: baseline;
 }
 
 .title-grid {
@@ -466,15 +465,15 @@
 
 .title-sub.title-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: auto auto;
   font-size: 1.2rem;
   font-weight: 500;
   letter-spacing: 0.04em;
   margin-top: -0.5rem;
   margin-bottom: 0.5rem;
   color: #1d6fdc;
-  position: relative;
-  left: -24px;
+  column-gap: 0.9em;
+  justify-content: center;
 }
 
 .title-left {
@@ -1426,13 +1425,6 @@ button:not(:disabled):hover {
   /* Make "Everything" display as one word on mobile */
   .title-stack {
     display: block;
-  }
-
-  h1.title-grid {
-    display: flex;
-    align-items: baseline;
-    justify-content: center;
-    gap: 0;
   }
 
   .title-part {

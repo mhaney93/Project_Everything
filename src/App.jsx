@@ -3963,10 +3963,8 @@ function App() {
       <header className="app-header" ref={headerRef}>
         <div className="title-block">
           <div className="title-stack" aria-label="Everything">
-            <h1 className="title title-grid">
-              <span className="title-part title-left title-top">
-                <span className="cool-e">E</span>very
-              </span><span className="title-part title-right title-top">thing</span>
+            <h1 className="title">
+              <span className="cool-e">E</span>verything
             </h1>
             <p className="title-sub title-grid" aria-hidden="true">
               <span className="title-left title-bottom">Knowledge</span>
