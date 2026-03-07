@@ -3318,8 +3318,15 @@ function App() {
     const tokens = extractWordTokens(query)
     if (tokens.length === 0) return []
 
-    const validity = await Promise.all(tokens.map((token) => isValidWord(token)))
-    return tokens.filter((_, index) => validity[index])
+    // If query doesn't end with whitespace, exclude the last token (still being typed)
+    const trimmedQuery = query.trim()
+    const endsWithSpace = query !== trimmedQuery && query.endsWith(' ')
+    const tokensToValidate = endsWithSpace || tokens.length === 1 ? tokens : tokens.slice(0, -1)
+    
+    if (tokensToValidate.length === 0) return []
+
+    const validity = await Promise.all(tokensToValidate.map((token) => isValidWord(token)))
+    return tokensToValidate.filter((_, index) => validity[index])
   }
 
   const queryContainsOnlyRealWords = async (query) => {
