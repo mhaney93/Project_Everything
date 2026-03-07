@@ -1430,6 +1430,17 @@ button:not(:disabled):hover {
     font-size: 0.75rem;
   }
 
+  /* Remove gap between "Every" and "thing" on mobile */
+  .title-stack {
+    column-gap: 0;
+  }
+
+  /* Add visible spacing between "Knowledge" and "Mapped" */
+  .title-sub.title-grid {
+    column-gap: 0.4em;
+    left: 0;
+  }
+
   /* Top navigation - stack vertically on small screens */
   .top-right {
     position: static;
