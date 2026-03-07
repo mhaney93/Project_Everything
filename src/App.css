@@ -1439,6 +1439,8 @@ button:not(:disabled):hover {
   .title-sub.title-grid {
     column-gap: 0.4em;
     left: 0;
+    letter-spacing: 0.02em;
+    word-spacing: 0.5em;
   }
 
   /* Top navigation - stack vertically on small screens */
