@@ -1277,6 +1277,11 @@ button:not(:disabled):hover {
     gap: 0.55rem;
   }
 
+  .title-sub.title-grid {
+    font-size: 1.08rem;
+    column-gap: 0.82em;
+  }
+
   .top-right button,
   .top-button-group button {
     padding: 0.55rem 1.15rem;
@@ -1304,6 +1309,11 @@ button:not(:disabled):hover {
     gap: 0.5rem;
   }
 
+  .title-sub.title-grid {
+    font-size: 1rem;
+    column-gap: 0.75em;
+  }
+
   .top-right button,
   .top-button-group button {
     padding: 0.5rem 1rem;
@@ -1329,6 +1339,11 @@ button:not(:disabled):hover {
 @media (max-width: 950px) {
   .top-right {
     gap: 0.45rem;
+  }
+
+  .title-sub.title-grid {
+    font-size: 0.95rem;
+    column-gap: 0.68em;
   }
 
   .top-right button,
@@ -1364,6 +1379,11 @@ button:not(:disabled):hover {
 @media (max-width: 850px) {
   .top-right {
     gap: 0.4rem;
+  }
+
+  .title-sub.title-grid {
+    font-size: 0.88rem;
+    column-gap: 0.62em;
   }
 
   .top-right button,
