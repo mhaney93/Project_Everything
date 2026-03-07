@@ -277,6 +277,8 @@ function App() {
   const [enableAnimations, setEnableAnimations] = useState(true)
   const [smoothPanning, setSmoothPanning] = useState(true)
   const [autoExpand, setAutoExpand] = useState(true)
+  const [isFullscreenMode, setIsFullscreenMode] = useState(false)
+  const [showFullscreenHint, setShowFullscreenHint] = useState(false)
   const [nodeSizeScale, setNodeSizeScale] = useState(() => {
     const raw = window.localStorage.getItem('nodeSizeScale')
     const parsed = Number.parseFloat(raw || '')
@@ -344,6 +346,27 @@ function App() {
       }
     }
   }, [])
+
+  useEffect(() => {
+    if (!showFullscreenHint) return
+    const timer = setTimeout(() => {
+      setShowFullscreenHint(false)
+    }, 2200)
+    return () => clearTimeout(timer)
+  }, [showFullscreenHint])
+
+  const toggleFullscreenMode = () => {
+    setIsFullscreenMode((prev) => {
+      const next = !prev
+      if (next) {
+        setShowFullscreenHint(true)
+      } else {
+        setShowFullscreenHint(false)
+      }
+      setOpenTooltip(null)
+      return next
+    })
+  }
 
   // Keep keyboard focus aligned with the selected delete modal option.
   useEffect(() => {
@@ -2715,7 +2738,8 @@ function App() {
   const actualViewportHeight = mapPanelElement?.clientHeight ?? viewportSize.height
   
   const visibleViewportWidth = actualViewportWidth > 0 ? actualViewportWidth : (windowSize.width - 40)
-  const visibleViewportHeight = actualViewportHeight > 0 ? actualViewportHeight : (windowSize.height - headerHeight)
+  const effectiveHeaderHeight = isFullscreenMode ? 0 : headerHeight
+  const visibleViewportHeight = actualViewportHeight > 0 ? actualViewportHeight : (windowSize.height - effectiveHeaderHeight)
   
   // When a node is selected or root is focused without selection, always use current viewport size
   // This ensures re-centering works immediately on window resize
@@ -2848,12 +2872,12 @@ function App() {
     const screenY = pos.y + offsetY + renderOffsetY;
     
     // Exclude nodes whose top edge is at or above the header (search bar) - don't show them to prevent overlap
-    if (screenY < headerHeight) return false;
+    if (screenY < effectiveHeaderHeight) return false;
     
     // Viewport culling: check if node is within visible viewport bounds (with buffer)
     const viewportLeft = -VIEWPORT_BUFFER;
     const viewportRight = windowSize.width + VIEWPORT_BUFFER;
-    const viewportTop = headerHeight - VIEWPORT_BUFFER;
+    const viewportTop = effectiveHeaderHeight - VIEWPORT_BUFFER;
     const viewportBottom = windowSize.height + VIEWPORT_BUFFER;
     
     // Check if node is completely outside viewport
@@ -2878,7 +2902,7 @@ function App() {
     const screenY = pos.y + offsetY + renderOffsetY;
     
     // Only exclude nodes whose top edge is at or above the header (vertical culling only)
-    if (screenY < headerHeight) return false;
+    if (screenY < effectiveHeaderHeight) return false;
     
     return true;
   });
@@ -2889,7 +2913,7 @@ function App() {
   if (rootNode) {
     const rootY = layout.positions.get(rootNode.id)?.y ?? 0;
     const rootScreenY = rootY + offsetY + renderOffsetY;
-    isRootAboveHeader = rootScreenY < headerHeight;
+    isRootAboveHeader = rootScreenY < effectiveHeaderHeight;
   }
 
   // Auth handlers
@@ -2947,6 +2971,14 @@ function App() {
 
   useEffect(() => {
     const handleShortcut = async (event) => {
+      if (isFullscreenMode && event.key === 'Escape') {
+        event.preventDefault()
+        event.stopPropagation()
+        setIsFullscreenMode(false)
+        setShowFullscreenHint(false)
+        return
+      }
+
       if (deleteConfirmation) {
         const modalNavKeys = ['ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown', 'Enter', 'Escape']
         if (!modalNavKeys.includes(event.key)) return
@@ -3242,7 +3274,7 @@ function App() {
     return () => {
       window.removeEventListener('keydown', handleShortcut)
     }
-  }, [selectedId, focusedElement, nodes, layout.positions, hasKnownSubdivisions, addChildren, addCustomChild, addCustomSibling, deleteCustomNode, isAuthenticated, deleteConfirmation, deleteModalChoice])
+  }, [selectedId, focusedElement, nodes, layout.positions, hasKnownSubdivisions, addChildren, addCustomChild, addCustomSibling, deleteCustomNode, isAuthenticated, deleteConfirmation, deleteModalChoice, isFullscreenMode])
 
   // Close search suggestions when clicking outside the search row
   useEffect(() => {
@@ -3933,7 +3965,8 @@ function App() {
   }
 
   return (
-    <div className="app-shell" style={{ '--header-height': `${headerHeight}px` }}>
+    <div className={`app-shell${isFullscreenMode ? ' fullscreen-mode' : ''}`} style={{ '--header-height': `${effectiveHeaderHeight}px` }}>
+      {!isFullscreenMode && (
       <header className="app-header" ref={headerRef}>
         <div className="title-block">
           <div className="title-stack" aria-label="Everything">
@@ -4157,6 +4190,16 @@ function App() {
                     </button>
                   </div>
                 </div>
+                <div className="setting-item setting-item-row" role="group" aria-label="Fullscreen mode controls">
+                  <span>Fullscreen mode</span>
+                  <button
+                    type="button"
+                    className="node-size-reset"
+                    onClick={toggleFullscreenMode}
+                  >
+                    {isFullscreenMode ? 'Exit' : 'Enter'}
+                  </button>
+                </div>
               </div>
             )}
           </div>
@@ -4288,6 +4331,13 @@ function App() {
           </div>
         </div>
       </header>
+      )}
+
+      {isFullscreenMode && showFullscreenHint && (
+        <div className="fullscreen-exit-hint" role="status" aria-live="polite">
+          Hit Esc to exit fullscreen mode
+        </div>
+      )}
 
       <main className="app-main">
         <section className="map-panel" ref={mapPanelRef}>
