@@ -1431,19 +1431,24 @@ button:not(:disabled):hover {
     font-size: 0.75rem;
   }
 
-  /* Remove gap between "Every" and "thing" on mobile */
+  /* Make "Everything" display as one word on mobile */
   .title-stack {
-    column-gap: 0 !important;
-    gap: 0;
+    display: block;
+  }
+
+  .title-grid {
+    display: inline;
   }
 
   .title-part {
+    display: inline;
     margin: 0;
     padding: 0;
   }
 
   /* Add visible spacing between "Knowledge" and "Mapped" */
   .title-sub.title-grid {
+    display: grid;
     grid-template-columns: auto auto;
     column-gap: 1em;
     gap: 1em;
