@@ -1457,12 +1457,12 @@ button:not(:disabled):hover {
   .title-sub.title-grid {
     display: grid;
     grid-template-columns: auto auto;
-    font-size: 0.95rem;
+    font-size: 0.72rem;
     column-gap: 1em;
     gap: 1em;
     justify-content: center;
     left: 0;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.04em;
     margin-left: 0;
   }
 
@@ -1681,9 +1681,9 @@ button:not(:disabled):hover {
   }
 
   .title-sub.title-grid {
-    font-size: 0.82rem;
-    column-gap: 0.8em;
-    gap: 0.8em;
+    font-size: 0.64rem;
+    column-gap: 0.7em;
+    gap: 0.7em;
   }
 
   .top-link {
