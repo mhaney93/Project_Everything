@@ -1450,6 +1450,7 @@ button:not(:disabled):hover {
   .title-sub.title-grid {
     display: grid;
     grid-template-columns: auto auto;
+    font-size: 0.95rem;
     column-gap: 1em;
     gap: 1em;
     justify-content: center;
@@ -1669,6 +1670,12 @@ button:not(:disabled):hover {
 
   .title-block p {
     font-size: 0.7rem;
+  }
+
+  .title-sub.title-grid {
+    font-size: 0.82rem;
+    column-gap: 0.8em;
+    gap: 0.8em;
   }
 
   .top-link {
