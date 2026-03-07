@@ -325,6 +325,8 @@ function App() {
   const searchDebounceTimeoutRef = useRef(null)
   const datamuseWordValidityCacheRef = useRef(new Map())
   const datamuseSuggestionCacheRef = useRef(new Map())
+  const draftNoteIdsRef = useRef(new Set())
+  const draftGridIdsRef = useRef(new Set())
 
   // Auto-dismiss notification after 5 seconds
   useEffect(() => {
@@ -2174,6 +2176,8 @@ function App() {
       )
     )
 
+    draftNoteIdsRef.current.add(newNote.id)
+
     requestAnimationFrame(() => {
       const input = noteInputRefs.current[newNote.id]
       if (input) {
@@ -2184,6 +2188,10 @@ function App() {
   }
 
   const updateNoteText = (nodeId, noteId, text) => {
+    if ((text || '').trim()) {
+      draftNoteIdsRef.current.delete(noteId)
+    }
+
     setNodes((prev) =>
       prev.map((node) =>
         node.id === nodeId
@@ -2219,6 +2227,12 @@ function App() {
   }
 
   const removeNoteFromNode = (nodeId, noteId) => {
+    draftNoteIdsRef.current.delete(noteId)
+    draftGridIdsRef.current.delete(noteId)
+    if (lastCreatedGridId === noteId) {
+      setLastCreatedGridId(null)
+    }
+
     setNodes((prev) =>
       prev.map((node) =>
         node.id === nodeId
@@ -2229,6 +2243,17 @@ function App() {
   }
 
   const handleNoteKeyDown = (event, nodeId, note) => {
+    if (event.key === 'Escape') {
+      const isDraft = draftNoteIdsRef.current.has(note.id)
+      const isEmpty = !(note.text || '').trim()
+      if (isDraft && isEmpty) {
+        event.preventDefault()
+        event.stopPropagation()
+        removeNoteFromNode(nodeId, note.id)
+      }
+      return
+    }
+
     if (event.key === 'Enter') {
       event.preventDefault()
       event.stopPropagation()
@@ -2288,10 +2313,23 @@ function App() {
           : node
       )
     )
+
+    draftGridIdsRef.current.add(newGrid.id)
     setLastCreatedGridId(newGrid.id)
   }
 
+  const isGridEmpty = (grid) => {
+    if (!grid || !Array.isArray(grid.data)) return true
+    return grid.data.every((row) =>
+      Array.isArray(row) ? row.every((cell) => !(String(cell || '').trim())) : true
+    )
+  }
+
   const updateGridCell = (nodeId, gridId, rowIndex, colIndex, value) => {
+    if ((value || '').trim()) {
+      draftGridIdsRef.current.delete(gridId)
+    }
+
     setNodes((prev) =>
       prev.map((node) =>
         node.id === nodeId
@@ -2316,6 +2354,16 @@ function App() {
   }
 
   const handleGridKeyDown = (event, nodeId, gridId, grid) => {
+    if (event.key === 'Escape') {
+      const isDraft = draftGridIdsRef.current.has(gridId)
+      if (isDraft && isGridEmpty(grid)) {
+        event.preventDefault()
+        event.stopPropagation()
+        removeNoteFromNode(nodeId, gridId)
+      }
+      return
+    }
+
     if (event.key === 'Tab') {
       event.preventDefault()
       event.stopPropagation()
