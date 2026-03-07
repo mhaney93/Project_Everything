@@ -119,6 +119,48 @@
   cursor: pointer;
 }
 
+.setting-item-row {
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: default;
+}
+
+.node-size-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.node-size-button,
+.node-size-reset {
+  border: 1px solid rgba(29, 111, 220, 0.25);
+  background: rgba(29, 111, 220, 0.09);
+  color: var(--ink);
+  border-radius: 8px;
+  padding: 0.2rem 0.45rem;
+  font-size: 0.8rem;
+  line-height: 1;
+  box-shadow: none;
+}
+
+.node-size-button {
+  min-width: 26px;
+}
+
+.node-size-reset {
+  padding: 0.2rem 0.5rem;
+  border-radius: 999px;
+}
+
+.node-size-value {
+  min-width: 3rem;
+  text-align: center;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: rgba(45, 52, 60, 0.75);
+}
+
 .profile-info {
   margin: 0.5rem 0 0 0;
   font-size: 0.9rem;

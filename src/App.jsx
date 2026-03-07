@@ -6,6 +6,9 @@ import { authAPI, mapsAPI, filesAPI } from './api';
 // v2: Humanities integration complete
 const NODE_WIDTH = 176;
 const NODE_HEIGHT = 52;
+const NODE_SIZE_MIN = 0.85;
+const NODE_SIZE_MAX = 1.8;
+const NODE_SIZE_STEP = 0.1;
 
 // ...existing code...
 
@@ -107,7 +110,7 @@ const applyLabelMigrations = (mapNodes) => {
   return { nodes: migratedNodes, changed }
 }
 
-const buildLayout = (nodes, topicSubdivisions = {}) => {
+const buildLayout = (nodes, topicSubdivisions = {}, nodeWidth = NODE_WIDTH, nodeHeight = NODE_HEIGHT) => {
   if (nodes.length === 0) {
     return { positions: new Map(), edges: [], bounds: null };
   }
@@ -156,8 +159,8 @@ const buildLayout = (nodes, topicSubdivisions = {}) => {
   const calculateSubtreeWidth = (nodeId) => {
     const kids = childrenById.get(nodeId) || [];
     if (kids.length === 0) {
-      subtreeWidths.set(nodeId, NODE_WIDTH);
-      return NODE_WIDTH;
+      subtreeWidths.set(nodeId, nodeWidth);
+      return nodeWidth;
     }
 
     let totalWidth = 0;
@@ -166,23 +169,23 @@ const buildLayout = (nodes, topicSubdivisions = {}) => {
       if (index > 0) totalWidth += H_GAP;
     });
 
-    const width = Math.max(totalWidth, NODE_WIDTH);
+    const width = Math.max(totalWidth, nodeWidth);
     subtreeWidths.set(nodeId, width);
     return width;
   };
 
   const assignPositions = (nodeId, x, y) => {
     const kids = childrenById.get(nodeId) || [];
-    const subtreeWidth = subtreeWidths.get(nodeId) || NODE_WIDTH;
-    const nodeX = x + (subtreeWidth - NODE_WIDTH) / 2;
+    const subtreeWidth = subtreeWidths.get(nodeId) || nodeWidth;
+    const nodeX = x + (subtreeWidth - nodeWidth) / 2;
 
     positions.set(nodeId, { x: nodeX, y });
 
     let childX = x;
     kids.forEach((child) => {
       edges.push({ from: nodeId, to: child.id });
-      const childWidth = subtreeWidths.get(child.id) || NODE_WIDTH;
-      assignPositions(child.id, childX, y + NODE_HEIGHT + V_GAP);
+      const childWidth = subtreeWidths.get(child.id) || nodeWidth;
+      assignPositions(child.id, childX, y + nodeHeight + V_GAP);
       childX += childWidth + H_GAP;
     });
   };
@@ -197,8 +200,8 @@ const buildLayout = (nodes, topicSubdivisions = {}) => {
   positions.forEach((pos) => {
     minX = Math.min(minX, pos.x);
     minY = Math.min(minY, pos.y);
-    maxX = Math.max(maxX, pos.x + NODE_WIDTH);
-    maxY = Math.max(maxY, pos.y + NODE_HEIGHT);
+    maxX = Math.max(maxX, pos.x + nodeWidth);
+    maxY = Math.max(maxY, pos.y + nodeHeight);
   });
 
   return {
@@ -274,6 +277,12 @@ function App() {
   const [enableAnimations, setEnableAnimations] = useState(true)
   const [smoothPanning, setSmoothPanning] = useState(true)
   const [autoExpand, setAutoExpand] = useState(true)
+  const [nodeSizeScale, setNodeSizeScale] = useState(() => {
+    const raw = window.localStorage.getItem('nodeSizeScale')
+    const parsed = Number.parseFloat(raw || '')
+    if (!Number.isFinite(parsed)) return 1
+    return Math.max(NODE_SIZE_MIN, Math.min(NODE_SIZE_MAX, parsed))
+  })
   const [currentUser, setCurrentUser] = useState(null)
   const [nodeFiles, setNodeFiles] = useState({}) // Map of nodeId -> files array
   const [uploadingNodeId, setUploadingNodeId] = useState(null)
@@ -1044,7 +1053,26 @@ function App() {
     'Multiverse': [],
   }
 
-  const layout = useMemo(() => buildLayout(nodes, TOPIC_SUBDIVISIONS), [nodes, recenterKey, TOPIC_SUBDIVISIONS])
+  const nodeWidth = Math.round(NODE_WIDTH * nodeSizeScale)
+  const nodeHeight = Math.round(NODE_HEIGHT * nodeSizeScale)
+  const nodeSizePercent = Math.round(nodeSizeScale * 100)
+
+  const adjustNodeSize = (delta) => {
+    setNodeSizeScale((prev) => {
+      const next = prev + delta
+      const clamped = Math.max(NODE_SIZE_MIN, Math.min(NODE_SIZE_MAX, next))
+      return Math.round(clamped * 100) / 100
+    })
+  }
+
+  useEffect(() => {
+    window.localStorage.setItem('nodeSizeScale', String(nodeSizeScale))
+  }, [nodeSizeScale])
+
+  const layout = useMemo(
+    () => buildLayout(nodes, TOPIC_SUBDIVISIONS, nodeWidth, nodeHeight),
+    [nodes, recenterKey, TOPIC_SUBDIVISIONS, nodeWidth, nodeHeight],
+  )
   const selectedNode = nodes.find((node) => node.id === selectedId)
   const isAuthenticated = Boolean(currentUser)
 
@@ -2596,7 +2624,7 @@ function App() {
   const baseOffsetX = PADDING - bounds.minX
   const baseOffsetY = PADDING - bounds.minY
   const baseWidth = bounds.maxX - bounds.minX + PADDING * 2
-  const baseHeight = bounds.maxY - bounds.minY + NODE_HEIGHT + PADDING * 2
+  const baseHeight = bounds.maxY - bounds.minY + nodeHeight + PADDING * 2
 
   const rootNode = nodes.find((node) => node.parentId == null) || nodes[0]
   // If Everything node is selected, reset lastFocusedIdRef to root
@@ -2658,11 +2686,11 @@ function App() {
   // Center the focused node vertically in the visible area
   const centerY = centerHeight ? centerHeight / 2 : baseHeight / 2
   const focusCenterX = focusPos
-    ? focusPos.x + baseOffsetX + NODE_WIDTH / 2
-    : baseOffsetX + NODE_WIDTH / 2
+    ? focusPos.x + baseOffsetX + nodeWidth / 2
+    : baseOffsetX + nodeWidth / 2
   const focusCenterY = focusPos
-    ? focusPos.y + baseOffsetY + NODE_HEIGHT / 2
-    : baseOffsetY + NODE_HEIGHT / 2
+    ? focusPos.y + baseOffsetY + nodeHeight / 2
+    : baseOffsetY + nodeHeight / 2
 
   // Apply centering shift when:
   // 1. Initially loading (root centered)
@@ -2723,9 +2751,9 @@ function App() {
   let finalMaxY = 0
   layout.positions.forEach((pos) => {
     const left = pos.x + baseOffsetXCentered
-    const right = pos.x + baseOffsetXCentered + NODE_WIDTH
+    const right = pos.x + baseOffsetXCentered + nodeWidth
     const top = pos.y + baseOffsetYCentered
-    const bottom = pos.y + baseOffsetYCentered + NODE_HEIGHT
+    const bottom = pos.y + baseOffsetYCentered + nodeHeight
     finalMinX = Math.min(finalMinX, left)
     finalMaxX = Math.max(finalMaxX, right)
     finalMinY = Math.min(finalMinY, top)
@@ -2778,9 +2806,9 @@ function App() {
     const viewportBottom = windowSize.height + VIEWPORT_BUFFER;
     
     // Check if node is completely outside viewport
-    if (screenX + NODE_WIDTH < viewportLeft) return false;  // Too far left
+    if (screenX + nodeWidth < viewportLeft) return false;  // Too far left
     if (screenX > viewportRight) return false;              // Too far right
-    if (screenY + NODE_HEIGHT < viewportTop) return false;  // Too far up
+    if (screenY + nodeHeight < viewportTop) return false;  // Too far up
     if (screenY > viewportBottom) return false;              // Too far down
     
     return true;
@@ -4046,6 +4074,38 @@ function App() {
                   />
                   Auto-expand on search
                 </label>
+                <div className="setting-item setting-item-row" role="group" aria-label="Node size controls">
+                  <span>Node size</span>
+                  <div className="node-size-controls">
+                    <button
+                      type="button"
+                      className="node-size-button"
+                      onClick={() => adjustNodeSize(-NODE_SIZE_STEP)}
+                      disabled={nodeSizeScale <= NODE_SIZE_MIN}
+                      aria-label="Decrease node size"
+                    >
+                      -
+                    </button>
+                    <span className="node-size-value">{nodeSizePercent}%</span>
+                    <button
+                      type="button"
+                      className="node-size-button"
+                      onClick={() => adjustNodeSize(NODE_SIZE_STEP)}
+                      disabled={nodeSizeScale >= NODE_SIZE_MAX}
+                      aria-label="Increase node size"
+                    >
+                      +
+                    </button>
+                    <button
+                      type="button"
+                      className="node-size-reset"
+                      onClick={() => setNodeSizeScale(1)}
+                      disabled={Math.abs(nodeSizeScale - 1) < 0.01}
+                    >
+                      Reset
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
           </div>
@@ -4214,9 +4274,9 @@ function App() {
                   const from = layout.positions.get(edge.from);
                   const to = layout.positions.get(edge.to);
                   if (!from || !to) return null;
-                  const x1 = from.x + offsetX + renderOffsetX + NODE_WIDTH / 2;
-                  const y1 = from.y + offsetY + renderOffsetY + NODE_HEIGHT;
-                  const x2 = to.x + offsetX + renderOffsetX + NODE_WIDTH / 2;
+                  const x1 = from.x + offsetX + renderOffsetX + nodeWidth / 2;
+                  const y1 = from.y + offsetY + renderOffsetY + nodeHeight;
+                  const x2 = to.x + offsetX + renderOffsetX + nodeWidth / 2;
                   const y2 = to.y + offsetY + renderOffsetY;
                   const dy = y2 - y1;
                   const d = `M ${x1} ${y1} C ${x1} ${y1 + dy * 0.35}, ${x2} ${y2 - dy * 0.35}, ${x2} ${y2}`;
@@ -4241,8 +4301,8 @@ function App() {
                         style={{
                           left: finalX,
                           top: finalY,
-                          width: NODE_WIDTH,
-                          height: NODE_HEIGHT,
+                          width: nodeWidth,
+                          height: nodeHeight,
                           transform: animatingIds.has(node.id) ? 'scale(0.8)' : 'scale(1)',
                           opacity: animatingIds.has(node.id) ? 0 : 1,
                           transition: isDragging || !smoothPanning ? 'none' : undefined,
@@ -4255,8 +4315,8 @@ function App() {
                           type="button"
                           className="node-card"
                           style={{
-                            width: NODE_WIDTH,
-                            height: NODE_HEIGHT,
+                            width: nodeWidth,
+                            height: nodeHeight,
                             color: selectedId === node.id && panelOpen ? '#1d6fdc' : 'inherit',
                             backgroundColor: focusedElement?.nodeId === node.id && focusedElement?.type === 'node' ? 'rgba(29, 111, 220, 0.1)' : '#ffffff',
                             outline: focusedElement?.nodeId === node.id && focusedElement?.type === 'node' ? '2px solid #1d6fdc' : 'none',
