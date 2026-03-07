@@ -1278,9 +1278,73 @@ button:not(:disabled):hover {
   color: var(--ink);
 }
 
-/* ===== Responsive Node Size Controls ===== */
-/* Shrink buttons on narrower screens to prevent overlap with title */
+/* ===== Responsive Header & Controls ===== */
+/* Progressively shrink buttons to prevent overlap with title */
+@media (max-width: 1100px) {
+  .top-right {
+    gap: 0.55rem;
+  }
+
+  .top-right button,
+  .top-button-group button {
+    padding: 0.55rem 1.15rem;
+    font-size: 0.88rem;
+  }
+
+  .node-size-controls {
+    gap: 0.3rem;
+  }
+
+  .node-size-button,
+  .node-size-reset {
+    padding: 0.18rem 0.4rem;
+    font-size: 0.76rem;
+  }
+
+  .node-size-value {
+    min-width: 2.7rem;
+    font-size: 0.74rem;
+  }
+}
+
+@media (max-width: 1000px) {
+  .top-right {
+    gap: 0.5rem;
+  }
+
+  .top-right button,
+  .top-button-group button {
+    padding: 0.5rem 1rem;
+    font-size: 0.85rem;
+  }
+
+  .node-size-controls {
+    gap: 0.28rem;
+  }
+
+  .node-size-button,
+  .node-size-reset {
+    padding: 0.16rem 0.38rem;
+    font-size: 0.74rem;
+  }
+
+  .node-size-value {
+    min-width: 2.6rem;
+    font-size: 0.72rem;
+  }
+}
+
 @media (max-width: 950px) {
+  .top-right {
+    gap: 0.45rem;
+  }
+
+  .top-right button,
+  .top-button-group button {
+    padding: 0.45rem 0.9rem;
+    font-size: 0.82rem;
+  }
+
   .node-size-controls {
     gap: 0.25rem;
   }
@@ -1306,6 +1370,16 @@ button:not(:disabled):hover {
 }
 
 @media (max-width: 850px) {
+  .top-right {
+    gap: 0.4rem;
+  }
+
+  .top-right button,
+  .top-button-group button {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.78rem;
+  }
+
   .node-size-controls {
     gap: 0.2rem;
   }
@@ -1327,10 +1401,6 @@ button:not(:disabled):hover {
   .node-size-value {
     min-width: 2.2rem;
     font-size: 0.68rem;
-  }
-
-  .top-right {
-    gap: 0.5rem;
   }
 }
 
