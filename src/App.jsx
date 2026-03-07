@@ -3611,9 +3611,9 @@ function App() {
       setHasValidSearchWords(hasRealWords)
 
       if (!hasRealWords) {
-        setSearchSuggestions([])
         setRelatedIdeas([])
-        setHighlightedSuggestion(-1)
+        // Keep immediate local matches visible while typing incomplete words.
+        setHighlightedSuggestion(localSuggestions.length > 0 ? 0 : -1)
         return
       }
 
