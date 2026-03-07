@@ -1436,12 +1436,15 @@ button:not(:disabled):hover {
     display: block;
   }
 
-  .title-grid {
-    display: inline;
+  h1.title-grid {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0;
   }
 
   .title-part {
-    display: inline;
+    display: inline-flex;
     margin: 0;
     padding: 0;
   }
@@ -1456,6 +1459,7 @@ button:not(:disabled):hover {
     justify-content: center;
     left: 0;
     letter-spacing: 0.05em;
+    margin-left: 0;
   }
 
   .title-sub .title-left,
