@@ -470,6 +470,8 @@
   letter-spacing: 0.18em;
   text-transform: uppercase;
   color: var(--accent-2);
+}
+
 .title-sub.title-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -481,7 +483,6 @@
   color: #1d6fdc;
   position: relative;
   left: -24px;
-}
 }
 
 .title-left {
@@ -1432,15 +1433,28 @@ button:not(:disabled):hover {
 
   /* Remove gap between "Every" and "thing" on mobile */
   .title-stack {
-    column-gap: 0;
+    column-gap: 0 !important;
+    gap: 0;
+  }
+
+  .title-part {
+    margin: 0;
+    padding: 0;
   }
 
   /* Add visible spacing between "Knowledge" and "Mapped" */
   .title-sub.title-grid {
-    column-gap: 0.4em;
+    grid-template-columns: auto auto;
+    column-gap: 1em;
+    gap: 1em;
+    justify-content: center;
     left: 0;
-    letter-spacing: 0.02em;
-    word-spacing: 0.5em;
+    letter-spacing: 0.05em;
+  }
+
+  .title-sub .title-left,
+  .title-sub .title-right {
+    justify-self: center;
   }
 
   /* Top navigation - stack vertically on small screens */
