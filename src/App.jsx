@@ -3182,7 +3182,7 @@ function App() {
     }
   }, [searchSuggestions.length])
 
-  const generateSearchSuggestions = (query) => {
+  const generateSearchSuggestions = (query, activeWords = null) => {
     const trimmedQuery = query.trim()
     if (!trimmedQuery) {
       setSearchSuggestions([])
@@ -3190,12 +3190,16 @@ function App() {
       return
     }
 
-    const lowerQuery = trimmedQuery.toLowerCase()
-    const validQueryWords = getValidQueryWords(trimmedQuery)
+    const validQueryWords = getValidQueryWords(trimmedQuery, activeWords)
+    if (validQueryWords.length === 0) {
+      setSearchSuggestions([])
+      setHighlightedSuggestion(-1)
+      return []
+    }
+    const lowerQuery = validQueryWords.join(' ')
     const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     const matchesQuery = (label) => {
       const lowerLabel = label.toLowerCase()
-      if (validQueryWords.length === 0) return false
       if (validQueryWords.length === 1) {
         const word = validQueryWords[0]
         const regex = new RegExp(`\\b${escapeRegex(word)}`, 'i')
@@ -3272,11 +3276,13 @@ function App() {
     return matches || []
   }
 
-  const getValidQueryWords = (query) => {
-    const tokens = extractWordTokens(query)
-    // Filter to only include tokens that are 3+ characters OR valid single letters ('a', 'i')
-    // 2-character tokens are too ambiguous (could be incomplete)
-    return tokens.filter((token) => token.length >= 3 || token === 'a' || token === 'i')
+  const getValidQueryWords = (query, activeWords = null) => {
+    if (Array.isArray(activeWords) && activeWords.length > 0) {
+      return activeWords
+        .filter((word) => typeof word === 'string' && word.trim())
+        .map((word) => word.toLowerCase())
+    }
+    return extractWordTokens(query)
   }
 
   const isExactWordMatch = (results, token) => {
@@ -3308,24 +3314,23 @@ function App() {
     }
   }
 
-  const queryContainsOnlyRealWords = async (query) => {
+  const getRealWordTokens = async (query) => {
     const tokens = extractWordTokens(query)
-    if (tokens.length === 0) return false
+    if (tokens.length === 0) return []
 
     const validity = await Promise.all(tokens.map((token) => isValidWord(token)))
-    return validity.some(Boolean)
+    return tokens.filter((_, index) => validity[index])
   }
 
-  const fetchDatamuseSuggestions = async (query) => {
-    const tokens = extractWordTokens(query)
-    const lastToken = tokens[tokens.length - 1]
-    
-    // Don't fetch Datamuse if the last word is a single incomplete letter
-    if (lastToken && lastToken.length === 1) {
-      return []
-    }
+  const queryContainsOnlyRealWords = async (query) => {
+    const realWords = await getRealWordTokens(query)
+    return realWords.length > 0
+  }
 
-    const normalizedQuery = query.trim().toLowerCase()
+  const fetchDatamuseSuggestions = async (query, realWordTokens = null) => {
+    const normalizedQuery = Array.isArray(realWordTokens) && realWordTokens.length > 0
+      ? realWordTokens.join(' ')
+      : query.trim().toLowerCase()
     if (!normalizedQuery) return []
 
     if (datamuseSuggestionCacheRef.current.has(normalizedQuery)) {
@@ -3398,7 +3403,7 @@ function App() {
     return Boolean(findNodePath(searchTerm))
   }
 
-  const generateRelatedIdeas = (query, currentSuggestions = []) => {
+  const generateRelatedIdeas = (query, currentSuggestions = [], activeWords = null) => {
     const trimmedQuery = query.trim()
     if (!trimmedQuery) {
       setRelatedIdeas([])
@@ -3406,13 +3411,18 @@ function App() {
     }
 
     const lowerQuery = trimmedQuery.toLowerCase()
-    const queryWords = getValidQueryWords(trimmedQuery)
+    const queryWords = getValidQueryWords(trimmedQuery, activeWords)
+    if (queryWords.length === 0) {
+      setRelatedIdeas([])
+      return
+    }
     const escapeRegex = (value) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     const matchesQuery = (label) => {
       const lowerLabel = label.toLowerCase()
       if (queryWords.length === 1) {
-        const regex = new RegExp(`\\b${escapeRegex(lowerQuery)}`, 'i')
-        return regex.test(label) || lowerLabel.startsWith(lowerQuery)
+        const word = queryWords[0]
+        const regex = new RegExp(`\\b${escapeRegex(word)}`, 'i')
+        return regex.test(label) || lowerLabel.startsWith(word)
       }
       return queryWords.every((word) => {
         const regex = new RegExp(`\\b${escapeRegex(word)}`, 'i')
@@ -3457,7 +3467,7 @@ function App() {
     // Use word boundary matching to avoid matching substrings
     nodes.forEach((node) => {
       if (typeof node.label !== 'string' || !node.label.trim()) return
-      const hasOverlap = queryWords.some((keyword) => {
+      const hasOverlap = queryWords.every((keyword) => {
         const regex = new RegExp(`\\b${keyword}`, 'i')
         return regex.test(node.label) || node.label.toLowerCase().startsWith(keyword)
       })
@@ -3487,8 +3497,9 @@ function App() {
       const matchesAllWords = (label) => {
         if (queryWords.length === 1) {
           // Check for word boundary match or starts with
-          const regex = new RegExp(`\\b${lowerQuery}`, 'i')
-          return regex.test(label) || label.toLowerCase().startsWith(lowerQuery)
+          const word = queryWords[0]
+          const regex = new RegExp(`\\b${word}`, 'i')
+          return regex.test(label) || label.toLowerCase().startsWith(word)
         }
         // All query words must be present as whole words
         return queryWords.every(word => {
@@ -3509,9 +3520,9 @@ function App() {
       // Check TOPIC_KEYWORDS for semantic matches using word boundaries
       for (const [topic, keywords] of Object.entries(TOPIC_KEYWORDS)) {
         const hasMatch = keywords.some((keyword) => {
-          // For multi-word queries, check if keyword matches any query word
+          // For multi-word queries, require all words to prevent partial-query matches.
           if (queryWords.length > 1) {
-            return queryWords.some(qWord => {
+            return queryWords.every(qWord => {
               if (qWord.length <= 5) return keyword === qWord
               if (qWord.length <= 8) return keyword.startsWith(qWord)
               // Use word boundary for longer queries
@@ -3586,23 +3597,28 @@ function App() {
     setRelatedIdeas([])
 
     searchDebounceTimeoutRef.current = setTimeout(async () => {
-      const hasRealWords = await queryContainsOnlyRealWords(value)
+      const realWordTokens = await getRealWordTokens(value)
+      const hasRealWords = realWordTokens.length > 0
       if (requestId !== searchRequestIdRef.current) return
 
       setHasValidSearchWords(hasRealWords)
 
       if (!hasRealWords) {
+        setSearchSuggestions([])
         setRelatedIdeas([])
+        setHighlightedSuggestion(-1)
         return
       }
 
-      const apiSuggestions = await fetchDatamuseSuggestions(value)
+      const validatedLocalSuggestions = generateSearchSuggestions(value, realWordTokens) || []
+
+      const apiSuggestions = await fetchDatamuseSuggestions(value, realWordTokens)
       if (requestId !== searchRequestIdRef.current) return
 
-      const suggestions = mergeSuggestions(localSuggestions, apiSuggestions)
+      const suggestions = mergeSuggestions(validatedLocalSuggestions, apiSuggestions)
       setSearchSuggestions(suggestions)
       setHighlightedSuggestion(suggestions.length > 0 ? 0 : -1)
-      generateRelatedIdeas(value, suggestions)
+      generateRelatedIdeas(value, suggestions, realWordTokens)
     }, 200)
   }
 
