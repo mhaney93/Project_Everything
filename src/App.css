@@ -1511,15 +1511,13 @@ button:not(:disabled):hover {
 
   /* Top navigation - stack vertically on small screens */
   .top-left {
-    position: static;
-    justify-content: center;
+    display: inline-flex;
     gap: 0.5rem;
     margin-bottom: 0.5rem;
   }
 
   .top-right {
-    position: static;
-    justify-content: center;
+    display: inline-flex;
     gap: 0.5rem;
   }
 
