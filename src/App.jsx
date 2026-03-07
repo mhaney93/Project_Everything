@@ -4103,7 +4103,7 @@ function App() {
             </form>
           </div>
         </div>
-        <div className="top-right">
+        <div className="top-left">
           <div className="top-button-group">
             <button
               className={`top-link ${createNodeMode === 'child' ? 'active' : ''}`}
@@ -4124,7 +4124,8 @@ function App() {
               Add Sibling
             </button>
           </div>
-
+        </div>
+        <div className="top-right">
           <div className="top-button-group">
             <button 
               className="top-link" 

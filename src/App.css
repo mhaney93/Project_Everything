@@ -59,18 +59,26 @@
   pointer-events: none;
 }
 
-.top-right {
+.top-left {
   display: flex;
-  flex-wrap: wrap;
   gap: 0.65rem;
   align-items: center;
-  justify-content: flex-end;
+  position: absolute;
+  left: clamp(1.5rem, 4vw, 4rem);
+  top: 2.75rem;
+  z-index: 101;
+  pointer-events: auto;
+}
+
+.top-right {
+  display: flex;
+  gap: 0.65rem;
+  align-items: center;
   position: absolute;
   right: clamp(1.5rem, 4vw, 4rem);
   top: 2.75rem;
   z-index: 101;
   pointer-events: auto;
-  max-width: 50%;
 }
 
 .top-button-group {
@@ -1502,6 +1510,15 @@ button:not(:disabled):hover {
   }
 
   /* Top navigation - stack vertically on small screens */
+  .top-left {
+    position: static;
+    width: 100%;
+    justify-content: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.5rem;
+  }
+
   .top-right {
     position: static;
     width: 100%;
