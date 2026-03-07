@@ -4567,14 +4567,16 @@ function App() {
           <aside className={`side-panel${panelExpanded ? ' expanded' : ''}`}>
             <div className="panel-card">
               <div className="panel-header">
-                <button
-                  className="panel-expand"
-                  type="button"
-                  onClick={() => setPanelExpanded(!panelExpanded)}
-                  title={panelExpanded ? 'Collapse panel' : 'Expand panel'}
-                >
-                  {panelExpanded ? '→' : '←'}
-                </button>
+                {windowSize.width >= 768 && (
+                  <button
+                    className="panel-expand"
+                    type="button"
+                    onClick={() => setPanelExpanded(!panelExpanded)}
+                    title={panelExpanded ? 'Collapse panel' : 'Expand panel'}
+                  >
+                    {panelExpanded ? '→' : '←'}
+                  </button>
+                )}
                 {editingSidebarNodeId === selectedNode.id ? (
                   <input
                     key={`editing-${selectedNode.id}`}
