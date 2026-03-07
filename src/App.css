@@ -59,26 +59,18 @@
   pointer-events: none;
 }
 
-.top-left {
-  display: flex;
-  gap: 0.65rem;
-  align-items: center;
-  position: absolute;
-  left: clamp(1.5rem, 4vw, 4rem);
-  top: 2.75rem;
-  z-index: 101;
-  pointer-events: auto;
-}
-
 .top-right {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.65rem;
   align-items: center;
+  justify-content: flex-end;
   position: absolute;
   right: clamp(1.5rem, 4vw, 4rem);
   top: 2.75rem;
   z-index: 101;
   pointer-events: auto;
+  max-width: 50%;
 }
 
 .top-button-group {
