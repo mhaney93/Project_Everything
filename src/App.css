@@ -1278,30 +1278,286 @@ button:not(:disabled):hover {
   color: var(--ink);
 }
 
-@media (max-width: 700px) {
+/* ===== Mobile Optimizations ===== */
+@media (max-width: 768px) {
+  /* Compact header for mobile */
+  .app-header {
+    min-height: 60px;
+    padding: 0.5rem 1rem;
+    gap: 0.75rem;
+    flex-direction: column;
+  }
+
   .app-shell {
-    padding: 2rem 1.25rem 2.5rem;
+    --header-height: 120px;
   }
 
-  .header-actions {
-    width: 100%;
+  .title-block {
+    gap: 0.2rem;
   }
 
-  button {
-    width: 100%;
+  .title-block h1 {
+    font-size: 1.5rem;
   }
 
+  .title-block p {
+    font-size: 0.75rem;
+  }
+
+  /* Top navigation - stack vertically on small screens */
   .top-right {
+    position: static;
     width: 100%;
     justify-content: center;
-    position: static;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+
+  .top-button-group {
+    flex: 0 0 auto;
+  }
+
+  /* Better button sizing for touch */
+  .top-link {
+    min-height: 44px;
+    padding: 0.6rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  /* Settings tooltip - better mobile positioning */
+  .settings-tooltip {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    transform: none;
+    margin: 0;
+    border-radius: 16px 16px 0 0;
+    max-width: none;
+    max-height: 70vh;
+    overflow-y: auto;
+    padding: 1.5rem;
+  }
+
+  .tooltip {
+    left: 50%;
+    min-width: 280px;
+  }
+
+  /* Search bar optimizations */
+  .search-row {
+    max-width: 100%;
+    min-width: 100%;
+  }
+
+  .search-input {
+    font-size: 16px; /* Prevents zoom on iOS */
+    padding: 0.7rem 1rem;
+    min-height: 44px;
+  }
+
+  .search-button {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0.7rem;
+  }
+
+  /* Search suggestions - full width on mobile */
+  .search-suggestions {
+    left: 0;
+    right: 0;
+    max-width: none;
+    border-radius: 0 0 12px 12px;
+  }
+
+  /* Map canvas - account for smaller header */
+  .map-canvas {
+    padding: 1rem;
+  }
+
+  /* Node cards - better touch targets */
+  .node-card {
+    min-height: 44px;
+    padding: 0.7rem 1rem;
+    font-size: 0.95rem;
+  }
+
+  .node-card.node-selected {
+    transform: scale(1.05);
+  }
+
+  /* Expand dots - larger touch area */
+  .node-dots {
+    width: 44px;
+    height: 44px;
+    padding: 0.5rem;
+  }
+
+  .dots-icon {
+    width: 32px;
+    height: 10px;
+  }
+
+  /* Side panel - full screen drawer on mobile */
+  .side-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    max-width: none;
+    z-index: 200;
+    border-radius: 0;
+    border: none;
+    overflow-y: auto;
+  }
+
+  .side-panel .close-panel {
+    position: sticky;
+    top: 0;
+    background: var(--bg);
+    z-index: 1;
+    padding: 1rem;
+    border-bottom: 1px solid rgba(29, 111, 220, 0.1);
+  }
+
+  /* Panel content spacing */
+  .panel-section {
+    padding: 1rem;
+  }
+
+  /* Note inputs - prevent zoom on iOS */
+  .note-input,
+  .grid-cell-input,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  /* Buttons - better touch targets */
+  button {
+    min-height: 44px;
+    padding: 0.6rem 1rem;
+  }
+
+  /* File upload button */
+  .file-upload-button {
+    min-height: 44px;
+  }
+
+  /* Modal positioning */
+  .modal-content {
+    width: 95%;
+    max-width: 95%;
+    margin: 1rem;
+  }
+
+  .modal-body {
+    font-size: 0.9rem;
+  }
+
+  /* Fullscreen hint - adjust position */
+  .fullscreen-exit-hint {
+    top: 0.5rem;
+    font-size: 0.75rem;
+    padding: 0.35rem 0.7rem;
+  }
+
+  /* Delete confirmation buttons */
+  .modal-footer button {
+    flex: 1;
+    min-height: 48px;
+  }
+
+  /* Node size controls in settings */
+  .node-size-button,
+  .node-size-reset {
+    min-height: 36px;
+    min-width: 36px;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+  }
+
+  /* Profile dropdown */
+  .profile-dropdown {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    transform: none;
+    border-radius: 16px 16px 0 0;
+    max-width: none;
+  }
+
+  /* Notification positioning */
+  .notification {
+    left: 1rem;
+    right: 1rem;
+    width: auto;
+  }
+}
+
+/* Extra small phones */
+@media (max-width: 480px) {
+  .app-header {
+    padding: 0.5rem 0.75rem;
+  }
+
+  .title-block h1 {
+    font-size: 1.25rem;
+  }
+
+  .title-block p {
+    font-size: 0.7rem;
+  }
+
+  .top-link {
+    font-size: 0.85rem;
+    padding: 0.5rem 0.8rem;
+  }
+
+  .search-input {
+    font-size: 16px;
+    padding: 0.6rem 0.8rem;
+  }
+
+  .node-card {
+    font-size: 0.9rem;
+    padding: 0.6rem 0.8rem;
+  }
+
+  .tooltip {
+    min-width: 260px;
+    max-width: 90vw;
+  }
+
+  .modal-content {
+    width: 98%;
+  }
+}
+
+/* Landscape mobile devices */
+@media (max-height: 600px) and (orientation: landscape) {
+  .app-header {
+    min-height: 50px;
+    padding: 0.4rem 1rem;
+  }
+
+  .app-shell {
+    --header-height: 100px;
   }
 
   .side-panel {
-    position: fixed;
-    width: 100%;
-    left: 0;
-    right: 0;
+    width: 50%;
+    right: auto;
+    left: auto;
+  }
+
+  .settings-tooltip,
+  .profile-dropdown {
+    max-height: 90vh;
   }
 }
 
@@ -1576,23 +1832,6 @@ button:not(:disabled):hover {
   to {
     transform: translateX(400px);
     opacity: 0;
-  }
-}
-
-@media (max-width: 768px) {
-  .notification {
-    bottom: 1rem;
-    right: 1rem;
-    left: 1rem;
-    max-width: none;
-  }
-
-  .notification-under-search {
-    left: 50%;
-    right: auto;
-    transform: translateX(-50%);
-    bottom: auto;
-    max-width: min(280px, calc(100vw - 2rem));
   }
 }
 
