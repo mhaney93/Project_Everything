@@ -2625,13 +2625,6 @@ function App() {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  // Auto-close side panel on very small viewports to avoid covering the map
-  useEffect(() => {
-    if (windowSize.width < 500 && panelOpen) {
-      setPanelOpen(false)
-    }
-  }, [windowSize.width, panelOpen])
-
   // Load user and maps from backend if authenticated
   useEffect(() => {
     const loadUserData = async () => {
