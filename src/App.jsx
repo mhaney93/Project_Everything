@@ -3966,8 +3966,7 @@ function App() {
             <h1 className="title title-grid">
               <span className="title-part title-left title-top">
                 <span className="cool-e">E</span>very
-              </span>
-              <span className="title-part title-right title-top">thing</span>
+              </span><span className="title-part title-right title-top">thing</span>
             </h1>
             <p className="title-sub title-grid" aria-hidden="true">
               <span className="title-left title-bottom">Knowledge</span>
