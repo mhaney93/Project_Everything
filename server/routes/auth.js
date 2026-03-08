@@ -5,6 +5,36 @@ const pool = require('../db/config');
 
 const router = express.Router();
 
+const PASSWORD_REQUIREMENTS = [
+  {
+    label: 'At least 8 characters',
+    test: (value) => value.length >= 8,
+  },
+  {
+    label: 'At least 1 lowercase letter',
+    test: (value) => /[a-z]/.test(value),
+  },
+  {
+    label: 'At least 1 uppercase letter',
+    test: (value) => /[A-Z]/.test(value),
+  },
+  {
+    label: 'At least 1 number',
+    test: (value) => /\d/.test(value),
+  },
+  {
+    label: 'At least 1 special character',
+    test: (value) => /[^A-Za-z0-9]/.test(value),
+  }
+];
+
+const getPasswordRequirementFailures = (password) => {
+  const value = typeof password === 'string' ? password : '';
+  return PASSWORD_REQUIREMENTS
+    .filter((rule) => !rule.test(value))
+    .map((rule) => rule.label);
+};
+
 // Register
 router.post('/register', async (req, res) => {
   try {
@@ -12,6 +42,13 @@ router.post('/register', async (req, res) => {
 
     if (!email || !password) {
       return res.status(400).json({ error: 'Email and password required' });
+    }
+
+    const failedRequirements = getPasswordRequirementFailures(password);
+    if (failedRequirements.length > 0) {
+      return res.status(400).json({
+        error: `Password does not meet requirements: ${failedRequirements.join(', ')}`
+      });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);

@@ -10,6 +10,43 @@ const NODE_SIZE_MIN = 0.85;
 const NODE_SIZE_MAX = 1.8;
 const NODE_SIZE_STEP = 0.1;
 
+const PASSWORD_RULES = [
+  {
+    id: 'length',
+    label: 'At least 8 characters',
+    test: (value) => value.length >= 8,
+  },
+  {
+    id: 'lowercase',
+    label: 'At least 1 lowercase letter',
+    test: (value) => /[a-z]/.test(value),
+  },
+  {
+    id: 'uppercase',
+    label: 'At least 1 uppercase letter',
+    test: (value) => /[A-Z]/.test(value),
+  },
+  {
+    id: 'number',
+    label: 'At least 1 number',
+    test: (value) => /\d/.test(value),
+  },
+  {
+    id: 'special',
+    label: 'At least 1 special character',
+    test: (value) => /[^A-Za-z0-9]/.test(value),
+  },
+]
+
+const getPasswordRuleChecks = (password) => {
+  const value = password || ''
+  return PASSWORD_RULES.map((rule) => ({
+    id: rule.id,
+    label: rule.label,
+    met: rule.test(value),
+  }))
+}
+
 // ...existing code...
 
 // Debug logger utility
@@ -290,6 +327,7 @@ function App() {
   const [uploadingNodeId, setUploadingNodeId] = useState(null)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [loginForm, setLoginForm] = useState({ email: '', password: '' })
+  const [authError, setAuthError] = useState('')
   const [storageUsage, setStorageUsage] = useState(null)
   const [isSignUp, setIsSignUp] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
@@ -2903,6 +2941,8 @@ function App() {
     return true;
   });
   const renderableNodeIds = new Set(renderableNodes.map((node) => node.id));
+  const passwordRuleChecks = useMemo(() => getPasswordRuleChecks(loginForm.password), [loginForm.password])
+  const isPasswordCompliant = passwordRuleChecks.every((rule) => rule.met)
 
   // Separate set for edge rendering: only hide edges for nodes above header, not for horizontal off-screen nodes
   const nodesForEdgeRendering = nodes.filter((node) => {
@@ -2933,9 +2973,16 @@ function App() {
   // Auth handlers
   const handleLogin = async () => {
     if (!loginForm.email || !loginForm.password) {
-      alert('Please fill in all fields')
+      setAuthError('Please fill in both email and password.')
       return
     }
+
+    if (isSignUp && !isPasswordCompliant) {
+      setAuthError('Password does not meet all requirements listed below.')
+      return
+    }
+
+    setAuthError('')
 
     try {
       // Remove logging of sensitive information
@@ -2947,6 +2994,7 @@ function App() {
       setCurrentUser(response.user)
       localStorage.setItem('everything_user_email', response.user.email)
       setLoginForm({ email: '', password: '' })
+      setAuthError('')
       setOpenTooltip(null)
       setIsSignUp(false)
 
@@ -2967,7 +3015,7 @@ function App() {
       } catch (err) {
       }
     } catch (err) {
-      alert(err.message || 'Authentication failed')
+      setAuthError(err.message || 'Authentication failed')
     }
   }
 
@@ -4244,6 +4292,9 @@ function App() {
               onClick={async () => {
                 const newState = openTooltip === 'profile' ? null : 'profile'
                 setOpenTooltip(newState)
+                if (newState === 'profile') {
+                  setAuthError('')
+                }
                 if (newState === 'profile' && currentUser) {
                   try {
                     const usage = await filesAPI.getStorageUsage()
@@ -4314,18 +4365,16 @@ function App() {
                 ) : (
                   <>
                     <h3>{isSignUp ? 'Sign Up' : 'Sign In'}</h3>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                    <div className="auth-form">
                       <input
                         type="email"
                         placeholder="Email"
                         value={loginForm.email}
-                        onChange={(e) => setLoginForm({ ...loginForm, email: e.target.value })}
-                        style={{
-                          padding: '0.5rem',
-                          border: '1px solid rgba(29, 111, 220, 0.2)',
-                          borderRadius: '4px',
-                          fontSize: '0.85rem',
+                        onChange={(e) => {
+                          setLoginForm({ ...loginForm, email: e.target.value })
+                          if (authError) setAuthError('')
                         }}
+                        className="auth-input"
                       />
                       <input
                         type="password"
@@ -4333,14 +4382,28 @@ function App() {
                         value={loginForm.password}
                         onChange={(e) => {
                           setLoginForm({ ...loginForm, password: e.target.value })
+                          if (authError) setAuthError('')
                         }}
-                        style={{
-                          padding: '0.5rem',
-                          border: '1px solid rgba(29, 111, 220, 0.2)',
-                          borderRadius: '4px',
-                          fontSize: '0.85rem',
-                        }}
+                        className="auth-input"
                       />
+                      {isSignUp && (
+                        <div className="auth-password-requirements" aria-live="polite">
+                          <p className="auth-password-title">Password requirements:</p>
+                          <ul>
+                            {passwordRuleChecks.map((rule) => (
+                              <li key={rule.id} className={rule.met ? 'met' : 'unmet'}>
+                                <span className="requirement-icon" aria-hidden="true">{rule.met ? '✓' : '✗'}</span>
+                                <span>{rule.label}</span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                      {authError && (
+                        <div className="auth-error" role="alert">
+                          {authError}
+                        </div>
+                      )}
                       <button 
                         className="profile-action" 
                         type="button"
@@ -4351,7 +4414,10 @@ function App() {
                       <button 
                         className="profile-action" 
                         type="button"
-                        onClick={() => setIsSignUp(!isSignUp)}
+                        onClick={() => {
+                          setIsSignUp(!isSignUp)
+                          setAuthError('')
+                        }}
                         style={{ background: 'transparent', opacity: 0.7 }}
                       >
                         {isSignUp ? 'Already have account?' : 'Need account?'}
