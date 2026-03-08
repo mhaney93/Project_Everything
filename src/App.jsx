@@ -2610,8 +2610,13 @@ function App() {
   }, [])
 
   useEffect(() => {
+    if (isFullscreenMode) return
+
     const header = headerRef.current
     if (!header) return
+
+    // Measure immediately so panel offset is correct right after exiting fullscreen.
+    setHeaderHeight(header.getBoundingClientRect().height)
 
     const observer = new ResizeObserver(([entry]) => {
       setHeaderHeight(entry.contentRect.height)
@@ -2619,7 +2624,7 @@ function App() {
 
     observer.observe(header)
     return () => observer.disconnect()
-  }, [])
+  }, [isFullscreenMode])
 
   // Close tooltips when clicking outside
   useEffect(() => {

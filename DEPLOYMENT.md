@@ -47,22 +47,34 @@ curl -X GET http://localhost:5000/api/maps -b /tmp/cookies.txt
 
 ### Production Deployment
 
-**SSH into EC2 (13.57.40.79):**
+**EC2 Server Details:**
+- **Public IP:** ec2-13-58-1-142.us-east-1.compute.amazonaws.com
+- **Private IP:** ip-172-31-8-152 (internal)
+- **User:** ubuntu
+- **Project Location:** `/home/ubuntu/project_everything` (note: lowercase, underscore)
+- **Key:** `~/.ssh/aws-key.pem`
+
+**SSH into EC2:**
 ```bash
-ssh -i ~/.ssh/matthew_haney_key.pem ubuntu@13.57.40.79
+ssh -i ~/.ssh/aws-key.pem ubuntu@ec2-13-58-1-142.us-east-1.compute.amazonaws.com
 ```
 
 **Pull latest code and rebuild:**
 ```bash
 cd ~/project_everything
 git pull
-POSTGRES_PASSWORD=<your-database-password> docker compose -f docker-compose.prod.yml up -d --build
+set -a
+source server/.env
+set +a
+docker compose -f docker-compose.prod.yml up -d --build
 ```
+
+`POSTGRES_PASSWORD` must stay in `server/.env` on the server. Do not store real passwords in this repo.
 
 **Verify deployment:**
 ```bash
 # Check containers running
-docker ps | grep project_everything
+docker compose -f docker-compose.prod.yml ps
 
 # Check logs
 docker compose -f docker-compose.prod.yml logs -f api
