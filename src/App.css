@@ -1863,7 +1863,7 @@ button:not(:disabled):hover {
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: transparent;
+  background: rgba(5, 10, 20, 0.42);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1916,14 +1916,14 @@ button:not(:disabled):hover {
   margin: 0;
   font-size: 1.25rem;
   font-weight: 600;
-  color: var(--ink);
+  color: #f8fbff;
 }
 
 .modal-close {
   background: none;
   border: none;
   font-size: 1.5rem;
-  color: rgba(45, 52, 60, 0.6);
+  color: rgba(237, 244, 255, 0.72);
   cursor: pointer;
   padding: 0;
   width: 32px;
@@ -1937,12 +1937,12 @@ button:not(:disabled):hover {
 
 .modal-close:hover {
   background: rgba(29, 111, 220, 0.1);
-  color: var(--ink);
+  color: #f8fbff;
 }
 
 .modal-body {
   padding: 1.5rem;
-  color: rgba(45, 52, 60, 0.8);
+  color: rgba(236, 243, 255, 0.9);
   font-size: 0.95rem;
   line-height: 1.5;
 }
