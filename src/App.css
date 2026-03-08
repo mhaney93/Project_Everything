@@ -517,7 +517,7 @@
 }
 
 .title {
-  font-size: clamp(2.6rem, 5vw, 4.6rem);
+  font-size: clamp(2.1rem, 4.1vw, 3.7rem);
   margin: 0;
   color: var(--ink);
   letter-spacing: 0.02em;
@@ -566,11 +566,11 @@
 .title-sub.title-grid {
   display: grid;
   grid-template-columns: auto auto;
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: 500;
   letter-spacing: 0.04em;
-  margin-top: -0.5rem;
-  margin-bottom: 0.5rem;
+  margin-top: -0.35rem;
+  margin-bottom: 0.4rem;
   color: #1d6fdc;
   column-gap: 0.9em;
   justify-content: center;
