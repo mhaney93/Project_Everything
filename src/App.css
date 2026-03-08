@@ -31,6 +31,20 @@
   pointer-events: none;
 }
 
+.create-node-hint {
+  position: fixed;
+  transform: translateX(-50%);
+  z-index: 2000;
+  background: rgba(20, 28, 40, 0.92);
+  color: #f5f9ff;
+  border: 1px solid rgba(93, 158, 255, 0.5);
+  border-radius: 999px;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.83rem;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+  pointer-events: none;
+}
+
 .app-header {
   display: flex;
   position: fixed;
@@ -1750,7 +1764,8 @@ button:not(:disabled):hover {
   }
 
   /* Fullscreen hint - adjust position */
-  .fullscreen-exit-hint {
+  .fullscreen-exit-hint,
+  .create-node-hint {
     top: 0.5rem;
     font-size: 0.75rem;
     padding: 0.35rem 0.7rem;

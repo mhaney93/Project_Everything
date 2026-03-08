@@ -344,11 +344,13 @@ function App() {
   const [lastCreatedGridId, setLastCreatedGridId] = useState(null) // Track newly created grid for Tab indent
   const [deleteModalChoice, setDeleteModalChoice] = useState('cancel') // 'cancel' | 'delete'
   const [createNodeMode, setCreateNodeMode] = useState(null) // 'child' | 'sibling' | null - for button-based node creation
+  const [createNodeHintPosition, setCreateNodeHintPosition] = useState(null)
 
   const canvasRef = useRef(null)
   const editInputRef = useRef(null)
   const mapPanelRef = useRef(null)
   const headerRef = useRef(null)
+  const createModeButtonsRef = useRef(null)
   const searchInputRef = useRef(null)
   const searchRowRef = useRef(null)
   const searchSuggestionsRef = useRef(null)
@@ -403,6 +405,32 @@ function App() {
     return () => clearTimeout(timer)
   }, [showCreateNodeHint])
 
+  useEffect(() => {
+    if (!showCreateNodeHint || !createNodeMode) {
+      setCreateNodeHintPosition(null)
+      return
+    }
+
+    const updateHintPosition = () => {
+      const buttonGroup = createModeButtonsRef.current
+      if (!buttonGroup) return
+      const rect = buttonGroup.getBoundingClientRect()
+      setCreateNodeHintPosition({
+        top: rect.bottom + 8,
+        left: rect.left + rect.width / 2,
+      })
+    }
+
+    updateHintPosition()
+    window.addEventListener('resize', updateHintPosition)
+    window.addEventListener('scroll', updateHintPosition, true)
+
+    return () => {
+      window.removeEventListener('resize', updateHintPosition)
+      window.removeEventListener('scroll', updateHintPosition, true)
+    }
+  }, [showCreateNodeHint, createNodeMode])
+
   const toggleFullscreenMode = () => {
     setIsFullscreenMode((prev) => {
       const next = !prev
@@ -420,6 +448,9 @@ function App() {
     setCreateNodeMode((prev) => {
       const next = prev === mode ? null : mode
       setShowCreateNodeHint(next !== null)
+      if (next === null) {
+        setCreateNodeHintPosition(null)
+      }
       return next
     })
   }
@@ -4188,7 +4219,7 @@ function App() {
             </form>
           </div>
         </div>
-        <div className="top-left">
+        <div className="top-left" ref={createModeButtonsRef}>
           <div className="top-button-group">
             <button
               className={`top-link ${createNodeMode === 'child' ? 'active' : ''}`}
@@ -4456,7 +4487,15 @@ function App() {
       )}
 
       {showCreateNodeHint && createNodeMode && (
-        <div className="fullscreen-exit-hint" role="status" aria-live="polite">
+        <div
+          className="create-node-hint"
+          role="status"
+          aria-live="polite"
+          style={createNodeHintPosition ? {
+            top: `${createNodeHintPosition.top}px`,
+            left: `${createNodeHintPosition.left}px`,
+          } : undefined}
+        >
           {createNodeMode === 'child'
             ? 'Click the node you want to add a child to'
             : 'Click the node you want to add a sibling to'}
