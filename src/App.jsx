@@ -316,6 +316,7 @@ function App() {
   const [autoExpand, setAutoExpand] = useState(true)
   const [isFullscreenMode, setIsFullscreenMode] = useState(false)
   const [showFullscreenHint, setShowFullscreenHint] = useState(false)
+  const [showCreateNodeHint, setShowCreateNodeHint] = useState(false)
   const [nodeSizeScale, setNodeSizeScale] = useState(() => {
     const raw = window.localStorage.getItem('nodeSizeScale')
     const parsed = Number.parseFloat(raw || '')
@@ -394,6 +395,14 @@ function App() {
     return () => clearTimeout(timer)
   }, [showFullscreenHint])
 
+  useEffect(() => {
+    if (!showCreateNodeHint) return
+    const timer = setTimeout(() => {
+      setShowCreateNodeHint(false)
+    }, 2200)
+    return () => clearTimeout(timer)
+  }, [showCreateNodeHint])
+
   const toggleFullscreenMode = () => {
     setIsFullscreenMode((prev) => {
       const next = !prev
@@ -403,6 +412,14 @@ function App() {
         setShowFullscreenHint(false)
       }
       setOpenTooltip(null)
+      return next
+    })
+  }
+
+  const toggleCreateNodeMode = (mode) => {
+    setCreateNodeMode((prev) => {
+      const next = prev === mode ? null : mode
+      setShowCreateNodeHint(next !== null)
       return next
     })
   }
@@ -4177,7 +4194,7 @@ function App() {
               className={`top-link ${createNodeMode === 'child' ? 'active' : ''}`}
               type="button"
               title="Click to enable, then click a node to create a child"
-              onClick={() => setCreateNodeMode(createNodeMode === 'child' ? null : 'child')}
+              onClick={() => toggleCreateNodeMode('child')}
             >
               Add Child
             </button>
@@ -4187,7 +4204,7 @@ function App() {
               className={`top-link ${createNodeMode === 'sibling' ? 'active' : ''}`}
               type="button"
               title="Click to enable, then click a node to create a sibling"
-              onClick={() => setCreateNodeMode(createNodeMode === 'sibling' ? null : 'sibling')}
+              onClick={() => toggleCreateNodeMode('sibling')}
             >
               Add Sibling
             </button>
@@ -4438,6 +4455,14 @@ function App() {
         </div>
       )}
 
+      {showCreateNodeHint && createNodeMode && (
+        <div className="fullscreen-exit-hint" role="status" aria-live="polite">
+          {createNodeMode === 'child'
+            ? 'Click the node you want to add a child to'
+            : 'Click the node you want to add a sibling to'}
+        </div>
+      )}
+
       <main className="app-main">
         <section className="map-panel" ref={mapPanelRef}>
           <div
@@ -4532,11 +4557,13 @@ function App() {
                             if (createNodeMode === 'child') {
                               addCustomChild(node.id)
                               setCreateNodeMode(null)
+                              setShowCreateNodeHint(false)
                               return
                             }
                             if (createNodeMode === 'sibling') {
                               addCustomSibling(node.id)
                               setCreateNodeMode(null)
+                              setShowCreateNodeHint(false)
                               return
                             }
                             
