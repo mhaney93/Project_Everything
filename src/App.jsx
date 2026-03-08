@@ -1,7 +1,7 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
 import './App.css';
-import { authAPI, mapsAPI, filesAPI } from './api';
+import { authAPI, mapsAPI, filesAPI, API_BASE_URL } from './api';
 
 // v2: Humanities integration complete
 const NODE_WIDTH = 176;
@@ -2989,6 +2989,7 @@ function App() {
     return true;
   });
   const renderableNodeIds = new Set(renderableNodes.map((node) => node.id));
+  const fileDownloadBaseUrl = API_BASE_URL.replace(/\/api\/?$/, '')
   const passwordRuleChecks = useMemo(() => getPasswordRuleChecks(loginForm.password), [loginForm.password])
   const isPasswordCompliant = passwordRuleChecks.every((rule) => rule.met)
 
@@ -5058,7 +5059,7 @@ function App() {
                     {nodeFiles[selectedNode.id].map((file) => (
                       <div key={file.id} className="file-item">
                         <a
-                          href={`http://localhost:5000${file.downloadUrl}`}
+                          href={`${fileDownloadBaseUrl}${file.downloadUrl}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="file-link"
