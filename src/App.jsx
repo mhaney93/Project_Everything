@@ -376,6 +376,21 @@ function App() {
     targetRef.current?.focus()
   }, [deleteConfirmation, deleteModalChoice])
 
+  // Close side panel when ESC is pressed
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape' && panelOpen) {
+        e.preventDefault()
+        setPanelOpen(false)
+        setSelectedId(null)
+        setPanelExpanded(false)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [panelOpen])
+
   // Auto-scroll highlighted suggestion into view
   useEffect(() => {
     if (highlightedSuggestion >= 0 && searchSuggestionsRef.current) {

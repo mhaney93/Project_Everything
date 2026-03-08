@@ -114,6 +114,12 @@ router.post('/upload', verifyToken, upload.single('file'), async (req, res) => {
       });
     }
     console.error('File upload error:', err);
+    
+    // Handle disk full error specifically
+    if (err.code === 'ENOSPC' || err.message.includes('no space left on device')) {
+      return res.status(507).json({ error: 'Server storage is full. Please contact support.' });
+    }
+    
     res.status(500).json({ error: err.message });
   }
 });
