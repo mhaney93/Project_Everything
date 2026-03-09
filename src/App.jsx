@@ -4216,7 +4216,7 @@ function App() {
                         >
                           {idea}
                         </button>
-                      }
+                      )
                     })}
                   </div>
                 )}
