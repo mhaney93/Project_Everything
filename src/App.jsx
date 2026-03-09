@@ -2275,11 +2275,16 @@ function App() {
         }
         return { expanded: true, firstChildId };
       }
+    }
+
+  const addNoteToNode = (nodeId, options = {}) => {
+    const { afterNoteId = null, level = 0 } = options;
+    const newNote = {
       id: `note-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       text: '',
       level: Math.max(0, Math.min(5, level)),
       createdAt: new Date().toISOString(),
-    }
+    };
 
     setNodes((prev) =>
       prev.map((node) =>
