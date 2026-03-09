@@ -4339,10 +4339,8 @@ function App() {
               </div>
             );
           }
-          export default App;
-            <button 
-              className="top-link" 
-              type="button"
+        }
+export default App;
               onClick={async () => {
                 const newState = openTooltip === 'profile' ? null : 'profile'
                 setOpenTooltip(newState)
