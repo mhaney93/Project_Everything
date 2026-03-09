@@ -4487,13 +4487,8 @@ export default App;
       )}
     </header>
 
-      <>
-        {isFullscreenMode && showFullscreenHint && (
-          <div className="fullscreen-exit-hint" role="status" aria-live="polite">
-            Hit Esc to exit fullscreen mode
-          </div>
-        )}
-      </>
+
+      {/* Move fullscreen hint inside main return */}
 
       {showCreateNodeHint && createNodeMode && (
         <div
