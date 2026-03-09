@@ -13,19 +13,17 @@ const fetchWikipediaSuggestions = async (query) => {
     const data = await response.json()
     const pages = data.query?.pages || {}
     const categories = []
-    
     for (const page of Object.values(pages)) {
       if (page.categories) {
         categories.push(...page.categories.map((c) => c.title.replace('Category:', '')))
       }
     }
-    
     // Return categories that look like subcategories (contain the query term or are plausible topics)
     // Use word boundary matching to avoid matching substrings inside words
     return categories
       .filter((cat) => {
         if (cat.length <= 5) return false
-        const regex = new RegExp(`\\b${query.toLowerCase()}`, 'i')
+        const regex = new RegExp(`\b${query.toLowerCase()}`, 'i')
         return regex.test(cat) || cat.toLowerCase().startsWith(query.toLowerCase())
       })
   } catch (error) {
@@ -34,43 +32,51 @@ const fetchWikipediaSuggestions = async (query) => {
   }
 }
 
-const getChildSuggestions = async (parentLabel) => {
-  // First check if we have curated subdivisions for this topic
-  if (TOPIC_SUBDIVISIONS[parentLabel]) {
-    return TOPIC_SUBDIVISIONS[parentLabel]
-  }
-  
-  // Fallback to generic labels (will be replaced with curated content over time)
-  return ['Concept A', 'Concept B']
-}
-
-useEffect(() => {
-  if (!transitionsEnabled && canvasSize.width > 0 && canvasSize.height > 0 && viewportSize.width > 0) {
-    const id = requestAnimationFrame(() => setTransitionsEnabled(true))
-    return () => cancelAnimationFrame(id)
-  }
-  return undefined
-}, [canvasSize.width, canvasSize.height, viewportSize.width, transitionsEnabled])
-
-const addCustomChild = (parentNodeId) => {
-  if (!isAuthenticated) {
-    alert('Please sign in to add custom nodes to your private map.')
-    return
-  }
-
-  const maxExistingId = nodes.reduce((maxId, node) => {
-    if (!node || !Number.isFinite(node.id)) return maxId
-    return Math.max(maxId, node.id)
-  }, 0)
-  const newId = Math.max(nextId.current, maxExistingId + 1)
-
-  const newNode = {
-    id: newId,
-    label: 'New Node',
-    parentId: parentNodeId,
-    isCustom: true,
-    hidden: false,
-    summary: '',
+function App() {
+  // ...existing code...
+  return (
+    <>
+      <div className={`app-shell${isFullscreenMode ? ' fullscreen-mode' : ''}`} style={{ '--header-height': `${effectiveHeaderHeight}px` }}>
+        {!isFullscreenMode && (
+          <header className="app-header" ref={headerRef}>
+            <div className="title-block">
+              <div className="title-stack" aria-label="Everything">
+                <h1 className="title">
+                  <span className="cool-e">E</span>verything
+                </h1>
+                <p className="title-sub title-grid" aria-hidden="true">
+                  <span className="title-left title-bottom">Knowledge</span>
+                  <span className="title-right title-bottom">Mapped</span>
+                </p>
+              </div>
+              <form className="search-bar" onSubmit={e => { e.preventDefault(); handleSearchWithQuery(searchQuery); }}>
+                {/* ...search input and handlers here... */}
+                {/* Suggestions dropdown */}
+                {(searchSuggestions.length > 0 || relatedIdeas.length > 0) && (
+                  <div className="search-suggestions" ref={searchSuggestionsRef}>
+                    {searchSuggestions.map((suggestion, idx) => (
+                      <button
+                        key={suggestion}
+                        data-suggestion-index={idx}
+                        className={
+                          "suggestion-item" +
+                          (idx === highlightedSuggestion ? " highlighted" : "")
+                        }
+                        type="button"
+                        onClick={() => handleSuggestionClick(suggestion)}
+                        onMouseEnter={() => setHighlightedSuggestion(idx)}
+                      />
+                    ))}
+                  </div>
+                )}
+              </form>
+            </div>
+          </header>
+        )}
+        {/* ...rest of JSX... */}
+      </div>
+    </>
+  );
   }
 
   nextId.current = newId + 1
@@ -104,7 +110,6 @@ const addCustomChild = (parentNodeId) => {
   setEditingNodeId(newId)
   // Focus the input after a short delay to ensure rendering
   setTimeout(() => editInputRef.current?.focus(), 100)
-}
 
 const addCustomSibling = (referenceNodeId) => {
   if (!isAuthenticated) {
