@@ -4222,22 +4222,15 @@ function App() {
                 </div>
 
               </div>
-
-              )
-            }
-          }
+            )}
+          </div>
         </div>
       )}
-
-// ...existing code...
+    </div>
+  );
+}
 
 export default App;
-
-    {/* ...existing code... */}
-    <main className="app-main">
-      <section className="map-panel" ref={mapPanelRef}>
-          <div
-            className="map-canvas"
             style={{ 
               cursor: isDragging ? 'grabbing' : 'grab'
             }}
