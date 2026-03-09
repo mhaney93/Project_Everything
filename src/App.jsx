@@ -4105,7 +4105,6 @@ function App() {
                     })}
                   </div>
                 )}
-              </div> {/* Close search-suggestions dropdown */}
             )}
           </form> {/* Close search form */}
         </div> {/* Close title-block */}
