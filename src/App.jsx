@@ -4105,9 +4105,8 @@ function App() {
                     })}
                   </div>
                 )}
-              </div>
-            )}
-          </form>
+            </div>
+            );
         <div className="top-left" ref={createModeButtonsRef}>
           <div className="top-button-group">
             <button
