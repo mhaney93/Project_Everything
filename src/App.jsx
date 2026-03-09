@@ -4225,39 +4225,60 @@ function App() {
           </div>
         </div>
       )}
-    </div>
+    {/* Main map and panels */}
+    <main className="app-main">
+      <section className="map-panel" ref={mapPanelRef}>
+        <div
+          className="map-canvas"
+          style={{ 
+            cursor: isDragging ? 'grabbing' : 'grab'
+          }}
+          ref={canvasRef}
+          onMouseDown={handleMapMouseDown}
+          onMouseMove={handleMapMouseMove}
+          onMouseUp={handleMapMouseUp}
+          onMouseLeave={handleMapMouseLeave}
+          onTouchStart={handleMapTouchStart}
+          onTouchMove={handleMapTouchMove}
+          onTouchEnd={handleMapTouchEnd}
+          onTouchCancel={handleMapTouchCancel}
+        >
+          <div
+            className="map-content"
+            style={{ width: mapWidth, height: mapHeight }}
+          >
+            <svg
+              className="map-links"
+              width={mapWidth}
+              height={mapHeight}
+              viewBox={`0 0 ${mapWidth} ${mapHeight}`}
+              aria-hidden="true"
+            >
+              {layout.edges.map((edge) => {
+                // Hide lines when either connected node is hidden or above the header (but not horizontally off-screen)
+                if (!nodeIdsForEdges.has(edge.from) || !nodeIdsForEdges.has(edge.to)) {
+                  return null;
+                }
+                // Skip edges involving the hidden root node if root is above header
+                if (isRootAboveHeader && (edge.from === rootNode.id || edge.to === rootNode.id)) {
+                  return null;
+                }
+                const from = layout.positions.get(edge.from);
+                const to = layout.positions.get(edge.to);
+                // ...existing code for rendering edges...
+              })}
+            </svg>
+            {/* ...existing code for rendering nodes, panels, modals, etc... */}
+          </div>
+        </div>
+      </section>
+      {/* ...side panel, modals, etc... */}
+    </main>
+  </div>
   );
 }
 
 export default App;
-            onMouseLeave={handleMapMouseLeave}
-            onTouchStart={handleMapTouchStart}
-            onTouchMove={handleMapTouchMove}
-            onTouchEnd={handleMapTouchEnd}
-            onTouchCancel={handleMapTouchCancel}
-          >
-            <div
-              className="map-content"
-              style={{ width: mapWidth, height: mapHeight }}
-            >
-              <svg
-                className="map-links"
-                width={mapWidth}
-                height={mapHeight}
-                viewBox={`0 0 ${mapWidth} ${mapHeight}`}
-                aria-hidden="true"
-              >
-                {layout.edges.map((edge) => {
-                  // Hide lines when either connected node is hidden or above the header (but not horizontally off-screen)
-                  if (!nodeIdsForEdges.has(edge.from) || !nodeIdsForEdges.has(edge.to)) {
-                    return null;
-                  }
-                  // Skip edges involving the hidden root node if root is above header
-                  if (isRootAboveHeader && (edge.from === rootNode.id || edge.to === rootNode.id)) {
-                    return null;
-                  }
-                  const from = layout.positions.get(edge.from);
-                  const to = layout.positions.get(edge.to);
                   if (!from || !to) return null;
                   const x1 = from.x + offsetX + renderOffsetX + nodeWidth / 2;
                   const y1 = from.y + offsetY + renderOffsetY + nodeHeight;
