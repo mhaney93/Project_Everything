@@ -4104,6 +4104,13 @@ function App() {
   const handleMapTouchEnd = (e) => {
     if (dragButton === 'touch' && dragStart) {
       setBasePanOffset((prev) => clampPanOffset({ x: prev.x + dragOffset.x, y: prev.y + dragOffset.y }))
+      debugLog('Touch drag end offset:', {
+        dragOffset,
+        basePanOffset,
+        shift: lastShiftRef.current
+      });
+      // Force a re-render after touch drag ends
+      setRecenterKey((k) => k + 1);
     }
     setDragOffset({ x: 0, y: 0 })
     setIsDragging(false)
