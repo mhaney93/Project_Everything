@@ -4140,7 +4140,9 @@ function App() {
       // Now the event handler or block is properly closed
     }
     // Now the event handler or block is properly closed
-    if (e.key === 'ArrowDown') {
+  }
+  // Now the event handler or block is properly closed
+  if (e.key === 'ArrowDown') {
                     e.preventDefault()
                     setHighlightedSuggestion((prev) =>
                       prev < totalItems - 1 ? prev + 1 : prev
