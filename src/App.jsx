@@ -15,34 +15,29 @@ const PASSWORD_RULES = [
     id: 'length',
     label: 'At least 8 characters',
     test: (value) => value.length >= 8,
-  },
-  {
-    id: 'lowercase',
-    label: 'At least 1 lowercase letter',
-    test: (value) => /[a-z]/.test(value),
-  },
-  {
-    id: 'uppercase',
-    label: 'At least 1 uppercase letter',
-    test: (value) => /[A-Z]/.test(value),
-  },
-  {
-    id: 'number',
-    label: 'At least 1 number',
-    test: (value) => /\d/.test(value),
-  },
-  {
+                    })}
+                  </div>
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+          </form>
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+          </form>
     id: 'special',
     label: 'At least 1 special character',
     test: (value) => /[^A-Za-z0-9]/.test(value),
-  },
-]
-
-const getPasswordRuleChecks = (password) => {
-  const value = password || ''
-  return PASSWORD_RULES.map((rule) => ({
-    id: rule.id,
-    label: rule.label,
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+          </form>
     met: rule.test(value),
   }))
 }
@@ -4249,9 +4244,8 @@ function App() {
 
                   </div>
                 );
-              }
-              export default App;
-            </form>
+              )}
+              </form>
           </div>
         </div>
         <div className="top-left" ref={createModeButtonsRef}>
