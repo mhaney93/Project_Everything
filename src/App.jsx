@@ -4108,6 +4108,19 @@ function App() {
               <span className="title-right title-bottom">Mapped</span>
             </p>
           </div>
+                {showCreateNodeHint && createNodeMode && (
+                  <div
+                    className="create-node-hint"
+                    role="status"
+                    aria-live="polite"
+                    style={createNodeHintPosition ? {
+                      top: `${createNodeHintPosition.top}px`,
+                      left: `${createNodeHintPosition.left}px`,
+                    } : undefined}
+                  >
+                    Click anywhere to create a node
+                  </div>
+                )}
           <div className="search-row" ref={searchRowRef}>
             <form onSubmit={(e) => {
               e.preventDefault()
