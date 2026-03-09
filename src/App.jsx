@@ -4144,6 +4144,7 @@ function App() {
   // Now the event handler or block is properly closed
   }
 }
+}
 if (e.key === 'ArrowDown') {
                     e.preventDefault()
                     setHighlightedSuggestion((prev) =>
