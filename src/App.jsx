@@ -2959,7 +2959,9 @@ function App() {
   // Do not clamp vertical pan: allow content to move behind the header region.
   // To prevent pop/re-overlap artifacts while dragging, never fall back to showing hidden nodes.
   // Viewport culling: only render nodes visible in viewport (with buffer for smooth panning)
-  const VIEWPORT_BUFFER = 500; // Extra pixels around viewport to render
+  // Increase buffer for mobile devices to ensure distant nodes render during drag/pan
+  const isMobile = typeof window !== 'undefined' && (window.innerWidth < 768 || 'ontouchstart' in window);
+  const VIEWPORT_BUFFER = isMobile ? 2000 : 500; // Larger buffer for mobile
   const renderableNodes = nodes.filter((node) => {
     // Always exclude explicitly hidden nodes
     if (node.hidden === true) return false;
