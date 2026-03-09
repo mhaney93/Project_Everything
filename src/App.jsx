@@ -4225,7 +4225,7 @@ function App() {
                   <div className="related-ideas">
                     <div className="related-ideas-title">Suggested Topics</div>
                     {relatedIdeas.map((idea, idx) => {
-                      const highlightIdx = searchSuggestions.length + idx
+                      const highlightIdx = searchSuggestions.length + idx;
                       return (
                         <button
                           key={idea}
@@ -4233,35 +4233,22 @@ function App() {
                           className={"suggestion-item related-idea-item" + (highlightIdx === highlightedSuggestion ? " highlighted" : "")}
                           type="button"
                           onClick={() => {
-                            setSearchQuery(idea)
-                            setRelatedIdeas([])
+                            setSearchQuery(idea);
+                            setRelatedIdeas([]);
                             setTimeout(() => {
-                              handleSearchWithQuery(idea)
-                            }, 0)
+                              handleSearchWithQuery(idea);
+                            }, 0);
                           }}
                           onMouseEnter={() => setHighlightedSuggestion(highlightIdx)}
                           onMouseLeave={() => setHighlightedSuggestion(-1)}
                         >
                           {idea}
                         </button>
-                      )
+                      );
                     })}
-
                   </div>
-                );
-              }
+                )}
 
-              <div className={`notification notification-${notification.type} notification-under-search`}>
-                <div className="notification-content">
-                  <p>{notification.message}</p>
-                  <button
-                    className="notification-close"
-                    onClick={() => setNotification(null)}
-                    aria-label="Close notification"
-                  >
-                    ✕
-                  </button>
-                </div>
               </div>
             )}
             </form>
