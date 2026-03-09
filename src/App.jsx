@@ -4218,11 +4218,11 @@ function App() {
                         </button>
                       );
                     })}
-
                   </div>
-                );
-              )}
-              </form>
+                )}
+              </div>
+            )}
+          </form>
           </div>
         </div>
         <div className="top-left" ref={createModeButtonsRef}>
