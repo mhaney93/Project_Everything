@@ -4481,8 +4481,8 @@ export default App;
             )}
           </div>
         </div>
-      </header>
       )}
+    </header>
 
       {isFullscreenMode && showFullscreenHint && (
         <div className="fullscreen-exit-hint" role="status" aria-live="polite">
