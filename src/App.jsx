@@ -4250,7 +4250,7 @@ function App() {
                   </div>
                 );
               }
-              export default App;
+
               <div className={`notification notification-${notification.type} notification-under-search`}>
                 <div className="notification-content">
                   <p>{notification.message}</p>
