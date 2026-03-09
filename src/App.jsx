@@ -15,19 +15,9 @@ const PASSWORD_RULES = [
     id: 'length',
     label: 'At least 8 characters',
     test: (value) => value.length >= 8,
-                    })}
-                  </div>
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
-          </form>
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
+  },
+  // ...other rules can be added here
+];
           </form>
     id: 'special',
     label: 'At least 1 special character',
