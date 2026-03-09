@@ -4119,24 +4119,24 @@ function App() {
                     } : undefined}
                   >
                     Click anywhere to create a node
-                  </div>
-                )}
-          <div className="search-row" ref={searchRowRef}>
-            <form onSubmit={(e) => {
-              e.preventDefault()
-              handleSearchWithQuery(searchQuery)
-            }}>
-            <input
-              ref={searchInputRef}
-              className="search-input"
-              type="text"
-              placeholder="Search ideas"
-              aria-label="Search ideas"
-              value={searchQuery}
-              onChange={handleSearchInputChange}
-              onKeyDown={(e) => {
-                const totalItems = searchSuggestions.length + relatedIdeas.length
-                if (totalItems > 0) {
+                  )}
+                </div>
+              </div>
+            )}
+            {showCreateNodeHint && createNodeMode && (
+              <div
+                className="create-node-hint"
+                role="status"
+                aria-live="polite"
+                style={createNodeHintPosition ? {
+                  top: `${createNodeHintPosition.top}px`,
+                  left: `${createNodeHintPosition.left}px`,
+                } : undefined}
+              >
+                Click anywhere to create a node
+              </div>
+            )}
+          </header>
                   if (e.key === 'ArrowDown') {
                     e.preventDefault()
                     setHighlightedSuggestion((prev) =>
