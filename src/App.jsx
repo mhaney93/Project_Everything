@@ -4220,7 +4220,6 @@ function App() {
                     {isFullscreenMode ? 'Exit' : 'Enter'}
                   </button>
                 </div>
-
               </div>
             )}
           </div>
@@ -4231,13 +4230,6 @@ function App() {
 }
 
 export default App;
-            style={{ 
-              cursor: isDragging ? 'grabbing' : 'grab'
-            }}
-            ref={canvasRef}
-            onMouseDown={handleMapMouseDown}
-            onMouseMove={handleMapMouseMove}
-            onMouseUp={handleMapMouseUp}
             onMouseLeave={handleMapMouseLeave}
             onTouchStart={handleMapTouchStart}
             onTouchMove={handleMapTouchMove}
