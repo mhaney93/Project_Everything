@@ -4150,6 +4150,7 @@ function App() {
 }
 }
 }
+}
 if (e.key === 'ArrowDown') {
                     e.preventDefault()
                     setHighlightedSuggestion((prev) =>
