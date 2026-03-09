@@ -4018,9 +4018,9 @@ function App() {
       };
     };
 
+  // Mouse drag handlers
   const handleMapMouseDown = (e) => {
     if (e.button === 0) {
-      // Left click: normal drag
       e.preventDefault()
       didDragRef.current = false
       suppressClickRef.current = false
@@ -4030,10 +4030,8 @@ function App() {
       setDragOffset({ x: 0, y: 0 })
     }
   }
-
   const handleMapMouseMove = (e) => {
     if (dragStart) {
-      // Normal drag mode
       const deltaX = dragStart.x - e.clientX
       const deltaY = dragStart.y - e.clientY
       if (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8) {
@@ -4049,10 +4047,8 @@ function App() {
       })
     }
   }
-
   const handleMapMouseUp = (e) => {
     if (dragButton === 0 && dragStart) {
-      // Left button released: commit drag offset
       setBasePanOffset((prev) => clampPanOffset({ x: prev.x + dragOffset.x, y: prev.y + dragOffset.y }))
     }
     setDragOffset({ x: 0, y: 0 })
@@ -4062,8 +4058,59 @@ function App() {
     suppressClickRef.current = didDragRef.current
     didDragRef.current = false
   }
-
   const handleMapMouseLeave = () => {
+    if (dragStart) {
+      setBasePanOffset((prev) => clampPanOffset({ x: prev.x + dragOffset.x, y: prev.y + dragOffset.y }))
+      setDragOffset({ x: 0, y: 0 })
+    }
+    setIsDragging(false)
+    setDragStart(null)
+    setDragButton(null)
+    suppressClickRef.current = didDragRef.current
+    didDragRef.current = false
+  }
+
+  // Touch drag handlers for mobile
+  const handleMapTouchStart = (e) => {
+    if (e.touches && e.touches.length === 1) {
+      e.preventDefault()
+      didDragRef.current = false
+      suppressClickRef.current = false
+      setIsDragging(true)
+      setDragStart({ x: e.touches[0].clientX, y: e.touches[0].clientY })
+      setDragButton('touch')
+      setDragOffset({ x: 0, y: 0 })
+    }
+  }
+  const handleMapTouchMove = (e) => {
+    if (dragStart && e.touches && e.touches.length === 1) {
+      const deltaX = dragStart.x - e.touches[0].clientX
+      const deltaY = dragStart.y - e.touches[0].clientY
+      if (Math.abs(deltaX) > 8 || Math.abs(deltaY) > 8) {
+        didDragRef.current = true
+      }
+      const clampedPreviewPan = clampPanOffset({
+        x: basePanOffset.x + deltaX,
+        y: basePanOffset.y + deltaY,
+      })
+      setDragOffset({
+        x: clampedPreviewPan.x - basePanOffset.x,
+        y: clampedPreviewPan.y - basePanOffset.y,
+      })
+    }
+  }
+  const handleMapTouchEnd = (e) => {
+    if (dragButton === 'touch' && dragStart) {
+      setBasePanOffset((prev) => clampPanOffset({ x: prev.x + dragOffset.x, y: prev.y + dragOffset.y }))
+    }
+    setDragOffset({ x: 0, y: 0 })
+    setIsDragging(false)
+    setDragStart(null)
+    setDragButton(null)
+    suppressClickRef.current = didDragRef.current
+    didDragRef.current = false
+  }
+  const handleMapTouchCancel = () => {
     if (dragStart) {
       setBasePanOffset((prev) => clampPanOffset({ x: prev.x + dragOffset.x, y: prev.y + dragOffset.y }))
       setDragOffset({ x: 0, y: 0 })
@@ -4515,6 +4562,10 @@ function App() {
             onMouseMove={handleMapMouseMove}
             onMouseUp={handleMapMouseUp}
             onMouseLeave={handleMapMouseLeave}
+            onTouchStart={handleMapTouchStart}
+            onTouchMove={handleMapTouchMove}
+            onTouchEnd={handleMapTouchEnd}
+            onTouchCancel={handleMapTouchCancel}
           >
             <div
               className="map-content"
