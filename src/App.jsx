@@ -4105,8 +4105,12 @@ function App() {
                     })}
                   </div>
                 )}
-            </div>
-          <div className="top-left" ref={createModeButtonsRef}>
+              </div> {/* Close search-suggestions dropdown */}
+            )}
+          </form> {/* Close search form */}
+        </div> {/* Close title-block */}
+      </header> {/* Close header */}
+      <div className="top-left" ref={createModeButtonsRef}>
           <div className="top-button-group">
             <button
               className={`top-link ${createNodeMode === 'child' ? 'active' : ''}`}
