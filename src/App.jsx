@@ -2187,83 +2187,94 @@ function App() {
           node.parentId === parentNodeId ? { ...node, hidden: true } : node
         )
       )
-      setAnimatingIds(new Set())
-      setSelectedId(null)
-      setBasePanOffset({ x: 0, y: 0 })
-      setRecenterKey((k) => k + 1)
-      return { expanded: false }
-    } else {
-      let updatedNodes = nodes.map((node) => {
-        if (node.parentId === parentNodeId && node.hidden) {
-          return { ...node, hidden: false }
-        }
-        if (node.parentId !== parentNodeId) {
-          const ancestors = new Set()
-          let current = node
-          while (current && current.parentId) {
-            ancestors.add(current.parentId)
-            current = nodes.find(n => n.id === current.parentId)
-          }
-          if (ancestors.has(parentNodeId)) {
-            return { ...node, hidden: true }
-          }
-        }
-        return node
-      })
-
-      const allChildren = updatedNodes.filter((node) => node.parentId === parentNodeId)
-      const existingPredefined = allChildren.filter((node) => !node.isCustom)
-
-      if (existingPredefined.length === 0) {
-        let labels = ['Concept A', 'Concept B']
-        if (parentNodeId === 1) {
-          labels = ['Humanities', 'Sciences']
-        } else {
-          labels = await getChildSuggestions(parent.label)
-        }
-
-        const maxExistingId = updatedNodes.reduce((maxId, node) => {
-          if (!node || !Number.isFinite(node.id)) return maxId
-          return Math.max(maxId, node.id)
-        }, 0)
-        const startId = Math.max(nextId.current, maxExistingId + 1)
-
-        const newNodeIds = Array.from({ length: labels.length }, (_, i) => startId + i)
-        const newNodes = Array.from({ length: labels.length }, (_, index) => ({
-          id: startId + index,
-          label: labels[index],
-          parentId: parentNodeId,
-          hidden: false,
-          summary: generateSummary(labels[index]),
-        }))
-
-        nextId.current = startId + newNodes.length
-
-        if (enableAnimations) {
-          setAnimatingIds(new Set(newNodeIds))
-          updatedNodes = [...updatedNodes, ...newNodes]
-          setNodes(updatedNodes)
-          requestAnimationFrame(() => setAnimatingIds(new Set()))
-        } else {
-          updatedNodes = [...updatedNodes, ...newNodes]
-          setNodes(updatedNodes)
-        }
+      if (existingChildren.length > 0) {
+        setNodes((prev) =>
+          prev.map((node) =>
+            node.parentId === parentNodeId ? { ...node, hidden: true } : node
+          )
+        )
+        setAnimatingIds(new Set())
+        setSelectedId(null)
         setBasePanOffset({ x: 0, y: 0 })
         setRecenterKey((k) => k + 1)
-        return { expanded: true, firstChildId: newNodes[0]?.id }
+        return { expanded: false }
       } else {
-        setNodes(updatedNodes)
-        setBasePanOffset({ x: 0, y: 0 })
-        setRecenterKey((k) => k + 1)
-        const firstChild = updatedNodes.find((node) => node.parentId === parentNodeId && !node.hidden)
-        return { expanded: true, firstChildId: firstChild?.id }
-      }
-    }
-  }
+        let updatedNodes = nodes.map((node) => {
+          if (node.parentId === parentNodeId && node.hidden) {
+            return { ...node, hidden: false }
+          }
+          if (node.parentId !== parentNodeId) {
+            const ancestors = new Set()
+            let current = node
+            while (current && current.parentId) {
+              ancestors.add(current.parentId)
+              current = nodes.find(n => n.id === current.parentId)
+            }
+            if (ancestors.has(parentNodeId)) {
+              return { ...node, hidden: true }
+            }
+          }
+          return node
+        })
 
-  const addNoteToNode = (nodeId, options = {}) => {
-    const { afterNoteId = null, level = 0 } = options
-    const newNote = {
+        const allChildren = updatedNodes.filter((node) => node.parentId === parentNodeId)
+        const existingPredefined = allChildren.filter((node) => !node.isCustom)
+
+        let firstChildId = null;
+        if (existingPredefined.length === 0) {
+          let labels = ['Concept A', 'Concept B']
+          if (parentNodeId === 1) {
+            labels = ['Humanities', 'Sciences']
+          } else {
+            labels = await getChildSuggestions(parent.label)
+          }
+
+          const maxExistingId = updatedNodes.reduce((maxId, node) => {
+            if (!node || !Number.isFinite(node.id)) return maxId
+            return Math.max(maxId, node.id)
+          }, 0)
+          const startId = Math.max(nextId.current, maxExistingId + 1)
+          const newNodeIds = Array.from({ length: labels.length }, (_, i) => startId + i)
+          const newNodes = Array.from({ length: labels.length }, (_, index) => ({
+            id: startId + index,
+            label: labels[index],
+            parentId: parentNodeId,
+            hidden: false,
+            summary: generateSummary(labels[index]),
+          }))
+
+          nextId.current = startId + newNodes.length
+          firstChildId = newNodes[0]?.id;
+
+          if (enableAnimations) {
+            setAnimatingIds(new Set(newNodeIds))
+            updatedNodes = [...updatedNodes, ...newNodes]
+            setNodes(updatedNodes)
+            requestAnimationFrame(() => setAnimatingIds(new Set()))
+          } else {
+            updatedNodes = [...updatedNodes, ...newNodes]
+            setNodes(updatedNodes)
+          }
+        } else {
+          setNodes(updatedNodes)
+          const firstChild = updatedNodes.find((node) => node.parentId === parentNodeId && !node.hidden)
+          firstChildId = firstChild?.id;
+        }
+
+        // Center on the first child after expansion
+        if (firstChildId) {
+          // Wait for layout update
+          setTimeout(() => {
+            const layout = buildLayout(updatedNodes, TOPIC_SUBDIVISIONS, NODE_WIDTH, NODE_HEIGHT);
+            const pos = layout.positions.get(firstChildId);
+            if (pos) {
+              setBasePanOffset({ x: -pos.x + windowSize.width / 2 - NODE_WIDTH / 2, y: -pos.y + windowSize.height / 2 - NODE_HEIGHT / 2 });
+              setRecenterKey((k) => k + 1);
+            }
+          }, 0);
+        }
+        return { expanded: true, firstChildId };
+      }
       id: `note-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       text: '',
       level: Math.max(0, Math.min(5, level)),
