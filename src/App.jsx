@@ -199,6 +199,8 @@ const buildLayout = (nodes, topicSubdivisions = {}, nodeWidth = NODE_WIDTH, node
     });
   };
 
+  // <-- Add missing closing brace for assignPositions here
+
   calculateSubtreeWidth(root.id);
   assignPositions(root.id, 0, 0);
 
@@ -240,6 +242,8 @@ function App() {
     const normalizeLoadedNodes = (mapNodes) => {
       return applyLabelMigrations(mapNodes)
     }
+// ...existing code...
+}
 
     const collapseNodesToRoot = (mapNodes) => {
       return mapNodes.map((node) => ({
@@ -2197,6 +2201,7 @@ function App() {
         return { expanded: true, firstChildId };
       }
     }
+  }
 
   const addNoteToNode = (nodeId, options = {}) => {
     const { afterNoteId = null, level = 0 } = options;
@@ -4224,7 +4229,6 @@ function App() {
             )}
           </div>
         </div>
-      )}
     {/* Main map and panels */}
     <main className="app-main">
       <section className="map-panel" ref={mapPanelRef}>

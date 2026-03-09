@@ -1,3 +1,16 @@
+## Docker Build Info
+
+The root Dockerfile builds the frontend inside the container:
+- Runs `npm ci` and `npm run build` during the build stage.
+- Copies the build output (`dist/`) to the Nginx image.
+- You do NOT need to run `npm run build` locally or commit `dist/`.
+- Just push your code, and when you redeploy, the container will build the frontend from your latest source.
+
+**Deployment steps:**
+1. Push your code.
+2. SSH into your server.
+3. Run the deployment commands (`git pull`, `docker compose up -d --build`).
+4. The Docker setup will build the frontend inside the container automatically.
 # Deployment Guide - HTTP-Only Cookie Auth
 
 > **Data Migrations:** Before deploying, review any pending label renames in `src/App.jsx` under `LABEL_MIGRATIONS_BY_VERSION`. See [SETUP.md](SETUP.md#data-migrations) or [README.md](README.md#data-migrations) for details.
