@@ -1619,6 +1619,14 @@ button:not(:disabled):hover {
     right: auto;
   }
 
+    /* Ensure button groups are side by side on mobile */
+    .top-left .top-button-group,
+    .top-right .top-button-group {
+      display: flex;
+      flex-direction: row;
+      gap: 0.5rem;
+    }
+
   .top-button-group {
     flex: 0 0 auto;
   }
