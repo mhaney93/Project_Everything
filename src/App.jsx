@@ -4337,9 +4337,9 @@ function App() {
                 </div>
 
               </div>
-            );
+              }
+            }
           }
-        }
 export default App;
               onClick={async () => {
                 const newState = openTooltip === 'profile' ? null : 'profile'
