@@ -4246,11 +4246,11 @@ function App() {
                         </button>
                       );
                     })}
-                  </div>
-                )}
 
-              </div>
-            )}
+                  </div>
+                );
+              }
+              export default App;
             </form>
           </div>
         </div>
@@ -4364,11 +4364,11 @@ function App() {
                     {isFullscreenMode ? 'Exit' : 'Enter'}
                   </button>
                 </div>
-              </div>
-            )}
-          </div>
 
-          <div className="top-button-group">
+              </div>
+            );
+          }
+          export default App;
             <button 
               className="top-link" 
               type="button"
