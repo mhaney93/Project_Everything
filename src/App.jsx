@@ -4134,7 +4134,7 @@ function App() {
                 Click anywhere to create a node
               </div>
             )}
-          </header>
+          </div>
                   if (e.key === 'ArrowDown') {
                     e.preventDefault()
                     setHighlightedSuggestion((prev) =>
