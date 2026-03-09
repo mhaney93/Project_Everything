@@ -4341,24 +4341,27 @@ function App() {
           }
         }
 export default App;
-              onClick={async () => {
-                const newState = openTooltip === 'profile' ? null : 'profile'
-                setOpenTooltip(newState)
-                if (newState === 'profile') {
-                  setAuthError('')
-                }
-                if (newState === 'profile' && currentUser) {
-                  try {
-                    const usage = await filesAPI.getStorageUsage()
-                    setStorageUsage(usage)
-                  } catch (err) {
-                    console.error('Failed to load storage usage:', err)
+              <button
+                type="button"
+                className="profile-btn"
+                onClick={async () => {
+                  const newState = openTooltip === 'profile' ? null : 'profile'
+                  setOpenTooltip(newState)
+                  if (newState === 'profile') {
+                    setAuthError('')
                   }
-                }
-              }}
-            >
-              Profile
-            </button>
+                  if (newState === 'profile' && currentUser) {
+                    try {
+                      const usage = await filesAPI.getStorageUsage()
+                      setStorageUsage(usage)
+                    } catch (err) {
+                      console.error('Failed to load storage usage:', err)
+                    }
+                  }
+                }}
+              >
+                Profile
+              </button>
             {openTooltip === 'profile' && (
               <div className="tooltip profile-tooltip">
                 {currentUser ? (
