@@ -4106,8 +4106,7 @@ function App() {
                   </div>
                 )}
             </div>
-            );
-        <div className="top-left" ref={createModeButtonsRef}>
+          <div className="top-left" ref={createModeButtonsRef}>
           <div className="top-button-group">
             <button
               className={`top-link ${createNodeMode === 'child' ? 'active' : ''}`}
