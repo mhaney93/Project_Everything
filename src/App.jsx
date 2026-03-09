@@ -2180,9 +2180,8 @@ function App() {
     const existingChildren = nodes.filter((node) => node.parentId === parentNodeId && !node.hidden)
     const nonCustomChildren = existingChildren.filter((node) => !node.isCustom)
     const hiddenChildren = nodes.filter((node) => node.parentId === parentNodeId && node.hidden)
-    
+
     if (existingChildren.length > 0) {
-      // Children are visible - hide them all (both predefined and custom)
       setNodes((prev) =>
         prev.map((node) =>
           node.parentId === parentNodeId ? { ...node, hidden: true } : node
@@ -2191,15 +2190,13 @@ function App() {
       setAnimatingIds(new Set())
       setSelectedId(null)
       setBasePanOffset({ x: 0, y: 0 })
+      setRecenterKey((k) => k + 1)
       return { expanded: false }
     } else {
-      // Children are hidden or don't exist - reveal and add predefined ones
-      // First, unhide direct children and hide their descendants
       let updatedNodes = nodes.map((node) => {
         if (node.parentId === parentNodeId && node.hidden) {
           return { ...node, hidden: false }
         }
-        // Hide all descendants of this parent
         if (node.parentId !== parentNodeId) {
           const ancestors = new Set()
           let current = node
@@ -2213,24 +2210,17 @@ function App() {
         }
         return node
       })
-      
-      // If there are no predefined children (hidden or visible), add them
+
       const allChildren = updatedNodes.filter((node) => node.parentId === parentNodeId)
       const existingPredefined = allChildren.filter((node) => !node.isCustom)
-      
+
       if (existingPredefined.length === 0) {
-        // No predefined children exist, create them
         let labels = ['Concept A', 'Concept B']
-        
-        // Special case for root node - use Humanities and Sciences
         if (parentNodeId === 1) {
           labels = ['Humanities', 'Sciences']
         } else {
-          // Get child suggestions using curated knowledge base or Wikipedia
           labels = await getChildSuggestions(parent.label)
         }
-
-        // Do not sort labels; preserve order from TOPIC_SUBDIVISIONS for chronology
 
         const maxExistingId = updatedNodes.reduce((maxId, node) => {
           if (!node || !Number.isFinite(node.id)) return maxId
@@ -2248,23 +2238,23 @@ function App() {
         }))
 
         nextId.current = startId + newNodes.length
-        
+
         if (enableAnimations) {
           setAnimatingIds(new Set(newNodeIds))
           updatedNodes = [...updatedNodes, ...newNodes]
           setNodes(updatedNodes)
-          // Clear immediately for animation to trigger
           requestAnimationFrame(() => setAnimatingIds(new Set()))
         } else {
           updatedNodes = [...updatedNodes, ...newNodes]
           setNodes(updatedNodes)
         }
-        // Return the first child's ID
+        setBasePanOffset({ x: 0, y: 0 })
+        setRecenterKey((k) => k + 1)
         return { expanded: true, firstChildId: newNodes[0]?.id }
       } else {
-        // Just unhiding existing children
         setNodes(updatedNodes)
-        // Return the first visible child's ID
+        setBasePanOffset({ x: 0, y: 0 })
+        setRecenterKey((k) => k + 1)
         const firstChild = updatedNodes.find((node) => node.parentId === parentNodeId && !node.hidden)
         return { expanded: true, firstChildId: firstChild?.id }
       }
