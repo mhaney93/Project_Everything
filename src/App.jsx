@@ -4226,81 +4226,10 @@ function App() {
           }
         </div>
       )}
-    </div> {/* End settings/profile parent div */}
-    <header className="app-header" ref={headerRef}>
-      <div className="storage-section">
-        <div className="storage-header">
-          <span className="storage-label">Storage Usage</span>
-          <span className="storage-amount">{storageUsage.usedGB} / {storageUsage.limitGB} GB</span>
-        </div>
-        <div className="storage-bar">
-          <div className="storage-bar-fill storage-bar-files" style={{ width: `${(storageUsage.fileStorage / storageUsage.limit) * 100}%` }} title={`Files: ${storageUsage.fileStorageGB} GB`} />
-          <div className="storage-bar-fill storage-bar-notes" style={{ width: `${(storageUsage.mapStorage / storageUsage.limit) * 100}%` }} title={`Notes/Nodes: ${storageUsage.mapStorageGB} GB`} />
-        </div>
-        <div className="storage-legend">
-          <div className="storage-legend-item">
-            <span className="storage-legend-color storage-legend-files"></span>
-            <span className="storage-legend-text">Files ({storageUsage.fileStorageGB} GB)</span>
-          </div>
-          <div className="storage-legend-item">
-            <span className="storage-legend-color storage-legend-notes"></span>
-            <span className="storage-legend-text">Notes ({storageUsage.mapStorageGB} GB)</span>
-          </div>
-        </div>
-      </div>
-      <div className="profile-section">
-        {user ? (
-          <>
-            <button className="profile-action profile-action-secondary" type="button" onClick={() => alert('Storage upgrade coming soon!')}>Upgrade Storage</button>
-            <button className="profile-action" type="button" onClick={handleLogout}>Logout</button>
-          </>
-        ) : (
-          <>
-            <h3>{isSignUp ? 'Sign Up' : 'Sign In'}</h3>
-            <div className="auth-form">
-              <input type="email" placeholder="Email" value={loginForm.email} onChange={(e) => { setLoginForm({ ...loginForm, email: e.target.value }); if (authError) setAuthError(''); }} className="auth-input" />
-              <input type="password" placeholder="Password" value={loginForm.password} onChange={(e) => { setLoginForm({ ...loginForm, password: e.target.value }); if (authError) setAuthError(''); }} className="auth-input" />
-              {isSignUp && (
-                <div className="auth-password-requirements" aria-live="polite">
-                  <p className="auth-password-title">Password requirements:</p>
-                  <ul>
-                    {passwordRuleChecks.map((rule) => (
-                      <li key={rule.id} className={rule.met ? 'met' : 'unmet'}>
-                        <span className="requirement-icon" aria-hidden="true">{rule.met ? '✓' : '✗'}</span>
-                        <span>{rule.label}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              {authError && (
-                <div className="auth-error" role="alert">{authError}</div>
-              )}
-              <button className="profile-action" type="button" onClick={handleLogin}>{isSignUp ? 'Create Account' : 'Sign In'}</button>
-              <button className="profile-action" type="button" onClick={() => { setIsSignUp(!isSignUp); setAuthError(''); }} style={{ background: 'transparent', opacity: 0.7 }}>{isSignUp ? 'Already have account?' : 'Need account?'}</button>
-            </div>
-          </>
-        )}
-      </div>
-    </header>
-    // ...existing code...
 
-    export default App;
-    {showCreateNodeHint && createNodeMode && (
-      <div
-        className="create-node-hint"
-        role="status"
-        aria-live="polite"
-        style={createNodeHintPosition ? {
-          top: `${createNodeHintPosition.top}px`,
-          left: `${createNodeHintPosition.left}px`,
-        } : undefined}
-      >
-        {createNodeMode === 'child'
-          ? 'Click the node you want to add a child to'
-          : 'Click the node you want to add a sibling to'}
-      </div>
-    )}
+// ...existing code...
+
+export default App;
 
     {/* ...existing code... */}
     <main className="app-main">
