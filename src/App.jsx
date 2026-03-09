@@ -4230,12 +4230,10 @@ export default App;
                           <span className="storage-amount">{storageUsage.usedGB} / {storageUsage.limitGB} GB</span>
                         </div>
                         <div className="storage-bar">
-                          <div 
-                            className="storage-bar-fill storage-bar-files" 
-                            style={{ width: `${(storageUsage.fileStorage / storageUsage.limit) * 100}%` }}
-                            title={`Files: ${storageUsage.fileStorageGB} GB`}
-                          />
-                          <div 
+                          </div>
+                        </div>
+                      )}
+                    </header>
                             className="storage-bar-fill storage-bar-notes" 
                             style={{ width: `${(storageUsage.mapStorage / storageUsage.limit) * 100}%` }}
                             title={`Notes/Nodes: ${storageUsage.mapStorageGB} GB`}
