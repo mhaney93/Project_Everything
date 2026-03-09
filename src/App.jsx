@@ -2952,32 +2952,23 @@ function App() {
   // Increase buffer for mobile devices to ensure distant nodes render during drag/pan
   const isMobile = typeof window !== 'undefined' && (window.innerWidth < 768 || 'ontouchstart' in window);
   const VIEWPORT_BUFFER = isMobile ? 2000 : 500; // Larger buffer for mobile
+  // Disable viewport culling for mobile devices to render all nodes
   const renderableNodes = nodes.filter((node) => {
-    // Always exclude explicitly hidden nodes
     if (node.hidden === true) return false;
-    
+    if (isMobile) return true;
     const pos = layout.positions.get(node.id);
     if (!pos) return true;
-    
-    // Calculate node position on screen
     const screenX = pos.x + offsetX + renderOffsetX;
     const screenY = pos.y + offsetY + renderOffsetY;
-    
-    // Exclude nodes whose top edge is at or above the header (search bar) - don't show them to prevent overlap
     if (screenY < effectiveHeaderHeight) return false;
-    
-    // Viewport culling: check if node is within visible viewport bounds (with buffer)
     const viewportLeft = -VIEWPORT_BUFFER;
     const viewportRight = windowSize.width + VIEWPORT_BUFFER;
     const viewportTop = effectiveHeaderHeight - VIEWPORT_BUFFER;
     const viewportBottom = windowSize.height + VIEWPORT_BUFFER;
-    
-    // Check if node is completely outside viewport
-    if (screenX + nodeWidth < viewportLeft) return false;  // Too far left
-    if (screenX > viewportRight) return false;              // Too far right
-    if (screenY + nodeHeight < viewportTop) return false;  // Too far up
-    if (screenY > viewportBottom) return false;              // Too far down
-    
+    if (screenX + nodeWidth < viewportLeft) return false;
+    if (screenX > viewportRight) return false;
+    if (screenY + nodeHeight < viewportTop) return false;
+    if (screenY > viewportBottom) return false;
     return true;
   });
   const renderableNodeIds = new Set(renderableNodes.map((node) => node.id));
