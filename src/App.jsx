@@ -17,7 +17,7 @@ const PASSWORD_RULES = [
     test: (value) => value.length >= 8,
   },
   // Add more rules here as needed
-  ];
+];
 
 // ...existing code...
 
@@ -4049,75 +4049,78 @@ function App() {
   }
 
   return (
-    <div className={`app-shell${isFullscreenMode ? ' fullscreen-mode' : ''}`} style={{ '--header-height': `${effectiveHeaderHeight}px` }}>
-      {!isFullscreenMode && (
-      <header className="app-header" ref={headerRef}>
-        <div className="title-block">
-          <div className="title-stack" aria-label="Everything">
-            <h1 className="title">
-              <span className="cool-e">E</span>verything
-            </h1>
-            <p className="title-sub title-grid" aria-hidden="true">
-              <span className="title-left title-bottom">Knowledge</span>
-              <span className="title-right title-bottom">Mapped</span>
-            </p>
-          </div>
-          <form className="search-bar" onSubmit={e => { e.preventDefault(); handleSearchWithQuery(searchQuery); }}>
-            {/* ...search input and handlers here... */}
-            {/* Suggestions dropdown */}
-            {(searchSuggestions.length > 0 || relatedIdeas.length > 0) && (
-              <div className="search-suggestions" ref={searchSuggestionsRef}>
-                {searchSuggestions.map((suggestion, idx) => (
-                  <button
-                    key={suggestion}
-                    data-suggestion-index={idx}
-                    className={
-                      "suggestion-item" +
-                      (idx === highlightedSuggestion ? " highlighted" : "")
-                    }
-                    type="button"
-                    onClick={() => handleSuggestionClick(suggestion)}
-                    onMouseEnter={() => setHighlightedSuggestion(idx)}
-                    onMouseLeave={() => setHighlightedSuggestion(-1)}
-                  >
-                    {suggestion}
-                  </button>
-                ))}
-                {hasValidSearchWords && relatedIdeas.length > 0 && (
-                  <div className="related-ideas">
-                    <div className="related-ideas-title">Suggested Topics</div>
-                    {relatedIdeas.map((idea, idx) => {
-                      const highlightIdx = searchSuggestions.length + idx;
-                      return (
-                        <button
-                          key={idea}
-                          data-suggestion-index={highlightIdx}
-                          className={"suggestion-item related-idea-item" + (highlightIdx === highlightedSuggestion ? " highlighted" : "")}
-                          type="button"
-                          onClick={() => {
-                            setSearchQuery(idea);
-                            setRelatedIdeas([]);
-                            setTimeout(() => {
-                              handleSearchWithQuery(idea);
-                            }, 0);
-                          }}
-                          onMouseEnter={() => setHighlightedSuggestion(highlightIdx)}
-                          onMouseLeave={() => setHighlightedSuggestion(-1)}
-                        >
-                          {idea}
-                        </button>
-                      );
-                    })}
+    <>
+      <div className={`app-shell${isFullscreenMode ? ' fullscreen-mode' : ''}`} style={{ '--header-height': `${effectiveHeaderHeight}px` }}>
+        {!isFullscreenMode && (
+          <header className="app-header" ref={headerRef}>
+            <div className="title-block">
+              <div className="title-stack" aria-label="Everything">
+                <h1 className="title">
+                  <span className="cool-e">E</span>verything
+                </h1>
+                <p className="title-sub title-grid" aria-hidden="true">
+                  <span className="title-left title-bottom">Knowledge</span>
+                  <span className="title-right title-bottom">Mapped</span>
+                </p>
+              </div>
+              <form className="search-bar" onSubmit={e => { e.preventDefault(); handleSearchWithQuery(searchQuery); }}>
+                {/* ...search input and handlers here... */}
+                {/* Suggestions dropdown */}
+                {(searchSuggestions.length > 0 || relatedIdeas.length > 0) && (
+                  <div className="search-suggestions" ref={searchSuggestionsRef}>
+                    {searchSuggestions.map((suggestion, idx) => (
+                      <button
+                        key={suggestion}
+                        data-suggestion-index={idx}
+                        className={
+                          "suggestion-item" +
+                          (idx === highlightedSuggestion ? " highlighted" : "")
+                        }
+                        type="button"
+                        onClick={() => handleSuggestionClick(suggestion)}
+                        onMouseEnter={() => setHighlightedSuggestion(idx)}
+                        onMouseLeave={() => setHighlightedSuggestion(-1)}
+                      >
+                        {suggestion}
+                      </button>
+                    ))}
+                    {hasValidSearchWords && relatedIdeas.length > 0 && (
+                      <div className="related-ideas">
+                        <div className="related-ideas-title">Suggested Topics</div>
+                        {relatedIdeas.map((idea, idx) => {
+                          const highlightIdx = searchSuggestions.length + idx;
+                          return (
+                            <button
+                              key={idea}
+                              data-suggestion-index={highlightIdx}
+                              className={"suggestion-item related-idea-item" + (highlightIdx === highlightedSuggestion ? " highlighted" : "")}
+                              type="button"
+                              onClick={() => {
+                                setSearchQuery(idea);
+                                setRelatedIdeas([]);
+                                setTimeout(() => {
+                                  handleSearchWithQuery(idea);
+                                }, 0);
+                              }}
+                              onMouseEnter={() => setHighlightedSuggestion(highlightIdx)}
+                              onMouseLeave={() => setHighlightedSuggestion(-1)}
+                            >
+                              {idea}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
                   </div>
                 )}
-              </div>
-            )}
-          </form> {/* Close search form */}
-        </div> {/* Close title-block */}
-      </header> {/* Close header */}
-      <div className="top-left" ref={createModeButtonsRef}>
-          <div className="top-button-group">
-            <button
+              </form> {/* Close search form */}
+            </div> {/* Close title-block */}
+          </header>
+        )}
+      {/* Close conditional header block here */}
+        <div className="top-left" ref={createModeButtonsRef}>
+        <div className="top-button-group">
+          <button
               className={`top-link ${createNodeMode === 'child' ? 'active' : ''}`}
               type="button"
               title="Click to enable, then click a node to create a child"
@@ -4279,7 +4282,7 @@ function App() {
       {/* ...side panel, modals, etc... */}
     </main>
   </div>
+  </>
   );
-}
 
 export default App;
