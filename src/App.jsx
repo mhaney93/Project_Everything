@@ -4279,15 +4279,6 @@ function App() {
 }
 
 export default App;
-                  if (!from || !to) return null;
-                  const x1 = from.x + offsetX + renderOffsetX + nodeWidth / 2;
-                  const y1 = from.y + offsetY + renderOffsetY + nodeHeight;
-                  const x2 = to.x + offsetX + renderOffsetX + nodeWidth / 2;
-                  const y2 = to.y + offsetY + renderOffsetY;
-                  const dy = y2 - y1;
-                  const d = `M ${x1} ${y1} C ${x1} ${y1 + dy * 0.35}, ${x2} ${y2 - dy * 0.35}, ${x2} ${y2}`;
-                  return <path key={`${edge.from}-${edge.to}`} d={d} />;
-                })}
               </svg>
 
               <div
