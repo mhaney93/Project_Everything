@@ -4057,7 +4057,9 @@ function App() {
               <span className="title-right title-bottom">Mapped</span>
             </p>
           </div>
-          {/* ...existing code for search bar and create node hint goes here... */}
+          <form className="search-bar" onSubmit={e => { e.preventDefault(); handleSearchWithQuery(searchQuery); }}>
+            {/* ...search input and handlers here... */}
+            {/* Suggestions dropdown */}
             {(searchSuggestions.length > 0 || relatedIdeas.length > 0) && (
               <div className="search-suggestions" ref={searchSuggestionsRef}>
                 {searchSuggestions.map((suggestion, idx) => (
@@ -4106,8 +4108,6 @@ function App() {
               </div>
             )}
           </form>
-          </div>
-        </div>
         <div className="top-left" ref={createModeButtonsRef}>
           <div className="top-button-group">
             <button
