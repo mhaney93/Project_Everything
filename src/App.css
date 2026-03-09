@@ -1625,6 +1625,7 @@ button:not(:disabled):hover {
       display: flex;
       flex-direction: row;
       gap: 0.5rem;
+      flex-wrap: nowrap;
     }
 
   .top-button-group {

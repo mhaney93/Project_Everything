@@ -48,16 +48,16 @@ curl -X GET http://localhost:5000/api/maps -b /tmp/cookies.txt
 ### Production Deployment
 
 **EC2 Server Details:**
-- **Public IP:** ec2-13-58-1-142.us-east-1.compute.amazonaws.com
-- **Private IP:** ip-172-31-8-152 (internal)
-- **User:** ubuntu
-- **Project Location:** `/home/ubuntu/project_everything` (note: lowercase, underscore)
-- **Key:** `~/.ssh/aws-key.pem`
+**Public DNS:** ec2-13-56-3-121.us-west-1.compute.amazonaws.com
+**Public IPv4 address:** 13.56.3.121
+**Private IP:** ip-172-31-8-152.us-west-1.compute.internal
+**Local PEM Key Path:** `C:/Users/matth/OneDrive/Desktop/Programming/ProjectEverything/project-everything-key.pem`
 
 **SSH into EC2:**
 ```bash
-ssh -i ~/.ssh/aws-key.pem ubuntu@ec2-13-58-1-142.us-east-1.compute.amazonaws.com
+ssh project-everything
 ```
+> Uses SSH alias from your ~/.ssh/config for easier connection.
 
 **Pull latest code and rebuild:**
 ```bash

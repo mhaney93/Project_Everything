@@ -1,7 +1,5 @@
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-// Pinch gesture state for mobile
-const pinchState = { initialDistance: null, lastScale: 1 }
 import './App.css';
 import { authAPI, mapsAPI, filesAPI, API_BASE_URL } from './api';
 
@@ -4232,8 +4230,6 @@ function App() {
             >
               Add Child
             </button>
-          </div>
-          <div className="top-button-group">
             <button
               className={`top-link ${createNodeMode === 'sibling' ? 'active' : ''}`}
               type="button"
@@ -4517,46 +4513,6 @@ function App() {
             onMouseMove={handleMapMouseMove}
             onMouseUp={handleMapMouseUp}
             onMouseLeave={handleMapMouseLeave}
-            onWheel={(e) => {
-              // Trackpad pinch (wheel + ctrlKey)
-              if (e.ctrlKey) {
-                e.preventDefault()
-                if (e.deltaY < 0) {
-                  adjustNodeSize(NODE_SIZE_STEP)
-                } else if (e.deltaY > 0) {
-                  adjustNodeSize(-NODE_SIZE_STEP)
-                }
-              }
-            }}
-            onTouchStart={(e) => {
-              if (e.touches.length === 2) {
-                const dx = e.touches[0].clientX - e.touches[1].clientX
-                const dy = e.touches[0].clientY - e.touches[1].clientY
-                pinchState.initialDistance = Math.sqrt(dx * dx + dy * dy)
-                pinchState.lastScale = 1
-              }
-            }}
-            onTouchMove={(e) => {
-              if (e.touches.length === 2 && pinchState.initialDistance) {
-                const dx = e.touches[0].clientX - e.touches[1].clientX
-                const dy = e.touches[0].clientY - e.touches[1].clientY
-                const distance = Math.sqrt(dx * dx + dy * dy)
-                const scale = distance / pinchState.initialDistance
-                // Only trigger if scale changes enough
-                if (Math.abs(scale - pinchState.lastScale) > 0.07) {
-                  if (scale > pinchState.lastScale) {
-                    adjustNodeSize(NODE_SIZE_STEP)
-                  } else {
-                    adjustNodeSize(-NODE_SIZE_STEP)
-                  }
-                  pinchState.lastScale = scale
-                }
-              }
-            }}
-            onTouchEnd={() => {
-              pinchState.initialDistance = null
-              pinchState.lastScale = 1
-            }}
           >
             <div
               className="map-content"
