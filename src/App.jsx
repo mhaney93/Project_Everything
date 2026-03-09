@@ -495,48 +495,7 @@ function App() {
     'Honesty': [],
     'Deontology': ['Duty', 'Kant', 'Rules', 'Rights', 'Categorical Imperative', 'Moral Law'],
     'Duty': [],
-              onKeyDown={(e) => {
-                const totalItems = searchSuggestions.length + relatedIdeas.length;
-                if (e.key === 'ArrowDown') {
-                  e.preventDefault();
-                  setHighlightedSuggestion((prev) =>
-                    prev < totalItems - 1 ? prev + 1 : prev
-                  );
-                } else if (e.key === 'ArrowUp') {
-                  e.preventDefault();
-                  setHighlightedSuggestion((prev) =>
-                    prev > 0 ? prev - 1 : prev
-                  );
-                } else if (e.key === 'Enter') {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  if (highlightedSuggestion >= 0) {
-                    if (highlightedSuggestion < searchSuggestions.length) {
-                      handleSuggestionClick(searchSuggestions[highlightedSuggestion]);
-                    } else {
-                      const relatedIdx = highlightedSuggestion - searchSuggestions.length;
-                      if (relatedIdx >= 0 && relatedIdx < relatedIdeas.length) {
-                        setSearchQuery(relatedIdeas[relatedIdx]);
-                        setRelatedIdeas([]);
-                        setTimeout(() => {
-                          handleSearchWithQuery(relatedIdeas[relatedIdx]);
-                        }, 0);
-                      }
-                    }
-                  } else {
-                    handleSearchWithQuery(searchQuery);
-                  }
-                  return false;
-                } else if (e.key === 'Escape') {
-                  setSearchSuggestions([]);
-                  setHighlightedSuggestion(-1);
-                }
-              }}
-              onBlur={() => {
-                setTimeout(() => setSearchSuggestions([]), 200);
-                setTimeout(() => setRelatedIdeas([]), 200);
-                setHighlightedSuggestion(-1);
-              }}
+// ...existing code...
     'Agency': [],
     'Responsibility': [],
     'Libertarianism': [],
