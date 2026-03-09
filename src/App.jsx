@@ -4488,7 +4488,6 @@ export default App;
     </header>
 
 
-      {/* Move fullscreen hint inside main return */}
 
       {showCreateNodeHint && createNodeMode && (
         <div
