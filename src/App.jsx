@@ -4269,9 +4269,9 @@ export default App;
                     >
                       Logout
                     </button>
-                  </>
+                  </div>
                 ) : (
-                  <>
+                  <div>
                     <h3>{isSignUp ? 'Sign Up' : 'Sign In'}</h3>
                     <div className="auth-form">
                       <input
@@ -4331,7 +4331,7 @@ export default App;
                         {isSignUp ? 'Already have account?' : 'Need account?'}
                       </button>
                     </div>
-                  </>
+                  </div>
                 )}
               </div>
             )}
@@ -4339,25 +4339,25 @@ export default App;
         </div>
       )}
     </header>
-      {showCreateNodeHint && createNodeMode && (
-        <div
-          className="create-node-hint"
-          role="status"
-          aria-live="polite"
-          style={createNodeHintPosition ? {
-            top: `${createNodeHintPosition.top}px`,
-            left: `${createNodeHintPosition.left}px`,
-          } : undefined}
-        >
-          {createNodeMode === 'child'
-            ? 'Click the node you want to add a child to'
-            : 'Click the node you want to add a sibling to'}
-        </div>
-      )}
+    {showCreateNodeHint && createNodeMode && (
+      <div
+        className="create-node-hint"
+        role="status"
+        aria-live="polite"
+        style={createNodeHintPosition ? {
+          top: `${createNodeHintPosition.top}px`,
+          left: `${createNodeHintPosition.left}px`,
+        } : undefined}
+      >
+        {createNodeMode === 'child'
+          ? 'Click the node you want to add a child to'
+          : 'Click the node you want to add a sibling to'}
+      </div>
+    )}
 
-      // ...existing code...
-      <main className="app-main">
-        <section className="map-panel" ref={mapPanelRef}>
+    {/* ...existing code... */}
+    <main className="app-main">
+      <section className="map-panel" ref={mapPanelRef}>
           <div
             className="map-canvas"
             style={{ 
