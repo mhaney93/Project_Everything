@@ -18,9 +18,6 @@ const PASSWORD_RULES = [
   },
   // Add more rules here as needed
   ];
-    met: rule.test(value),
-  }))
-}
 
 // ...existing code...
 
