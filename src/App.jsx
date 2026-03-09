@@ -3029,7 +3029,7 @@ function App() {
           // Ensure all nodes have hidden field
           const nodesWithHidden = normalizedNodes.map(node => 
             ('hidden' in node) ? node : { ...node, hidden: false }
-              }
+          )
           setNodesFromBackend(collapseNodesToRoot(nodesWithHidden))
         }
       } catch (err) {
