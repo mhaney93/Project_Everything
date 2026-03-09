@@ -4230,6 +4230,8 @@ function App() {
             >
               Add Child
             </button>
+          </div>
+          <div className="top-button-group">
             <button
               className={`top-link ${createNodeMode === 'sibling' ? 'active' : ''}`}
               type="button"
