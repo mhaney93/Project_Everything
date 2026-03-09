@@ -452,24 +452,20 @@ function App() {
   // Auto-scroll highlighted suggestion into view
   useEffect(() => {
     if (highlightedSuggestion >= 0 && searchSuggestionsRef.current) {
-      const container = searchSuggestionsRef.current
-      const items = container.querySelectorAll('[data-suggestion-index]')
+      const container = searchSuggestionsRef.current;
+      const items = container.querySelectorAll('[data-suggestion-index]');
       if (items[highlightedSuggestion]) {
-        const item = items[highlightedSuggestion]
-        // Scroll the parent container if needed
-        const containerRect = container.getBoundingClientRect()
-        const itemRect = item.getBoundingClientRect()
-        
+        const item = items[highlightedSuggestion];
+        const containerRect = container.getBoundingClientRect();
+        const itemRect = item.getBoundingClientRect();
         if (itemRect.bottom > containerRect.bottom) {
-          // Scroll down
-          container.scrollTop += itemRect.bottom - containerRect.bottom + 10
+          container.scrollTop += itemRect.bottom - containerRect.bottom + 10;
         } else if (itemRect.top < containerRect.top) {
-          // Scroll up
-          container.scrollTop -= containerRect.top - itemRect.top + 10
+          container.scrollTop -= containerRect.top - itemRect.top + 10;
         }
       }
     }
-  }, [highlightedSuggestion])
+  }, [highlightedSuggestion]);
 
   // Knowledge base mapping topics to their meaningful subdivisions (must be before layout useMemo)
   const TOPIC_SUBDIVISIONS = {
@@ -499,54 +495,48 @@ function App() {
     'Honesty': [],
     'Deontology': ['Duty', 'Kant', 'Rules', 'Rights', 'Categorical Imperative', 'Moral Law'],
     'Duty': [],
-    'Kant': [],
-    'Rules': [],
-    'Rights': [],
-    'Categorical Imperative': [],
-    'Moral Law': [],
-    'Consequentialism': ['Utilitarianism', 'Happiness', 'Well-being', 'Preference Satisfaction', 'Cost-Benefit Analysis', 'Greatest Good'],
-    'Utilitarianism': ['Act Utilitarianism', 'Rule Utilitarianism', 'Preference Utilitarianism', 'Hedonic Calculus', 'Singer', 'Bentham'],
-    'Act Utilitarianism': [],
-    'Rule Utilitarianism': [],
-    'Preference Utilitarianism': [],
-    'Hedonic Calculus': [],
-    'Singer': [],
-    'Bentham': [],
-    'Happiness': [],
-    'Well-being': [],
-    'Preference Satisfaction': [],
-    'Cost-Benefit Analysis': [],
-    'Greatest Good': [],
-    'Metaethics': ['Moral Realism', 'Moral Relativism', 'Moral Nihilism', 'Cognitivism', 'Emotivism'],
-    'Moral Realism': [],
-    'Moral Relativism': [],
-    'Moral Nihilism': [],
-    'Cognitivism': [],
-    'Emotivism': [],
-    'Applied Ethics': ['Bioethics', 'Environmental Ethics', 'Business Ethics', 'Medical Ethics', 'Computer Ethics'],
-    'Bioethics': ['Gene Ethics', 'Organ Transplantation', 'Genetic Testing', 'Reproductive Ethics'],
-    'Gene Ethics': [],
-    'Organ Transplantation': [],
-    'Genetic Testing': [],
-    'Reproductive Ethics': [],
-    'Environmental Ethics': [],
-    'Business Ethics': [],
-    'Medical Ethics': [],
-    'Computer Ethics': [],
-    
-    // Metaphysics
-    'Metaphysics': ['Ontology', 'Free Will', 'Causality', 'Substance Theory', 'Time', 'Philosophy of Mind'],
-    'Ontology': ['Being', 'Existence', 'Categories', 'Properties', 'Relations', 'Universals'],
-    'Being': [],
-    'Existence': [],
-    'Categories': [],
-    'Properties': [],
-    'Relations': [],
-    'Universals': [],
-    'Free Will': ['Determinism', 'Indeterminism', 'Compatibilism', 'Agency', 'Responsibility', 'Libertarianism'],
-    'Determinism': [],
-    'Indeterminism': [],
-    'Compatibilism': [],
+              onKeyDown={(e) => {
+                const totalItems = searchSuggestions.length + relatedIdeas.length;
+                if (e.key === 'ArrowDown') {
+                  e.preventDefault();
+                  setHighlightedSuggestion((prev) =>
+                    prev < totalItems - 1 ? prev + 1 : prev
+                  );
+                } else if (e.key === 'ArrowUp') {
+                  e.preventDefault();
+                  setHighlightedSuggestion((prev) =>
+                    prev > 0 ? prev - 1 : prev
+                  );
+                } else if (e.key === 'Enter') {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (highlightedSuggestion >= 0) {
+                    if (highlightedSuggestion < searchSuggestions.length) {
+                      handleSuggestionClick(searchSuggestions[highlightedSuggestion]);
+                    } else {
+                      const relatedIdx = highlightedSuggestion - searchSuggestions.length;
+                      if (relatedIdx >= 0 && relatedIdx < relatedIdeas.length) {
+                        setSearchQuery(relatedIdeas[relatedIdx]);
+                        setRelatedIdeas([]);
+                        setTimeout(() => {
+                          handleSearchWithQuery(relatedIdeas[relatedIdx]);
+                        }, 0);
+                      }
+                    }
+                  } else {
+                    handleSearchWithQuery(searchQuery);
+                  }
+                  return false;
+                } else if (e.key === 'Escape') {
+                  setSearchSuggestions([]);
+                  setHighlightedSuggestion(-1);
+                }
+              }}
+              onBlur={() => {
+                setTimeout(() => setSearchSuggestions([]), 200);
+                setTimeout(() => setRelatedIdeas([]), 200);
+                setHighlightedSuggestion(-1);
+              }}
     'Agency': [],
     'Responsibility': [],
     'Libertarianism': [],
@@ -4135,61 +4125,40 @@ function App() {
               </div>
             )}
           </div>
-        })
-      }
-      // Now the event handler or block is properly closed
-    }
-    // Now the event handler or block is properly closed
-  }
-  // Now the event handler or block is properly closed
-  }
-}
-}
-}
-}
-}
-}
-}
-}
-if (e.key === 'ArrowDown') {
-                    e.preventDefault()
-                    setHighlightedSuggestion((prev) =>
-                      prev < totalItems - 1 ? prev + 1 : prev
-                    )
-                  } else if (e.key === 'ArrowUp') {
-                    e.preventDefault()
-                    setHighlightedSuggestion((prev) =>
-                      prev > 0 ? prev - 1 : prev
-                    )
-                  } else if (e.key === 'Enter') {
-                    e.preventDefault()
-                    e.stopPropagation()
-                    if (highlightedSuggestion >= 0) {
-                      if (highlightedSuggestion < searchSuggestions.length) {
-                        handleSuggestionClick(searchSuggestions[highlightedSuggestion])
-                      } else {
-                        const relatedIdx = highlightedSuggestion - searchSuggestions.length
-                        if (relatedIdx >= 0 && relatedIdx < relatedIdeas.length) {
-                          setSearchQuery(relatedIdeas[relatedIdx])
-                          setRelatedIdeas([])
-                          setTimeout(() => {
-                            handleSearchWithQuery(relatedIdeas[relatedIdx])
-                          }, 0)
-                        }
-                      }
-                    } else {
-                      handleSearchWithQuery(searchQuery)
-                    }
-                    return false
-                  } else if (e.key === 'Escape') {
-                    setSearchSuggestions([])
-                    setHighlightedSuggestion(-1)
-                  }
+// ...existing code...
+                if (e.key === 'ArrowDown') {
+                  e.preventDefault();
+                  setHighlightedSuggestion((prev) =>
+                    prev < totalItems - 1 ? prev + 1 : prev
+                  );
+                } else if (e.key === 'ArrowUp') {
+                  e.preventDefault();
+                  setHighlightedSuggestion((prev) =>
+                    prev > 0 ? prev - 1 : prev
+                  );
                 } else if (e.key === 'Enter') {
-                  e.preventDefault()
-                  e.stopPropagation()
-                  handleSearchWithQuery(searchQuery)
-                  return false
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (highlightedSuggestion >= 0) {
+                    if (highlightedSuggestion < searchSuggestions.length) {
+                      handleSuggestionClick(searchSuggestions[highlightedSuggestion]);
+                    } else {
+                      const relatedIdx = highlightedSuggestion - searchSuggestions.length;
+                      if (relatedIdx >= 0 && relatedIdx < relatedIdeas.length) {
+                        setSearchQuery(relatedIdeas[relatedIdx]);
+                        setRelatedIdeas([]);
+                        setTimeout(() => {
+                          handleSearchWithQuery(relatedIdeas[relatedIdx]);
+                        }, 0);
+                      }
+                    }
+                  } else {
+                    handleSearchWithQuery(searchQuery);
+                  }
+                  return false;
+                } else if (e.key === 'Escape') {
+                  setSearchSuggestions([]);
+                  setHighlightedSuggestion(-1);
                 }
               }}
               onBlur={() => {
@@ -4368,36 +4337,6 @@ if (e.key === 'ArrowDown') {
           }
         }
 export default App;
-              <button
-                type="button"
-                className="profile-btn"
-                onClick={async () => {
-                  const newState = openTooltip === 'profile' ? null : 'profile'
-                  setOpenTooltip(newState)
-                  if (newState === 'profile') {
-                    setAuthError('')
-                  }
-                  if (newState === 'profile' && currentUser) {
-                    try {
-                      const usage = await filesAPI.getStorageUsage()
-                      setStorageUsage(usage)
-                    } catch (err) {
-                      console.error('Failed to load storage usage:', err)
-                    }
-                  }
-                }}
-              >
-                Profile
-              </button>
-            {openTooltip === 'profile' && (
-              <div className="tooltip profile-tooltip">
-                {currentUser ? (
-                  <>
-                    <h3>Profile</h3>
-                    <p className="profile-info">{currentUser.email}</p>
-                    <p className="profile-detail">Signed in</p>
-                    
-                    {storageUsage && (
                       <div className="storage-section">
                         <div className="storage-header">
                           <span className="storage-label">Storage Usage</span>
