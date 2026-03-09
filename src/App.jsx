@@ -4120,8 +4120,7 @@ function App() {
                   >
                     Click anywhere to create a node
                   </div>
-              </div>
-            )}
+                )}
             {showCreateNodeHint && createNodeMode && (
               <div
                 className="create-node-hint"
