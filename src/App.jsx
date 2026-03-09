@@ -77,7 +77,7 @@ function App() {
       </div>
     </>
   );
-  }
+  // ...no extra closing brace here...
 
   nextId.current = newId + 1
 
