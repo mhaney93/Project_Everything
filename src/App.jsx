@@ -4105,6 +4105,7 @@ function App() {
                     })}
                   </div>
                 )}
+              </div>
             )}
           </form> {/* Close search form */}
         </div> {/* Close title-block */}
