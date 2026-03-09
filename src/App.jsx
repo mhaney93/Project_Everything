@@ -17,11 +17,7 @@ const PASSWORD_RULES = [
     test: (value) => value.length >= 8,
   },
   // Add more rules here as needed
-];
-    test: (value) => /[^A-Za-z0-9]/.test(value),
-                    })}
-                  </div>
-                )}
+  ];
               </div>
             )}
           </form>
