@@ -4119,8 +4119,7 @@ function App() {
                     } : undefined}
                   >
                     Click anywhere to create a node
-                  )}
-                </div>
+                  </div>
               </div>
             )}
             {showCreateNodeHint && createNodeMode && (
