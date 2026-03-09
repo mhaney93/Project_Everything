@@ -4486,9 +4486,6 @@ export default App;
         </div>
       )}
     </header>
-
-
-
       {showCreateNodeHint && createNodeMode && (
         <div
           className="create-node-hint"
