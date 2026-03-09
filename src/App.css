@@ -1601,8 +1601,8 @@ button:not(:disabled):hover {
 
   /* Top navigation under search bar, side by side */
   .top-left {
-    display: inline-flex;
-    gap: 0.5rem;
+    display: flex;
+    gap: 0.5rem !important;
     margin-bottom: 0;
     position: static;
     top: auto;
@@ -1611,8 +1611,8 @@ button:not(:disabled):hover {
   }
 
   .top-right {
-    display: inline-flex;
-    gap: 0.5rem;
+    display: flex;
+    gap: 0.5rem !important;
     position: static;
     top: auto;
     left: auto;
