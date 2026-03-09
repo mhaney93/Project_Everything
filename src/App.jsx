@@ -4082,19 +4082,9 @@ function App() {
       })
     }
   }
-  // Debug overlay state
-  const [debugOverlay, setDebugOverlay] = useState(null);
-
   const handleMapTouchEnd = (e) => {
     if (dragButton === 'touch' && dragStart) {
       setBasePanOffset((prev) => clampPanOffset({ x: prev.x + dragOffset.x, y: prev.y + dragOffset.y }))
-      setDebugOverlay({
-        dragOffset,
-        basePanOffset,
-        shift: lastShiftRef.current,
-        timestamp: Date.now()
-      });
-      // Force a re-render after touch drag ends
       setRecenterKey((k) => k + 1);
     }
     setDragOffset({ x: 0, y: 0 })
@@ -4544,28 +4534,7 @@ function App() {
         </div>
       )}
 
-      {/* Debug overlay for mobile drag offsets */}
-      {debugOverlay && (
-        <div style={{
-          position: 'fixed',
-          bottom: 16,
-          left: 16,
-          zIndex: 9999,
-          background: 'rgba(29,111,220,0.85)',
-          color: '#fff',
-          padding: '12px 16px',
-          borderRadius: 8,
-          fontSize: '1.1em',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
-        }}>
-          <div><b>Touch Drag Debug</b></div>
-          <div>dragOffset: {JSON.stringify(debugOverlay.dragOffset)}</div>
-          <div>basePanOffset: {JSON.stringify(debugOverlay.basePanOffset)}</div>
-          <div>shift: {JSON.stringify(debugOverlay.shift)}</div>
-          <div style={{fontSize:'0.9em',opacity:0.7}}>Closes in 8s</div>
-        </div>
-      )}
-      {debugOverlay && setTimeout(() => setDebugOverlay(null), 8000)}
+      // ...existing code...
       <main className="app-main">
         <section className="map-panel" ref={mapPanelRef}>
           <div
