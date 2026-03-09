@@ -4332,28 +4332,29 @@ export default App;
                       </button>
                     </div>
                   </div>
-                )}
 
-            </div>
-          )}
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+      {showCreateNodeHint && createNodeMode && (
+        <div
+          className="create-node-hint"
+          role="status"
+          aria-live="polite"
+          style={createNodeHintPosition ? {
+            top: `${createNodeHintPosition.top}px`,
+            left: `${createNodeHintPosition.left}px`,
+          } : undefined}
+        >
+          {createNodeMode === 'child'
+            ? 'Click the node you want to add a child to'
+            : 'Click the node you want to add a sibling to'}
         </div>
       )}
     </header>
-    {showCreateNodeHint && createNodeMode && (
-      <div
-        className="create-node-hint"
-        role="status"
-        aria-live="polite"
-        style={createNodeHintPosition ? {
-          top: `${createNodeHintPosition.top}px`,
-          left: `${createNodeHintPosition.left}px`,
-        } : undefined}
-      >
-        {createNodeMode === 'child'
-          ? 'Click the node you want to add a child to'
-          : 'Click the node you want to add a sibling to'}
-      </div>
-    )}
 
     {/* ...existing code... */}
     <main className="app-main">
