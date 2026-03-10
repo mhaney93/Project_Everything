@@ -2186,3 +2186,18 @@ button:not(:disabled):hover {
     opacity: 0;
   }
 }
+
+/* Ensures mobile header spacer always takes up space and prevents overlap */
+.mobile-header-spacer {
+  display: block;
+  width: 100%;
+  height: 120px;
+  min-height: 120px;
+  pointer-events: none;
+}
+
+@media (min-width: 769px) {
+  .mobile-header-spacer {
+    display: none;
+  }
+}

@@ -1,71 +1,161 @@
-
+import { useMobileHeaderSpacer } from './mobileHeaderSpacer';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import './App.css';
 import { authAPI, mapsAPI, filesAPI, API_BASE_URL } from './api';
 
-// v2: Humanities integration complete
-const NODE_WIDTH = 176;
-const NODE_HEIGHT = 52;
-const NODE_SIZE_MIN = 0.85;
-const NODE_SIZE_MAX = 1.8;
+// Node size and layout constants
+const NODE_SIZE_MIN = 0.6;
+const NODE_SIZE_MAX = 2.0;
 const NODE_SIZE_STEP = 0.1;
 
-const PASSWORD_RULES = [
-  {
-    id: 'length',
-    label: 'At least 8 characters',
-    test: (value) => value.length >= 8,
-  },
-  {
-    id: 'lowercase',
-    label: 'At least 1 lowercase letter',
-    test: (value) => /[a-z]/.test(value),
-  },
-  {
-    id: 'uppercase',
-    label: 'At least 1 uppercase letter',
-    test: (value) => /[A-Z]/.test(value),
-  },
-  {
-    id: 'number',
-    label: 'At least 1 number',
-    test: (value) => /\d/.test(value),
-  },
-  {
-    id: 'special',
-    label: 'At least 1 special character',
-    test: (value) => /[^A-Za-z0-9]/.test(value),
-  },
-]
-
-const getPasswordRuleChecks = (password) => {
-  const value = password || ''
-  return PASSWORD_RULES.map((rule) => ({
-    id: rule.id,
-    label: rule.label,
-    met: rule.test(value),
-  }))
-}
-
-
-
-// Debug logger utility
-const debugLog = (...args) => {
-  if (window && window.localStorage && window.localStorage.getItem('debugMapLog') === 'true') {
-    console.log('[MAP-DEBUG]', ...args);
-  }
-};
-
-// Recenter map when root node is selected, using latest layout and viewport
-// (This useEffect should be placed after all state and ref declarations in the App component)
+// Node layout and spacing constants
+const NODE_WIDTH = 176;
+const NODE_HEIGHT = 52;
 const H_GAP = 5;
 const V_GAP = 45;
 const PADDING = 90;
-const DOTS_OFFSET = 12;
 
+// Default initial nodes for the knowledge map
 const INITIAL_NODES = [
-  { id: 1, label: 'Everything', parentId: null, hidden: false },
+  {
+    id: 1,
+    label: 'Everything',
+    parentId: null,
+    hidden: false,
+    summary: 'The root of all knowledge',
+  },
 ];
+
+
+// v2: Humanities integration complete
+
+// Debug logging utility (set to false to disable all debug logs)
+const DEBUG = true;
+function debugLog(...args) {
+  if (DEBUG) {
+    // eslint-disable-next-line no-console
+    console.log('[DEBUG]', ...args);
+  }
+}
+
+// Password rule checking utility for login/signup forms
+function getPasswordRuleChecks(password) {
+  // Example rules: at least 8 chars, 1 uppercase, 1 lowercase, 1 number, 1 special char
+  return [
+    {
+      label: 'At least 8 characters',
+      met: typeof password === 'string' && password.length >= 8,
+    },
+    {
+      label: 'Contains a lowercase letter',
+      met: /[a-z]/.test(password),
+    },
+    {
+      label: 'Contains an uppercase letter',
+      met: /[A-Z]/.test(password),
+    },
+    {
+      label: 'Contains a number',
+      met: /[0-9]/.test(password),
+    },
+    {
+      label: 'Contains a special character',
+      met: /[^A-Za-z0-9]/.test(password),
+    },
+  ];
+}
+
+// ...other code...
+
+// AddChildren function (example signature, update as needed)
+async function addChildren({ existingPredefined, parentNodeId, parent, updatedNodes, nextId, enableAnimations, setAnimatingIds, setNodes, setBasePanOffset, setRecenterKey, setSelectedId, lastFocusedIdRef, setForceRecenter, getChildSuggestions, generateSummary, layout }) {
+  // After updating nodes, always find the leftmost visible child for centering
+  const getLeftmostChildId = (allNodes, parentId) => {
+    // Only consider visible (not hidden) children
+    const visibleChildren = allNodes.filter((node) => node.parentId === parentId && !node.hidden);
+    if (visibleChildren.length === 0) return null;
+    // Use layout.positions to get x positions
+    // If layout is not available yet, fallback to first in array
+    if (typeof layout?.positions?.get === 'function') {
+      let leftmost = visibleChildren[0];
+      let minX = Infinity;
+      for (const child of visibleChildren) {
+        const pos = layout.positions.get(child.id);
+        if (pos && pos.x < minX) {
+          minX = pos.x;
+          leftmost = child;
+        }
+      }
+      return leftmost.id;
+    }
+    return visibleChildren[0].id;
+  };
+
+  if (existingPredefined.length === 0) {
+    let labels = ['Concept A', 'Concept B'];
+    if (parentNodeId === 1) {
+      labels = ['Humanities', 'Sciences'];
+    } else {
+      labels = await getChildSuggestions(parent.label);
+    }
+
+    const maxExistingId = updatedNodes.reduce((maxId, node) => {
+      if (!node || !Number.isFinite(node.id)) return maxId;
+      return Math.max(maxId, node.id);
+    }, 0);
+    const startId = Math.max(nextId.current, maxExistingId + 1);
+
+    const newNodeIds = Array.from({ length: labels.length }, (_, i) => startId + i);
+    const newNodes = Array.from({ length: labels.length }, (_, index) => ({
+      id: startId + index,
+      label: labels[index],
+      parentId: parentNodeId,
+      hidden: false,
+      summary: generateSummary(labels[index]),
+    }));
+
+    nextId.current = startId + newNodes.length;
+
+    if (enableAnimations) {
+      setAnimatingIds(new Set(newNodeIds));
+      updatedNodes = [...updatedNodes, ...newNodes];
+      setNodes(updatedNodes);
+      requestAnimationFrame(() => setAnimatingIds(new Set()));
+    } else {
+      updatedNodes = [...updatedNodes, ...newNodes];
+      setNodes(updatedNodes);
+    }
+    setBasePanOffset({ x: 0, y: 0 });
+    setRecenterKey((k) => k + 1);
+    // After state updates, use setTimeout to get the leftmost child from the new layout
+    setTimeout(() => {
+      const leftmostId = getLeftmostChildId(updatedNodes, parentNodeId);
+      if (leftmostId) {
+        setSelectedId(null);
+        lastFocusedIdRef.current = leftmostId;
+        setForceRecenter(true);
+        setTimeout(() => setForceRecenter(false), 100);
+      }
+    }, 0);
+  } else {
+    setNodes(updatedNodes);
+    setBasePanOffset({ x: 0, y: 0 });
+    setRecenterKey((k) => k + 1);
+    setTimeout(() => {
+      const leftmostId = getLeftmostChildId(updatedNodes, parentNodeId);
+      if (leftmostId) {
+        setSelectedId(null);
+        lastFocusedIdRef.current = leftmostId;
+        setForceRecenter(true);
+        setTimeout(() => setForceRecenter(false), 100);
+      }
+    }, 0);
+  }
+
+  // Return the leftmost child id for consistency
+  const leftmostChildId = getLeftmostChildId(updatedNodes, parentNodeId);
+  return { expanded: true, firstChildId: leftmostChildId };
+}
 
 const LABEL_MIGRATIONS_BY_VERSION = {
   1: {
@@ -249,6 +339,7 @@ const buildLayout = (nodes, topicSubdivisions = {}, nodeWidth = NODE_WIDTH, node
 };
 
 function App() {
+  const isMobile = useMobileHeaderSpacer();
 
   // State to force recenter animation
   const [recenterKey, setRecenterKey] = useState(0);
@@ -829,10 +920,9 @@ function App() {
     'Comedy': [],
     'Tragedy': [],
     'Tragicomedy': [],
-    'Classical Drama': [],
-    'Modern Drama': [],
-    'Contemporary Drama': [],
-    'Melodrama': [],
+    'Experimental Theatre': 'Drama that challenges conventional theatrical forms and audience expectations.',
+    'Classical Drama': 'Drama from ancient Greece and Rome establishing foundational theatrical forms.',
+    'Modern Drama': 'Drama from the late 19th and 20th centuries exploring psychological realism and social issues.',
     'Literary Theory': ['Structuralism', 'Deconstruction', 'Rhetoric', 'Semiotics', 'Narratology', 'Literary Criticism'],
     'Structuralism': [],
     'Deconstruction': [],
@@ -1243,7 +1333,10 @@ function App() {
     // Add all keys and their children from TOPIC_SUBDIVISIONS
     Object.keys(TOPIC_SUBDIVISIONS).forEach((key) => {
       allLabels.add(key);
-      (TOPIC_SUBDIVISIONS[key] || []).forEach((child) => allLabels.add(child));
+      const children = TOPIC_SUBDIVISIONS[key];
+      if (Array.isArray(children)) {
+        children.forEach((child) => allLabels.add(child));
+      }
     });
 
     // Existing detailed summaries
@@ -1688,6 +1781,8 @@ function App() {
       'Astronomy': 'The scientific study of celestial objects, space, and the universe as a whole.',
       'Observational Astronomy': 'The practice of observing celestial objects and phenomena.',
       'Planetary Science': 'The study of planets, moons, and planetary systems.',
+      'Inner Planets': 'The rocky planets closest to the Sun: Mercury, Venus, Earth, and Mars.',
+      'Outer Planets': 'The gas and ice giants',
       'Inner Planets': 'The rocky planets closest to the Sun: Mercury, Venus, Earth, and Mars.',
       'Outer Planets': 'The gas and ice giants: Jupiter, Saturn, Uranus, and Neptune.',
       'Moons': 'Natural satellites orbiting planets and other celestial bodies.',
@@ -2214,6 +2309,8 @@ function App() {
       const allChildren = updatedNodes.filter((node) => node.parentId === parentNodeId)
       const existingPredefined = allChildren.filter((node) => !node.isCustom)
 
+      let firstChildId = null;
+
       if (existingPredefined.length === 0) {
         let labels = ['Concept A', 'Concept B']
         if (parentNodeId === 1) {
@@ -2250,14 +2347,28 @@ function App() {
         }
         setBasePanOffset({ x: 0, y: 0 })
         setRecenterKey((k) => k + 1)
-        return { expanded: true, firstChildId: newNodes[0]?.id }
+        firstChildId = newNodes[0]?.id;
       } else {
         setNodes(updatedNodes)
         setBasePanOffset({ x: 0, y: 0 })
         setRecenterKey((k) => k + 1)
         const firstChild = updatedNodes.find((node) => node.parentId === parentNodeId && !node.hidden)
-        return { expanded: true, firstChildId: firstChild?.id }
+        firstChildId = firstChild?.id;
       }
+
+      // If expanding the root node, focus and center the first child
+      if (firstChildId) {
+        // Clear selection to avoid selection interfering with focus centering
+        setSelectedId(null);
+        // Pan the map to center the first child node, but do not set focusedElement (no blue outline)
+        setTimeout(() => {
+          lastFocusedIdRef.current = firstChildId;
+          setForceRecenter(true);
+          setTimeout(() => setForceRecenter(false), 100);
+        }, 0);
+      }
+
+      return { expanded: true, firstChildId };
     }
   }
 
@@ -2828,8 +2939,13 @@ function App() {
   const actualViewportHeight = mapPanelElement?.clientHeight ?? viewportSize.height
   
   const visibleViewportWidth = actualViewportWidth > 0 ? actualViewportWidth : (windowSize.width - 40)
-  const effectiveHeaderHeight = isFullscreenMode ? 0 : headerHeight
-  const visibleViewportHeight = actualViewportHeight > 0 ? actualViewportHeight : (windowSize.height - effectiveHeaderHeight)
+  // Calculate the height of the mobile header spacer if present (final adjustment: do not subtract from center)
+  const mobileHeaderSpacerHeight = isMobile && !isFullscreenMode ? 120 : 0;
+  const effectiveHeaderHeight = isFullscreenMode ? 0 : headerHeight;
+  // Subtract the mobile spacer height from the vertical center calculation on mobile
+  const visibleViewportHeight = actualViewportHeight > 0
+    ? actualViewportHeight
+    : (windowSize.height - effectiveHeaderHeight);
   
   // When a node is selected or root is focused without selection, always use current viewport size
   // This ensures re-centering works immediately on window resize
@@ -2849,7 +2965,9 @@ function App() {
   // The visible map area is from 0 to (centerWidth - sidePanelWidth), so center it there
   const centerX = centerWidth ? (centerWidth - sidePanelWidthWhenOpen) / 2 : baseWidth / 2
   // Center the focused node vertically in the visible area
-  const centerY = centerHeight ? centerHeight / 2 : baseHeight / 2
+  // On mobile, shift the center upward by the full mobile header spacer height ONLY when root is focused
+  const mobileCenterYOffset = isMobile && !isFullscreenMode && isRootFocus ? -mobileHeaderSpacerHeight : 0;
+  const centerY = centerHeight ? (centerHeight / 2 + mobileCenterYOffset) : (baseHeight / 2)
   const focusCenterX = focusPos
     ? focusPos.x + baseOffsetX + nodeWidth / 2
     : baseOffsetX + nodeWidth / 2
@@ -2950,7 +3068,7 @@ function App() {
   // To prevent pop/re-overlap artifacts while dragging, never fall back to showing hidden nodes.
   // Viewport culling: only render nodes visible in viewport (with buffer for smooth panning)
   // Increase buffer for mobile devices to ensure distant nodes render during drag/pan
-  const isMobile = typeof window !== 'undefined' && (window.innerWidth < 768 || 'ontouchstart' in window);
+  // Use the hook-based isMobile from useMobileHeaderSpacer
   const VIEWPORT_BUFFER = isMobile ? 2000 : 500; // Larger buffer for mobile
   // Disable viewport culling for mobile devices to render all nodes
   const renderableNodes = nodes.filter((node) => {
@@ -4108,9 +4226,13 @@ function App() {
 
   return (
     <div className={`app-shell${isFullscreenMode ? ' fullscreen-mode' : ''}`} style={{ '--header-height': `${effectiveHeaderHeight}px` }}>
+      {/* Spacer for mobile: must be outside the fixed header to push content down */}
+      {isMobile && !isFullscreenMode && (
+        <div className="mobile-header-spacer" style={{ height: '120px', minHeight: '120px' }} />
+      )}
       {!isFullscreenMode && (
-      <header className="app-header" ref={headerRef}>
-        <div className="title-block">
+        <header className="app-header" ref={headerRef}>
+          <div className="title-block">
           <div className="title-stack" aria-label="Everything">
             <h1 className="title">
               <span className="cool-e">E</span>verything
@@ -4754,9 +4876,10 @@ function App() {
                           onClick={async (event) => {
                             event.stopPropagation();
                             event.preventDefault();
+                            debugLog('Dots clicked for node', node.id, node.label);
                             const result = await addChildren(node.id);
-                            if (result?.expanded && result?.firstChildId) {
-                              setSelectedId(result.firstChildId);
+                            debugLog('addChildren result for node', node.id, result);
+                            if (result?.expanded) {
                               setForceRecenter(true);
                             }
                           }}
