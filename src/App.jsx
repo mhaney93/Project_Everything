@@ -47,7 +47,7 @@ const getPasswordRuleChecks = (password) => {
   }))
 }
 
-// ...existing code...
+
 
 // Debug logger utility
 const debugLog = (...args) => {
@@ -4534,7 +4534,7 @@ function App() {
         </div>
       )}
 
-      // ...existing code...
+
       <main className="app-main">
         <section className="map-panel" ref={mapPanelRef}>
           <div
@@ -4662,7 +4662,7 @@ function App() {
                               setSelectedId(node.id)
                               setFocusedElement(null)
                               prevSelectedIdRef.current = null
-                              // ...existing code...
+
                             } else if (selectedId === node.id) {
                               debugLog('Node deselected:', node);
                               setFocusedElement(null)
@@ -4751,15 +4751,23 @@ function App() {
                           onMouseDown={(event) => {
                             if (event.button === 0) event.stopPropagation() // Only stop propagation for left-click
                           }}
-                          onClick={(event) => {
-                            event.stopPropagation()
-                            event.preventDefault()
-                            addChildren(node.id)
+                          onClick={async (event) => {
+                            event.stopPropagation();
+                            event.preventDefault();
+                            const result = await addChildren(node.id);
+                            if (result?.expanded && result?.firstChildId) {
+                              setSelectedId(result.firstChildId);
+                              setForceRecenter(true);
+                            }
                           }}
-                          onKeyDown={(event) => {
+                          onKeyDown={async (event) => {
                             if (event.key === 'Enter' || event.key === ' ') {
-                              event.preventDefault()
-                              addChildren(node.id)
+                              event.preventDefault();
+                              const result = await addChildren(node.id);
+                              if (result?.expanded && result?.firstChildId) {
+                                setSelectedId(result.firstChildId);
+                                setForceRecenter(true);
+                              }
                             }
                           }}
                           aria-label="Add child nodes"
