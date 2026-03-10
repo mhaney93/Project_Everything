@@ -1,3 +1,4 @@
+// ...existing code...
 import { useMobileHeaderSpacer } from './mobileHeaderSpacer';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import './App.css';
@@ -29,14 +30,7 @@ const INITIAL_NODES = [
 
 // v2: Humanities integration complete
 
-// Debug logging utility (set to false to disable all debug logs)
-const DEBUG = true;
-function debugLog(...args) {
-  if (DEBUG) {
-    // eslint-disable-next-line no-console
-    console.log('[DEBUG]', ...args);
-  }
-}
+
 
 // Password rule checking utility for login/signup forms
 function getPasswordRuleChecks(password) {
@@ -370,10 +364,7 @@ function App() {
   const [selectedId, setSelectedId] = useState(null)
   const [focusedElement, setFocusedElement] = useState(null) // { nodeId, type: 'node' | 'dots' } or null
 
-  // Log selection changes
-  useEffect(() => {
-    debugLog('Selected node changed:', selectedId);
-  }, [selectedId]);
+
   const [panelOpen, setPanelOpen] = useState(false)
   const [panelExpanded, setPanelExpanded] = useState(false)
   const [transitionsEnabled, setTransitionsEnabled] = useState(false)
@@ -391,16 +382,8 @@ function App() {
   const [basePanOffset, setBasePanOffset] = useState({ x: 0, y: 0 })
   const [dragButton, setDragButton] = useState(null)
 
-  // Log drag events
-  useEffect(() => {
-    debugLog('Drag start:', dragStart, 'Drag offset:', dragOffset, 'Base pan offset:', basePanOffset);
-  }, [dragStart]);
-  useEffect(() => {
-    debugLog('Drag offset changed:', dragOffset);
-  }, [dragOffset]);
-  useEffect(() => {
-    debugLog('Base pan offset changed:', basePanOffset);
-  }, [basePanOffset]);
+
+
   const [openTooltip, setOpenTooltip] = useState(null)
   const [enableAnimations, setEnableAnimations] = useState(true)
   const [smoothPanning, setSmoothPanning] = useState(true)
@@ -462,6 +445,12 @@ function App() {
   const datamuseSuggestionCacheRef = useRef(new Map())
   const draftNoteIdsRef = useRef(new Set())
   const draftGridIdsRef = useRef(new Set())
+
+  // Keyboard shortcut: Ctrl+F toggles fullscreen mode
+  useEffect(() => {
+    // No fullscreen keyboard shortcut; only allow via UI button
+  }, [isFullscreenMode, deleteConfirmation]);
+  // ...existing code...
 
   // Auto-dismiss notification after 5 seconds
   useEffect(() => {
@@ -921,7 +910,12 @@ function App() {
     'Tragedy': [],
     'Tragicomedy': [],
     'Experimental Theatre': 'Drama that challenges conventional theatrical forms and audience expectations.',
-    'Classical Drama': 'Drama from ancient Greece and Rome establishing foundational theatrical forms.',
+    'Classical Drama': ['Greek Tragedy', 'Greek Comedy', 'Roman Tragedy', 'Roman Comedy', 'Satyr Play'],
+    'Greek Tragedy': [],
+    'Greek Comedy': [],
+    'Roman Tragedy': [],
+    'Roman Comedy': [],
+    'Satyr Play': [],
     'Modern Drama': 'Drama from the late 19th and 20th centuries exploring psychological realism and social issues.',
     'Literary Theory': ['Structuralism', 'Deconstruction', 'Rhetoric', 'Semiotics', 'Narratology', 'Literary Criticism'],
     'Structuralism': [],
@@ -1342,6 +1336,11 @@ function App() {
     // Existing detailed summaries
     // Duplicates removed: only the last occurrence of each key is kept for predictable behavior
     const summaries = {
+      'Greek Tragedy': 'Ancient Greek dramatic genre focusing on human suffering, fate, and moral lessons.',
+      'Greek Comedy': 'Ancient Greek dramatic genre characterized by humor, satire, and social commentary.',
+      'Roman Tragedy': 'Roman adaptation of Greek tragedy, emphasizing rhetoric and political themes.',
+      'Roman Comedy': 'Roman adaptation of Greek comedy, featuring stock characters and everyday life.',
+      'Satyr Play': 'Ancient Greek theatrical form blending tragedy and comedy, often with mythological themes.',
       // Root level
       'Everything': 'A conceptual map connecting all fields of human knowledge and inquiry.',
       'Humanities': 'Disciplines that study human culture, history, language, and values.',
@@ -2311,62 +2310,101 @@ function App() {
 
       let firstChildId = null;
 
-      if (existingPredefined.length === 0) {
-        let labels = ['Concept A', 'Concept B']
-        if (parentNodeId === 1) {
-          labels = ['Humanities', 'Sciences']
+        // Always find the leftmost visible child for centering
+        const getLeftmostChildId = (allNodes, parentId, layout) => {
+          const visibleChildren = allNodes.filter((node) => node.parentId === parentId && !node.hidden);
+          if (visibleChildren.length === 0) return null;
+          if (typeof layout?.positions?.get === 'function') {
+            let leftmost = visibleChildren[0];
+            let minX = Infinity;
+            for (const child of visibleChildren) {
+              const pos = layout.positions.get(child.id);
+              if (pos && pos.x < minX) {
+                minX = pos.x;
+                leftmost = child;
+              }
+            }
+            return leftmost.id;
+          }
+          return visibleChildren[0].id;
+        };
+
+        if (existingPredefined.length === 0) {
+          let labels = ['Concept A', 'Concept B'];
+          if (parentNodeId === 1) {
+            labels = ['Humanities', 'Sciences'];
+          } else {
+            labels = await getChildSuggestions(parent.label);
+          }
+
+          const maxExistingId = updatedNodes.reduce((maxId, node) => {
+            if (!node || !Number.isFinite(node.id)) return maxId;
+            return Math.max(maxId, node.id);
+          }, 0);
+          const startId = Math.max(nextId.current, maxExistingId + 1);
+
+          const newNodeIds = Array.from({ length: labels.length }, (_, i) => startId + i);
+          const newNodes = Array.from({ length: labels.length }, (_, index) => ({
+            id: startId + index,
+            label: labels[index],
+            parentId: parentNodeId,
+            hidden: false,
+            summary: generateSummary(labels[index]),
+          }));
+
+          nextId.current = startId + newNodes.length;
+
+          if (enableAnimations) {
+            setAnimatingIds(new Set(newNodeIds));
+            updatedNodes = [...updatedNodes, ...newNodes];
+            setNodes(updatedNodes);
+            requestAnimationFrame(() => setAnimatingIds(new Set()));
+          } else {
+            updatedNodes = [...updatedNodes, ...newNodes];
+            setNodes(updatedNodes);
+          }
+          setBasePanOffset({ x: 0, y: 0 });
+          setRecenterKey((k) => k + 1);
+          firstChildId = getLeftmostChildId(updatedNodes, parentNodeId, layout);
         } else {
-          labels = await getChildSuggestions(parent.label)
+          setNodes(updatedNodes);
+          setBasePanOffset({ x: 0, y: 0 });
+          setRecenterKey((k) => k + 1);
+          firstChildId = getLeftmostChildId(updatedNodes, parentNodeId, layout);
         }
-
-        const maxExistingId = updatedNodes.reduce((maxId, node) => {
-          if (!node || !Number.isFinite(node.id)) return maxId
-          return Math.max(maxId, node.id)
-        }, 0)
-        const startId = Math.max(nextId.current, maxExistingId + 1)
-
-        const newNodeIds = Array.from({ length: labels.length }, (_, i) => startId + i)
-        const newNodes = Array.from({ length: labels.length }, (_, index) => ({
-          id: startId + index,
-          label: labels[index],
-          parentId: parentNodeId,
-          hidden: false,
-          summary: generateSummary(labels[index]),
-        }))
-
-        nextId.current = startId + newNodes.length
-
-        if (enableAnimations) {
-          setAnimatingIds(new Set(newNodeIds))
-          updatedNodes = [...updatedNodes, ...newNodes]
-          setNodes(updatedNodes)
-          requestAnimationFrame(() => setAnimatingIds(new Set()))
-        } else {
-          updatedNodes = [...updatedNodes, ...newNodes]
-          setNodes(updatedNodes)
-        }
-        setBasePanOffset({ x: 0, y: 0 })
-        setRecenterKey((k) => k + 1)
-        firstChildId = newNodes[0]?.id;
-      } else {
-        setNodes(updatedNodes)
-        setBasePanOffset({ x: 0, y: 0 })
-        setRecenterKey((k) => k + 1)
-        const firstChild = updatedNodes.find((node) => node.parentId === parentNodeId && !node.hidden)
-        firstChildId = firstChild?.id;
-      }
 
       // If expanding the root node, focus and center the first child
-      if (firstChildId) {
-        // Clear selection to avoid selection interfering with focus centering
-        setSelectedId(null);
-        // Pan the map to center the first child node, but do not set focusedElement (no blue outline)
-        setTimeout(() => {
-          lastFocusedIdRef.current = firstChildId;
-          setForceRecenter(true);
-          setTimeout(() => setForceRecenter(false), 100);
-        }, 0);
-      }
+        if (firstChildId) {
+          // Clear selection to avoid selection interfering with focus centering
+          setSelectedId(null);
+          // Wait for layout to update, then select and recenter leftmost child
+          setTimeout(() => {
+            // Recompute leftmost child after layout update
+            const leftmostId = (() => {
+              const visibleChildren = updatedNodes.filter((node) => node.parentId === parentNodeId && !node.hidden);
+              if (visibleChildren.length === 0) return null;
+              if (typeof layout?.positions?.get === 'function') {
+                let leftmost = visibleChildren[0];
+                let minX = Infinity;
+                for (const child of visibleChildren) {
+                  const pos = layout.positions.get(child.id);
+                  if (pos && pos.x < minX) {
+                    minX = pos.x;
+                    leftmost = child;
+                  }
+                }
+                return leftmost.id;
+              }
+              return visibleChildren[0].id;
+            })();
+            if (leftmostId) {
+              setSelectedId(leftmostId);
+              lastFocusedIdRef.current = leftmostId;
+              setForceRecenter(true);
+              setTimeout(() => setForceRecenter(false), 100);
+            }
+          }, 120);
+        }
 
       return { expanded: true, firstChildId };
     }
@@ -3012,17 +3050,6 @@ function App() {
   const safe = (v) => Number.isFinite(v) ? v : 0;
   let offsetX = safe(baseOffsetXCentered) - safe(basePanOffset?.x) - safe(dragOffset?.x);
   let offsetY = safe(baseOffsetYCentered) - safe(basePanOffset?.y) - safe(dragOffset?.y);
-  debugLog('Offset calculation:', {
-    baseOffsetXCentered,
-    baseOffsetYCentered,
-    basePanOffset,
-    dragOffset,
-    offsetX,
-    offsetY,
-    selectedId,
-    focusNode,
-    lastShift: lastShiftRef.current
-  });
 
   // Offset reset effect for root node removed to avoid interfering with drag logic
 
@@ -4786,13 +4813,13 @@ function App() {
                               prevSelectedIdRef.current = null
 
                             } else if (selectedId === node.id) {
-                              debugLog('Node deselected:', node);
+                                // ...existing code...
                               setFocusedElement(null)
                               setSelectedId(null)
                               setPanelOpen(false)
                               setPanelExpanded(false)
                             } else {
-                              debugLog('Node selected:', node);
+                                // ...existing code...
                               setFocusedElement(null)
                               setPanelOpen(true)
                               setPanelExpanded(false)
@@ -4876,12 +4903,18 @@ function App() {
                           onClick={async (event) => {
                             event.stopPropagation();
                             event.preventDefault();
-                            debugLog('Dots clicked for node', node.id, node.label);
+                             // ...existing code...
                             const result = await addChildren(node.id);
-                            debugLog('addChildren result for node', node.id, result);
-                            if (result?.expanded) {
-                              setForceRecenter(true);
-                            }
+                             // ...existing code...
+                                  if (result?.expanded && result?.firstChildId) {
+                                    setSelectedId(result.firstChildId);
+                                    setForceRecenter(true);
+                                    // Ensure selection and recentering after layout update
+                                    setTimeout(() => {
+                                      setSelectedId(result.firstChildId);
+                                      setForceRecenter(true);
+                                    }, 120);
+                                  }
                           }}
                           onKeyDown={async (event) => {
                             if (event.key === 'Enter' || event.key === ' ') {
