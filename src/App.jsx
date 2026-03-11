@@ -2398,10 +2398,18 @@ function App() {
               return visibleChildren[0].id;
             })();
             if (leftmostId) {
-              setSelectedId(leftmostId);
-              lastFocusedIdRef.current = leftmostId;
-              setForceRecenter(true);
-              setTimeout(() => setForceRecenter(false), 100);
+                // Center on leftmost child node visually
+                lastFocusedIdRef.current = leftmostId;
+                // Find position of leftmost child
+                const leftmostPos = layout.positions?.get(leftmostId);
+                if (leftmostPos) {
+                  setBasePanOffset({
+                    x: -leftmostPos.x,
+                    y: -leftmostPos.y,
+                  });
+                }
+                setForceRecenter(true);
+                setTimeout(() => setForceRecenter(false), 100);
             }
           }, 120);
         }
@@ -4792,34 +4800,14 @@ function App() {
                               return
                             }
                             
-                            // Allow deselection to always work, but suppress selection after drag
-                            const shouldSuppress = suppressClickRef.current && selectedId !== node.id
-                            suppressClickRef.current = false
-                            if (shouldSuppress) {
-                              return
-                            }
+                            // ...existing code...
                             // Toggle selection: if already selected, deselect; otherwise select and open panel
-                            if (node.parentId == null) {
-                              debugLog('Root node clicked, recentering. Node:', node);
-                              setPanelOpen(true)
-                              setPanelExpanded(false)
-                              setDragStart(null)
-                              setDragButton(null)
-                              setDragOffset({ x: 0, y: 0 })
-                              setBasePanOffset({ x: 0, y: 0 })
-                              setRecenterKey((k) => k + 1)
-                              setSelectedId(node.id)
-                              setFocusedElement(null)
-                              prevSelectedIdRef.current = null
-
-                            } else if (selectedId === node.id) {
-                                // ...existing code...
+                            if (selectedId === node.id) {
                               setFocusedElement(null)
                               setSelectedId(null)
                               setPanelOpen(false)
                               setPanelExpanded(false)
                             } else {
-                                // ...existing code...
                               setFocusedElement(null)
                               setPanelOpen(true)
                               setPanelExpanded(false)
@@ -4905,23 +4893,42 @@ function App() {
                             event.preventDefault();
                              // ...existing code...
                             const result = await addChildren(node.id);
-                             // ...existing code...
-                                  if (result?.expanded && result?.firstChildId) {
-                                    setSelectedId(result.firstChildId);
-                                    setForceRecenter(true);
-                                    // Ensure selection and recentering after layout update
-                                    setTimeout(() => {
-                                      setSelectedId(result.firstChildId);
-                                      setForceRecenter(true);
-                                    }, 120);
-                                  }
+                            if (result?.expanded && result?.firstChildId) {
+                              const leftmostPos = layout.positions?.get(result.firstChildId);
+                              if (leftmostPos) {
+                                setTimeout(() => {
+                                  const minX = layout.bounds?.minX || 0;
+                                  const minY = layout.bounds?.minY || 0;
+                                  const centerX = (viewportSize.width / 2) - (nodeWidth / 2);
+                                  const centerY = (viewportSize.height / 2) - (nodeHeight / 2);
+                                  const offset = {
+                                    x: centerX - (leftmostPos.x - minX),
+                                    y: centerY - (leftmostPos.y - minY),
+                                  };
+                                  // Debug log for troubleshooting
+                                  console.log('[DEBUG] Centering leftmost child:', {
+                                    leftmostPos,
+                                    minX,
+                                    minY,
+                                    centerX,
+                                    centerY,
+                                    offset,
+                                    viewportSize,
+                                    nodeWidth,
+                                    nodeHeight,
+                                  });
+                                  setBasePanOffset(offset);
+                                  setForceRecenter(true);
+                                  setTimeout(() => setForceRecenter(false), 120);
+                                }, 150);
+                              }
+                            }
                           }}
                           onKeyDown={async (event) => {
                             if (event.key === 'Enter' || event.key === ' ') {
                               event.preventDefault();
                               const result = await addChildren(node.id);
                               if (result?.expanded && result?.firstChildId) {
-                                setSelectedId(result.firstChildId);
                                 setForceRecenter(true);
                               }
                             }
