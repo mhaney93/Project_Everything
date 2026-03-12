@@ -434,6 +434,8 @@ function App() {
   const prevFocusedElementRef = useRef(null)
   const lastShiftRef = useRef({ x: 0, y: 0 })
   const lastFocusedIdRef = useRef(null)
+  const layoutRef = useRef(null)
+  const maxPanYRef = useRef(2000)
   const didDragRef = useRef(false)
   const suppressClickRef = useRef(false)
   const noteInputRefs = useRef({})
@@ -909,14 +911,14 @@ function App() {
     'Comedy': [],
     'Tragedy': [],
     'Tragicomedy': [],
-    'Experimental Theatre': 'Drama that challenges conventional theatrical forms and audience expectations.',
+    'Experimental Theatre': [],
     'Classical Drama': ['Greek Tragedy', 'Greek Comedy', 'Roman Tragedy', 'Roman Comedy', 'Satyr Play'],
     'Greek Tragedy': [],
     'Greek Comedy': [],
     'Roman Tragedy': [],
     'Roman Comedy': [],
     'Satyr Play': [],
-    'Modern Drama': 'Drama from the late 19th and 20th centuries exploring psychological realism and social issues.',
+    'Modern Drama': [],
     'Literary Theory': ['Structuralism', 'Deconstruction', 'Rhetoric', 'Semiotics', 'Narratology', 'Literary Criticism'],
     'Structuralism': [],
     'Deconstruction': [],
@@ -1284,6 +1286,7 @@ function App() {
     () => buildLayout(nodes, TOPIC_SUBDIVISIONS, nodeWidth, nodeHeight),
     [nodes, recenterKey, TOPIC_SUBDIVISIONS, nodeWidth, nodeHeight],
   )
+  layoutRef.current = layout
   const selectedNode = nodes.find((node) => node.id === selectedId)
   const isAuthenticated = Boolean(currentUser)
 
@@ -2379,15 +2382,16 @@ function App() {
           setSelectedId(null);
           // Wait for layout to update, then select and recenter leftmost child
           setTimeout(() => {
-            // Recompute leftmost child after layout update
+            // Use layoutRef.current to get the up-to-date layout after re-render
+            const currentLayout = layoutRef.current;
             const leftmostId = (() => {
               const visibleChildren = updatedNodes.filter((node) => node.parentId === parentNodeId && !node.hidden);
               if (visibleChildren.length === 0) return null;
-              if (typeof layout?.positions?.get === 'function') {
+              if (typeof currentLayout?.positions?.get === 'function') {
                 let leftmost = visibleChildren[0];
                 let minX = Infinity;
                 for (const child of visibleChildren) {
-                  const pos = layout.positions.get(child.id);
+                  const pos = currentLayout.positions.get(child.id);
                   if (pos && pos.x < minX) {
                     minX = pos.x;
                     leftmost = child;
@@ -2398,16 +2402,7 @@ function App() {
               return visibleChildren[0].id;
             })();
             if (leftmostId) {
-                // Center on leftmost child node visually
                 lastFocusedIdRef.current = leftmostId;
-                // Find position of leftmost child
-                const leftmostPos = layout.positions?.get(leftmostId);
-                if (leftmostPos) {
-                  setBasePanOffset({
-                    x: -leftmostPos.x,
-                    y: -leftmostPos.y,
-                  });
-                }
                 setForceRecenter(true);
                 setTimeout(() => setForceRecenter(false), 100);
             }
@@ -3082,6 +3077,11 @@ function App() {
   // But when focusing on a child node, don't apply renderOffset - allow ancestors to go off-screen
   const renderOffsetX = (finalMinX < 0 && focusNode.id === rootNode.id) ? -finalMinX + PADDING / 2 : 0
   const renderOffsetY = (finalMinY < 0 && focusNode.id === rootNode.id) ? -finalMinY + PADDING / 2 : 0
+  // Sync max upward pan limit into a ref so drag handlers always use the latest value.
+  // Constraint: top of lowest visible node must stay at or below the header/ceiling.
+  // top of lowest node (screen Y) = (finalMaxY - nodeHeight) + renderOffsetY - totalPanY
+  // => totalPanY <= finalMaxY - nodeHeight + renderOffsetY - ceiling
+  maxPanYRef.current = Math.max(0, finalMaxY - nodeHeight + renderOffsetY - effectiveHeaderHeight)
 
   
   // Calculate actual SVG bounds
@@ -4150,7 +4150,7 @@ function App() {
       const MAX_PAN_Y = 2000;
       return {
         x: Math.max(-MAX_PAN_X, Math.min(MAX_PAN_X, offset.x)),
-        y: Math.max(-MAX_PAN_Y, Math.min(MAX_PAN_Y, offset.y)),
+        y: Math.max(-MAX_PAN_Y, Math.min(maxPanYRef.current, offset.y)),
       };
     };
 
@@ -4892,37 +4892,7 @@ function App() {
                             event.stopPropagation();
                             event.preventDefault();
                              // ...existing code...
-                            const result = await addChildren(node.id);
-                            if (result?.expanded && result?.firstChildId) {
-                              const leftmostPos = layout.positions?.get(result.firstChildId);
-                              if (leftmostPos) {
-                                setTimeout(() => {
-                                  const minX = layout.bounds?.minX || 0;
-                                  const minY = layout.bounds?.minY || 0;
-                                  const centerX = (viewportSize.width / 2) - (nodeWidth / 2);
-                                  const centerY = (viewportSize.height / 2) - (nodeHeight / 2);
-                                  const offset = {
-                                    x: centerX - (leftmostPos.x - minX),
-                                    y: centerY - (leftmostPos.y - minY),
-                                  };
-                                  // Debug log for troubleshooting
-                                  console.log('[DEBUG] Centering leftmost child:', {
-                                    leftmostPos,
-                                    minX,
-                                    minY,
-                                    centerX,
-                                    centerY,
-                                    offset,
-                                    viewportSize,
-                                    nodeWidth,
-                                    nodeHeight,
-                                  });
-                                  setBasePanOffset(offset);
-                                  setForceRecenter(true);
-                                  setTimeout(() => setForceRecenter(false), 120);
-                                }, 150);
-                              }
-                            }
+                            await addChildren(node.id);
                           }}
                           onKeyDown={async (event) => {
                             if (event.key === 'Enter' || event.key === ' ') {
