@@ -3084,8 +3084,10 @@ function App() {
   // Constraint: top of lowest node (canvas Y) >= 0
   // => totalPanY <= finalMaxY - nodeHeight + renderOffsetY
   maxPanYRef.current = Math.max(0, finalMaxY - nodeHeight + renderOffsetY)
+  if (isDragging) {
+    console.log('[ceiling]', { finalMaxY, baseOffsetYCentered, maxPan: maxPanYRef.current, basePanY: basePanOffset.y, dragOffsetY: dragOffset.y, totalPanY: basePanOffset.y + dragOffset.y, renderOffsetY, nodeHeight })
+  }
 
-  
   // Calculate actual SVG bounds
   const svgWidth = Math.max(finalMaxX + renderOffsetX + PADDING / 2, viewportSize.width || 1000)
   const svgHeight = Math.max(finalMaxY + renderOffsetY + PADDING / 2, viewportSize.height || 800)
@@ -4698,7 +4700,7 @@ function App() {
         <section className="map-panel" ref={mapPanelRef}>
           <div
             className="map-canvas"
-            style={{ 
+            style={{
               cursor: isDragging ? 'grabbing' : 'grab'
             }}
             ref={canvasRef}
