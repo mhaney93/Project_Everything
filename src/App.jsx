@@ -488,6 +488,7 @@ function App() {
   const [editingNodeId, setEditingNodeId] = useState(null) // For tree view editing
   const [editingSidebarNodeId, setEditingSidebarNodeId] = useState(null) // For sidebar title editing
   const [deleteConfirmation, setDeleteConfirmation] = useState(null) // { nodeId, message }
+  const [signInRequired, setSignInRequired] = useState(null) // message string or null
   const [editingSummaryId, setEditingSummaryId] = useState(null)
   const [notification, setNotification] = useState(null) // { message, type: 'error' | 'success' | 'info' }
   const [lastCreatedGridId, setLastCreatedGridId] = useState(null) // Track newly created grid for Tab indent
@@ -2120,7 +2121,7 @@ function App() {
 
   const addCustomChild = (parentNodeId) => {
     if (!isAuthenticated) {
-      alert('Please sign in to add custom nodes to your private map.')
+      setSignInRequired('Sign in to add custom nodes to your private map.')
       return
     }
 
@@ -2174,7 +2175,7 @@ function App() {
 
   const addCustomSibling = (referenceNodeId) => {
     if (!isAuthenticated) {
-      alert('Please sign in to add custom nodes to your private map.')
+      setSignInRequired('Sign in to add custom nodes to your private map.')
       return
     }
 
@@ -2232,7 +2233,7 @@ function App() {
 
   const deleteCustomNode = (nodeId) => {
     if (!isAuthenticated) {
-      alert('Please sign in to delete custom nodes.')
+      setSignInRequired('Sign in to delete custom nodes.')
       return
     }
 
@@ -2363,8 +2364,11 @@ function App() {
       )
       setAnimatingIds(new Set())
       setSelectedId(null)
+      lastFocusedIdRef.current = parentNodeId
       setBasePanOffset({ x: 0, y: 0 })
       setRecenterKey((k) => k + 1)
+      setForceRecenter(true)
+      setTimeout(() => setForceRecenter(false), 100)
       return { expanded: false }
     } else {
       let updatedNodes = nodes.map((node) => {
@@ -2443,47 +2447,22 @@ function App() {
             updatedNodes = [...updatedNodes, ...newNodes];
             setNodes(updatedNodes);
           }
+          setSelectedId(null);
+          lastFocusedIdRef.current = parentNodeId;
           setBasePanOffset({ x: 0, y: 0 });
           setRecenterKey((k) => k + 1);
+          setForceRecenter(true);
+          setTimeout(() => setForceRecenter(false), 100);
           firstChildId = getLeftmostChildId(updatedNodes, parentNodeId, layout);
         } else {
           setNodes(updatedNodes);
+          setSelectedId(null);
+          lastFocusedIdRef.current = parentNodeId;
           setBasePanOffset({ x: 0, y: 0 });
           setRecenterKey((k) => k + 1);
+          setForceRecenter(true);
+          setTimeout(() => setForceRecenter(false), 100);
           firstChildId = getLeftmostChildId(updatedNodes, parentNodeId, layout);
-        }
-
-      // If expanding the root node, focus and center the first child
-        if (firstChildId) {
-          // Clear selection to avoid selection interfering with focus centering
-          setSelectedId(null);
-          // Wait for layout to update, then select and recenter leftmost child
-          setTimeout(() => {
-            // Use layoutRef.current to get the up-to-date layout after re-render
-            const currentLayout = layoutRef.current;
-            const leftmostId = (() => {
-              const visibleChildren = updatedNodes.filter((node) => node.parentId === parentNodeId && !node.hidden);
-              if (visibleChildren.length === 0) return null;
-              if (typeof currentLayout?.positions?.get === 'function') {
-                let leftmost = visibleChildren[0];
-                let minX = Infinity;
-                for (const child of visibleChildren) {
-                  const pos = currentLayout.positions.get(child.id);
-                  if (pos && pos.x < minX) {
-                    minX = pos.x;
-                    leftmost = child;
-                  }
-                }
-                return leftmost.id;
-              }
-              return visibleChildren[0].id;
-            })();
-            if (leftmostId) {
-                lastFocusedIdRef.current = leftmostId;
-                setForceRecenter(true);
-                setTimeout(() => setForceRecenter(false), 100);
-            }
-          }, 120);
         }
 
       return { expanded: true, firstChildId };
@@ -3357,6 +3336,13 @@ function App() {
           }
           addCustomSibling(targetNodeId)
         }
+        return
+      }
+
+      // Handle Escape: clear keyboard focus highlight
+      if (event.key === 'Escape' && focusedElement !== null) {
+        event.preventDefault()
+        setFocusedElement(null)
         return
       }
 
@@ -4250,6 +4236,7 @@ function App() {
       setDragStart({ x: e.clientX, y: e.clientY })
       setDragButton(0)
       setDragOffset({ x: 0, y: 0 })
+      setFocusedElement(null)
     }
   }
   const handleMapMouseMove = (e) => {
@@ -4819,13 +4806,19 @@ function App() {
           >
             <div
               className="map-content"
-              style={{ width: mapWidth, height: mapHeight }}
+              style={{
+                width: mapWidth,
+                height: mapHeight,
+                transform: `translate(${offsetX}px, ${offsetY}px)`,
+                transition: isDragging || !smoothPanning ? 'none' : 'transform 0.2s ease-out',
+              }}
             >
               <svg
                 className="map-links"
                 width={mapWidth}
                 height={mapHeight}
                 viewBox={`0 0 ${mapWidth} ${mapHeight}`}
+                overflow="visible"
                 aria-hidden="true"
               >
                 {layout.edges.map((edge) => {
@@ -4840,10 +4833,10 @@ function App() {
                   const from = layout.positions.get(edge.from);
                   const to = layout.positions.get(edge.to);
                   if (!from || !to) return null;
-                  const x1 = from.x + offsetX + renderOffsetX + nodeWidth / 2;
-                  const y1 = from.y + offsetY + renderOffsetY + nodeHeight;
-                  const x2 = to.x + offsetX + renderOffsetX + nodeWidth / 2;
-                  const y2 = to.y + offsetY + renderOffsetY;
+                  const x1 = from.x + renderOffsetX + nodeWidth / 2;
+                  const y1 = from.y + renderOffsetY + nodeHeight;
+                  const x2 = to.x + renderOffsetX + nodeWidth / 2;
+                  const y2 = to.y + renderOffsetY;
                   const dy = y2 - y1;
                   const d = `M ${x1} ${y1} C ${x1} ${y1 + dy * 0.35}, ${x2} ${y2 - dy * 0.35}, ${x2} ${y2}`;
                   return <path key={`${edge.from}-${edge.to}`} d={d} />;
@@ -4857,8 +4850,8 @@ function App() {
                 {renderableNodes.map((node) => {
                   const pos = layout.positions.get(node.id)
                   if (!pos) return null
-                  const finalX = pos.x + offsetX + renderOffsetX
-                  const finalY = pos.y + offsetY + renderOffsetY
+                  const finalX = pos.x + renderOffsetX
+                  const finalY = pos.y + renderOffsetY
                   const isRoot = node.parentId == null
                   return (
                     <div key={node.id}>
@@ -5386,6 +5379,35 @@ function App() {
           </aside>
         ) : null}
       </main>
+
+      {/* Sign In Required Modal */}
+      {signInRequired && (
+        <div className="modal-overlay" onClick={() => setSignInRequired(null)}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Sign In Required</h2>
+              <button className="modal-close" onClick={() => setSignInRequired(null)}>✕</button>
+            </div>
+            <div className="modal-body">
+              <p>{signInRequired}</p>
+            </div>
+            <div className="modal-footer">
+              <button
+                className="modal-button modal-button-cancel"
+                onClick={() => setSignInRequired(null)}
+              >
+                Dismiss
+              </button>
+              <button
+                className="modal-button modal-button-confirm"
+                onClick={() => { setSignInRequired(null); setOpenTooltip('profile'); }}
+              >
+                Sign In
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Delete Confirmation Modal */}
       {deleteConfirmation && (

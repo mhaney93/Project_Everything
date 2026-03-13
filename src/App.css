@@ -683,6 +683,7 @@ button:not(:disabled):hover {
   inset: 0;
   z-index: 1;
   pointer-events: none;
+  overflow: visible;
 }
 
 .map-links path {
@@ -2041,6 +2042,22 @@ button:not(:disabled):hover {
 }
 
 .modal-button-delete:active {
+  transform: translateY(0);
+}
+
+.modal-button-confirm {
+  background: #1d6fdc;
+  color: white;
+  border: none;
+}
+
+.modal-button-confirm:hover {
+  background: #1a63c5;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(29, 111, 220, 0.3);
+}
+
+.modal-button-confirm:active {
   transform: translateY(0);
 }
 /* Notification Styles */
