@@ -4254,6 +4254,33 @@ function App() {
     didDragRef.current = false
   }
 
+  // Attach touch handlers imperatively with { passive: false } so preventDefault works
+  const touchHandlersRef = useRef({})
+  touchHandlersRef.current = {
+    start: handleMapTouchStart,
+    move: handleMapTouchMove,
+    end: handleMapTouchEnd,
+    cancel: handleMapTouchCancel,
+  }
+  useEffect(() => {
+    const el = canvasRef.current
+    if (!el) return
+    const onStart = (e) => touchHandlersRef.current.start(e)
+    const onMove = (e) => touchHandlersRef.current.move(e)
+    const onEnd = (e) => touchHandlersRef.current.end(e)
+    const onCancel = (e) => touchHandlersRef.current.cancel(e)
+    el.addEventListener('touchstart', onStart, { passive: false })
+    el.addEventListener('touchmove', onMove, { passive: false })
+    el.addEventListener('touchend', onEnd)
+    el.addEventListener('touchcancel', onCancel)
+    return () => {
+      el.removeEventListener('touchstart', onStart)
+      el.removeEventListener('touchmove', onMove)
+      el.removeEventListener('touchend', onEnd)
+      el.removeEventListener('touchcancel', onCancel)
+    }
+  }, []) // runs once; always reads latest handlers via touchHandlersRef
+
   return (
     <div className={`app-shell${isFullscreenMode ? ' fullscreen-mode' : ''}`} style={{ '--header-height': `${effectiveHeaderHeight}px` }}>
       {/* Spacer for mobile: must be outside the fixed header to push content down */}
@@ -4699,10 +4726,6 @@ function App() {
             onMouseMove={handleMapMouseMove}
             onMouseUp={handleMapMouseUp}
             onMouseLeave={handleMapMouseLeave}
-            onTouchStart={handleMapTouchStart}
-            onTouchMove={handleMapTouchMove}
-            onTouchEnd={handleMapTouchEnd}
-            onTouchCancel={handleMapTouchCancel}
           >
             <div
               className="map-content"
