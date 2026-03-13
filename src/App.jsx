@@ -1287,6 +1287,8 @@ function App() {
     [nodes, recenterKey, TOPIC_SUBDIVISIONS, nodeWidth, nodeHeight],
   )
   layoutRef.current = layout
+  const nodesRef = useRef(nodes)
+  nodesRef.current = nodes
   const selectedNode = nodes.find((node) => node.id === selectedId)
   const isAuthenticated = Boolean(currentUser)
 
@@ -3292,10 +3294,24 @@ function App() {
           setPanelExpanded(false)
           setFocusedElement(null)
         } else if (focusedElement.type === 'dots') {
-          const result = await addChildren(focusedElement.nodeId)
-          if (result?.expanded && result?.firstChildId) {
-            // Focus on the first child after expansion
-            setFocusedElement({ nodeId: result.firstChildId, type: 'node' })
+          const expandedNodeId = focusedElement.nodeId
+          const result = await addChildren(expandedNodeId)
+          if (result?.expanded) {
+            // Wait for layout to re-render, then focus the actual leftmost child
+            setTimeout(() => {
+              const currentLayout = layoutRef.current
+              const visibleChildren = nodesRef.current.filter(n => n.parentId === expandedNodeId && !n.hidden)
+              if (!visibleChildren.length) return
+              let leftmost = visibleChildren[0]
+              if (typeof currentLayout?.positions?.get === 'function') {
+                let minX = Infinity
+                for (const child of visibleChildren) {
+                  const pos = currentLayout.positions.get(child.id)
+                  if (pos && pos.x < minX) { minX = pos.x; leftmost = child }
+                }
+              }
+              setFocusedElement({ nodeId: leftmost.id, type: 'node' })
+            }, 150)
           } else {
             setFocusedElement(null)
           }
