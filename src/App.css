@@ -665,6 +665,7 @@ button:not(:disabled):hover {
   -ms-user-select: none;
   pointer-events: auto;
   scrollbar-width: none;
+  touch-action: none;
 }
 
 .map-canvas::-webkit-scrollbar {
@@ -1707,9 +1708,11 @@ button:not(:disabled):hover {
     border-radius: 0 0 12px 12px;
   }
 
-  /* Map canvas - account for smaller header */
+  /* Map canvas - correct height for mobile header, no page overflow */
   .map-canvas {
-    padding: 1rem;
+    padding: 0;
+    height: calc(100vh - var(--header-height));
+    max-height: calc(100vh - var(--header-height));
   }
 
   /* Node cards - better touch targets */
