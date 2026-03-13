@@ -2988,14 +2988,9 @@ function App() {
     ? actualViewportHeight
     : (windowSize.height - effectiveHeaderHeight);
   
-  // When a node is selected or root is focused without selection, always use current viewport size
-  // This ensures re-centering works immediately on window resize
-  const centerWidth = (hasSelection || rootFocusedNoSelection || forceRecenter)
-    ? visibleViewportWidth
-    : (anchorSizeRef.current.width || canvasSize.width)
-  const centerHeight = (hasSelection || rootFocusedNoSelection || forceRecenter)
-    ? visibleViewportHeight
-    : (anchorSizeRef.current.height || canvasSize.height)
+  // Always use current viewport size for centering, with anchorSizeRef/canvasSize as fallback
+  const centerWidth = visibleViewportWidth || anchorSizeRef.current.width || canvasSize.width
+  const centerHeight = visibleViewportHeight || anchorSizeRef.current.height || canvasSize.height
   
   // Account for fixed side panel taking up visual space on the right
   // The side panel is position: fixed, so it doesn't reduce map-panel width but takes up screen space
