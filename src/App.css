@@ -650,7 +650,7 @@ button:not(:disabled):hover {
 
 .map-canvas {
   position: relative;
-  overflow: auto;
+  overflow: hidden;
   border-radius: 20px;
   background: transparent;
   border: none;
@@ -1553,6 +1553,11 @@ button:not(:disabled):hover {
     flex-direction: row;
   }
 
+  /* Spacer handles the full header offset dynamically; remove static margin */
+  .app-main {
+    margin-top: 0;
+  }
+
   .app-shell {
     --header-height: 120px;
   }
@@ -1599,24 +1604,28 @@ button:not(:disabled):hover {
     justify-self: center;
   }
 
-  /* Top navigation under search bar, side by side */
+  /* Top navigation under search bar, side by side on one row */
   .top-left {
     display: flex;
+    flex: 1 1 0;
     gap: 0.5rem !important;
     margin-bottom: 0;
     position: static;
     top: auto;
     left: auto;
     right: auto;
+    justify-content: flex-start;
   }
 
   .top-right {
     display: flex;
+    flex: 1 1 0;
     gap: 0.5rem !important;
     position: static;
     top: auto;
     left: auto;
     right: auto;
+    justify-content: flex-end;
   }
 
     /* Ensure button groups are side by side on mobile */
