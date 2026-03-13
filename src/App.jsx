@@ -4204,7 +4204,6 @@ function App() {
   // Touch drag handlers for mobile
   const handleMapTouchStart = (e) => {
     if (e.touches && e.touches.length === 1) {
-      e.preventDefault()
       didDragRef.current = false
       suppressClickRef.current = false
       setIsDragging(true)
