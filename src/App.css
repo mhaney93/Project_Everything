@@ -638,7 +638,7 @@ button:not(:disabled):hover {
   align-items: start;
   padding: 0;
   padding-bottom: 0;
-  margin-top: 80px;
+  margin-top: 0;
 }
 
 

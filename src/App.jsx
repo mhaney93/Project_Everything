@@ -3084,9 +3084,6 @@ function App() {
   // Constraint: top of lowest node (canvas Y) >= 0
   // => totalPanY <= finalMaxY - nodeHeight + renderOffsetY
   maxPanYRef.current = Math.max(0, finalMaxY - nodeHeight + renderOffsetY)
-  if (isDragging) {
-    console.log('[ceiling]', { finalMaxY, baseOffsetYCentered, maxPan: maxPanYRef.current, basePanY: basePanOffset.y, dragOffsetY: dragOffset.y, totalPanY: basePanOffset.y + dragOffset.y, renderOffsetY, nodeHeight })
-  }
 
   // Calculate actual SVG bounds
   const svgWidth = Math.max(finalMaxX + renderOffsetX + PADDING / 2, viewportSize.width || 1000)
@@ -3117,10 +3114,10 @@ function App() {
     if (!pos) return true;
     const screenX = pos.x + offsetX + renderOffsetX;
     const screenY = pos.y + offsetY + renderOffsetY;
-    if (screenY < effectiveHeaderHeight) return false;
+    if (screenY < 0) return false;
     const viewportLeft = -VIEWPORT_BUFFER;
     const viewportRight = windowSize.width + VIEWPORT_BUFFER;
-    const viewportTop = effectiveHeaderHeight - VIEWPORT_BUFFER;
+    const viewportTop = -VIEWPORT_BUFFER;
     const viewportBottom = windowSize.height + VIEWPORT_BUFFER;
     if (screenX + nodeWidth < viewportLeft) return false;
     if (screenX > viewportRight) return false;
@@ -3144,8 +3141,8 @@ function App() {
     // Calculate node position on screen
     const screenY = pos.y + offsetY + renderOffsetY;
     
-    // Only exclude nodes whose top edge is at or above the header (vertical culling only)
-    if (screenY < effectiveHeaderHeight) return false;
+    // Only exclude nodes whose top edge is above the canvas top (behind the header)
+    if (screenY < 0) return false;
     
     return true;
   });
@@ -3156,7 +3153,7 @@ function App() {
   if (rootNode) {
     const rootY = layout.positions.get(rootNode.id)?.y ?? 0;
     const rootScreenY = rootY + offsetY + renderOffsetY;
-    isRootAboveHeader = rootScreenY < effectiveHeaderHeight;
+    isRootAboveHeader = rootScreenY < 0;
   }
 
   // Auth handlers
@@ -4696,7 +4693,7 @@ function App() {
       )}
 
 
-      <main className="app-main">
+      <main className="app-main" style={!isMobile && !isFullscreenMode && headerHeight ? { marginTop: headerHeight } : undefined}>
         <section className="map-panel" ref={mapPanelRef}>
           <div
             className="map-canvas"
