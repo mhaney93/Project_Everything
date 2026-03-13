@@ -2990,10 +2990,10 @@ function App() {
   
   // When a node is selected or root is focused without selection, always use current viewport size
   // This ensures re-centering works immediately on window resize
-  const centerWidth = (hasSelection || rootFocusedNoSelection)
+  const centerWidth = (hasSelection || rootFocusedNoSelection || forceRecenter)
     ? visibleViewportWidth
     : (anchorSizeRef.current.width || canvasSize.width)
-  const centerHeight = (hasSelection || rootFocusedNoSelection)
+  const centerHeight = (hasSelection || rootFocusedNoSelection || forceRecenter)
     ? visibleViewportHeight
     : (anchorSizeRef.current.height || canvasSize.height)
   
