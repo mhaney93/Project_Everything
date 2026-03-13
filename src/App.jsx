@@ -2846,8 +2846,8 @@ function App() {
     // Measure immediately so panel offset is correct right after exiting fullscreen.
     setHeaderHeight(header.getBoundingClientRect().height)
 
-    const observer = new ResizeObserver(([entry]) => {
-      setHeaderHeight(entry.contentRect.height)
+    const observer = new ResizeObserver(() => {
+      setHeaderHeight(header.getBoundingClientRect().height)
     })
 
     observer.observe(header)
@@ -3057,12 +3057,14 @@ function App() {
   // Offset reset effect for root node removed to avoid interfering with drag logic
 
   // (Removed accidental top-level code. All logic is inside App function.)
-  // Calculate stable bounds without drag offset
+  // Calculate stable bounds without drag offset (only non-hidden nodes for accurate ceiling)
+  const visibleNodeIdSet = new Set(nodes.filter(n => n.hidden !== true).map(n => n.id))
   let finalMinX = 0
   let finalMaxX = 0
   let finalMinY = 0
   let finalMaxY = 0
-  layout.positions.forEach((pos) => {
+  layout.positions.forEach((pos, id) => {
+    if (!visibleNodeIdSet.has(id)) return
     const left = pos.x + baseOffsetXCentered
     const right = pos.x + baseOffsetXCentered + nodeWidth
     const top = pos.y + baseOffsetYCentered
@@ -3078,10 +3080,10 @@ function App() {
   const renderOffsetX = (finalMinX < 0 && focusNode.id === rootNode.id) ? -finalMinX + PADDING / 2 : 0
   const renderOffsetY = (finalMinY < 0 && focusNode.id === rootNode.id) ? -finalMinY + PADDING / 2 : 0
   // Sync max upward pan limit into a ref so drag handlers always use the latest value.
-  // Constraint: top of lowest visible node must stay at or below the header/ceiling.
-  // top of lowest node (screen Y) = (finalMaxY - nodeHeight) + renderOffsetY - totalPanY
-  // => totalPanY <= finalMaxY - nodeHeight + renderOffsetY - ceiling
-  maxPanYRef.current = Math.max(0, finalMaxY - nodeHeight + renderOffsetY - effectiveHeaderHeight)
+  // Canvas top is always at effectiveHeaderHeight on screen, so ceiling in canvas coords = 0.
+  // Constraint: top of lowest node (canvas Y) >= 0
+  // => totalPanY <= finalMaxY - nodeHeight + renderOffsetY
+  maxPanYRef.current = Math.max(0, finalMaxY - nodeHeight + renderOffsetY)
 
   
   // Calculate actual SVG bounds
@@ -4263,7 +4265,7 @@ function App() {
     <div className={`app-shell${isFullscreenMode ? ' fullscreen-mode' : ''}`} style={{ '--header-height': `${effectiveHeaderHeight}px` }}>
       {/* Spacer for mobile: must be outside the fixed header to push content down */}
       {isMobile && !isFullscreenMode && (
-        <div className="mobile-header-spacer" style={{ height: '120px', minHeight: '120px' }} />
+        <div className="mobile-header-spacer" style={{ height: `${headerHeight || 120}px`, minHeight: `${headerHeight || 120}px` }} />
       )}
       {!isFullscreenMode && (
         <header className="app-header" ref={headerRef}>
