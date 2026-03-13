@@ -3007,8 +3007,7 @@ function App() {
   const centerX = centerWidth ? (centerWidth - sidePanelWidthWhenOpen) / 2 : baseWidth / 2
   // Center the focused node vertically in the visible area
   // On mobile, shift the center upward by the full mobile header spacer height ONLY when root is focused
-  const mobileCenterYOffset = isMobile && !isFullscreenMode && isRootFocus ? -mobileHeaderSpacerHeight : 0;
-  const centerY = centerHeight ? (centerHeight / 2 + mobileCenterYOffset) : (baseHeight / 2)
+  const centerY = centerHeight ? centerHeight / 2 : baseHeight / 2
   const focusCenterX = focusPos
     ? focusPos.x + baseOffsetX + nodeWidth / 2
     : baseOffsetX + nodeWidth / 2
