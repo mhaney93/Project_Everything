@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" https://matthew-haney.com 2>/dev/null || echo \"Cannot reach\")",
+      "Bash(awk 'NR>=583 && NR<=1265' /c/Users/matth/OneDrive/Desktop/Programming/project_everything/src/App.jsx | grep -v \"^\\\\s*\\\\[\" | grep -v \"^\\\\s*//\" | grep \"'.*':\\\\s*'\" | head -20)",
+      "Bash(npm run:*)",
+      "Bash(awk 'NR>=588 && NR<=650' /c/Users/matth/OneDrive/Desktop/Programming/project_everything/src/App.jsx | grep \"'Metaphysics'\\\\|'Epistemology'\\\\|'Ethics'\\\\|'Aesthetics'\\\\|'Logic'\\\\|'Political Philosophy'\\\\|'Phenomenology'\\\\|'History of Philosophy'\\\\|'Metaphilosophy'\")",
+      "Bash(awk 'NR>=583 && NR<=780' /c/Users/matth/OneDrive/Desktop/Programming/project_everything/src/App.jsx | grep -E \"^\\\\s+'\\(Metaphysics|Epistemology|Ethics|Aesthetics|Logic|Political Philosophy|Phenomenology|History of Philosophy|Metaphilosophy\\)':\")",
+      "Bash(find \"C:/Users/matth/OneDrive/Desktop/Programming/project_everything\" -name \"help*\" -o -name \"*help*\" 2>/dev/null | head -20)",
+      "Bash(git add:*)",
+      "Bash(git push:*)",
+      "Bash(grep -n \"Carolingian\\\\|Post-Carolingian\\\\|Early High Middle\\\\|Central High Middle\\\\|Late High Middle\\\\|Late Antiquity \\(500\\\\|Migration Period \\(500\\\\|Migration Period \\(750\" /c/Users/matth/OneDrive/Desktop/Programming/project_everything/src/App.jsx | grep -v \"//\")",
+      "WebFetch(domain:drive.mindmup.com)",
+      "Bash(grep -n \"Global Exploration\\\\|Religious Transformation\\\\|Age of Absolutism\\\\|Enlightenment \\(1715\\\\|Industrial Age \\(1760\\\\|Age of Revolutions \\(1775\" /c/Users/matth/OneDrive/Desktop/Programming/project_everything/src/App.jsx | grep -v \"//\")",
+      "Bash(grep -o \"'[^']*'\" /c/Users/matth/OneDrive/Desktop/Programming/project_everything/src/App.jsx | grep -A0 \"\" | sort | uniq -d | grep -v \"^'[^\\(]*'$\" | head -30)",
+      "Bash(grep -c \"'Age of Revolutions \\(1775 - 1800\\)'\" /c/Users/matth/OneDrive/Desktop/Programming/project_everything/src/App.jsx\ngrep -c \"'Enlightenment \\(1715 - 1775\\)'\" /c/Users/matth/OneDrive/Desktop/Programming/project_everything/src/App.jsx\ngrep -c \"'Industrial Age \\(1760 - 1800\\)'\" /c/Users/matth/OneDrive/Desktop/Programming/project_everything/src/App.jsx)",
+      "Bash(grep -n \"'Age of Revolutions \\(1775 - 1800\\)'\\\\|'Enlightenment \\(1715 - 1775\\)'\\\\|'Industrial Age \\(1760 - 1800\\)'\" /c/Users/matth/OneDrive/Desktop/Programming/project_everything/src/App.jsx | grep -v \"summaries\\\\|//\")",
+      "Bash(grep -n \"midPanAnchor\\\\|midPanMouse\\\\|midPanRaf\" /c/Users/matth/OneDrive/Desktop/Programming/project_everything/src/App.jsx | grep -v \"summaries\\\\|//\")"
+    ]
+  }
+}
