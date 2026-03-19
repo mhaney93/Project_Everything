@@ -15,7 +15,11 @@
       "Bash(grep -o \"'[^']*'\" /c/Users/matth/OneDrive/Desktop/Programming/project_everything/src/App.jsx | grep -A0 \"\" | sort | uniq -d | grep -v \"^'[^\\(]*'$\" | head -30)",
       "Bash(grep -c \"'Age of Revolutions \\(1775 - 1800\\)'\" /c/Users/matth/OneDrive/Desktop/Programming/project_everything/src/App.jsx\ngrep -c \"'Enlightenment \\(1715 - 1775\\)'\" /c/Users/matth/OneDrive/Desktop/Programming/project_everything/src/App.jsx\ngrep -c \"'Industrial Age \\(1760 - 1800\\)'\" /c/Users/matth/OneDrive/Desktop/Programming/project_everything/src/App.jsx)",
       "Bash(grep -n \"'Age of Revolutions \\(1775 - 1800\\)'\\\\|'Enlightenment \\(1715 - 1775\\)'\\\\|'Industrial Age \\(1760 - 1800\\)'\" /c/Users/matth/OneDrive/Desktop/Programming/project_everything/src/App.jsx | grep -v \"summaries\\\\|//\")",
-      "Bash(grep -n \"midPanAnchor\\\\|midPanMouse\\\\|midPanRaf\" /c/Users/matth/OneDrive/Desktop/Programming/project_everything/src/App.jsx | grep -v \"summaries\\\\|//\")"
+      "Bash(grep -n \"midPanAnchor\\\\|midPanMouse\\\\|midPanRaf\" /c/Users/matth/OneDrive/Desktop/Programming/project_everything/src/App.jsx | grep -v \"summaries\\\\|//\")",
+      "Bash(python3.exe -c \"\nimport re, sys\n\nfilepath = 'src/App.jsx'\n\nwith open\\(filepath, 'r', encoding='utf-8'\\) as f:\n    content = f.read\\(\\)\n\nsingle_chapter = re.compile\\(r\\\\\"'\\(\\\\d+\\):\\(\\\\d+[–\\\\-]\\\\d+\\) \\(\\\\\\([^']+\\\\\\)\\)'\\\\\"\\)\n\nall_matches = {}\nfor m in single_chapter.finditer\\(content\\):\n    full = m.group\\(0\\)\n    chapter = m.group\\(1\\)\n    desc = m.group\\(3\\)\n    new = f\\\\\"'{chapter} {desc}'\\\\\"\n    all_matches[full] = new\n\nprint\\(f'Found {len\\(all_matches\\)} unique single-chapter labels to transform', file=sys.stderr\\)\nfor old, new in sorted\\(all_matches.items\\(\\)\\):\n    print\\(f'  {old}  -->  {new}'\\)\n\")",
+      "Bash(node:*)",
+      "Bash(cd:*)",
+      "Bash(git commit:*)"
     ]
   }
 }
