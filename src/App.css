@@ -897,6 +897,7 @@ button:not(:disabled):hover {
   background: rgba(29, 111, 220, 0.08);
   border-left: 2px solid var(--accent);
   border-radius: 0.25rem;
+  white-space: pre-wrap;
 }
 
 .panel-summary.editable {
