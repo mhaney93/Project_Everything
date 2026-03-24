@@ -19,7 +19,15 @@
       "Bash(python3.exe -c \"\nimport re, sys\n\nfilepath = 'src/App.jsx'\n\nwith open\\(filepath, 'r', encoding='utf-8'\\) as f:\n    content = f.read\\(\\)\n\nsingle_chapter = re.compile\\(r\\\\\"'\\(\\\\d+\\):\\(\\\\d+[–\\\\-]\\\\d+\\) \\(\\\\\\([^']+\\\\\\)\\)'\\\\\"\\)\n\nall_matches = {}\nfor m in single_chapter.finditer\\(content\\):\n    full = m.group\\(0\\)\n    chapter = m.group\\(1\\)\n    desc = m.group\\(3\\)\n    new = f\\\\\"'{chapter} {desc}'\\\\\"\n    all_matches[full] = new\n\nprint\\(f'Found {len\\(all_matches\\)} unique single-chapter labels to transform', file=sys.stderr\\)\nfor old, new in sorted\\(all_matches.items\\(\\)\\):\n    print\\(f'  {old}  -->  {new}'\\)\n\")",
       "Bash(node:*)",
       "Bash(cd:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(python:*)",
+      "Bash(python3.exe -c \":*)",
+      "Bash(py -3 -c \":*)",
+      "Bash(py:*)",
+      "Bash(grep -v \"//\")",
+      "Bash(node -e \"const fs = require\\(''''fs''''\\); const content = fs.readFileSync\\(''''src/App.jsx'''', ''''utf8''''\\); console.log\\(''''File size:'''', content.length, ''''chars''''\\); console.log\\(''''No syntax errors check...''''\\);\")",
+      "Bash(npx vite:*)",
+      "Bash(find /c/Users/matth/OneDrive/Desktop/Programming/project_everything -name *.js -newer /c/Users/matth/OneDrive/Desktop/Programming/project_everything/src/App.jsx -not -path */node_modules/*)"
     ]
   }
 }
