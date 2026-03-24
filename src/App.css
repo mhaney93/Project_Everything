@@ -738,6 +738,7 @@ button:not(:disabled):hover {
 .node-card span {
   pointer-events: none;
   line-height: 1.2;
+  white-space: pre-wrap;
 }
 
 .node-dots {
