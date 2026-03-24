@@ -938,9 +938,30 @@ const applyLabelMigrations = (mapNodes) => {
   return { nodes: migratedNodes, changed }
 }
 
-const buildLayout = (nodes, topicSubdivisions = {}, nodeWidth = NODE_WIDTH, nodeHeight = NODE_HEIGHT) => {
+const getDisplayLabelRaw = (label) => {
+  const m = label.match(/\s\d+:(\d+)$/)
+  if (m) return m[1]
+  const pipeIdx = label.indexOf('|')
+  if (pipeIdx !== -1) return label.slice(0, pipeIdx)
+  return label
+}
+
+const buildLayout = (nodes, topicSubdivisions = {}, nodeWidth = NODE_WIDTH, nodeHeight = NODE_HEIGHT, nodeSizeScale = 1) => {
   if (nodes.length === 0) {
     return { positions: new Map(), edges: [], bounds: null };
+  }
+
+  const nodeById = new Map(nodes.map(n => [n.id, n]))
+  const getNodeHeightFn = (label) => {
+    const displayLabel = getDisplayLabelRaw(label)
+    const lineCount = displayLabel.split('\n').length
+    if (lineCount <= 1) return nodeHeight
+    const lineHeightPx = Math.round(13 * nodeSizeScale)
+    return Math.max(nodeHeight, lineCount * lineHeightPx + Math.round(16 * nodeSizeScale))
+  }
+  const getHeight = (nodeId) => {
+    const node = nodeById.get(nodeId)
+    return node ? getNodeHeightFn(node.label) : nodeHeight
   }
 
   const root = nodes.find((node) => node.parentId == null) || nodes[0];
@@ -1021,7 +1042,7 @@ const buildLayout = (nodes, topicSubdivisions = {}, nodeWidth = NODE_WIDTH, node
     kids.forEach((child) => {
       edges.push({ from: nodeId, to: child.id });
       const childWidth = subtreeWidths.get(child.id) || nodeWidth;
-      assignPositions(child.id, childX, y + nodeHeight + V_GAP);
+      assignPositions(child.id, childX, y + getHeight(nodeId) + V_GAP);
       childX += childWidth + H_GAP;
     });
   };
@@ -1033,11 +1054,11 @@ const buildLayout = (nodes, topicSubdivisions = {}, nodeWidth = NODE_WIDTH, node
   let minY = Infinity;
   let maxX = -Infinity;
   let maxY = -Infinity;
-  positions.forEach((pos) => {
+  positions.forEach((pos, nodeId) => {
     minX = Math.min(minX, pos.x);
     minY = Math.min(minY, pos.y);
     maxX = Math.max(maxX, pos.x + nodeWidth);
-    maxY = Math.max(maxY, pos.y + nodeHeight);
+    maxY = Math.max(maxY, pos.y + getHeight(nodeId));
   });
 
   return {
@@ -6660,8 +6681,8 @@ function App() {
   }, [nodeSizeScale])
 
   const layout = useMemo(
-    () => buildLayout(nodes, TOPIC_SUBDIVISIONS, nodeWidth, nodeHeight),
-    [nodes, recenterKey, TOPIC_SUBDIVISIONS, nodeWidth, nodeHeight],
+    () => buildLayout(nodes, TOPIC_SUBDIVISIONS, nodeWidth, nodeHeight, nodeSizeScale),
+    [nodes, recenterKey, TOPIC_SUBDIVISIONS, nodeWidth, nodeHeight, nodeSizeScale],
   )
   layoutRef.current = layout
   const nodesRef = useRef(nodes)
@@ -6679,6 +6700,15 @@ function App() {
     const pipeIdx = label.indexOf('|')
     if (pipeIdx !== -1) return label.slice(0, pipeIdx)
     return label
+  }
+
+  // Calculate node height based on line count in the label
+  const getNodeHeightForLabel = (label) => {
+    const displayLabel = getDisplayLabel(label)
+    const lineCount = displayLabel.split('\n').length
+    if (lineCount <= 1) return nodeHeight
+    const lineHeightPx = Math.round(13 * nodeSizeScale)
+    return Math.max(nodeHeight, lineCount * lineHeightPx + Math.round(16 * nodeSizeScale))
   }
 
   // Calculate font size based on label length to ensure text fits in node
@@ -15016,6 +15046,7 @@ function App() {
                   const finalX = pos.x + renderOffsetX
                   const finalY = pos.y + renderOffsetY
                   const isRoot = node.parentId == null
+                  const computedNodeHeight = getNodeHeightForLabel(node.label)
                   return (
                     <div key={node.id}>
                       <div
@@ -15024,7 +15055,7 @@ function App() {
                           left: finalX,
                           top: finalY,
                           width: nodeWidth,
-                          height: nodeHeight,
+                          height: computedNodeHeight,
                           transform: animatingIds.has(node.id) ? 'scale(0.8)' : 'scale(1)',
                           opacity: animatingIds.has(node.id) ? 0 : 1,
                           transition: isDragging || !smoothPanning ? 'none' : undefined,
@@ -15038,7 +15069,7 @@ function App() {
                           className="node-card"
                           style={{
                             width: nodeWidth,
-                            height: nodeHeight,
+                            height: computedNodeHeight,
                             color: selectedId === node.id && panelOpen ? '#1d6fdc' : 'inherit',
                             backgroundColor: focusedElement?.nodeId === node.id && focusedElement?.type === 'node' ? 'rgba(29, 111, 220, 0.1)' : '#ffffff',
                             outline: focusedElement?.nodeId === node.id && focusedElement?.type === 'node' ? '2px solid #1d6fdc' : 'none',
