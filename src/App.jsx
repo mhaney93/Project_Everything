@@ -6841,7 +6841,7 @@ function App() {
     'Example|str-py-var': ["'Python for Beginners'|py-var"],
     "'Python for Beginners'|py-var": [],
     // Python — Types/Data Types
-    'Types/Data Types|py': ['Numeric Types|py', 'Sequence Types|py', 'Mapping Type|py', 'Callable Types|py', 'Modules|py', 'Type Conversion|py'],
+    'Types/Data Types|py': ['Numeric Types|py', 'Sequence Types|py', 'Mapping Type|py', 'Callable Types|py', 'Classes|py', 'Modules|py', 'Type Conversion|py'],
     // Numeric Types
     'Numeric Types|py': ['floats|py', 'integers|py'],
     'integers|py': ['boolean values|py'],
@@ -6973,7 +6973,7 @@ function App() {
     '.items()|py-dict': ['x|py-dict-items'],
     'x|py-dict-items': [],
     // Callable Types
-    'Callable Types|py': ['Classes|py', 'Functions|py'],
+    'Callable Types|py': ['Functions|py'],
     // Functions
     'Functions|py': ['Arguments|py', 'def x(y):\n  z|py-fn'],
     'def x(y):\n  z|py-fn': ['x|py-fn', 'y|py-fn', 'z|py-fn'],
