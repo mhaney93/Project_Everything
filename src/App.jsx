@@ -5742,8 +5742,8 @@ function App() {
     'Entities': ['Named Entities', 'Numeric Entities'],
     'Named Entities': [],
     'Numeric Entities': [],
-    'Markdown': ['Formatting|Markdown', 'Line Break', 'Headings', 'Lists', 'Links', 'Inline Code', 'Block Code', 'Insert Images', 'Blockquote', 'Tables|Markdown', 'Bold', 'Italic', 'Bold and Italic', 'Strikethrough', 'Subscript', 'Superscript', 'Underlined', 'Color|Markdown', 'Mentions', 'Emojis', 'Footnotes', 'Alerts', 'Comments|Markdown', 'Ignore Markdown Formatting'],
-    'Formatting|Markdown': [],
+    'Markdown': ['Formatting (Markdown)|Markdown', 'Line Break', 'Headings', 'Lists', 'Links', 'Inline Code', 'Block Code', 'Insert Images', 'Blockquote', 'Tables (Markdown)|Markdown', 'Bold', 'Italic', 'Bold and Italic', 'Strikethrough', 'Subscript', 'Superscript', 'Underlined', 'Color (Markdown)|Markdown', 'Mentions', 'Emojis', 'Footnotes', 'Alerts', 'Comments (Markdown)|Markdown', 'Ignore Markdown Formatting'],
+    'Formatting (Markdown)|Markdown': [],
     'Line Break': [],
     'Headings': [],
     'Lists': ['Unsorted List', 'Sorted List', 'Task List'],
@@ -5755,7 +5755,7 @@ function App() {
     'Block Code': [],
     'Insert Images': [],
     'Blockquote': [],
-    'Tables|Markdown': [],
+    'Tables (Markdown)|Markdown': [],
     'Bold': [],
     'Italic': [],
     'Bold and Italic': [],
@@ -5763,7 +5763,7 @@ function App() {
     'Subscript': [],
     'Superscript': [],
     'Underlined': [],
-    'Color|Markdown': ['HEX Color', 'RGB Color', 'HSL Color'],
+    'Color (Markdown)|Markdown': ['HEX Color', 'RGB Color', 'HSL Color'],
     'HEX Color': [],
     'RGB Color': [],
     'HSL Color': [],
@@ -5771,10 +5771,10 @@ function App() {
     'Emojis': [],
     'Footnotes': [],
     'Alerts': [],
-    'Comments|Markdown': [],
+    'Comments (Markdown)|Markdown': [],
     'Ignore Markdown Formatting': [],
     'Style Sheet Languages': ['CSS'],
-    'CSS': ['Selectors', 'Properties|CSS', 'CSS Values', 'At-Rules'],
+    'CSS': ['Selectors', 'Properties (CSS)|CSS', 'CSS Values', 'At-Rules'],
     'Selectors': ['Universal Selector', 'Element Selectors', 'Compound Selectors', 'Grouping Selector', 'Class Selector', 'ID Selector', 'Attribute Selectors', 'Combinators', 'Pseudo-Classes', 'Pseudo-Elements'],
     'Universal Selector': [],
     'Element Selectors': [],
@@ -5837,7 +5837,7 @@ function App() {
     'Pseudo-Elements': ['::before', '::after'],
     '::before': [],
     '::after': [],
-    'Properties|CSS': ['Box Model & Sizing', 'Typography|CSS', 'Backgrounds', 'Layout|CSS', 'Visual Effects & Transforms'],
+    'Properties (CSS)|CSS': ['Box Model & Sizing', 'Typography (CSS)|CSS', 'Backgrounds', 'Layout (CSS)|CSS', 'Visual Effects & Transforms'],
     'Box Model & Sizing': ['Width Properties', 'Height Properties', 'Margin Properties', 'Padding Properties', 'Border Properties', 'box-sizing', 'Outline Properties', 'box-shadow'],
     'Width Properties': ['width', 'min-width', 'max-width'],
     'width': [],
@@ -5873,7 +5873,7 @@ function App() {
     'outline-color': [],
     'outline-offset': [],
     'box-shadow': [],
-    'Typography|CSS': ['Font Properties', 'font-family', 'color', 'text-align', 'text-decoration', 'text-transform', 'letter-spacing', 'word-spacing', 'text-indent', 'white-space', 'text-shadow'],
+    'Typography (CSS)|CSS': ['Font Properties', 'font-family', 'color', 'text-align', 'text-decoration', 'text-transform', 'letter-spacing', 'word-spacing', 'text-indent', 'white-space', 'text-shadow'],
     'Font Properties': ['font', 'font-style', 'font-variant', 'font-weight', 'font-size', 'line-height'],
     'font': [],
     'font-style': [],
@@ -5899,7 +5899,7 @@ function App() {
     'background-repeat': [],
     'background-attachment': [],
     'background-color': [],
-    'Layout|CSS': ['display', 'position', 'Positioned Element Properties', 'z-index', 'float', 'clear|CSS', 'Overflow Properties'],
+    'Layout (CSS)|CSS': ['display', 'position', 'Positioned Element Properties', 'z-index', 'float', 'clear|CSS', 'Overflow Properties'],
     'display': ['Block-level Display', 'Inline-level Display', 'Flexbox', 'CSS Grid', 'Other Display Values'],
     'Block-level Display': [],
     'Inline-level Display': [],
@@ -6028,7 +6028,7 @@ function App() {
     'Object-Oriented': ['Emojicode', 'JavaScript', 'Python'],
     'Emojicode': ['thumbs up'],
     'thumbs up': [],
-    'JavaScript': ['JS Keywords', 'JS Operators', 'Literals', 'Variables', 'JS Data Types', 'Scope', 'Control Flow', 'Error Handling/Exception Management', 'Destructuring', 'TypeScript'],
+    'JavaScript': ['JS Keywords', 'JS Operators', 'Literals', 'Variables', 'JS Data Types', 'Scope', 'Control Flow', 'Error Handling/Exception Management', 'Destructuring', 'TypeScript', 'Packages (JavaScript)|js'],
     'JS Keywords': ['object keywords', 'function keywords', 'module keywords'],
     'object keywords': ['this'],
     'this': [],
@@ -6042,7 +6042,7 @@ function App() {
     'import': [],
     'from': [],
     'as': [],
-    'JS Operators': ['Arithmetic', 'Comparative', 'Syntax|JavaScript', 'Assignment'],
+    'JS Operators': ['Arithmetic', 'Comparative', 'Syntax (JavaScript)|JavaScript', 'Assignment'],
     'Arithmetic': ['+', '++'],
     '+': [],
     '++': [],
@@ -6056,7 +6056,7 @@ function App() {
     '!=': [],
     '!==': [],
     '||': [],
-    'Syntax|JavaScript': ['...'],
+    'Syntax (JavaScript)|JavaScript': ['...'],
     '...': ['Spread Operator', 'Rest Operator'],
     'Spread Operator': ['Spread with Arrays', 'Spread with Strings'],
     'Spread with Arrays': ['Example|spread-arrays'],
@@ -6645,7 +6645,7 @@ function App() {
     'const x = [y, z, a];\nconst [b, ...c] = x': ['calling c would return [z, a]', 'x|arr-destr', 'y|arr-destr', 'z|arr-destr', 'a|arr-destr-23', 'b|arr-destr-23', 'c|arr-destr-3'],
     'calling c would return [z, a]': [],
     'c|arr-destr-3': [],
-    'TypeScript': ['To check what version you have installed|TypeScript', '.ts file extension', 'Compile ts into js', 'Define variable value type', 'Configuring the TS Compiler', 'Debugging|TypeScript', 'Functions|TypeScript', 'Aliases|TypeScript', 'Operators|TypeScript', 'Keywords|TypeScript'],
+    'TypeScript': ['To check what version you have installed|TypeScript', '.ts file extension', 'Compile ts into js', 'Define variable value type', 'Configuring the TS Compiler', 'Debugging|TypeScript', 'Functions (TypeScript)|TypeScript', 'Aliases|TypeScript', 'Operators (TypeScript)|TypeScript', 'Keywords (TypeScript)|TypeScript'],
     'To check what version you have installed|TypeScript': ['in terminal:|ts-version'],
     'in terminal:|ts-version': ['tsc -v'],
     'tsc -v': [],
@@ -6712,7 +6712,7 @@ function App() {
     '"preLaunchTask": "tsc: build - tsconfig.json"': [],
     'Return to index.ts and click the debug panel on vscode': [],
     'Launch program|ts-debug': [],
-    'Functions|TypeScript': ['Adjust the tsconfig.json file', 'Can make an argument optional by adding ? before : when defining the value type', 'if you set an argument = to a value, it will default to that value'],
+    'Functions (TypeScript)|TypeScript': ['Adjust the tsconfig.json file', 'Can make an argument optional by adding ? before : when defining the value type', 'if you set an argument = to a value, it will default to that value'],
     'Adjust the tsconfig.json file': ['Uncomment/enable:|ts-functions'],
     'Uncomment/enable:|ts-functions': ['"noUnusedLocals": true,', '"noUnusedParameters": true,', '"noImplicitReturns": true,'],
     '"noUnusedLocals": true,': [],
@@ -6732,12 +6732,21 @@ function App() {
     'y|ts-alias': [],
     'z|ts-alias': [],
     'a|ts-alias': [],
-    'Operators|TypeScript': ['Chaining Operator|TypeScript'],
+    'Operators (TypeScript)|TypeScript': ['Chaining Operator|TypeScript'],
     'Chaining Operator|TypeScript': ['?.|TypeScript'],
     '?.|TypeScript': [],
-    'Keywords|TypeScript': ['declare|TypeScript'],
+    'Keywords (TypeScript)|TypeScript': ['declare|TypeScript'],
     'declare|TypeScript': [],
-    'Python': ['Comments|py', 'Escape Sequences|py', 'Events|py', 'File Extension|py', 'If Statements|py', 'Keywords|py', 'Loops|py', 'Packages|py', 'pip', 'Special Characters|py', 'Symbols|py', 'Types/Data Types|py', 'Variables|py'],
+    'Packages (JavaScript)|js': ['Importing (JavaScript)|js', 'Modules (JavaScript)|js'],
+    'Importing (JavaScript)|js': ['Options|js-pkg'],
+    'Options|js-pkg': ['import x|js', "import {x} from 'y';|js"],
+    'import x|js': ['x|js-import-mod'],
+    'x|js-import-mod': [],
+    "import {x} from 'y';|js": ['x|js-import-prop', 'y|js-import-mod'],
+    'x|js-import-prop': [],
+    'y|js-import-mod': [],
+    'Modules (JavaScript)|js': [],
+    'Python': ['Comments (Python)|py', 'Escape Sequences|py', 'Events (Python)|py', 'File Extension|py', 'If Statements|py', 'Keywords (Python)|py', 'Loops (Python)|py', 'Packages (Python)|py', 'pip', 'Special Characters|py', 'Symbols|py', 'Types/Data Types|py', 'Variables (Python)|py'],
     'pip': ['pip freeze', 'pip install', 'pip list', 'pip show', 'pip uninstall'],
     'pip freeze': [],
     'pip install': [],
@@ -6748,7 +6757,7 @@ function App() {
     'File Extension|py': ['.py'],
     '.py': [],
     // Python — Comments
-    'Comments|py': ['#x|py-comment'],
+    'Comments (Python)|py': ['#x|py-comment'],
     '#x|py-comment': ['x|py-comment'],
     'x|py-comment': [],
     // Python — Escape Sequences
@@ -6759,7 +6768,7 @@ function App() {
     'Special Characters|py': ['\\|py-line-cont'],
     '\\|py-line-cont': [],
     // Python — Keywords
-    'Keywords|py': ['Logical Operators|py', 'return|py', 'try|py'],
+    'Keywords (Python)|py': ['Logical Operators (Python)|py', 'return|py', 'try|py'],
     'return|py': ['return x|py-return'],
     'return x|py-return': ['x|py-return'],
     'x|py-return': [],
@@ -6769,7 +6778,7 @@ function App() {
     'y|py-try': [],
     'z|py-try': [],
     'a|py-try': [],
-    'Logical Operators|py': ['and|py', 'in|py', 'not|py', 'or|py'],
+    'Logical Operators (Python)|py': ['and|py', 'in|py', 'not|py', 'or|py'],
     'and|py': ['if x and y:\n  z|py-and'],
     'if x and y:\n  z|py-and': ['x|py-and', 'y|py-and', 'z|py-and'],
     'x|py-and': [],
@@ -6823,7 +6832,7 @@ function App() {
     '-=|py': [],
     '=|py': [],
     // Python — Variables
-    'Variables|py': ['x = y|py-var'],
+    'Variables (Python)|py': ['x = y|py-var'],
     'x = y|py-var': ['x|py-var', 'y|py-var'],
     'x|py-var': [],
     'y|py-var': ['Options|y-py-var'],
@@ -6841,16 +6850,16 @@ function App() {
     'Example|str-py-var': ["'Python for Beginners'|py-var"],
     "'Python for Beginners'|py-var": [],
     // Python — Types/Data Types
-    'Types/Data Types|py': ['Numeric Types|py', 'Sequence Types|py', 'Mapping Type|py', 'Callable Types|py', 'Classes|py', 'Modules|py', 'Type Conversion|py'],
+    'Types/Data Types|py': ['Numeric Types|py', 'Sequence Types|py', 'Mapping Type|py', 'Callable Types|py', 'Classes|py', 'Modules (Python)|py', 'Type Conversion|py'],
     // Numeric Types
     'Numeric Types|py': ['floats|py', 'integers|py'],
     'integers|py': ['boolean values|py'],
     'boolean values|py': [],
     'floats|py': [],
     // Sequence Types
-    'Sequence Types|py': ['Lists|py', 'Strings|py', 'range|py'],
+    'Sequence Types|py': ['Lists (Python)|py', 'Strings (Python)|py', 'range|py'],
     // Strings
-    'Strings|py': ['Methods|py-strings', 'Multi-line string|py', 'Options|py-strings', 'Single-line string|py'],
+    'Strings (Python)|py': ['Methods|py-strings', 'Multi-line string|py', 'Options|py-strings', 'Single-line string|py'],
     'Single-line string|py': ["'x'|py-str", '"x"|py-str'],
     "'x'|py-str": [],
     '"x"|py-str': [],
@@ -6890,7 +6899,7 @@ function App() {
     'x|py-str-split': [],
     'y|py-str-split': [],
     // Lists
-    'Lists|py': ['Methods|py-lists', 'Options|py-lists', 'Tuples|py', 'x = [y, z]|py-list'],
+    'Lists (Python)|py': ['Methods|py-lists', 'Options|py-lists', 'Tuples|py', 'x = [y, z]|py-list'],
     'x = [y, z]|py-list': ['x|py-list', 'y|py-list', 'z|py-list'],
     'x|py-list': [],
     'y|py-list': [],
@@ -6973,14 +6982,14 @@ function App() {
     '.items()|py-dict': ['x|py-dict-items'],
     'x|py-dict-items': [],
     // Callable Types
-    'Callable Types|py': ['Functions|py'],
+    'Callable Types|py': ['Functions (Python)|py'],
     // Functions
-    'Functions|py': ['Arguments|py', 'def x(y):\n  z|py-fn'],
+    'Functions (Python)|py': ['Arguments|py', 'def x(y):\n  z|py-fn'],
     'def x(y):\n  z|py-fn': ['x|py-fn', 'y|py-fn', 'z|py-fn'],
     'x|py-fn': [],
     'y|py-fn': [],
     'z|py-fn': [],
-    'Arguments|py': ['Built-in Functions|py', 'Keyword Arguments|py', 'Keywords|py-fn', 'Positional Arguments|py', 'Returns|py-fn'],
+    'Arguments|py': ['Built-in Functions (Python)|py', 'Keyword Arguments|py', 'Keywords|py-fn', 'Positional Arguments|py', 'Returns|py-fn'],
     'Positional Arguments|py': [],
     'Keyword Arguments|py': ['x(y=z, a=b)|py-fn'],
     'x(y=z, a=b)|py-fn': ['x|py-fn-kw', 'y|py-fn-kw', 'z|py-fn-kw', 'a|py-fn-kw', 'b|py-fn-kw'],
@@ -6995,7 +7004,7 @@ function App() {
     'def x():\n  global y|py-global': ['x|py-global', 'y|py-global'],
     'x|py-global': [],
     'y|py-global': [],
-    'Built-in Functions|py': ['Methods|py-built-in', 'input(x)|py', 'int(x)|py', 'print(x)|py'],
+    'Built-in Functions (Python)|py': ['Methods|py-built-in', 'input(x)|py', 'int(x)|py', 'print(x)|py'],
     'Methods|py-built-in': ['Instance Methods|py-built-in', 'x.y()|py-method-call'],
     'x.y()|py-method-call': ['x|py-method-call', 'y|py-method-call'],
     'x|py-method-call': [],
@@ -7065,7 +7074,7 @@ function App() {
     'List Methods|py-inst': [],
     'Dictionary Methods|py-inst': [],
     // Modules
-    'Modules|py': ['Importing|py-modules'],
+    'Modules (Python)|py': ['Importing|py-modules'],
     'Importing|py-modules': ['Options|py-modules-import'],
     'Options|py-modules-import': ['Create an alias as you import something|py', 'Import an entire module|py', 'Import one function in a module|py'],
     'Import an entire module|py': ['import x|py-mod'],
@@ -7121,8 +7130,8 @@ function App() {
     'Options|b-py-if': ['function|b-py-if'],
     'function|b-py-if': [],
     // Loops
-    'Loops|py': ['For Loops|py', 'While Loops|py'],
-    'While Loops|py': ['x = y\nwhile x z a:\n  b(x)\n  x c d|py-while'],
+    'Loops (Python)|py': ['For Loops (Python)|py', 'While Loops (Python)|py'],
+    'While Loops (Python)|py': ['x = y\nwhile x z a:\n  b(x)\n  x c d|py-while'],
     'x = y\nwhile x z a:\n  b(x)\n  x c d|py-while': ['x|py-while', 'y|py-while', 'z|py-while', 'a|py-while', 'b|py-while', 'c|py-while', 'd|py-while'],
     'x|py-while': [],
     'y|py-while': [],
@@ -7141,7 +7150,7 @@ function App() {
     'd|py-while': ['Options|d-py-while'],
     'Options|d-py-while': ['number|d-py-while'],
     'number|d-py-while': [],
-    'For Loops|py': ['Options|py-for'],
+    'For Loops (Python)|py': ['Options|py-for'],
     'Options|py-for': ['With an if statement|py-for', 'Without an if statement|py-for'],
     'Without an if statement|py-for': ['for x in y:\n  z(x)|py-for'],
     'for x in y:\n  z(x)|py-for': ['x|py-for', 'y|py-for', 'z|py-for'],
@@ -7156,12 +7165,12 @@ function App() {
     'With an if statement|py-for': ['for x in y:\n  if z\nelse:\n  a|py-for-if'],
     'for x in y:\n  if z\nelse:\n  a|py-for-if': [],
     // Events
-    'Events|py': ['Exceptions/Errors|py'],
+    'Events (Python)|py': ['Exceptions/Errors|py'],
     'Exceptions/Errors|py': ['ValueError|py', 'ZeroDivisionError|py'],
     'ValueError|py': [],
     'ZeroDivisionError|py': [],
     // Packages
-    'Packages|py': ['Importing|py-packages', 'Modules|py-packages', 'Python Package Index (PyPI)', 'Python Standard Library'],
+    'Packages (Python)|py': ['Importing|py-packages', 'Modules|py-packages', 'Python Package Index (PyPI)', 'Python Standard Library'],
     'Importing|py-packages': ['Options|py-packages-import'],
     'Options|py-packages-import': ['an entire module from a package|py', 'one function from a module|py-pkg'],
     'an entire module from a package|py': ['from x import y|py-pkg-module'],
@@ -12014,7 +12023,7 @@ function App() {
       'Named Entities': 'Human-readable escape sequences like &amp; (&), &lt; (<), &gt; (>), &nbsp; (non-breaking space), and &copy; (©).',
       'Numeric Entities': 'Character references using decimal (&#60;) or hexadecimal (&#x3C;) Unicode code points.',
       'Markdown': 'A lightweight markup language for formatting plain text using simple syntax, commonly used for README files (.md extension) and convertible to HTML.',
-      'Formatting|Markdown': 'Two spaces indent content in Markdown.',
+      'Formatting (Markdown)|Markdown': 'Two spaces indent content in Markdown.',
       'Line Break': 'Insert a line break by ending a line with two spaces, a backslash (\\), a blank line, or the <br/> tag.',
       'Headings': 'Six heading levels created with # symbols: # H1, ## H2, ### H3, #### H4, ##### H5, ###### H6.',
       'Lists': 'Markdown supports unordered, ordered, and task list formats.',
@@ -12026,7 +12035,7 @@ function App() {
       'Block Code': 'Create a fenced code block with triple backticks and an optional language identifier: ```js ... ```.',
       'Insert Images': 'Embed an image with ![alt text](image URL).',
       'Blockquote': 'Indent text as a blockquote with > at the start of the line.',
-      'Tables|Markdown': 'Build a table with | column | headers | separated by pipes and a --- divider row beneath them.',
+      'Tables (Markdown)|Markdown': 'Build a table with | column | headers | separated by pipes and a --- divider row beneath them.',
       'Bold': 'Bold text with **text**.',
       'Italic': 'Italicize text with *text* or _text_.',
       'Bold and Italic': 'Bold and italicize text simultaneously with ***text***.',
@@ -12034,7 +12043,7 @@ function App() {
       'Subscript': 'Render subscript text with <sub>text</sub>.',
       'Superscript': 'Render superscript text with <sup>text</sup>.',
       'Underlined': 'Underline text with <ins>text</ins>.',
-      'Color|Markdown': 'Inline color values can be shown using code-formatted hex, RGB, or HSL strings.',
+      'Color (Markdown)|Markdown': 'Inline color values can be shown using code-formatted hex, RGB, or HSL strings.',
       'HEX Color': 'Display a hex color with `#RRGGBB`.',
       'RGB Color': 'Display an RGB color with `rgb(R,G,B)`.',
       'HSL Color': 'Display an HSL color with `hsl(H,S,L)`.',
@@ -12042,7 +12051,7 @@ function App() {
       'Emojis': 'Insert an emoji using its shortcode: :emojicode:.',
       'Footnotes': 'Add a footnote with text[^1] and define it elsewhere with [^1]: footnote content.',
       'Alerts': 'Highlighted callout blocks using > [!TYPE] > content, where TYPE is NOTE, TIP, IMPORTANT, WARNING, or CAUTION.',
-      'Comments|Markdown': 'Hide content from rendering with <!-- comment text -->.',
+      'Comments (Markdown)|Markdown': 'Hide content from rendering with <!-- comment text -->.',
       'Ignore Markdown Formatting': 'Escape Markdown syntax with a backslash: \\ before the character to render it literally.',
       'Style Sheet Languages': 'Languages that describe the visual presentation and formatting of structured documents.',
       'CSS': 'A stylesheet language that describes the visual presentation of HTML/XML documents using rules of the form: selector { property: value; }.',
@@ -12108,7 +12117,7 @@ function App() {
       'Pseudo-Elements': 'Keywords prefixed with :: that style a specific part of an element or inject generated content.',
       '::before': 'Inserts generated content before an element\'s actual content; requires the content property.',
       '::after': 'Inserts generated content after an element\'s actual content; requires the content property.',
-      'Properties|CSS': 'Name-value pairs within a CSS rule that control specific visual or layout characteristics.',
+      'Properties (CSS)|CSS': 'Name-value pairs within a CSS rule that control specific visual or layout characteristics.',
       'Box Model & Sizing': 'Properties governing an element\'s dimensions and spacing: width, height, margin, padding, border, and outline.',
       'Width Properties': 'Control the horizontal dimension of an element\'s content area.',
       'width': 'Sets the horizontal size of an element\'s content area. Values: length, percentage, auto.',
@@ -12144,7 +12153,7 @@ function App() {
       'outline-color': 'Sets outline color.',
       'outline-offset': 'Adds space between the outline and the border edge without affecting element size.',
       'box-shadow': 'Adds one or more shadows: h-offset v-offset blur spread color. Supports multiple comma-separated shadows.',
-      'Typography|CSS': 'Properties controlling fonts, text color, alignment, spacing, and decoration.',
+      'Typography (CSS)|CSS': 'Properties controlling fonts, text color, alignment, spacing, and decoration.',
       'Font Properties': 'Properties controlling font appearance; font is the shorthand combining font-style, font-variant, font-weight, font-size/line-height, and font-family.',
       'font': 'Shorthand: font-style font-variant font-weight font-size/line-height font-family.',
       'font-style': 'Sets text slant. Values: normal, italic, oblique.',
@@ -12170,7 +12179,7 @@ function App() {
       'background-repeat': 'Controls tiling. Values: repeat, repeat-x, repeat-y, no-repeat, space, round.',
       'background-attachment': 'Controls scrolling behavior. Values: scroll (with element), fixed (relative to viewport), local (with element\'s scroll box).',
       'background-color': 'Sets the solid background color. Rendered behind any background images.',
-      'Layout|CSS': 'Properties controlling how elements are positioned, stacked, and how their content overflows.',
+      'Layout (CSS)|CSS': 'Properties controlling how elements are positioned, stacked, and how their content overflows.',
       'display': 'Determines an element\'s rendering box type and layout model: block, inline, flex, grid, and more.',
       'Block-level Display': 'block: starts on new line, full width. list-item: like block with a marker. table: like an HTML table.',
       'Inline-level Display': 'inline: no new line, width = content. inline-block: inline placement but allows width/height. inline-table: table in inline context.',
@@ -12327,7 +12336,7 @@ function App() {
       '!=': 'Inequality with type coercion — returns true if operands are not equal after coercion.',
       '!==': 'Strict inequality — returns true if operands differ in value or type, with no coercion.',
       '||': 'Logical OR — returns the first truthy operand, or the last operand if none are truthy.',
-      'Syntax|JavaScript': 'Structural operators that affect how values are spread or collected.',
+      'Syntax (JavaScript)|JavaScript': 'Structural operators that affect how values are spread or collected.',
       '...': 'The spread/rest syntax — spreads an iterable into elements in an expression, or collects remaining items in a destructuring pattern.',
       'Spread Operator': '...x — expands an iterable (array, string, object) into individual elements; useful for copying, merging, or passing arguments.',
       'Spread with Arrays': 'The spread operator expands the array into its individual elements, essentially taking each individual value out of the array.',
@@ -12983,7 +12992,7 @@ function App() {
       '"preLaunchTask": "tsc: build - tsconfig.json"': 'Tells VS Code to run the TypeScript build task before launching the debugger.',
       'Return to index.ts and click the debug panel on vscode': 'Go back to your TypeScript file and open the debug panel to start a session.',
       'Launch program|ts-debug': 'Click the green play button (Launch Program) in the debug panel to start debugging.',
-      'Functions|TypeScript': 'TypeScript adds type annotations to function parameters and return types for stricter checking.',
+      'Functions (TypeScript)|TypeScript': 'TypeScript adds type annotations to function parameters and return types for stricter checking.',
       'Adjust the tsconfig.json file': 'Enable strict compiler options to catch common function-related type errors.',
       'Uncomment/enable:|ts-functions': 'Uncomment the following options in tsconfig.json to enable stricter function checks.',
       '"noUnusedLocals": true,': 'Raises an error if a local variable is declared but never used.',
@@ -13003,11 +13012,20 @@ function App() {
       'y|ts-alias': 'The name of the first property in the alias.',
       'z|ts-alias': 'The type shared by both properties.',
       'a|ts-alias': 'The name of the second property in the alias.',
-      'Operators|TypeScript': 'TypeScript-specific operators that provide safer or more expressive access patterns.',
+      'Operators (TypeScript)|TypeScript': 'TypeScript-specific operators that provide safer or more expressive access patterns.',
       'Chaining Operator|TypeScript': 'The optional chaining operator safely accesses nested properties without throwing on null/undefined.',
       '?.|TypeScript': 'Returns undefined instead of throwing if the object before it is null or undefined.',
-      'Keywords|TypeScript': 'TypeScript-specific keywords that extend JavaScript syntax.',
+      'Keywords (TypeScript)|TypeScript': 'TypeScript-specific keywords that extend JavaScript syntax.',
       'declare|TypeScript': 'Tells the TypeScript compiler that a variable or type exists without providing an implementation — used for type declarations.',
+      'Packages (JavaScript)|js': 'A collection of one or more modules that are published and managed together; after installation, they must be imported into each file where they are used.',
+      'Importing (JavaScript)|js': 'The process of bringing an installed package module into the current JavaScript file.',
+      'Options|js-pkg': 'The two import syntax styles available for bringing package exports into a JavaScript file.',
+      'import x|js': 'Imports the entire installed third-party module as a single namespace object named x.',
+      'x|js-import-mod': 'The module name being imported.',
+      "import {x} from 'y';|js": "Destructured import that brings only the specific named export x from module y, rather than the whole module.",
+      'x|js-import-prop': 'The specific named export (property) being imported from the module.',
+      'y|js-import-mod': 'The module name to import the named export from.',
+      'Modules (JavaScript)|js': 'A single JavaScript file containing encapsulated code — functions, variables, classes, or any logic — that can be imported and reused in other files.',
       'Python': 'A high-level, general-purpose programming language emphasizing readability. Run a script: python x.py. Run a module: python -m x (e.g. python -m venv myenv). Check version: python --version. Stop a running script: Ctrl+C.',
       'Packages': 'Reusable bundles of code and resources that extend the functionality of programming environments.',
       'CLI Tools': 'Command-line utilities that help developers automate tasks and manage workflows from the terminal.',
@@ -13164,7 +13182,7 @@ function App() {
       // Python
       'File Extension|py': 'Python source files use the .py extension.',
       '.py': 'The file extension for Python source files.',
-      'Comments|py': 'Adds notes to code',
+      'Comments (Python)|py': 'Adds notes to code',
       '#x|py-comment': 'Syntax for a Python single-line comment.',
       'x|py-comment': 'The commentary — the text of the note or explanation.',
       'Escape Sequences|py': 'a sequence of characters that does not represent itself but is interpreted by the compiler or interpreter as a command to perform a specific action',
@@ -13181,7 +13199,7 @@ function App() {
       'y|py-try': 'the value assigned to x',
       'z|py-try': 'the name of an anticipated error',
       'a|py-try': 'the code that is run if the anticipated error occurs',
-      'Logical Operators|py': 'Operators that combine or negate boolean expressions.',
+      'Logical Operators (Python)|py': 'Operators that combine or negate boolean expressions.',
       'and|py': 'Returns True if both operands are true.',
       'if x and y:\n  z|py-and': 'Executes z only if both x and y are true.',
       'x|py-and': 'if this and y are true, then execute z',
@@ -13233,7 +13251,7 @@ function App() {
       '+=|py': 'x = x + 10 is the same as x += 10',
       '-=|py': 'x = x - 10 is the same as x -= 10',
       '=|py': 'assigns the value of the right-hand operand to the variable or name on the left-hand side',
-      'Variables|py': 'temporarily stores data in the computer\'s memory.',
+      'Variables (Python)|py': 'temporarily stores data in the computer\'s memory.',
       'x = y|py-var': 'Syntax for declaring a variable.',
       'x|py-var': 'the name of your variable',
       'y|py-var': 'the value of your variable',
@@ -13256,7 +13274,7 @@ function App() {
       'boolean values|py': 'a subclass of integers which only has True or False and where True is 1 and False is 0',
       'floats|py': 'numbers with decimal points',
       'Sequence Types|py': 'Types that store ordered collections of items.',
-      'Strings|py': 'a sequence of characters',
+      'Strings (Python)|py': 'a sequence of characters',
       'Single-line string|py': 'A string contained on a single line.',
       "'x'|py-str": 'Single-quoted string syntax.',
       '"x"|py-str': 'Double-quoted string syntax.',
@@ -13295,7 +13313,7 @@ function App() {
       'x.split(y)|py-str': 'divides a string into a list of substrings based on a specified delimiter, returning the substrings as elements in a new list',
       'x|py-str-split': 'the string',
       'y|py-str-split': 'the delimiter',
-      'Lists|py': 'ordered, mutable collections of items that can be of different data types',
+      'Lists (Python)|py': 'ordered, mutable collections of items that can be of different data types',
       'x = [y, z]|py-list': 'Syntax for creating a list.',
       'x|py-list': 'the name of your list',
       'y|py-list': 'the first item of your list',
@@ -13375,7 +13393,7 @@ function App() {
       '.items()|py-dict': "returns a new view object that displays a list of a dictionary's key-value tuple pairs",
       'x|py-dict-items': 'the name of the dictionary',
       'Callable Types|py': 'Types that can be called like functions.',
-      'Functions|py': 'Reusable blocks of code that perform a specific task.',
+      'Functions (Python)|py': 'Reusable blocks of code that perform a specific task.',
       'Methods|py-built-in': 'Functions that belong to objects',
       'x.y()|py-method-call': 'Syntax for calling a method on an object.',
       'x|py-method-call': 'the name of the object that is having the method called on it',
@@ -13400,7 +13418,7 @@ function App() {
       'def x():\n  global y|py-global': 'Syntax for using the global keyword inside a function.',
       'x|py-global': 'the name of the function',
       'y|py-global': 'the name of the variable that is defined outside the function',
-      'Built-in Functions|py': 'Functions built into Python that are always available.',
+      'Built-in Functions (Python)|py': 'Functions built into Python that are always available.',
       'input(x)|py': 'receives input from the user. Returns a string.',
       'x|py-input': 'The prompt displayed to the user before input.',
       'Options|x-py-input': 'Possible types for the prompt.',
@@ -13463,7 +13481,7 @@ function App() {
       'character|z-py-str-replace': 'z can be a character.',
       'List Methods|py-inst': 'See: Types/Data Types → Sequence Types → Lists → Methods',
       'Dictionary Methods|py-inst': 'See: Types/Data Types → Mapping Type → Dictionaries → Methods',
-      'Modules|py': 'a file with some Python code used to break up/organize programs',
+      'Modules (Python)|py': 'a file with some Python code used to break up/organize programs',
       'Importing|py-modules': 'Ways to import a module or function.',
       'Options|py-modules-import': 'Different import styles.',
       'Import an entire module|py': 'Import a module so you can access its functions with dot notation.',
@@ -13516,8 +13534,8 @@ function App() {
       'b|py-if': 'if neither x nor z are true, then this is executed',
       'Options|b-py-if': 'Possible types for b.',
       'function|b-py-if': 'b can be a function call.',
-      'Loops|py': 'Control structures for repeating blocks of code.',
-      'While Loops|py': 'repeatedly executes a block of code as long as a specified condition remains true',
+      'Loops (Python)|py': 'Control structures for repeating blocks of code.',
+      'While Loops (Python)|py': 'repeatedly executes a block of code as long as a specified condition remains true',
       'x = y\nwhile x z a:\n  b(x)\n  x c d|py-while': 'Syntax for a while loop with an initializer and increment.',
       'x|py-while': 'the name of your variable',
       'y|py-while': 'the starting value of x',
@@ -13536,7 +13554,7 @@ function App() {
       'd|py-while': 'the amount that x is altered at the end of each loop',
       'Options|d-py-while': 'Possible types for d.',
       'number|d-py-while': 'd can be a number.',
-      'For Loops|py': 'iterates over the elements of a sequence or other iterable objects, executing a block of code for each item',
+      'For Loops (Python)|py': 'iterates over the elements of a sequence or other iterable objects, executing a block of code for each item',
       'Options|py-for': 'Syntax options for for loops.',
       'Without an if statement|py-for': 'A basic for loop iterating over a sequence.',
       'for x in y:\n  z(x)|py-for': 'Syntax for a for loop without a conditional.',
@@ -13550,11 +13568,11 @@ function App() {
       'z|py-for': 'the function that x does every iteration of the loop',
       'With an if statement|py-for': 'A for loop with a conditional.',
       'for x in y:\n  if z\nelse:\n  a|py-for-if': 'Syntax for a for loop with an embedded if/else.',
-      'Events|py': 'actions/occurrences, often external to the program\'s sequential flow, that a program can detect and respond to',
+      'Events (Python)|py': 'actions/occurrences, often external to the program\'s sequential flow, that a program can detect and respond to',
       'Exceptions/Errors|py': "Events that disrupt a program's normal execution flow",
       'ValueError|py': 'when a function receives an argument of the correct data type but an inappropriate value for the operation it needs to perform',
       'ZeroDivisionError|py': 'when an attempt is made to divide a number by zero, which is mathematically undefined',
-      'Packages|py': 'A directory with __init__.py in it and can contain modules',
+      'Packages (Python)|py': 'A directory with __init__.py in it and can contain modules',
       'Importing|py-packages': 'Ways to import from a package.',
       'Options|py-packages-import': 'Different package import styles.',
       'an entire module from a package|py': 'Import a whole module from a package.',
@@ -15907,41 +15925,41 @@ function App() {
     }
 
     // Look up the node ID from our new nodes or existing nodes
-    const targetNode = nodesToAdd.find((n) => n.label.toLowerCase() === searchTerm) ||
-                       nodes.find((n) => n.label.toLowerCase() === searchTerm)
-    
+    const targetNode = nodesToAdd.find((n) => n.label.toLowerCase() === searchTerm || getDisplayLabel(n.label).toLowerCase() === searchTerm) ||
+                       nodes.find((n) => n.label.toLowerCase() === searchTerm || getDisplayLabel(n.label).toLowerCase() === searchTerm)
+
     if (targetNode) {
       setBasePanOffset({ x: 0, y: 0 })
       // Unhide the target node, all its ancestors, and all siblings along the path
+      // then set selectedId so layout has positions for the newly-unhidden node
       setTimeout(() => {
         setNodes((prevNodes) => {
           const nodesToUnhide = new Set()
-          
+
           // Trace up the tree to find all ancestors and their siblings
           let currentId = targetNode.id
           while (currentId !== null) {
             nodesToUnhide.add(currentId)
             const currentNode = prevNodes.find(n => n.id === currentId)
             const parentId = currentNode?.parentId ?? null
-            
+
             // Add all siblings of the current node
             if (parentId !== null) {
               const siblings = prevNodes.filter(n => n.parentId === parentId)
               siblings.forEach(sibling => nodesToUnhide.add(sibling.id))
             }
-            
+
             currentId = parentId
           }
-          
+
           // Update all nodes to unhide the necessary ones
-          return prevNodes.map(node => 
+          return prevNodes.map(node =>
             nodesToUnhide.has(node.id) ? { ...node, hidden: false } : node
           )
         })
+        setSelectedId(targetNode.id)
+        setPanelOpen(true)
       }, 0)
-      
-      setSelectedId(targetNode.id)
-      setPanelOpen(true)
     }
 
     setSearchQuery('')

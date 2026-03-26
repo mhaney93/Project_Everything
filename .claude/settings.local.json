@@ -27,7 +27,13 @@
       "Bash(grep -v \"//\")",
       "Bash(node -e \"const fs = require\\(''''fs''''\\); const content = fs.readFileSync\\(''''src/App.jsx'''', ''''utf8''''\\); console.log\\(''''File size:'''', content.length, ''''chars''''\\); console.log\\(''''No syntax errors check...''''\\);\")",
       "Bash(npx vite:*)",
-      "Bash(find /c/Users/matth/OneDrive/Desktop/Programming/project_everything -name *.js -newer /c/Users/matth/OneDrive/Desktop/Programming/project_everything/src/App.jsx -not -path */node_modules/*)"
+      "Bash(find /c/Users/matth/OneDrive/Desktop/Programming/project_everything -name *.js -newer /c/Users/matth/OneDrive/Desktop/Programming/project_everything/src/App.jsx -not -path */node_modules/*)",
+      "Bash(npx acorn:*)",
+      "Bash(node -e \":*)",
+      "Bash(npx react-scripts:*)",
+      "Bash(npx --no react-scripts build)",
+      "Bash(curl -s http://localhost:5174)",
+      "Bash(python3:*)"
     ]
   }
 }
