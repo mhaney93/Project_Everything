@@ -876,6 +876,8 @@ const ORDERED_CHILDREN_PARENTS = new Set([
   'TGA 2022',
   'TGA 2023',
   'TGA 2024',
+  // Python — paste-defined ordering
+  'Types/Data Types|py',
   // Python — operator display order
   'Arithmetic Operators|py',
   'Comparison Operators|py',
@@ -6839,7 +6841,7 @@ function App() {
     'Example|str-py-var': ["'Python for Beginners'|py-var"],
     "'Python for Beginners'|py-var": [],
     // Python — Types/Data Types
-    'Types/Data Types|py': ['Callable Types|py', 'Mapping Type|py', 'Modules|py', 'Numeric Types|py', 'Sequence Types|py', 'Type Conversion|py'],
+    'Types/Data Types|py': ['Numeric Types|py', 'Sequence Types|py', 'Mapping Type|py', 'Callable Types|py', 'Modules|py', 'Type Conversion|py'],
     // Numeric Types
     'Numeric Types|py': ['floats|py', 'integers|py'],
     'integers|py': ['boolean values|py'],
@@ -6973,12 +6975,12 @@ function App() {
     // Callable Types
     'Callable Types|py': ['Classes|py', 'Functions|py'],
     // Functions
-    'Functions|py': ['Arguments|py', 'Built-in Functions|py', 'Keywords|py-fn', 'Returns|py-fn', 'def x(y):\n  z|py-fn'],
+    'Functions|py': ['Arguments|py', 'def x(y):\n  z|py-fn'],
     'def x(y):\n  z|py-fn': ['x|py-fn', 'y|py-fn', 'z|py-fn'],
     'x|py-fn': [],
     'y|py-fn': [],
     'z|py-fn': [],
-    'Arguments|py': ['Keyword Arguments|py', 'Positional Arguments|py'],
+    'Arguments|py': ['Built-in Functions|py', 'Keyword Arguments|py', 'Keywords|py-fn', 'Positional Arguments|py', 'Returns|py-fn'],
     'Positional Arguments|py': [],
     'Keyword Arguments|py': ['x(y=z, a=b)|py-fn'],
     'x(y=z, a=b)|py-fn': ['x|py-fn-kw', 'y|py-fn-kw', 'z|py-fn-kw', 'a|py-fn-kw', 'b|py-fn-kw'],
@@ -6993,7 +6995,12 @@ function App() {
     'def x():\n  global y|py-global': ['x|py-global', 'y|py-global'],
     'x|py-global': [],
     'y|py-global': [],
-    'Built-in Functions|py': ['input(x)|py', 'int(x)|py', 'print(x)|py'],
+    'Built-in Functions|py': ['Methods|py-built-in', 'input(x)|py', 'int(x)|py', 'print(x)|py'],
+    'Methods|py-built-in': ['Instance Methods|py-built-in', 'x.y()|py-method-call'],
+    'x.y()|py-method-call': ['x|py-method-call', 'y|py-method-call'],
+    'x|py-method-call': [],
+    'y|py-method-call': [],
+    'Instance Methods|py-built-in': [],
     'input(x)|py': ['Returns|py-input', 'x|py-input'],
     'x|py-input': ['Options|x-py-input'],
     'Options|x-py-input': ['string|x-py-input'],
@@ -13369,6 +13376,11 @@ function App() {
       'x|py-dict-items': 'the name of the dictionary',
       'Callable Types|py': 'Types that can be called like functions.',
       'Functions|py': 'Reusable blocks of code that perform a specific task.',
+      'Methods|py-built-in': 'Functions that belong to objects',
+      'x.y()|py-method-call': 'Syntax for calling a method on an object.',
+      'x|py-method-call': 'the name of the object that is having the method called on it',
+      'y|py-method-call': 'the name of the method being called',
+      'Instance Methods|py-built-in': 'See: Instances',
       'def x(y):\n  z|py-fn': 'Syntax for defining a function.',
       'x|py-fn': 'the name of your function',
       'y|py-fn': 'the parameter of the function (placeholder for an eventual argument when the function is called later)',
