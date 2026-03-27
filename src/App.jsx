@@ -1003,6 +1003,7 @@ const ORDERED_CHILDREN_PARENTS = new Set([
   'Texture (Mouthfeel)',
   'Temperature|food',
   'Synergistic/Bidirectional Enhancement',
+  'Stages|design-thinking',
 ]);
 
 // Topic keywords for semantic search fallback - helps suggest related topics when no exact match
@@ -8908,7 +8909,13 @@ function App() {
     'Nursing': [],
     'Public Health': [],
     'Product Design': ['Design Thinking', 'UX (User Experience) Design'],
-    'Design Thinking': [],
+    'Design Thinking': ['Stages|design-thinking'],
+    'Stages|design-thinking': ['Empathize', 'Define', 'Ideate', 'Prototype', 'Test'],
+    'Empathize': [],
+    'Define': [],
+    'Ideate': [],
+    'Prototype': [],
+    'Test': [],
     'UX (User Experience) Design': ['Wireframing'],
     'Wireframing': [],
 
@@ -15946,7 +15953,13 @@ function App() {
       'Nursing': 'The profession focused on patient care, health promotion, and supporting individuals through illness and recovery.',
       'Public Health': 'The science and practice of protecting and improving community health through education, policy, and research.',
       'Product Design': 'The process of creating products that are functional, usable, and desirable for human use.',
-      'Design Thinking': 'A human-centered problem-solving methodology emphasizing empathy, ideation, prototyping, and iterative testing.',
+      'Design Thinking': 'An iterative, non-linear process that provides a human-centered approach to problem-solving and innovation, focusing on understanding user needs to challenge assumptions and redefine problems in order to create innovative solutions.',
+      'Stages|design-thinking': 'The five iterative phases of the Design Thinking process.',
+      'Empathize': 'Research and understand the needs, experiences, and motivations of the people you are designing for.',
+      'Define': 'Synthesize findings from the empathize stage to clearly articulate the core problem to be solved.',
+      'Ideate': 'Generate a broad range of creative ideas and potential solutions without judgment.',
+      'Prototype': 'Build scaled-down, inexpensive versions of the product or features to explore ideas.',
+      'Test': 'Rigorously test prototypes with real users and use findings to refine solutions.',
       'UX (User Experience) Design': 'The process of designing products that deliver meaningful, usable, and enjoyable experiences to users.',
       'Wireframing': 'The practice of creating low-fidelity blueprints of a user interface to map out structure and content hierarchy.',
       // Formal Sciences
