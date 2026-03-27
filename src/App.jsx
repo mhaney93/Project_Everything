@@ -8917,7 +8917,10 @@ function App() {
     'Prototype': [],
     'Test': [],
     'UX (User Experience) Design': ['Wireframing'],
-    'Wireframing': [],
+    'Wireframing': ['Tools|wireframing', 'The "F" shape pattern'],
+    'Tools|wireframing': ['See: Figma'],
+    'See: Figma': [],
+    'The "F" shape pattern': [],
 
     // Formal Sciences
     'Formal Sciences': ['Logic', 'Mathematics', 'Statistics', 'Computer Science'],
@@ -15961,7 +15964,10 @@ function App() {
       'Prototype': 'Build scaled-down, inexpensive versions of the product or features to explore ideas.',
       'Test': 'Rigorously test prototypes with real users and use findings to refine solutions.',
       'UX (User Experience) Design': 'The process of designing products that deliver meaningful, usable, and enjoyable experiences to users.',
-      'Wireframing': 'The practice of creating low-fidelity blueprints of a user interface to map out structure and content hierarchy.',
+      'Wireframing': 'The process of creating a visual blueprint for a website or application, outlining its structure, layout, and functionality without focusing on visual design elements like colors, fonts, or images.',
+      'Tools|wireframing': 'Software and applications used to create wireframes and UI mockups.',
+      'See: Figma': 'Figma is a primary wireframing and prototyping tool — see the Figma node for details.',
+      'The "F" shape pattern': 'A pattern in which users scan content on a webpage or screen, with their eyes moving in a path that resembles the letter F.',
       // Formal Sciences
       'Formal Sciences': 'Disciplines studying formal systems—including logic, mathematics, statistics, and computer science—using a priori methods.',
       'Computer Science': 'The study of computation, algorithms, data structures, programming languages, and the theory and practice of computing.',
