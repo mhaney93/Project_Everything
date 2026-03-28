@@ -1336,6 +1336,14 @@ function App() {
   const [authError, setAuthError] = useState('')
   const [storageUsage, setStorageUsage] = useState(null)
   const [isSignUp, setIsSignUp] = useState(false)
+  const [isForgotPassword, setIsForgotPassword] = useState(false)
+  const [forgotPasswordSent, setForgotPasswordSent] = useState(false)
+  const [resetToken, setResetToken] = useState(() => {
+    const params = new URLSearchParams(window.location.search)
+    return params.get('reset_token') || ''
+  })
+  const [resetPasswordForm, setResetPasswordForm] = useState({ password: '', confirm: '' })
+  const [resetPasswordDone, setResetPasswordDone] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
   const [searchSuggestions, setSearchSuggestions] = useState([])
   const [highlightedSuggestion, setHighlightedSuggestion] = useState(-1)
@@ -22881,6 +22889,45 @@ function App() {
     }
   }
 
+  const handleForgotPassword = async () => {
+    if (!loginForm.email) {
+      setAuthError('Please enter your email address.')
+      return
+    }
+    setAuthError('')
+    try {
+      await authAPI.forgotPassword(loginForm.email)
+      setForgotPasswordSent(true)
+    } catch (err) {
+      setAuthError(err.message || 'Failed to send reset email')
+    }
+  }
+
+  const handleResetPassword = async () => {
+    if (!resetPasswordForm.password || !resetPasswordForm.confirm) {
+      setAuthError('Please fill in both fields.')
+      return
+    }
+    if (resetPasswordForm.password !== resetPasswordForm.confirm) {
+      setAuthError('Passwords do not match.')
+      return
+    }
+    const ruleChecks = getPasswordRuleChecks(resetPasswordForm.password)
+    if (!ruleChecks.every(r => r.met)) {
+      setAuthError('Password does not meet all requirements.')
+      return
+    }
+    setAuthError('')
+    try {
+      await authAPI.resetPassword(resetToken, resetPasswordForm.password)
+      setResetPasswordDone(true)
+      // Clean the token from the URL
+      window.history.replaceState({}, '', window.location.pathname)
+    } catch (err) {
+      setAuthError(err.message || 'Failed to reset password')
+    }
+  }
+
   const handleLogout = async () => {
     try {
       await authAPI.logout()
@@ -24427,6 +24474,48 @@ function App() {
                       Logout
                     </button>
                   </>
+                ) : isForgotPassword ? (
+                  <>
+                    <h3>Reset Password</h3>
+                    <div className="auth-form">
+                      {forgotPasswordSent ? (
+                        <p className="auth-success">
+                          If that email is registered, a reset link has been sent. Check your inbox.
+                        </p>
+                      ) : (
+                        <>
+                          <input
+                            type="email"
+                            placeholder="Email"
+                            value={loginForm.email}
+                            onChange={(e) => {
+                              setLoginForm({ ...loginForm, email: e.target.value })
+                              if (authError) setAuthError('')
+                            }}
+                            className="auth-input"
+                          />
+                          {authError && (
+                            <div className="auth-error" role="alert">{authError}</div>
+                          )}
+                          <button className="profile-action" type="button" onClick={handleForgotPassword}>
+                            Send Reset Link
+                          </button>
+                        </>
+                      )}
+                      <button
+                        className="profile-action"
+                        type="button"
+                        onClick={() => {
+                          setIsForgotPassword(false)
+                          setForgotPasswordSent(false)
+                          setAuthError('')
+                        }}
+                        style={{ background: 'transparent', opacity: 0.7 }}
+                      >
+                        Back to Sign In
+                      </button>
+                    </div>
+                  </>
                 ) : (
                   <>
                     <h3>{isSignUp ? 'Sign Up' : 'Sign In'}</h3>
@@ -24469,15 +24558,15 @@ function App() {
                           {authError}
                         </div>
                       )}
-                      <button 
-                        className="profile-action" 
+                      <button
+                        className="profile-action"
                         type="button"
                         onClick={handleLogin}
                       >
                         {isSignUp ? 'Create Account' : 'Sign In'}
                       </button>
-                      <button 
-                        className="profile-action" 
+                      <button
+                        className="profile-action"
                         type="button"
                         onClick={() => {
                           setIsSignUp(!isSignUp)
@@ -24487,6 +24576,19 @@ function App() {
                       >
                         {isSignUp ? 'Already have account?' : 'Need account?'}
                       </button>
+                      {!isSignUp && (
+                        <button
+                          className="profile-action"
+                          type="button"
+                          onClick={() => {
+                            setIsForgotPassword(true)
+                            setAuthError('')
+                          }}
+                          style={{ background: 'transparent', opacity: 0.5, fontSize: '0.85em' }}
+                        >
+                          Forgot password?
+                        </button>
+                      )}
                     </div>
                   </>
                 )}
@@ -25178,6 +25280,71 @@ function App() {
                 Delete
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reset Password Modal (opened via email link) */}
+      {resetToken && !resetPasswordDone && (
+        <div className="reset-password-overlay">
+          <div className="reset-password-modal">
+            <h3>Set New Password</h3>
+            <div className="auth-form">
+              <input
+                type="password"
+                placeholder="New password"
+                value={resetPasswordForm.password}
+                onChange={(e) => {
+                  setResetPasswordForm({ ...resetPasswordForm, password: e.target.value })
+                  if (authError) setAuthError('')
+                }}
+                className="auth-input"
+              />
+              <input
+                type="password"
+                placeholder="Confirm new password"
+                value={resetPasswordForm.confirm}
+                onChange={(e) => {
+                  setResetPasswordForm({ ...resetPasswordForm, confirm: e.target.value })
+                  if (authError) setAuthError('')
+                }}
+                className="auth-input"
+              />
+              <div className="auth-password-requirements" aria-live="polite">
+                <ul>
+                  {getPasswordRuleChecks(resetPasswordForm.password).map((rule) => (
+                    <li key={rule.label} className={rule.met ? 'met' : 'unmet'}>
+                      <span className="requirement-icon" aria-hidden="true">{rule.met ? '✓' : '✗'}</span>
+                      <span>{rule.label}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              {authError && <div className="auth-error" role="alert">{authError}</div>}
+              <button className="profile-action" type="button" onClick={handleResetPassword}>
+                Reset Password
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {resetPasswordDone && (
+        <div className="reset-password-overlay">
+          <div className="reset-password-modal">
+            <h3>Password Reset</h3>
+            <p style={{ textAlign: 'center', color: 'var(--muted)' }}>Your password has been updated. You can now sign in.</p>
+            <button
+              className="profile-action"
+              type="button"
+              onClick={() => {
+                setResetPasswordDone(false)
+                setResetToken('')
+                setResetPasswordForm({ password: '', confirm: '' })
+              }}
+            >
+              Sign In
+            </button>
           </div>
         </div>
       )}
