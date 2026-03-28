@@ -21644,6 +21644,16 @@ function App() {
     return undefined
   }, [canvasSize.width, canvasSize.height, viewportSize.width, transitionsEnabled])
 
+  const isInPersonalSubtree = (nodeId) => {
+    let current = nodes.find((n) => n.id === nodeId)
+    while (current) {
+      if (current.label === 'Personal') return true
+      if (current.parentId === null) return false
+      current = nodes.find((n) => n.id === current.parentId)
+    }
+    return false
+  }
+
   const addCustomChild = (parentNodeId) => {
     if (!isAuthenticated) {
       setSignInRequired('Sign in to add custom nodes to your private map.')
@@ -21665,6 +21675,7 @@ function App() {
       label: 'New Node',
       parentId: parentNodeId,
       isCustom: true,
+      isPersonal: isInPersonalSubtree(parentNodeId),
       hidden: false,
       summary: '',
       order: maxOrder + 1,
@@ -21714,6 +21725,7 @@ function App() {
       label: 'New Node',
       parentId: referenceNode.parentId,
       isCustom: true,
+      isPersonal: isInPersonalSubtree(referenceNode.parentId),
       hidden: false,
       summary: '',
       order: maxOrder + 1,
@@ -21785,11 +21797,6 @@ function App() {
 
     const nodeToDelete = nodes.find((node) => node.id === nodeId)
     if (!nodeToDelete) return
-
-    if (!nodeToDelete.isCustom) {
-      alert('Only custom nodes can be deleted.')
-      return
-    }
 
     const hasChildren = nodes.some((node) => node.parentId === nodeId)
     const confirmMessage = hasChildren 
@@ -21975,7 +21982,7 @@ function App() {
         if (existingPredefined.length === 0) {
           let labels = ['Concept A', 'Concept B'];
           if (parentNodeId === 1) {
-            labels = ['Humanities', 'Sciences'];
+            labels = TOPIC_SUBDIVISIONS['Everything'];
           } else {
             labels = await getChildSuggestions(parent.label);
           }
@@ -25015,13 +25022,13 @@ function App() {
                   </p>
                 )}
               </div>
-              {selectedNode.isCustom && isAuthenticated ? (
+              {isAuthenticated ? (
                 <div className="panel-delete-section">
                   <button
                     className="delete-node-button"
                     type="button"
                     onClick={() => deleteCustomNode(selectedNode.id)}
-                    title="Delete this custom node"
+                    title="Delete this node"
                   >
                     Delete node
                   </button>
