@@ -1003,6 +1003,16 @@ const ORDERED_CHILDREN_PARENTS = new Set([
   'Overall Impressions',
   'Texture (Mouthfeel)',
   'Temperature|food',
+  'Sweet',
+  'Sour/Acid',
+  'Spicy/Pungent|taste',
+  'Moisture Content',
+  'Hardness|texture',
+  'Softness|texture',
+  'Cohesiveness',
+  'Viscosity',
+  'Particle Size',
+  'Fat Content',
   'Synergistic/Bidirectional Enhancement',
   'Stages|design-thinking',
   'Steps|Dopamine Cycle',
@@ -1133,25 +1143,26 @@ const buildLayout = (nodes, topicSubdivisions = {}, nodeWidth = NODE_WIDTH, node
     if (parentLabel && topicSubdivisions[parentLabel] && ORDERED_CHILDREN_PARENTS.has(parentLabel)) {
       const definedOrder = topicSubdivisions[parentLabel];
       children.sort((a, b) => {
-        if (a.isCustom || b.isCustom) {
-          if (a.isCustom && b.isCustom && a.order !== undefined && b.order !== undefined) {
-            return a.order - b.order;
-          }
-          return a.label.localeCompare(b.label);
+        // Explicit order (including admin-assigned order on global nodes) takes priority
+        if (a.order !== undefined || b.order !== undefined) {
+          const aOrder = a.order !== undefined ? a.order : Infinity;
+          const bOrder = b.order !== undefined ? b.order : Infinity;
+          if (aOrder !== bOrder) return aOrder - bOrder;
         }
         const indexA = definedOrder.indexOf(a.label);
         const indexB = definedOrder.indexOf(b.label);
-        // If both exist in defined order, use that; otherwise sort alphabetically
         if (indexA !== -1 && indexB !== -1) return indexA - indexB;
         if (indexA !== -1) return -1;
         if (indexB !== -1) return 1;
         return a.label.localeCompare(b.label);
       });
     } else {
-      // Default alphabetical sort, but respect explicit order for custom siblings
+      // Default alphabetical sort, but respect explicit order (custom or admin-assigned)
       children.sort((a, b) => {
-        if (a.isCustom && b.isCustom && a.order !== undefined && b.order !== undefined) {
-          return a.order - b.order;
+        if (a.order !== undefined || b.order !== undefined) {
+          const aOrder = a.order !== undefined ? a.order : Infinity;
+          const bOrder = b.order !== undefined ? b.order : Infinity;
+          if (aOrder !== bOrder) return aOrder - bOrder;
         }
         return a.label.localeCompare(b.label);
       });
@@ -8790,14 +8801,14 @@ function App() {
     'Flavor|food': ['Tastes', 'Aroma (Smell)', 'Flavor Combinations', 'Overall Impressions'],
     'Tastes': ['Basic Tastes', 'Other Taste Qualities', 'Taste Combinations'],
     'Basic Tastes': ['Sweet', 'Sour/Acid', 'Salty', 'Bitter', 'Umami'],
-    'Sweet': ['Sugary', 'Saccharine', 'Honeyed', 'Candy-like', 'Mellow|sweet', 'Cloying (negatively sweet)'],
+    'Sweet': ['Mellow|sweet', 'Honeyed', 'Sugary', 'Candy-like', 'Saccharine', 'Cloying (negatively sweet)'],
     'Sugary': [],
     'Saccharine': [],
     'Honeyed': [],
     'Candy-like': [],
     'Mellow|sweet': [],
     'Cloying (negatively sweet)': [],
-    'Sour/Acid': ['Acidic', 'Tart', 'Vinegary', 'Lemony|sour', 'Sharp|sour', 'Tangy', 'Puckering|sour'],
+    'Sour/Acid': ['Tangy', 'Lemony|sour', 'Tart', 'Acidic', 'Vinegary', 'Sharp|sour', 'Puckering|sour'],
     'Acidic': [],
     'Tart': [],
     'Vinegary': [],
@@ -8825,7 +8836,7 @@ function App() {
     'Mushroomy|umami': [],
     'Nuanced': [],
     'Other Taste Qualities': ['Spicy/Pungent|taste', 'Cooling|taste', 'Metallic|taste', 'Earthy|taste', 'Fatty/Oleic', 'Water-like', 'Calcium|taste'],
-    'Spicy/Pungent|taste': ['Sharp|spicy', 'Biting|spicy', 'Prickling', 'Burning', 'Tingling', 'Irritating'],
+    'Spicy/Pungent|taste': ['Tingling', 'Prickling', 'Sharp|spicy', 'Biting|spicy', 'Burning', 'Irritating'],
     'Sharp|spicy': [],
     'Biting|spicy': [],
     'Prickling': [],
@@ -9081,28 +9092,28 @@ function App() {
     'Rigid': [],
     'Dense/Compact': [],
     'Solid|texture': [],
-    'Softness|texture': ['Tender', 'Yielding', 'Delicate|softness', 'Mushy', 'Velvety'],
+    'Softness|texture': ['Velvety', 'Tender', 'Delicate|softness', 'Yielding', 'Mushy'],
     'Tender': [],
     'Yielding': [],
     'Delicate|softness': [],
     'Mushy': ['Negative Connotation|mushy'],
     'Negative Connotation|mushy': [],
     'Velvety': [],
-    'Cohesiveness': ['Chewy', 'Gummy', 'Sticky', 'Cohesive', 'Crumbly'],
+    'Cohesiveness': ['Crumbly', 'Cohesive', 'Chewy', 'Gummy', 'Sticky'],
     'Chewy': [],
     'Gummy': [],
     'Sticky': [],
     'Cohesive': [],
     'Crumbly': ['Negative Connotation|crumbly'],
     'Negative Connotation|crumbly': [],
-    'Viscosity': ['Thick', 'Viscous', 'Syrupy', 'Runny', 'Watery', 'Thin'],
+    'Viscosity': ['Thin', 'Watery', 'Runny', 'Syrupy', 'Thick', 'Viscous'],
     'Thick': [],
     'Viscous': [],
     'Syrupy': [],
     'Runny': [],
     'Watery': [],
     'Thin': [],
-    'Particle Size': ['Smooth', 'Creamy', 'Gritty', 'Sandy', 'Coarse', 'Fine|texture', 'Powdery'],
+    'Particle Size': ['Smooth', 'Creamy', 'Powdery', 'Fine|texture', 'Gritty', 'Sandy', 'Coarse'],
     'Smooth': [],
     'Creamy': [],
     'Gritty': [],
@@ -9110,13 +9121,13 @@ function App() {
     'Coarse': [],
     'Fine|texture': [],
     'Powdery': [],
-    'Moisture Content': ['Juicy', 'Moist', 'Succulent', 'Dry|texture', 'Parched'],
+    'Moisture Content': ['Parched', 'Dry|texture', 'Moist', 'Juicy', 'Succulent'],
     'Juicy': [],
     'Moist': [],
     'Succulent': [],
     'Dry|texture': [],
     'Parched': [],
-    'Fat Content': ['Oily', 'Greasy', 'Buttery|texture', 'Rich|fat'],
+    'Fat Content': ['Buttery|texture', 'Rich|fat', 'Oily', 'Greasy'],
     'Oily': [],
     'Greasy': ['Negative Connotation|greasy'],
     'Negative Connotation|greasy': [],
@@ -21778,8 +21789,49 @@ function App() {
   const reorderCustomNode = (nodeId, direction) => {
     setNodes((prev) => {
       const node = prev.find(n => n.id === nodeId)
-      if (!node || !node.isCustom) return prev
+      if (!node) return prev
+      if (!node.isCustom && !isAdmin) return prev
 
+      if (isAdmin && !node.isCustom) {
+        // Admin reordering global nodes: consider all siblings using layout sort order
+        const parentNode = prev.find(n => n.id === node.parentId)
+        const parentLabel = parentNode?.label
+        const allSiblings = prev.filter(n => n.parentId === node.parentId && !n.hidden)
+
+        const sortedSiblings = [...allSiblings].sort((a, b) => {
+          if (a.order !== undefined || b.order !== undefined) {
+            const aOrder = a.order !== undefined ? a.order : Infinity
+            const bOrder = b.order !== undefined ? b.order : Infinity
+            if (aOrder !== bOrder) return aOrder - bOrder
+          }
+          if (parentLabel && TOPIC_SUBDIVISIONS[parentLabel] && ORDERED_CHILDREN_PARENTS.has(parentLabel)) {
+            const definedOrder = TOPIC_SUBDIVISIONS[parentLabel]
+            const indexA = definedOrder.indexOf(a.label)
+            const indexB = definedOrder.indexOf(b.label)
+            if (indexA !== -1 && indexB !== -1) return indexA - indexB
+            if (indexA !== -1) return -1
+            if (indexB !== -1) return 1
+          }
+          return a.label.localeCompare(b.label)
+        })
+
+        const idx = sortedSiblings.findIndex(n => n.id === nodeId)
+        if (direction === 'left' && idx <= 0) return prev
+        if (direction === 'right' && idx >= sortedSiblings.length - 1) return prev
+
+        const swapIdx = direction === 'left' ? idx - 1 : idx + 1
+
+        return prev.map(n => {
+          const sibIdx = sortedSiblings.findIndex(s => s.id === n.id)
+          if (sibIdx === -1) return n
+          let newOrder = sibIdx
+          if (sibIdx === idx) newOrder = swapIdx
+          else if (sibIdx === swapIdx) newOrder = idx
+          return { ...n, order: newOrder }
+        })
+      }
+
+      // Custom node reordering (existing logic)
       const customSiblings = prev
         .filter(n => n.parentId === node.parentId && n.isCustom)
         .sort((a, b) => {
@@ -21854,17 +21906,19 @@ function App() {
     findDescendants(nodeId)
 
     const removedNodes = nodes.filter((n) => nodeIdsToRemove.has(n.id))
-    const deletedLabel = nodes.find((n) => n.id === nodeId)?.label || 'Node'
+    const deletedNode = nodes.find((n) => n.id === nodeId)
+    const deletedLabel = deletedNode?.label || 'Node'
+    const parentId = deletedNode?.parentId ?? null
 
     setNodes((prev) => prev.filter((node) => !nodeIdsToRemove.has(node.id)))
 
-    // Clear selection and focus if the deleted node was selected/focused
+    // Move selection/focus to parent of deleted node
     if (selectedId === nodeId) {
-      setSelectedId(null)
-      setPanelOpen(false)
+      setSelectedId(parentId)
+      if (!parentId) setPanelOpen(false)
     }
     if (focusedElement?.nodeId === nodeId) {
-      setFocusedElement(null)
+      setFocusedElement(parentId ? { nodeId: parentId, type: 'node' } : null)
     }
 
     // Suppress auto-save and offer undo for 5 seconds
@@ -23098,22 +23152,16 @@ function App() {
         return
       }
 
-      // Ctrl+Left/Right: reorder a focused custom node among its siblings
-      if ((event.key === 'ArrowLeft' || event.key === 'ArrowRight') && event.ctrlKey && !event.shiftKey && !event.altKey && isAuthenticated) {
-        const isTextEditable =
-          event.target.tagName === 'INPUT' ||
-          event.target.tagName === 'TEXTAREA' ||
-          event.target.isContentEditable
-        if (!isTextEditable) {
-          const nodeId = focusedElement?.nodeId ?? selectedId
-          if (nodeId !== null) {
-            const node = nodes.find(n => n.id === nodeId)
-            if (node && node.isCustom) {
-              event.preventDefault()
-              reorderCustomNode(nodeId, event.key === 'ArrowLeft' ? 'left' : 'right')
-              return
-            }
-          }
+      // Ctrl+Left/Right: reorder a focused custom node (or any node for admin) among its siblings
+      if ((event.key === 'ArrowLeft' || event.key === 'ArrowRight') && event.ctrlKey && !event.shiftKey && !event.altKey) {
+        console.log('[Ctrl+Arrow] key:', event.key, 'isAuthenticated:', isAuthenticated, 'isAdmin:', isAdmin, 'selectedId:', selectedId, 'focusedElement:', focusedElement)
+        const nodeId = focusedElement?.nodeId ?? selectedId
+        const node = nodeId != null ? nodes.find(n => n.id === nodeId) : null
+        console.log('[Ctrl+Arrow] nodeId:', nodeId, 'node:', node?.label, 'node.isCustom:', node?.isCustom)
+        if (isAuthenticated && nodeId != null && node && (node.isCustom || isAdmin)) {
+          event.preventDefault()
+          reorderCustomNode(nodeId, event.key === 'ArrowLeft' ? 'left' : 'right')
+          return
         }
       }
 
@@ -23320,7 +23368,7 @@ function App() {
     return () => {
       window.removeEventListener('keydown', handleShortcut)
     }
-  }, [selectedId, focusedElement, nodes, layout.positions, hasKnownSubdivisions, addChildren, addCustomChild, addCustomSibling, deleteCustomNode, reorderCustomNode, isAuthenticated, deleteConfirmation, deleteModalChoice, isFullscreenMode])
+  }, [selectedId, focusedElement, nodes, layout.positions, hasKnownSubdivisions, addChildren, addCustomChild, addCustomSibling, deleteCustomNode, reorderCustomNode, isAuthenticated, isAdmin, deleteConfirmation, deleteModalChoice, isFullscreenMode])
 
   // Close search suggestions when clicking outside the search row
   useEffect(() => {
