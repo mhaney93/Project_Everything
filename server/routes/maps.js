@@ -28,7 +28,7 @@ router.get('/global', async (req, res) => {
     }
 
     const globalNodes = (nodes || []).filter(
-      (n) => n.isCustom === true && n.isPersonal !== true && n.label !== 'Personal'
+      (n) => n.isPersonal !== true && n.label !== 'Personal'
     );
 
     res.json({ nodes: globalNodes });

@@ -22527,11 +22527,11 @@ function App() {
         // Not authenticated, clear cached email
         localStorage.removeItem('everything_user_email')
         console.log('User session invalid')
-        // Load global (non-personal) custom nodes for logged-out view
+        // Load global (non-personal) map for logged-out view
         try {
           const globalData = await mapsAPI.getGlobalMap()
           if (Array.isArray(globalData.nodes) && globalData.nodes.length > 0) {
-            setNodesFromBackend([...INITIAL_NODES, ...globalData.nodes])
+            setNodesFromBackend(globalData.nodes)
           }
         } catch (e) {
           // silently ignore if global fetch fails
@@ -22841,8 +22841,10 @@ function App() {
     setOpenTooltip(null)
     try {
       const globalData = await mapsAPI.getGlobalMap()
-      const globalNodes = Array.isArray(globalData.nodes) ? globalData.nodes : []
-      setNodesFromBackend([...INITIAL_NODES, ...globalNodes])
+      const globalNodes = Array.isArray(globalData.nodes) && globalData.nodes.length > 0
+        ? globalData.nodes
+        : INITIAL_NODES
+      setNodesFromBackend(globalNodes)
     } catch (e) {
       setNodesFromBackend(INITIAL_NODES)
     }
