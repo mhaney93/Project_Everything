@@ -781,6 +781,19 @@ button:not(:disabled):hover {
   white-space: pre-wrap;
 }
 
+input.node-label-edit {
+  background: var(--card);
+  color: var(--ink);
+  border: 2px solid #1d6fdc;
+  outline: none;
+  font-weight: 600;
+  font-family: inherit;
+  text-align: center;
+  padding: 0.5rem 1.2rem;
+  cursor: text;
+  box-shadow: 0 14px 30px rgba(54, 39, 25, 0.12);
+}
+
 .node-dots {
   position: absolute;
   top: calc(100% + 4px);

@@ -24724,113 +24724,102 @@ function App() {
                           if (e.button === 0) e.stopPropagation() // Only stop propagation for left-click
                         }}
                       >
-                        <button
-                          type="button"
-                          className="node-card"
-                          style={{
-                            width: computedNodeWidth,
-                            height: computedNodeHeight,
-                            color: selectedId === node.id && panelOpen ? '#1d6fdc' : 'inherit',
-                            backgroundColor: focusedElement?.nodeId === node.id && focusedElement?.type === 'node' ? 'rgba(29, 111, 220, 0.1)' : '#ffffff',
-                            outline: focusedElement?.nodeId === node.id && focusedElement?.type === 'node' ? '2px solid #1d6fdc' : 'none',
-                            ...(getDisplayLabel(node.label).includes('\n') ? { justifyContent: 'flex-start', paddingLeft: '0.8rem' } : {}),
-                          }}
-                          onMouseDown={(e) => {
-                            if (e.button === 0) e.stopPropagation() // Only stop propagation for left-click
-                          }}
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            e.preventDefault()
-                            
-                            // Handle button-based node creation for mobile users
-                            if (createNodeMode === 'child') {
-                              addCustomChild(node.id)
-                              setCreateNodeMode(null)
-                              setShowCreateNodeHint(false)
-                              return
-                            }
-                            if (createNodeMode === 'sibling') {
-                              addCustomSibling(node.id)
-                              setCreateNodeMode(null)
-                              setShowCreateNodeHint(false)
-                              return
-                            }
-                            
-                            // ...existing code...
-                            // Toggle selection: if already selected, deselect; otherwise select and open panel
-                            if (selectedId === node.id) {
-                              setFocusedElement(null)
-                              setSelectedId(null)
-                              setPanelOpen(false)
-                              setPanelExpanded(false)
-                            } else {
-                              setFocusedElement(null)
-                              setPanelOpen(true)
-                              setPanelExpanded(false)
-                              setIsDragging(false)
-                              setDragStart(null)
-                              setDragButton(null)
-                              setDragOffset({ x: 0, y: 0 })
-                              setBasePanOffset({ x: 0, y: 0 })
-                              setRecenterKey((k) => k + 1)
-                              setSelectedId(node.id)
-                            }
-                          }}
-                          onDoubleClick={(e) => {
-                            e.stopPropagation()
-                            e.preventDefault()
-                            if (node.isCustom && isAuthenticated) {
-                              setEditingNodeId(node.id)
-                            }
-                          }}
-                        >
-                          {editingNodeId === node.id ? (
-                            <input
-                              ref={(el) => {
+                        {editingNodeId === node.id ? (
+                          <input
+                            ref={(el) => {
+                              if (el && el !== editInputRef.current) {
                                 editInputRef.current = el
-                                if (el) {
-                                  el.focus()
-                                  el.select()
-                                }
-                              }}
-                              type="text"
-                              defaultValue={node.label}
-                              style={{
-                                width: '100%',
-                                background: 'transparent',
-                                border: 'none',
-                                outline: 'none',
-                                fontSize: 'inherit',
-                                fontWeight: 'inherit',
-                                fontFamily: 'inherit',
-                                color: 'inherit',
-                                textAlign: 'center',
-                                padding: 0,
-                              }}
-                              onClick={(e) => {
-                                e.stopPropagation()
-                              }}
-                              onMouseDown={(e) => {
-                                e.stopPropagation()
-                              }}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
-                                  e.preventDefault()
-                                  updateNodeLabel(node.id, e.target.value)
-                                } else if (e.key === 'Escape') {
-                                  e.preventDefault()
-                                  setEditingNodeId(null)
-                                }
-                                e.stopPropagation()
-                              }}
-                              onBlur={(e) => {
+                                el.focus()
+                                el.select()
+                              } else {
+                                editInputRef.current = el
+                              }
+                            }}
+                            type="text"
+                            defaultValue={node.label}
+                            className="node-card node-label-edit"
+                            style={{
+                              width: computedNodeWidth,
+                              height: computedNodeHeight,
+                              fontSize: getNodeFontSize(node.label),
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            onMouseDown={(e) => e.stopPropagation()}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') {
+                                e.preventDefault()
                                 updateNodeLabel(node.id, e.target.value)
-                              }}
-                            />
-                          ) : (
+                              } else if (e.key === 'Escape') {
+                                e.preventDefault()
+                                setEditingNodeId(null)
+                              }
+                              e.stopPropagation()
+                            }}
+                            onBlur={(e) => {
+                              updateNodeLabel(node.id, e.target.value)
+                            }}
+                          />
+                        ) : (
+                          <button
+                            type="button"
+                            className="node-card"
+                            style={{
+                              width: computedNodeWidth,
+                              height: computedNodeHeight,
+                              color: selectedId === node.id && panelOpen ? '#1d6fdc' : 'inherit',
+                              backgroundColor: focusedElement?.nodeId === node.id && focusedElement?.type === 'node' ? 'rgba(29, 111, 220, 0.1)' : '#ffffff',
+                              outline: focusedElement?.nodeId === node.id && focusedElement?.type === 'node' ? '2px solid #1d6fdc' : 'none',
+                              ...(getDisplayLabel(node.label).includes('\n') ? { justifyContent: 'flex-start', paddingLeft: '0.8rem' } : {}),
+                            }}
+                            onMouseDown={(e) => {
+                              if (e.button === 0) e.stopPropagation()
+                            }}
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              e.preventDefault()
+
+                              if (createNodeMode === 'child') {
+                                addCustomChild(node.id)
+                                setCreateNodeMode(null)
+                                setShowCreateNodeHint(false)
+                                return
+                              }
+                              if (createNodeMode === 'sibling') {
+                                addCustomSibling(node.id)
+                                setCreateNodeMode(null)
+                                setShowCreateNodeHint(false)
+                                return
+                              }
+
+                              if (selectedId === node.id) {
+                                setFocusedElement(null)
+                                setSelectedId(null)
+                                setPanelOpen(false)
+                                setPanelExpanded(false)
+                              } else {
+                                setFocusedElement(null)
+                                setPanelOpen(true)
+                                setPanelExpanded(false)
+                                setIsDragging(false)
+                                setDragStart(null)
+                                setDragButton(null)
+                                setDragOffset({ x: 0, y: 0 })
+                                setBasePanOffset({ x: 0, y: 0 })
+                                setRecenterKey((k) => k + 1)
+                                setSelectedId(node.id)
+                              }
+                            }}
+                            onDoubleClick={(e) => {
+                              e.stopPropagation()
+                              e.preventDefault()
+                              if (node.isCustom && isAuthenticated) {
+                                setEditingNodeId(node.id)
+                              }
+                            }}
+                          >
                             <span style={{ fontSize: getNodeFontSize(getDisplayLabel(node.label)), ...(getDisplayLabel(node.label).includes('\n') ? { textAlign: 'left', fontFamily: 'monospace' } : {}) }}>{getDisplayLabel(node.label)}</span>
-                          )}
-                        </button>
+                          </button>
+                        )}
                         {(hasKnownSubdivisions(node.label) || nodes.some((n) => n.parentId === node.id)) ? (
                         <span
                           className="node-dots"
