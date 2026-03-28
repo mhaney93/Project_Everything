@@ -2123,6 +2123,24 @@ button:not(:disabled):hover {
   flex: 1;
 }
 
+.notification-undo {
+  background: none;
+  border: 1px solid currentColor;
+  border-radius: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 2px 8px;
+  color: inherit;
+  opacity: 0.85;
+  transition: opacity 0.2s ease;
+  flex-shrink: 0;
+}
+
+.notification-undo:hover {
+  opacity: 1;
+}
+
 .notification-close {
   background: none;
   border: none;

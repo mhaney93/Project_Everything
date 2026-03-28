@@ -1216,6 +1216,9 @@ function App() {
 
     // Robustly skip auto-save after backend loads
     const skipNextAutoSave = useRef(false);
+    const suppressSaveUntil = useRef(0);
+    const undoTimerRef = useRef(null);
+    const nodesRef = useRef([]);
 
     // Helper for backend-driven node updates
     const setNodesFromBackend = (newNodes) => {
@@ -1267,6 +1270,7 @@ function App() {
       }))
     }
   const [nodes, setNodes] = useState(INITIAL_NODES)
+  nodesRef.current = nodes
   const [selectedId, setSelectedId] = useState(null)
   const [focusedElement, setFocusedElement] = useState(null) // { nodeId, type: 'node' | 'dots' } or null
 
@@ -1322,6 +1326,7 @@ function App() {
   const [editingNodeId, setEditingNodeId] = useState(null) // For tree view editing
   const [editingSidebarNodeId, setEditingSidebarNodeId] = useState(null) // For sidebar title editing
   const [deleteConfirmation, setDeleteConfirmation] = useState(null) // { nodeId, message }
+  const [undoSnapshot, setUndoSnapshot] = useState(null) // { nodes: [...], label: string }
   const [signInRequired, setSignInRequired] = useState(null) // message string or null
   const [editingSummaryId, setEditingSummaryId] = useState(null)
   const [notification, setNotification] = useState(null) // { message, type: 'error' | 'success' | 'info' }
@@ -21824,8 +21829,11 @@ function App() {
     }
     findDescendants(nodeId)
 
+    const removedNodes = nodes.filter((n) => nodeIdsToRemove.has(n.id))
+    const deletedLabel = nodes.find((n) => n.id === nodeId)?.label || 'Node'
+
     setNodes((prev) => prev.filter((node) => !nodeIdsToRemove.has(node.id)))
-    
+
     // Clear selection and focus if the deleted node was selected/focused
     if (selectedId === nodeId) {
       setSelectedId(null)
@@ -21835,8 +21843,35 @@ function App() {
       setFocusedElement(null)
     }
 
+    // Suppress auto-save and offer undo for 5 seconds
+    suppressSaveUntil.current = Date.now() + 6000
+    setUndoSnapshot({ nodes: removedNodes, label: deletedLabel })
+    setNotification({ message: `"${deletedLabel}" deleted.`, type: 'info', hasUndo: true })
+
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
+    undoTimerRef.current = setTimeout(async () => {
+      suppressSaveUntil.current = 0
+      setUndoSnapshot(null)
+      setNotification(null)
+      try {
+        await mapsAPI.saveMap(nodesRef.current)
+      } catch (e) {
+        console.error('Failed to save after delete:', e)
+      }
+    }, 5000)
+
     setDeleteModalChoice('cancel')
     setDeleteConfirmation(null)
+  }
+
+  const handleUndoDelete = () => {
+    if (!undoSnapshot) return
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
+    undoTimerRef.current = null
+    suppressSaveUntil.current = 0
+    setNodes((prev) => [...prev, ...undoSnapshot.nodes])
+    setUndoSnapshot(null)
+    setNotification(null)
   }
 
   const cancelDelete = () => {
@@ -22548,6 +22583,8 @@ function App() {
       skipNextAutoSave.current = false;
       return;
     }
+
+    if (Date.now() < suppressSaveUntil.current) return;
 
     const saveTimer = setTimeout(async () => {
       try {
@@ -24169,6 +24206,15 @@ function App() {
               <div className={`notification notification-${notification.type} notification-under-search`}>
                 <div className="notification-content">
                   <p>{notification.message}</p>
+                  {notification.hasUndo && undoSnapshot && (
+                    <button
+                      className="notification-undo"
+                      onClick={handleUndoDelete}
+                      type="button"
+                    >
+                      Undo
+                    </button>
+                  )}
                   <button
                     className="notification-close"
                     onClick={() => setNotification(null)}
