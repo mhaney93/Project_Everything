@@ -24584,7 +24584,7 @@ function App() {
                             setIsForgotPassword(true)
                             setAuthError('')
                           }}
-                          style={{ background: 'transparent', opacity: 0.5, fontSize: '0.85em' }}
+                          style={{ background: 'transparent', opacity: 0.7 }}
                         >
                           Forgot password?
                         </button>
