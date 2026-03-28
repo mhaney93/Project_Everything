@@ -24802,7 +24802,7 @@ function App() {
                   )}
                 </div>
               ) : (
-                generateSummary(selectedNode.label) && (
+                !selectedNode.isCustom && generateSummary(selectedNode.label) && (
                   <p className="panel-summary">{generateSummary(selectedNode.label)}</p>
                 )
               )}
