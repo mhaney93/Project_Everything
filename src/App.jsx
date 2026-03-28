@@ -1218,7 +1218,6 @@ function App() {
     const skipNextAutoSave = useRef(false);
     const suppressSaveUntil = useRef(0);
     const undoTimerRef = useRef(null);
-    const nodesRef = useRef([]);
 
     // Helper for backend-driven node updates
     const setNodesFromBackend = (newNodes) => {
@@ -1270,7 +1269,6 @@ function App() {
       }))
     }
   const [nodes, setNodes] = useState(INITIAL_NODES)
-  nodesRef.current = nodes
   const [selectedId, setSelectedId] = useState(null)
   const [focusedElement, setFocusedElement] = useState(null) // { nodeId, type: 'node' | 'dots' } or null
 
