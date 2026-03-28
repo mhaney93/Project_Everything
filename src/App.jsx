@@ -24505,7 +24505,8 @@ function App() {
                       <button
                         className="profile-action"
                         type="button"
-                        onClick={() => {
+                        onClick={(e) => {
+                          e.stopPropagation()
                           setIsForgotPassword(false)
                           setForgotPasswordSent(false)
                           setAuthError('')
