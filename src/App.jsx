@@ -86,12 +86,13 @@ async function addChildren({ existingPredefined, parentNodeId, parent, updatedNo
   };
 
   if (existingPredefined.length === 0) {
-    let labels = ['Concept A', 'Concept B'];
+    let labels;
     if (parentNodeId === 1) {
-      labels = ['Humanities', 'Sciences'];
+      labels = TOPIC_SUBDIVISIONS['Everything'];
     } else {
       labels = await getChildSuggestions(parent.label);
     }
+    if (!labels || labels.length === 0) return;
 
     const maxExistingId = updatedNodes.reduce((maxId, node) => {
       if (!node || !Number.isFinite(node.id)) return maxId;
@@ -21629,14 +21630,8 @@ function App() {
     }
   }
 
-  const getChildSuggestions = async (parentLabel) => {
-    // First check if we have curated subdivisions for this topic
-    if (TOPIC_SUBDIVISIONS[parentLabel]) {
-      return TOPIC_SUBDIVISIONS[parentLabel]
-    }
-    
-    // Fallback to generic labels (will be replaced with curated content over time)
-    return ['Concept A', 'Concept B']
+  const getChildSuggestions = (parentLabel) => {
+    return TOPIC_SUBDIVISIONS[parentLabel] || []
   }
 
   useEffect(() => {
@@ -24688,7 +24683,7 @@ function App() {
                             <span style={{ fontSize: getNodeFontSize(getDisplayLabel(node.label)), ...(getDisplayLabel(node.label).includes('\n') ? { textAlign: 'left', fontFamily: 'monospace' } : {}) }}>{getDisplayLabel(node.label)}</span>
                           )}
                         </button>
-                        {(hasKnownSubdivisions(node.label) || nodes.some((n) => n.parentId === node.id && n.isCustom)) ? (
+                        {(hasKnownSubdivisions(node.label) || nodes.some((n) => n.parentId === node.id)) ? (
                         <span
                           className="node-dots"
                           role="button"
