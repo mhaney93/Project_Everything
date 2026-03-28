@@ -23731,6 +23731,9 @@ function App() {
   }
 
   const handleSuggestionClick = (suggestion) => {
+    // Cancel any pending debounced suggestion update so it doesn't reopen the dropdown
+    if (searchDebounceTimeoutRef.current) clearTimeout(searchDebounceTimeoutRef.current)
+    searchRequestIdRef.current += 1
     setSearchQuery(suggestion)
     setSearchSuggestions([])
     setRelatedIdeas([])
