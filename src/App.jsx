@@ -22531,7 +22531,7 @@ function App() {
         try {
           const globalData = await mapsAPI.getGlobalMap()
           if (Array.isArray(globalData.nodes) && globalData.nodes.length > 0) {
-            setNodesFromBackend(globalData.nodes)
+            setNodesFromBackend(collapseNodesToRoot(globalData.nodes))
           }
         } catch (e) {
           // silently ignore if global fetch fails
@@ -22842,7 +22842,7 @@ function App() {
     try {
       const globalData = await mapsAPI.getGlobalMap()
       const globalNodes = Array.isArray(globalData.nodes) && globalData.nodes.length > 0
-        ? globalData.nodes
+        ? collapseNodesToRoot(globalData.nodes)
         : INITIAL_NODES
       setNodesFromBackend(globalNodes)
     } catch (e) {
