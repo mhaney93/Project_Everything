@@ -11544,6 +11544,8 @@ function App() {
   nodesRef.current = nodes
   const selectedNode = nodes.find((node) => node.id === selectedId)
   const isAuthenticated = Boolean(currentUser)
+  const isAdmin = currentUser?.email === 'matthew.haney1993@gmail.com'
+  const canEditNode = (node) => isAuthenticated && (node?.isCustom || isAdmin)
 
   // For verse nodes keyed as "Book chapter:verse", display only the verse number
   const getDisplayLabel = (label) => {
@@ -24812,7 +24814,7 @@ function App() {
                             onDoubleClick={(e) => {
                               e.stopPropagation()
                               e.preventDefault()
-                              if (node.isCustom && isAuthenticated) {
+                              if (canEditNode(node)) {
                                 setEditingNodeId(node.id)
                               }
                             }}
@@ -24916,14 +24918,14 @@ function App() {
                   />
                 ) : (
                   <h2
-                    className={selectedNode.isCustom && isAuthenticated ? 'editable' : ''}
+                    className={canEditNode(selectedNode) ? 'editable' : ''}
                     onClick={(e) => {
-                      if (selectedNode.isCustom && isAuthenticated) {
+                      if (canEditNode(selectedNode)) {
                         e.stopPropagation()
                         setEditingSidebarNodeId(selectedNode.id)
                       }
                     }}
-                    title={selectedNode.isCustom && isAuthenticated ? 'Click to edit title' : ''}
+                    title={canEditNode(selectedNode) ? 'Click to edit title' : ''}
                   >
                     {selectedNode.label}
                   </h2>
@@ -24940,7 +24942,7 @@ function App() {
                   X
                 </button>
               </div>
-              {selectedNode.isCustom && isAuthenticated ? (
+              {canEditNode(selectedNode) ? (
                 <div className="panel-summary-section">
                   {editingSummaryId === selectedNode.id ? (
                     <div>
