@@ -1084,7 +1084,18 @@ const getDisplayLabelRaw = (label) => {
   return label
 }
 
-const buildLayout = (nodes, topicSubdivisions = {}, nodeWidth = NODE_WIDTH, nodeHeight = NODE_HEIGHT, nodeSizeScale = 1) => {
+const getCodeNodeWidth = (label, nodeWidth, nodeSizeScale) => {
+  const displayLabel = getDisplayLabelRaw(label)
+  if (!displayLabel.includes('\n')) return nodeWidth
+  const lines = displayLabel.split('\n')
+  const maxLen = Math.max(...lines.map(l => l.length))
+  const fontSizePx = 0.6 * 16 * nodeSizeScale
+  const charWidthPx = fontSizePx * 0.6
+  const paddingPx = Math.round(2 * 1.2 * 16 * nodeSizeScale)
+  return Math.max(nodeWidth, Math.ceil(maxLen * charWidthPx) + paddingPx + 8)
+}
+
+const buildLayout = (nodes, topicSubdivisions = {}, nodeWidth = NODE_WIDTH, nodeHeight = NODE_HEIGHT, nodeSizeScale = 1, getNodeWidthFn = null) => {
   if (nodes.length === 0) {
     return { positions: new Map(), edges: [], bounds: null };
   }
@@ -1151,11 +1162,18 @@ const buildLayout = (nodes, topicSubdivisions = {}, nodeWidth = NODE_WIDTH, node
   const edges = [];
   const subtreeWidths = new Map();
 
+  const effectiveWidth = (nodeId) => {
+    const node = nodeById.get(nodeId)
+    if (!node) return nodeWidth
+    return getNodeWidthFn ? getNodeWidthFn(node.label) : nodeWidth
+  }
+
   const calculateSubtreeWidth = (nodeId) => {
     const kids = childrenById.get(nodeId) || [];
     if (kids.length === 0) {
-      subtreeWidths.set(nodeId, nodeWidth);
-      return nodeWidth;
+      const w = effectiveWidth(nodeId);
+      subtreeWidths.set(nodeId, w);
+      return w;
     }
 
     let totalWidth = 0;
@@ -1164,7 +1182,7 @@ const buildLayout = (nodes, topicSubdivisions = {}, nodeWidth = NODE_WIDTH, node
       if (index > 0) totalWidth += H_GAP;
     });
 
-    const width = Math.max(totalWidth, nodeWidth);
+    const width = Math.max(totalWidth, effectiveWidth(nodeId));
     subtreeWidths.set(nodeId, width);
     return width;
   };
@@ -1172,7 +1190,8 @@ const buildLayout = (nodes, topicSubdivisions = {}, nodeWidth = NODE_WIDTH, node
   const assignPositions = (nodeId, x, y) => {
     const kids = childrenById.get(nodeId) || [];
     const subtreeWidth = subtreeWidths.get(nodeId) || nodeWidth;
-    const nodeX = x + (subtreeWidth - nodeWidth) / 2;
+    const myWidth = effectiveWidth(nodeId);
+    const nodeX = x + (subtreeWidth - myWidth) / 2;
 
     positions.set(nodeId, { x: nodeX, y });
 
@@ -1195,7 +1214,7 @@ const buildLayout = (nodes, topicSubdivisions = {}, nodeWidth = NODE_WIDTH, node
   positions.forEach((pos, nodeId) => {
     minX = Math.min(minX, pos.x);
     minY = Math.min(minY, pos.y);
-    maxX = Math.max(maxX, pos.x + nodeWidth);
+    maxX = Math.max(maxX, pos.x + effectiveWidth(nodeId));
     maxY = Math.max(maxY, pos.y + getHeight(nodeId));
   });
 
@@ -11506,8 +11525,10 @@ function App() {
     window.localStorage.setItem('nodeSizeScale', String(nodeSizeScale))
   }, [nodeSizeScale])
 
+  const getNodeWidthForLabel = (label) => getCodeNodeWidth(label, nodeWidth, nodeSizeScale)
+
   const layout = useMemo(
-    () => buildLayout(nodes, TOPIC_SUBDIVISIONS, nodeWidth, nodeHeight, nodeSizeScale),
+    () => buildLayout(nodes, TOPIC_SUBDIVISIONS, nodeWidth, nodeHeight, nodeSizeScale, (label) => getCodeNodeWidth(label, nodeWidth, nodeSizeScale)),
     [nodes, recenterKey, TOPIC_SUBDIVISIONS, nodeWidth, nodeHeight, nodeSizeScale],
   )
   layoutRef.current = layout
@@ -24559,6 +24580,7 @@ function App() {
                   const finalY = pos.y + renderOffsetY
                   const isRoot = node.parentId == null
                   const computedNodeHeight = getNodeHeightForLabel(node.label)
+                  const computedNodeWidth = getNodeWidthForLabel(node.label)
                   return (
                     <div key={node.id}>
                       <div
@@ -24566,7 +24588,7 @@ function App() {
                         style={{
                           left: finalX,
                           top: finalY,
-                          width: nodeWidth,
+                          width: computedNodeWidth,
                           height: computedNodeHeight,
                           transform: animatingIds.has(node.id) ? 'scale(0.8)' : 'scale(1)',
                           opacity: animatingIds.has(node.id) ? 0 : 1,
@@ -24580,7 +24602,7 @@ function App() {
                           type="button"
                           className="node-card"
                           style={{
-                            width: nodeWidth,
+                            width: computedNodeWidth,
                             height: computedNodeHeight,
                             color: selectedId === node.id && panelOpen ? '#1d6fdc' : 'inherit',
                             backgroundColor: focusedElement?.nodeId === node.id && focusedElement?.type === 'node' ? 'rgba(29, 111, 220, 0.1)' : '#ffffff',
