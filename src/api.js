@@ -54,6 +54,13 @@ export const mapsAPI = {
     return data;
   },
 
+  getGlobalMap: async () => {
+    const res = await fetch(`${API_BASE_URL}/maps/global`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    return data;
+  },
+
   saveMap: async (nodes) => {
     const res = await fetch(`${API_BASE_URL}/maps`, {
       ...defaultFetchOptions,

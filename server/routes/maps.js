@@ -1,13 +1,42 @@
 const express = require('express');
 const pool = require('../db/config');
 const { verifyToken } = require('../middleware/auth');
-const { 
-  TOTAL_STORAGE_LIMIT_PER_USER, 
-  getFileStorageUsage, 
-  isUserAdmin 
+const {
+  TOTAL_STORAGE_LIMIT_PER_USER,
+  ADMIN_EMAIL,
+  getFileStorageUsage,
+  isUserAdmin
 } = require('../utils/storage');
 
 const router = express.Router();
+
+// Get global (non-personal) custom nodes — no auth required
+router.get('/global', async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT m.nodes FROM maps m JOIN users u ON m.user_id = u.id WHERE u.email = $1',
+      [ADMIN_EMAIL]
+    );
+
+    if (result.rows.length === 0) {
+      return res.json({ nodes: [] });
+    }
+
+    let nodes = result.rows[0].nodes;
+    if (typeof nodes === 'string') {
+      try { nodes = JSON.parse(nodes); } catch (e) { nodes = []; }
+    }
+
+    const globalNodes = (nodes || []).filter(
+      (n) => n.isCustom === true && n.isPersonal !== true
+    );
+
+    res.json({ nodes: globalNodes });
+  } catch (err) {
+    console.error('GET /api/maps/global error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
 
 // Get user's map
 router.get('/', verifyToken, async (req, res) => {
