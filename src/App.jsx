@@ -21846,7 +21846,7 @@ function App() {
     // Suppress auto-save and offer undo for 5 seconds
     suppressSaveUntil.current = Date.now() + 6000
     setUndoSnapshot({ nodes: removedNodes, label: deletedLabel })
-    setNotification({ message: `"${deletedLabel}" deleted.`, type: 'info', hasUndo: true })
+    setNotification(null)
 
     if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
     undoTimerRef.current = setTimeout(async () => {
@@ -24206,15 +24206,6 @@ function App() {
               <div className={`notification notification-${notification.type} notification-under-search`}>
                 <div className="notification-content">
                   <p>{notification.message}</p>
-                  {notification.hasUndo && undoSnapshot && (
-                    <button
-                      className="notification-undo"
-                      onClick={handleUndoDelete}
-                      type="button"
-                    >
-                      Undo
-                    </button>
-                  )}
                   <button
                     className="notification-close"
                     onClick={() => setNotification(null)}
@@ -25170,6 +25161,19 @@ function App() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Undo Delete Toast */}
+      {undoSnapshot && (
+        <div className="undo-toast">
+          <span>"{undoSnapshot.label}" deleted.</span>
+          <button className="undo-toast-button" type="button" onClick={handleUndoDelete}>
+            Undo
+          </button>
+          <button className="undo-toast-close" type="button" onClick={() => { if (undoTimerRef.current) clearTimeout(undoTimerRef.current); suppressSaveUntil.current = 0; setUndoSnapshot(null); mapsAPI.saveMap(nodesRef.current).catch(() => {}) }} aria-label="Dismiss">
+            ✕
+          </button>
         </div>
       )}
     </div>
