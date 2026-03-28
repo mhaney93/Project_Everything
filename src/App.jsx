@@ -24048,12 +24048,20 @@ function App() {
     if (dragButton === 0 && dragStart) {
       setBasePanOffset((prev) => clampPanOffset({ x: prev.x + dragOffset.x, y: prev.y + dragOffset.y }))
     }
+    const wasDrag = didDragRef.current
     setDragOffset({ x: 0, y: 0 })
     setIsDragging(false)
     setDragStart(null)
     setDragButton(null)
-    suppressClickRef.current = didDragRef.current
+    suppressClickRef.current = wasDrag
     didDragRef.current = false
+
+    // Close sidebar when clicking empty canvas (not a drag, left button, target is the canvas itself)
+    if (!wasDrag && e.button === 0 && e.target === canvasRef.current) {
+      setSelectedId(null)
+      setPanelOpen(false)
+      setPanelExpanded(false)
+    }
   }
   const handleMapMouseLeave = () => {
     if (dragStart) {
