@@ -1130,7 +1130,7 @@ button:not(:disabled):hover {
   border: none;
   background: transparent;
   font-size: 0.9rem;
-  color: var(--ink);
+  color: #b86a00;
   outline: none;
 }
 
