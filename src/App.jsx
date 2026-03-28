@@ -23154,10 +23154,8 @@ function App() {
 
       // Ctrl+Left/Right: reorder a focused custom node (or any node for admin) among its siblings
       if ((event.key === 'ArrowLeft' || event.key === 'ArrowRight') && event.ctrlKey && !event.shiftKey && !event.altKey) {
-        console.log('[Ctrl+Arrow] key:', event.key, 'isAuthenticated:', isAuthenticated, 'isAdmin:', isAdmin, 'selectedId:', selectedId, 'focusedElement:', focusedElement)
         const nodeId = focusedElement?.nodeId ?? selectedId
         const node = nodeId != null ? nodes.find(n => n.id === nodeId) : null
-        console.log('[Ctrl+Arrow] nodeId:', nodeId, 'node:', node?.label, 'node.isCustom:', node?.isCustom)
         if (isAuthenticated && nodeId != null && node && (node.isCustom || isAdmin)) {
           event.preventDefault()
           reorderCustomNode(nodeId, event.key === 'ArrowLeft' ? 'left' : 'right')
