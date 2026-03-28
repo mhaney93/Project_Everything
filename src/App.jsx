@@ -22963,6 +22963,13 @@ function App() {
 
   useEffect(() => {
     const handleShortcut = async (event) => {
+      // Don't intercept shortcuts when the user is typing in any text input
+      const isTyping =
+        event.target.tagName === 'INPUT' ||
+        event.target.tagName === 'TEXTAREA' ||
+        event.target.isContentEditable
+      if (isTyping) return
+
       if (event.key === 'Escape' && midPanAnchor) {
         setMidPanAnchor(null)
         return
