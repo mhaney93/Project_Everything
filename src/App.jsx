@@ -24801,8 +24801,12 @@ function App() {
                     </p>
                   )}
                 </div>
+              ) : selectedNode.isCustom ? (
+                selectedNode.summary ? (
+                  <p className="panel-summary">{selectedNode.summary}</p>
+                ) : null
               ) : (
-                !selectedNode.isCustom && generateSummary(selectedNode.label) && (
+                generateSummary(selectedNode.label) && (
                   <p className="panel-summary">{generateSummary(selectedNode.label)}</p>
                 )
               )}
