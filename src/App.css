@@ -1366,10 +1366,10 @@ button:not(:disabled):hover {
 }
 
 .panel-delete-section {
-  position: fixed;
-  bottom: 12px;
-  right: 12px;
-  z-index: 11;
+  margin-top: 1.5rem;
+  padding-bottom: 0.5rem;
+  display: flex;
+  justify-content: flex-end;
 }
 
 .delete-node-button {
