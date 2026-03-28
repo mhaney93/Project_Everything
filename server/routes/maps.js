@@ -27,9 +27,9 @@ router.get('/global', async (req, res) => {
       try { nodes = JSON.parse(nodes); } catch (e) { nodes = []; }
     }
 
-    const globalNodes = (nodes || []).filter(
-      (n) => n.isPersonal !== true && n.label !== 'Personal'
-    );
+    const globalNodes = (nodes || [])
+      .filter((n) => n.isPersonal !== true && n.label !== 'Personal')
+      .map(({ notes, ...rest }) => rest);
 
     res.json({ nodes: globalNodes });
   } catch (err) {

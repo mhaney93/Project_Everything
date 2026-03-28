@@ -22838,6 +22838,7 @@ function App() {
     }
     setCurrentUser(null)
     localStorage.removeItem('everything_user_email')
+    setNodeFiles({})
     setOpenTooltip(null)
     try {
       const globalData = await mapsAPI.getGlobalMap()
