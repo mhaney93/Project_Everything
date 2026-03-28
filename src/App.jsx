@@ -22225,6 +22225,18 @@ function App() {
         updateNoteLevel(nodeId, note.id, -1)
       }
     }
+
+    if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+      const textNotes = (selectedNode?.notes || []).filter((n) => n.type !== 'grid')
+      const currentIdx = textNotes.findIndex((n) => n.id === note.id)
+      if (event.key === 'ArrowUp' && currentIdx > 0) {
+        event.preventDefault()
+        noteInputRefs.current[textNotes[currentIdx - 1].id]?.focus()
+      } else if (event.key === 'ArrowDown' && currentIdx < textNotes.length - 1) {
+        event.preventDefault()
+        noteInputRefs.current[textNotes[currentIdx + 1].id]?.focus()
+      }
+    }
   }
 
   const addGridToNode = (nodeId, options = {}) => {
