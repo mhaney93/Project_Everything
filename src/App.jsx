@@ -11555,7 +11555,7 @@ function App() {
   nodesRef.current = nodes
   const selectedNode = nodes.find((node) => node.id === selectedId)
   const isAuthenticated = Boolean(currentUser)
-  const isAdmin = currentUser?.email === 'matthew.haney1993@gmail.com'
+  const isAdmin = currentUser?.email === 'matthew.haney1993@gmail.com' || currentUser?.email === 'preveil.llc@gmail.com'
   const canEditNode = (node) => isAuthenticated && (node?.isCustom || isAdmin)
 
   // For verse nodes keyed as "Book chapter:verse", display only the verse number
@@ -24595,10 +24595,12 @@ function App() {
                 ) : (
                   <>
                     <h3>{isSignUp ? 'Sign Up' : 'Sign In'}</h3>
-                    <div className="auth-form">
+                    <form key={isSignUp ? 'signup' : 'signin'} className="auth-form" onSubmit={(e) => { e.preventDefault(); handleLogin(); }}>
                       <input
                         type="email"
                         placeholder="Email"
+                        name="email"
+                        autoComplete="email"
                         value={loginForm.email}
                         onChange={(e) => {
                           setLoginForm({ ...loginForm, email: e.target.value })
@@ -24609,6 +24611,8 @@ function App() {
                       <input
                         type="password"
                         placeholder="Password"
+                        name={isSignUp ? 'new-password' : 'password'}
+                        autoComplete={isSignUp ? 'new-password' : 'current-password'}
                         value={loginForm.password}
                         onChange={(e) => {
                           setLoginForm({ ...loginForm, password: e.target.value })
@@ -24636,8 +24640,7 @@ function App() {
                       )}
                       <button
                         className="profile-action"
-                        type="button"
-                        onClick={handleLogin}
+                        type="submit"
                       >
                         {isSignUp ? 'Create Account' : 'Sign In'}
                       </button>
@@ -24666,7 +24669,7 @@ function App() {
                           Forgot password?
                         </button>
                       )}
-                    </div>
+                    </form>
                   </>
                 )}
               </div>
