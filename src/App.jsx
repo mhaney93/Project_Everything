@@ -24950,6 +24950,7 @@ function App() {
                         onChange={(e) => updateNodeSummary(selectedNode.id, e.target.value)}
                         placeholder="Add a summary..."
                         rows={3}
+                        autoFocus
                       />
                       <button
                         className="summary-save-button"
