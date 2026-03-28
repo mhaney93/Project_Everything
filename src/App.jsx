@@ -24950,6 +24950,12 @@ function App() {
                         className="summary-textarea"
                         value={selectedNode.summary || ''}
                         onChange={(e) => updateNodeSummary(selectedNode.id, e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' && !e.shiftKey) {
+                            e.preventDefault()
+                            setEditingSummaryId(null)
+                          }
+                        }}
                         placeholder="Add a summary..."
                         rows={3}
                         autoFocus
