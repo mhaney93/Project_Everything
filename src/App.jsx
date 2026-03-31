@@ -25005,7 +25005,7 @@ function App() {
                     <div>
                       <textarea
                         className="summary-textarea"
-                        value={selectedNode.summary || ''}
+                        value={selectedNode.summary || generateSummary(selectedNode.label) || ''}
                         onChange={(e) => updateNodeSummary(selectedNode.id, e.target.value)}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' && !e.shiftKey) {
@@ -25031,7 +25031,7 @@ function App() {
                       onClick={() => setEditingSummaryId(selectedNode.id)}
                       title="Click to edit summary"
                     >
-                      {selectedNode.summary || 'Click to add a summary...'}
+                      {selectedNode.summary || generateSummary(selectedNode.label) || 'Click to add a summary...'}
                     </p>
                   )}
                 </div>
