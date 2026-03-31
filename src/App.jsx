@@ -21792,8 +21792,8 @@ function App() {
       if (!node) return prev
       if (!node.isCustom && !isAdmin) return prev
 
-      if (isAdmin && !node.isCustom) {
-        // Admin reordering global nodes: consider all siblings using layout sort order
+      if (isAdmin) {
+        // Admin reordering any node: consider all siblings using layout sort order
         const parentNode = prev.find(n => n.id === node.parentId)
         const parentLabel = parentNode?.label
         const allSiblings = prev.filter(n => n.parentId === node.parentId && !n.hidden)
