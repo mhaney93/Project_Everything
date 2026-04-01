@@ -22578,11 +22578,11 @@ function App() {
     )
   }
 
-  const updateNodeSummary = (nodeId, summary) => {
+  const updateNodeSummary = (nodeId, summary, trim = false) => {
     setNodes((prev) =>
       prev.map((node) =>
         node.id === nodeId
-          ? { ...node, summary: summary.trim() }
+          ? { ...node, summary: trim ? summary.trim() : summary }
           : node
       )
     )
@@ -25083,9 +25083,11 @@ function App() {
                         className="summary-textarea"
                         value={selectedNode.summary || generateSummary(selectedNode.label) || ''}
                         onChange={(e) => updateNodeSummary(selectedNode.id, e.target.value)}
+                        onBlur={(e) => updateNodeSummary(selectedNode.id, e.target.value, true)}
                         onKeyDown={(e) => {
                           if (e.key === 'Enter' && !e.shiftKey) {
                             e.preventDefault()
+                            updateNodeSummary(selectedNode.id, e.target.value, true)
                             setEditingSummaryId(null)
                           }
                         }}
