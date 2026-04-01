@@ -25021,7 +25021,7 @@ function App() {
                   </button>
                 )}
                 {editingSidebarNodeId === selectedNode.id ? (
-                  <input
+                  <textarea
                     key={`editing-${selectedNode.id}`}
                     ref={(el) => {
                       if (el) {
@@ -25029,13 +25029,13 @@ function App() {
                         el.select()
                       }
                     }}
-                    type="text"
                     defaultValue={selectedNode.label}
                     className="panel-title-input"
+                    style={{ resize: 'none' }}
                     onClick={(e) => e.stopPropagation()}
                     onMouseDown={(e) => e.stopPropagation()}
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
+                      if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault()
                         updateNodeLabel(selectedNode.id, e.target.value)
                         setEditingSidebarNodeId(null)
