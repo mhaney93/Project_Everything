@@ -24860,7 +24860,7 @@ function App() {
                         }}
                       >
                         {editingNodeId === node.id ? (
-                          <input
+                          <textarea
                             ref={(el) => {
                               if (el && el !== editInputRef.current) {
                                 editInputRef.current = el
@@ -24870,18 +24870,18 @@ function App() {
                                 editInputRef.current = el
                               }
                             }}
-                            type="text"
                             defaultValue={node.label}
                             className="node-card node-label-edit"
                             style={{
                               width: computedNodeWidth,
                               height: computedNodeHeight,
                               fontSize: getNodeFontSize(node.label),
+                              resize: 'none',
                             }}
                             onClick={(e) => e.stopPropagation()}
                             onMouseDown={(e) => e.stopPropagation()}
                             onKeyDown={(e) => {
-                              if (e.key === 'Enter') {
+                              if (e.key === 'Enter' && !e.shiftKey) {
                                 e.preventDefault()
                                 updateNodeLabel(node.id, e.target.value)
                               } else if (e.key === 'Escape') {
