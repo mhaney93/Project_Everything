@@ -22042,6 +22042,7 @@ function App() {
   const confirmDelete = () => {
     if (!deleteConfirmation) return
     const nodeId = deleteConfirmation.nodeId
+    console.log('[confirmDelete] nodeId:', nodeId, '| includeChildren:', deleteConfirmation.includeChildren, '| message:', deleteConfirmation.message)
 
     // Remove the node and all its descendants
     const nodeIdsToRemove = new Set([nodeId])
@@ -22108,6 +22109,9 @@ function App() {
   }
 
   const updateNodeLabel = (nodeId, newLabel) => {
+    const childrenBefore = nodes.filter(n => n.parentId === nodeId)
+    console.log('[updateNodeLabel] nodeId:', nodeId, '| newLabel:', JSON.stringify(newLabel), '| children before:', childrenBefore.length, childrenBefore.map(c => c.label))
+
     if (!newLabel.trim()) {
       // If empty, revert to default or delete the node
       const node = nodes.find(n => n.id === nodeId)
