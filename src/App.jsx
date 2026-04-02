@@ -21865,9 +21865,37 @@ function App() {
     }, 0)
     const newId = Math.max(nextId.current, maxExistingId + 1)
 
-    const maxOrder = nodes
-      .filter(n => n.parentId === referenceNode.parentId && n.isCustom && n.order !== undefined)
-      .reduce((max, n) => Math.max(max, n.order), -1)
+    // Sort all siblings as the layout does, find reference position, insert right after it
+    const allSiblings = nodes.filter(n => n.parentId === referenceNode.parentId && !n.hidden)
+    const parentNode = nodes.find(n => n.id === referenceNode.parentId)
+    const parentLabel = parentNode?.label
+    const sortedSiblings = [...allSiblings].sort((a, b) => {
+      if (a.order !== undefined || b.order !== undefined) {
+        const aOrder = a.order !== undefined ? a.order : Infinity
+        const bOrder = b.order !== undefined ? b.order : Infinity
+        if (aOrder !== bOrder) return aOrder - bOrder
+      }
+      if (parentLabel && topicSubdivisions[parentLabel] && ORDERED_CHILDREN_PARENTS.has(parentLabel)) {
+        const definedOrder = topicSubdivisions[parentLabel]
+        const indexA = definedOrder.indexOf(a.label)
+        const indexB = definedOrder.indexOf(b.label)
+        if (indexA !== -1 && indexB !== -1) return indexA - indexB
+        if (indexA !== -1) return -1
+        if (indexB !== -1) return 1
+      }
+      return a.label.localeCompare(b.label)
+    })
+    const refIdx = sortedSiblings.findIndex(n => n.id === referenceNodeId)
+    const insertIdx = refIdx >= 0 ? refIdx + 1 : sortedSiblings.length
+
+    // Normalize orders of editable siblings, shifting those at insertIdx and beyond
+    const ordersToUpdate = new Map()
+    sortedSiblings.forEach((sib, i) => {
+      if (sib.isCustom || isAdmin) {
+        const newOrder = i < insertIdx ? i : i + 1
+        ordersToUpdate.set(sib.id, newOrder)
+      }
+    })
 
     const newNode = {
       id: newId,
@@ -21877,17 +21905,23 @@ function App() {
       isPersonal: isInPersonalSubtree(referenceNode.parentId),
       hidden: false,
       summary: '',
-      order: maxOrder + 1,
+      order: insertIdx,
     }
 
     nextId.current = newId + 1
 
     if (enableAnimations) {
       setAnimatingIds(new Set([newId]))
-      setNodes((prev) => [...prev, newNode])
+      setNodes((prev) => [
+        ...prev.map(n => ordersToUpdate.has(n.id) ? { ...n, order: ordersToUpdate.get(n.id) } : n),
+        newNode,
+      ])
       requestAnimationFrame(() => setAnimatingIds(new Set()))
     } else {
-      setNodes((prev) => [...prev, newNode])
+      setNodes((prev) => [
+        ...prev.map(n => ordersToUpdate.has(n.id) ? { ...n, order: ordersToUpdate.get(n.id) } : n),
+        newNode,
+      ])
     }
 
     // Focus the new node and enter edit mode
