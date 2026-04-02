@@ -24274,7 +24274,13 @@ function App() {
               return false
             }
             if (isDescendant(targetId, draggedId)) return prev
-            return prev.map(n => n.id === draggedId ? { ...n, parentId: targetId } : n)
+            // If the target's existing children are all hidden (collapsed), hide the
+            // dropped node too so it joins the group — one dots-click reveals all together.
+            const targetHasHiddenKids = prev.some(x => x.parentId === targetId && x.hidden)
+            const targetHasVisibleKids = prev.some(x => x.parentId === targetId && !x.hidden && x.id !== draggedId)
+            const shouldHide = targetHasHiddenKids && !targetHasVisibleKids
+            // Mark as isCustom so addChildren filter never deletes it when expanding new parent
+            return prev.map(n => n.id === draggedId ? { ...n, parentId: targetId, isCustom: true, hidden: shouldHide } : n)
           })
         }
       }
