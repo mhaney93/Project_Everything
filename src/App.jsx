@@ -23187,6 +23187,9 @@ function App() {
         event.target.tagName === 'INPUT' ||
         event.target.tagName === 'TEXTAREA' ||
         event.target.isContentEditable
+      if (event.key === 'Tab') {
+        console.log('[Tab debug] target:', event.target.tagName, event.target.className, '| isTyping:', isTyping, '| selectedId:', selectedId, '| focusedElement:', focusedElement)
+      }
       if (isTyping) return
 
       if (event.key === 'Escape' && midPanAnchor) {
