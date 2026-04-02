@@ -1390,6 +1390,13 @@ function App() {
   const maxPanYRef = useRef(2000)
   const didDragRef = useRef(false)
   const suppressClickRef = useRef(false)
+  const nodeDragRef = useRef(null)
+  const nodeDragOverRef = useRef(null)
+  const suppressNodeClickRef = useRef(false)
+  const [nodeDragActive, setNodeDragActive] = useState(false)
+  const [nodeDragId, setNodeDragId] = useState(null)
+  const [ghostPos, setGhostPos] = useState({ x: 0, y: 0 })
+  const [nodeDragOver, setNodeDragOver] = useState(null)
   const noteInputRefs = useRef({})
   const deleteCancelButtonRef = useRef(null)
   const deleteConfirmButtonRef = useRef(null)
@@ -11595,6 +11602,11 @@ function App() {
   const isAuthenticated = Boolean(currentUser)
   const isAdmin = currentUser?.email === 'matthew.haney1993@gmail.com' || currentUser?.email === 'preveil.llc@gmail.com'
   const canEditNode = (node) => isAuthenticated && (node?.isCustom || isAdmin)
+  const canDragNodeToReparent = (node) => {
+    if (!currentUser) return false
+    if (isAdmin) return true
+    return Boolean(node?.isCustom)
+  }
 
   // For verse nodes keyed as "Book chapter:verse", display only the verse number
   const getDisplayLabel = (label) => {
@@ -21770,6 +21782,27 @@ function App() {
     return false
   }
 
+  const reparentNode = (draggedNodeId, targetNodeId) => {
+    if (draggedNodeId === targetNodeId) return
+    const isDescendant = (nodeId, ancestorId) => {
+      let cur = nodeId
+      const visited = new Set()
+      while (cur !== null && cur !== undefined) {
+        if (visited.has(cur)) break
+        visited.add(cur)
+        const n = nodesRef.current.find(x => x.id === cur)
+        if (!n) break
+        if (n.parentId === ancestorId) return true
+        cur = n.parentId
+      }
+      return false
+    }
+    if (isDescendant(targetNodeId, draggedNodeId)) return
+    setNodes(prev => prev.map(n =>
+      n.id === draggedNodeId ? { ...n, parentId: targetNodeId } : n
+    ))
+  }
+
   const addCustomChild = (parentNodeId) => {
     if (!isAuthenticated) {
       setSignInRequired('Sign in to add custom nodes to your private map.')
@@ -24120,6 +24153,64 @@ function App() {
     return () => { if (midPanRafRef.current) cancelAnimationFrame(midPanRafRef.current) }
   }, [midPanAnchor])
 
+  // Node drag-to-reparent global handlers
+  useEffect(() => {
+    const handleMouseMove = (e) => {
+      if (!nodeDragRef.current) return
+      if (!nodeDragRef.current.active) {
+        const dx = e.clientX - nodeDragRef.current.startX
+        const dy = e.clientY - nodeDragRef.current.startY
+        if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+          nodeDragRef.current.active = true
+          setNodeDragActive(true)
+          setNodeDragId(nodeDragRef.current.nodeId)
+        }
+      }
+      if (nodeDragRef.current.active) {
+        setGhostPos({ x: e.clientX, y: e.clientY })
+      }
+    }
+    const handleMouseUp = () => {
+      if (!nodeDragRef.current) return
+      const wasActive = nodeDragRef.current.active
+      const draggedId = nodeDragRef.current.nodeId
+      nodeDragRef.current = null
+      if (wasActive) {
+        suppressNodeClickRef.current = true
+        const targetId = nodeDragOverRef.current
+        if (targetId !== null && targetId !== draggedId) {
+          setNodes(prev => {
+            const isDescendant = (nodeId, ancestorId) => {
+              let cur = nodeId
+              const visited = new Set()
+              while (cur !== null && cur !== undefined) {
+                if (visited.has(cur)) break
+                visited.add(cur)
+                const n = prev.find(x => x.id === cur)
+                if (!n) break
+                if (n.parentId === ancestorId) return true
+                cur = n.parentId
+              }
+              return false
+            }
+            if (isDescendant(targetId, draggedId)) return prev
+            return prev.map(n => n.id === draggedId ? { ...n, parentId: targetId } : n)
+          })
+        }
+      }
+      nodeDragOverRef.current = null
+      setNodeDragActive(false)
+      setNodeDragId(null)
+      setNodeDragOver(null)
+    }
+    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mouseup', handleMouseUp)
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove)
+      window.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [])
+
   // Mouse drag handlers
   const handleMapMouseDown = (e) => {
     if (e.button === 1) {
@@ -24852,11 +24943,25 @@ function App() {
                           width: computedNodeWidth,
                           height: computedNodeHeight,
                           transform: animatingIds.has(node.id) ? 'scale(0.8)' : 'scale(1)',
-                          opacity: animatingIds.has(node.id) ? 0 : 1,
+                          opacity: nodeDragActive && nodeDragId === node.id ? 0.4 : animatingIds.has(node.id) ? 0 : 1,
                           transition: isDragging || !smoothPanning ? 'none' : undefined,
+                          outline: nodeDragActive && nodeDragOver === node.id && nodeDragId !== node.id ? '2px dashed #1d6fdc' : undefined,
+                          borderRadius: nodeDragActive && nodeDragOver === node.id && nodeDragId !== node.id ? '8px' : undefined,
                         }}
                         onMouseDown={(e) => {
                           if (e.button === 0) e.stopPropagation() // Only stop propagation for left-click
+                        }}
+                        onMouseEnter={() => {
+                          if (nodeDragActive && nodeDragId !== node.id) {
+                            nodeDragOverRef.current = node.id
+                            setNodeDragOver(node.id)
+                          }
+                        }}
+                        onMouseLeave={() => {
+                          if (nodeDragActive && nodeDragOverRef.current === node.id) {
+                            nodeDragOverRef.current = null
+                            setNodeDragOver(null)
+                          }
                         }}
                       >
                         {editingNodeId === node.id ? (
@@ -24907,11 +25012,22 @@ function App() {
                               ...(getDisplayLabel(node.label).includes('\n') ? { justifyContent: 'flex-start', paddingLeft: '0.8rem' } : {}),
                             }}
                             onMouseDown={(e) => {
-                              if (e.button === 0) e.stopPropagation()
+                              if (e.button === 0) {
+                                e.stopPropagation()
+                                if (canDragNodeToReparent(node)) {
+                                  nodeDragRef.current = { nodeId: node.id, startX: e.clientX, startY: e.clientY, label: node.label, active: false }
+                                  suppressNodeClickRef.current = false
+                                }
+                              }
                             }}
                             onClick={(e) => {
                               e.stopPropagation()
                               e.preventDefault()
+
+                              if (suppressNodeClickRef.current) {
+                                suppressNodeClickRef.current = false
+                                return
+                              }
 
                               if (createNodeMode === 'child') {
                                 addCustomChild(node.id)
@@ -25006,6 +25122,33 @@ function App() {
             </div>
           </div>
         </section>
+        {nodeDragActive && (
+          <div
+            style={{
+              position: 'fixed',
+              left: ghostPos.x + 14,
+              top: ghostPos.y + 14,
+              pointerEvents: 'none',
+              zIndex: 9999,
+              background: '#fff',
+              border: '2px solid #1d6fdc',
+              borderRadius: '6px',
+              padding: '4px 10px',
+              fontSize: '12px',
+              fontWeight: 500,
+              color: '#1d6fdc',
+              opacity: 0.9,
+              maxWidth: 220,
+              boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              userSelect: 'none',
+            }}
+          >
+            {nodeDragRef.current ? getDisplayLabel(nodeDragRef.current.label) : ''}
+          </div>
+        )}
         {selectedNode && panelOpen ? (
           <aside className={`side-panel${panelExpanded ? ' expanded' : ''}`}>
             <div className="panel-card">
