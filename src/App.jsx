@@ -1391,6 +1391,7 @@ function App() {
   const didDragRef = useRef(false)
   const suppressClickRef = useRef(false)
   const sidebarTitleInputRef = useRef(null)
+  const pendingSidebarTitleRef = useRef(null)
   const nodeDragRef = useRef(null)
   const nodeDragOverRef = useRef(null)
   const suppressNodeClickRef = useRef(false)
@@ -22176,10 +22177,11 @@ function App() {
   useEffect(() => {
     const nodeId = editingSidebarNodeIdRef.current
     if (nodeId === null) return
-    const el = sidebarTitleInputRef.current
-    if (el && el.value.trim()) {
-      updateNodeLabel(nodeId, el.value)
+    const value = pendingSidebarTitleRef.current ?? sidebarTitleInputRef.current?.value
+    if (value && value.trim()) {
+      updateNodeLabel(nodeId, value)
     }
+    pendingSidebarTitleRef.current = null
     setEditingSidebarNodeId(null)
   }, [panelOpen, selectedId]) // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -25291,19 +25293,23 @@ function App() {
                     defaultValue={selectedNode.label}
                     className="panel-title-input"
                     style={{ resize: 'none' }}
+                    onChange={(e) => { pendingSidebarTitleRef.current = e.target.value }}
                     onClick={(e) => e.stopPropagation()}
                     onMouseDown={(e) => e.stopPropagation()}
                     onKeyDown={(e) => {
                       if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault()
+                        pendingSidebarTitleRef.current = null
                         updateNodeLabel(selectedNode.id, e.target.value)
                         setEditingSidebarNodeId(null)
                       } else if (e.key === 'Escape') {
                         e.preventDefault()
+                        pendingSidebarTitleRef.current = null
                         setEditingSidebarNodeId(null)
                       }
                     }}
                     onBlur={(e) => {
+                      pendingSidebarTitleRef.current = null
                       updateNodeLabel(selectedNode.id, e.target.value)
                       setEditingSidebarNodeId(null)
                     }}
