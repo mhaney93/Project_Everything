@@ -23286,11 +23286,14 @@ function App() {
       }
 
       // Handle Delete key: delete custom node
-      if (event.key === 'Delete' && selectedId !== null && isAuthenticated) {
-        const selectedNode = nodes.find((n) => n.id === selectedId)
-        if (selectedNode && selectedNode.isCustom) {
-          event.preventDefault()
-          deleteCustomNode(selectedId)
+      if (event.key === 'Delete' && isAuthenticated) {
+        const targetNodeId = focusedElement?.nodeId ?? selectedId
+        if (targetNodeId !== null && targetNodeId !== undefined) {
+          const targetNode = nodes.find((n) => n.id === targetNodeId)
+          if (targetNode && (targetNode.isCustom || isAdmin)) {
+            event.preventDefault()
+            deleteCustomNode(targetNodeId)
+          }
         }
         return
       }
