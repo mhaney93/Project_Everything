@@ -106,7 +106,6 @@ async function addChildren({ existingPredefined, parentNodeId, parent, updatedNo
       label: labels[index],
       parentId: parentNodeId,
       hidden: false,
-      summary: generateSummary(labels[index]),
     }));
 
     nextId.current = startId + newNodes.length;
@@ -22129,16 +22128,10 @@ function App() {
     const isCustom = node?.isCustom
     const parentId = node?.parentId
 
-    // Preserve auto-generated summary if there's no manual one and the label is changing
-    const oldLabel = node?.label
-    const existingSummary = node?.summary
-    const labelIsChanging = oldLabel && oldLabel.trim() !== newLabel.trim()
-    const generatedSummary = (!existingSummary && labelIsChanging) ? generateSummary(oldLabel) : null
-
     setNodes((prev) => {
       // Update the label
       const updated = prev.map((n) =>
-        n.id === nodeId ? { ...n, label: newLabel.trim(), ...(generatedSummary ? { summary: generatedSummary } : {}) } : n
+        n.id === nodeId ? { ...n, label: newLabel.trim() } : n
       )
 
       // If it's a custom node, reorder it alphabetically among siblings
@@ -22287,7 +22280,6 @@ function App() {
             label: labels[index],
             parentId: parentNodeId,
             hidden: false,
-            summary: generateSummary(labels[index]),
           }));
 
           nextId.current = startId + newNodes.length;
@@ -25350,7 +25342,7 @@ function App() {
                     <div>
                       <textarea
                         className="summary-textarea"
-                        value={selectedNode.summary || generateSummary(selectedNode.label) || ''}
+                        value={selectedNode.summary || ''}
                         onChange={(e) => updateNodeSummary(selectedNode.id, e.target.value)}
                         onBlur={(e) => updateNodeSummary(selectedNode.id, e.target.value, true)}
                         onKeyDown={(e) => {
@@ -25378,7 +25370,7 @@ function App() {
                       onClick={() => setEditingSummaryId(selectedNode.id)}
                       title="Click to edit summary"
                     >
-                      {selectedNode.summary || generateSummary(selectedNode.label) || 'Click to add a summary...'}
+                      {selectedNode.summary || 'Click to add a summary...'}
                     </p>
                   )}
                 </div>
@@ -25387,9 +25379,9 @@ function App() {
                   <p className="panel-summary">{selectedNode.summary}</p>
                 ) : null
               ) : (
-                generateSummary(selectedNode.label) && (
-                  <p className="panel-summary">{generateSummary(selectedNode.label)}</p>
-                )
+                selectedNode.summary ? (
+                  <p className="panel-summary">{selectedNode.summary}</p>
+                ) : null
               )}
               <div className="panel-notes">
                 <div className="panel-notes-header">
