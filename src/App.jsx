@@ -1390,6 +1390,7 @@ function App() {
   const maxPanYRef = useRef(2000)
   const didDragRef = useRef(false)
   const suppressClickRef = useRef(false)
+  const sidebarTitleInputRef = useRef(null)
   const nodeDragRef = useRef(null)
   const nodeDragOverRef = useRef(null)
   const suppressNodeClickRef = useRef(false)
@@ -22162,6 +22163,20 @@ function App() {
     }
   }
 
+  // Save sidebar title edit whenever the panel closes or selection changes,
+  // as a safety net for browsers/cases where onBlur doesn't fire reliably.
+  const editingSidebarNodeIdRef = useRef(editingSidebarNodeId)
+  editingSidebarNodeIdRef.current = editingSidebarNodeId
+  useEffect(() => {
+    const nodeId = editingSidebarNodeIdRef.current
+    if (nodeId === null) return
+    const el = sidebarTitleInputRef.current
+    if (el && el.value.trim()) {
+      updateNodeLabel(nodeId, el.value)
+    }
+    setEditingSidebarNodeId(null)
+  }, [panelOpen, selectedId]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const addChildren = async (parentNodeId) => {
     const parent = nodes.find((node) => node.id === parentNodeId)
     if (!parent) return { expanded: false }
@@ -25258,6 +25273,7 @@ function App() {
                   <textarea
                     key={`editing-${selectedNode.id}`}
                     ref={(el) => {
+                      sidebarTitleInputRef.current = el
                       if (el) {
                         el.focus()
                         el.select()
