@@ -1393,8 +1393,13 @@ function App() {
   const nodeDragRef = useRef(null)
   const nodeDragOverRef = useRef(null)
   const suppressNodeClickRef = useRef(false)
+  const ghostPosRef = useRef({ x: 0, y: 0 })
+  const clampPanOffsetRef = useRef(null)
+  const nodeDragDescendantsRef = useRef(new Set())
+  const nodeDragScrollRafRef = useRef(null)
   const [nodeDragActive, setNodeDragActive] = useState(false)
   const [nodeDragId, setNodeDragId] = useState(null)
+  const [nodeDragLabel, setNodeDragLabel] = useState('')
   const [ghostPos, setGhostPos] = useState({ x: 0, y: 0 })
   const [nodeDragOver, setNodeDragOver] = useState(null)
   const noteInputRefs = useRef({})
@@ -24165,6 +24170,8 @@ function App() {
       };
     };
 
+  clampPanOffsetRef.current = clampPanOffset
+
   // Middle-click autoscroll RAF loop
   useEffect(() => {
     if (!midPanAnchor) {
@@ -24199,11 +24206,43 @@ function App() {
         const dy = e.clientY - nodeDragRef.current.startY
         if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
           nodeDragRef.current.active = true
+          // Compute descendants so they can be made non-interactive during drag
+          const descendants = new Set()
+          const computeDescendants = (id) => {
+            nodesRef.current.forEach(n => {
+              if (n.parentId === id) { descendants.add(n.id); computeDescendants(n.id) }
+            })
+          }
+          computeDescendants(nodeDragRef.current.nodeId)
+          nodeDragDescendantsRef.current = descendants
           setNodeDragActive(true)
           setNodeDragId(nodeDragRef.current.nodeId)
+          setNodeDragLabel(nodeDragRef.current.label)
+          // Start edge-scroll RAF
+          const scrollTick = () => {
+            if (!nodeDragRef.current?.active) { nodeDragScrollRafRef.current = null; return }
+            const pos = ghostPosRef.current
+            const vw = window.innerWidth
+            const vh = window.innerHeight
+            const sidebarW = document.querySelector('.side-panel')?.offsetWidth || 0
+            const EDGE = 80
+            const MAX_SPEED = 10
+            const rightLimit = vw - sidebarW
+            let velX = 0, velY = 0
+            if (pos.x < EDGE) velX = -((EDGE - pos.x) / EDGE) * MAX_SPEED
+            else if (pos.x > rightLimit - EDGE) velX = ((pos.x - (rightLimit - EDGE)) / EDGE) * MAX_SPEED
+            if (pos.y < EDGE) velY = -((EDGE - pos.y) / EDGE) * MAX_SPEED
+            else if (pos.y > vh - EDGE) velY = ((pos.y - (vh - EDGE)) / EDGE) * MAX_SPEED
+            if ((velX !== 0 || velY !== 0) && clampPanOffsetRef.current) {
+              setBasePanOffset(prev => clampPanOffsetRef.current({ x: prev.x + velX, y: prev.y + velY }))
+            }
+            nodeDragScrollRafRef.current = requestAnimationFrame(scrollTick)
+          }
+          nodeDragScrollRafRef.current = requestAnimationFrame(scrollTick)
         }
       }
       if (nodeDragRef.current.active) {
+        ghostPosRef.current = { x: e.clientX, y: e.clientY }
         setGhostPos({ x: e.clientX, y: e.clientY })
       }
     }
@@ -24212,6 +24251,10 @@ function App() {
       const wasActive = nodeDragRef.current.active
       const draggedId = nodeDragRef.current.nodeId
       nodeDragRef.current = null
+      if (nodeDragScrollRafRef.current) {
+        cancelAnimationFrame(nodeDragScrollRafRef.current)
+        nodeDragScrollRafRef.current = null
+      }
       if (wasActive) {
         suppressNodeClickRef.current = true
         const targetId = nodeDragOverRef.current
@@ -24236,6 +24279,7 @@ function App() {
         }
       }
       nodeDragOverRef.current = null
+      nodeDragDescendantsRef.current = new Set()
       setNodeDragActive(false)
       setNodeDragId(null)
       setNodeDragOver(null)
@@ -24984,12 +25028,13 @@ function App() {
                           transition: isDragging || !smoothPanning ? 'none' : undefined,
                           outline: nodeDragActive && nodeDragOver === node.id && nodeDragId !== node.id ? '2px dashed #1d6fdc' : undefined,
                           borderRadius: nodeDragActive && nodeDragOver === node.id && nodeDragId !== node.id ? '8px' : undefined,
+                          pointerEvents: nodeDragActive && (nodeDragId === node.id || nodeDragDescendantsRef.current.has(node.id)) ? 'none' : undefined,
                         }}
                         onMouseDown={(e) => {
                           if (e.button === 0) e.stopPropagation() // Only stop propagation for left-click
                         }}
                         onMouseEnter={() => {
-                          if (nodeDragActive && nodeDragId !== node.id) {
+                          if (nodeDragActive && nodeDragId !== node.id && !nodeDragDescendantsRef.current.has(node.id)) {
                             nodeDragOverRef.current = node.id
                             setNodeDragOver(node.id)
                           }
@@ -25183,7 +25228,7 @@ function App() {
               userSelect: 'none',
             }}
           >
-            {nodeDragRef.current ? getDisplayLabel(nodeDragRef.current.label) : ''}
+            {getDisplayLabel(nodeDragLabel)}
           </div>
         )}
         {selectedNode && panelOpen ? (
