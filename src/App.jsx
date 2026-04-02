@@ -22124,10 +22124,16 @@ function App() {
     const isCustom = node?.isCustom
     const parentId = node?.parentId
 
+    // Preserve auto-generated summary if there's no manual one and the label is changing
+    const oldLabel = node?.label
+    const existingSummary = node?.summary
+    const labelIsChanging = oldLabel && oldLabel.trim() !== newLabel.trim()
+    const generatedSummary = (!existingSummary && labelIsChanging) ? generateSummary(oldLabel) : null
+
     setNodes((prev) => {
       // Update the label
       const updated = prev.map((n) =>
-        n.id === nodeId ? { ...n, label: newLabel.trim() } : n
+        n.id === nodeId ? { ...n, label: newLabel.trim(), ...(generatedSummary ? { summary: generatedSummary } : {}) } : n
       )
 
       // If it's a custom node, reorder it alphabetically among siblings
