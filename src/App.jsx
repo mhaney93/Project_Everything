@@ -2672,7 +2672,7 @@ function App() {
     'Indian and Pakistani Independence (1947)': [],
     'Industrial Age (1945 - 1980)': [],
     // Cold War Era
-    'Cold War Era (1947 - 1991)': ['USSR during the Cold War (1947 - 1991)', 'America during the Cold War Era (1947 - 1991)', 'Israel during the Cold War Era (1948 - 1991)', 'Arms Race (1947 - 1991)', 'China during the Cold War Era (1947 - 1991)', 'NATO (1949)', 'Two Germanys (1949 - 1990)', 'Korean War (1950 - 1953)', 'Warsaw Pact (1955)', 'Space Race (1957 - 1975)', 'Vietnam War (1955 - 1975)', 'Cuban Revolution (1959)', 'Bay of Pigs Invasion (1961)', 'Operation Mongoose (1961 - 1962)', 'Cuban Missile Crisis (1962)', 'Nuclear Non-Proliferation Treaty (1968)', 'Church Committee (1975 - 1976)', 'INF Treaty (1987)'],
+    'Cold War Era (1947 - 1991)': ['USSR during the Cold War (1947 - 1991)', 'America during the Cold War Era (1947 - 1991)', 'Israel during the Cold War Era (1948 - 1991)', 'Arms Race (1947 - 1991)', 'China during the Cold War Era (1947 - 1991)', 'NATO (1949)', 'Two Germanys (1949 - 1990)', 'Korean War (1950 - 1953)', 'Warsaw Pact (1955)', 'Vietnam War (1955 - 1975)', 'Cuban Revolution (1959)', 'Bay of Pigs Invasion (1961)', 'Operation Mongoose (1961 - 1962)', 'Cuban Missile Crisis (1962)', 'Church Committee (1975 - 1976)'],
     'USSR during the Cold War (1947 - 1991)': ['Joe-1 Atomic Bomb Test (1949)', 'Death of Joseph Stalin (1953)', "Khrushchev's Secret Speech (1956)", 'Mikhail Gorbachev Becomes General Secretary (1985)', 'Chernobyl Nuclear Disaster (1986)', 'Dissolution of the USSR (1991)'],
     'Joe-1 Atomic Bomb Test (1949)': [],
     'Death of Joseph Stalin (1953)': [],
@@ -2707,7 +2707,7 @@ function App() {
     "James Angleton's Testimony": [],
     'Israel during the Cold War Era (1948 - 1991)': ['Dimona Nuclear Reactor (1958 - 1964)'],
     'Dimona Nuclear Reactor (1958 - 1964)': [],
-    'Arms Race (1947 - 1991)': [],
+    'Arms Race (1947 - 1991)': ['Space Race (1957 - 1975)', 'Nuclear Non-Proliferation Treaty (1968)', 'INF Treaty (1987)'],
     'China during the Cold War Era (1947 - 1991)': ['Great Leap Forward (1958)'],
     'Great Leap Forward (1958)': [],
     'NATO (1949)': [],
