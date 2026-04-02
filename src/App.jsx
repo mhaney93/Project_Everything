@@ -24259,6 +24259,7 @@ function App() {
         suppressNodeClickRef.current = true
         const targetId = nodeDragOverRef.current
         if (targetId !== null && targetId !== draggedId) {
+          lastFocusedIdRef.current = targetId  // keep camera near drop target, not root
           setNodes(prev => {
             const isDescendant = (nodeId, ancestorId) => {
               let cur = nodeId
