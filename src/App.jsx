@@ -22071,21 +22071,18 @@ function App() {
       setFocusedElement(parentId ? { nodeId: parentId, type: 'node' } : null)
     }
 
-    // Suppress auto-save and offer undo for 5 seconds
+    // Save immediately, then offer undo toast for 5 seconds
+    const nodesAfterDelete = nodes.filter((node) => !nodeIdsToRemove.has(node.id))
     suppressSaveUntil.current = Date.now() + 6000
     setUndoSnapshot({ nodes: removedNodes, label: deletedLabel })
     setNotification(null)
+    mapsAPI.saveMap(nodesAfterDelete).catch(e => console.error('Failed to save after delete:', e))
 
     if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
-    undoTimerRef.current = setTimeout(async () => {
+    undoTimerRef.current = setTimeout(() => {
       suppressSaveUntil.current = 0
       setUndoSnapshot(null)
       setNotification(null)
-      try {
-        await mapsAPI.saveMap(nodesRef.current)
-      } catch (e) {
-        console.error('Failed to save after delete:', e)
-      }
     }, 5000)
 
     setDeleteModalChoice('cancel')
@@ -22097,7 +22094,9 @@ function App() {
     if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
     undoTimerRef.current = null
     suppressSaveUntil.current = 0
-    setNodes((prev) => [...prev, ...undoSnapshot.nodes])
+    const restoredNodes = [...nodesRef.current, ...undoSnapshot.nodes]
+    setNodes(restoredNodes)
+    mapsAPI.saveMap(restoredNodes).catch(e => console.error('Failed to save after undo:', e))
     setUndoSnapshot(null)
     setNotification(null)
   }
