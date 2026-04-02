@@ -21882,8 +21882,8 @@ function App() {
         const bOrder = b.order !== undefined ? b.order : Infinity
         if (aOrder !== bOrder) return aOrder - bOrder
       }
-      if (parentLabel && topicSubdivisions[parentLabel] && ORDERED_CHILDREN_PARENTS.has(parentLabel)) {
-        const definedOrder = topicSubdivisions[parentLabel]
+      if (parentLabel && TOPIC_SUBDIVISIONS[parentLabel] && ORDERED_CHILDREN_PARENTS.has(parentLabel)) {
+        const definedOrder = TOPIC_SUBDIVISIONS[parentLabel]
         const indexA = definedOrder.indexOf(a.label)
         const indexB = definedOrder.indexOf(b.label)
         if (indexA !== -1 && indexB !== -1) return indexA - indexB
