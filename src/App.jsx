@@ -22293,6 +22293,9 @@ function App() {
           // Filter out labels the user explicitly removed (deleted or reparented)
           const excluded = new Set(parent.excludedChildLabels || [])
           labels = labels.filter(label => !excluded.has(label))
+          // Filter out labels already present as custom children (moved here by drag-drop)
+          // to prevent creating a predefined duplicate alongside the custom node.
+          labels = labels.filter(label => !updatedNodes.some(n => n.parentId === parentNodeId && n.isCustom && n.label === label))
 
           const maxExistingId = updatedNodes.reduce((maxId, node) => {
             if (!node || !Number.isFinite(node.id)) return maxId;
@@ -24343,13 +24346,17 @@ function App() {
               : prev
             // Mark as isCustom so addChildren filter never deletes it when expanding new parent.
             // Also tell the original parent to exclude this label so addChildren won't recreate it.
-            return withoutDupe.map(n => {
+            const newNodes = withoutDupe.map(n => {
               if (n.id === draggedId) return { ...n, parentId: targetId, isCustom: true, hidden: shouldHide }
               if (n.id === originalParentId && draggedNode && !draggedNode.isCustom && draggedLabel) {
                 return { ...n, excludedChildLabels: [...(n.excludedChildLabels || []), draggedLabel] }
               }
               return n
             })
+            // Save immediately so excludedChildLabels survives a refresh without
+            // waiting for the 2-second auto-save debounce.
+            mapsAPI.saveMap(newNodes).catch(e => console.error('Failed to save after reparent:', e))
+            return newNodes
           })
         }
       }
