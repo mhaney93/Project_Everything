@@ -23427,7 +23427,7 @@ function App() {
         
         // Special handling for Down/Up when navigating to/from dots
         if (event.key === 'ArrowDown') {
-          if (startType === 'node' && hasKnownSubdivisions(currentNode.label)) {
+          if (startType === 'node' && hasKnownSubdivisions(currentNode.label) && (TOPIC_SUBDIVISIONS[currentNode.label] || []).some(l => !(currentNode.excludedChildLabels || []).includes(l))) {
             // Move from node to its dots
             setFocusedElement({ nodeId: startNodeId, type: 'dots' })
             return
@@ -25217,7 +25217,7 @@ function App() {
                             <span style={{ fontSize: getNodeFontSize(getDisplayLabel(node.label)), ...(getDisplayLabel(node.label).includes('\n') ? { textAlign: 'left', fontFamily: 'monospace' } : {}) }}>{getDisplayLabel(node.label)}</span>
                           </button>
                         )}
-                        {(hasKnownSubdivisions(node.label) || nodes.some((n) => n.parentId === node.id)) ? (
+                        {((hasKnownSubdivisions(node.label) && (TOPIC_SUBDIVISIONS[node.label] || []).some(l => !(node.excludedChildLabels || []).includes(l))) || nodes.some((n) => n.parentId === node.id)) ? (
                         <span
                           className="node-dots"
                           role="button"
