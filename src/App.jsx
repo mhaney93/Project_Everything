@@ -1400,9 +1400,12 @@ function App() {
   const nodeDragScrollRafRef = useRef(null)
   const [nodeDragActive, setNodeDragActive] = useState(false)
   const [nodeDragId, setNodeDragId] = useState(null)
+  const [nodeDragIds, setNodeDragIds] = useState(new Set())
+  const nodeDragIdsRef = useRef(new Set())
   const [nodeDragLabel, setNodeDragLabel] = useState('')
   const [ghostPos, setGhostPos] = useState({ x: 0, y: 0 })
   const [nodeDragOver, setNodeDragOver] = useState(null)
+  const [multiSelectedIds, setMultiSelectedIds] = useState(new Set())
   const noteInputRefs = useRef({})
   const deleteCancelButtonRef = useRef(null)
   const deleteConfirmButtonRef = useRef(null)
@@ -24257,17 +24260,20 @@ function App() {
         const dy = e.clientY - nodeDragRef.current.startY
         if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
           nodeDragRef.current.active = true
-          // Compute descendants so they can be made non-interactive during drag
+          // Compute descendants for all dragged nodes so they are non-interactive during drag
+          const allDragIds = nodeDragRef.current.dragIds
           const descendants = new Set()
           const computeDescendants = (id) => {
             nodesRef.current.forEach(n => {
               if (n.parentId === id) { descendants.add(n.id); computeDescendants(n.id) }
             })
           }
-          computeDescendants(nodeDragRef.current.nodeId)
+          allDragIds.forEach(id => computeDescendants(id))
           nodeDragDescendantsRef.current = descendants
+          nodeDragIdsRef.current = new Set(allDragIds)
           setNodeDragActive(true)
           setNodeDragId(nodeDragRef.current.nodeId)
+          setNodeDragIds(new Set(allDragIds))
           setNodeDragLabel(nodeDragRef.current.label)
           // Start edge-scroll RAF
           const scrollTick = () => {
@@ -24301,6 +24307,7 @@ function App() {
       if (!nodeDragRef.current) return
       const wasActive = nodeDragRef.current.active
       const draggedId = nodeDragRef.current.nodeId
+      const allDragIds = nodeDragRef.current.dragIds || new Set([draggedId])
       nodeDragRef.current = null
       if (nodeDragScrollRafRef.current) {
         cancelAnimationFrame(nodeDragScrollRafRef.current)
@@ -24309,7 +24316,7 @@ function App() {
       if (wasActive) {
         suppressNodeClickRef.current = true
         const targetId = nodeDragOverRef.current
-        if (targetId !== null && targetId !== draggedId) {
+        if (targetId !== null && !allDragIds.has(targetId)) {
           lastFocusedIdRef.current = targetId
           setBasePanOffset({ x: 0, y: 0 })
           setDragOffset({ x: 0, y: 0 })
@@ -24329,41 +24336,46 @@ function App() {
               }
               return false
             }
-            if (isDescendant(targetId, draggedId)) return prev
+            // Abort if target is a descendant of any dragged node
+            for (const dId of allDragIds) {
+              if (isDescendant(targetId, dId)) return prev
+            }
             // If the target's existing children are all hidden (collapsed), hide the
-            // dropped node too so it joins the group — one dots-click reveals all together.
+            // dropped nodes too so they join the group.
             const targetHasHiddenKids = prev.some(x => x.parentId === targetId && x.hidden)
-            const targetHasVisibleKids = prev.some(x => x.parentId === targetId && !x.hidden && x.id !== draggedId)
+            const targetHasVisibleKids = prev.some(x => x.parentId === targetId && !x.hidden && !allDragIds.has(x.id))
             const shouldHide = targetHasHiddenKids && !targetHasVisibleKids
-            // Remove any non-custom node already under the target with the same label —
-            // this happens when addChildren created the same label under both grandparent
-            // and parent, producing a visual duplicate after reparenting.
-            const draggedNode = prev.find(n => n.id === draggedId)
-            const draggedLabel = draggedNode?.label
-            const originalParentId = draggedNode?.parentId
-            const withoutDupe = draggedLabel
-              ? prev.filter(n => !(n.parentId === targetId && !n.isCustom && n.label === draggedLabel && n.id !== draggedId))
-              : prev
-            // Mark as isCustom so addChildren filter never deletes it when expanding new parent.
-            // Also tell the original parent to exclude this label so addChildren won't recreate it.
-            const newNodes = withoutDupe.map(n => {
-              if (n.id === draggedId) return { ...n, parentId: targetId, isCustom: true, hidden: shouldHide }
-              if (n.id === originalParentId && draggedNode && !draggedNode.isCustom && draggedLabel) {
-                return { ...n, excludedChildLabels: [...(n.excludedChildLabels || []), draggedLabel] }
-              }
-              return n
-            })
-            // Save immediately so excludedChildLabels survives a refresh without
-            // waiting for the 2-second auto-save debounce.
-            mapsAPI.saveMap(newNodes).catch(e => console.error('Failed to save after reparent:', e))
-            return newNodes
+            // Reparent each dragged node in turn
+            let result = prev
+            for (const dId of allDragIds) {
+              const draggedNode = result.find(n => n.id === dId)
+              if (!draggedNode) continue
+              const draggedLabel = draggedNode.label
+              const originalParentId = draggedNode.parentId
+              // Remove non-custom duplicate at target
+              result = draggedLabel
+                ? result.filter(n => !(n.parentId === targetId && !n.isCustom && n.label === draggedLabel && n.id !== dId))
+                : result
+              result = result.map(n => {
+                if (n.id === dId) return { ...n, parentId: targetId, isCustom: true, hidden: shouldHide }
+                if (n.id === originalParentId && !draggedNode.isCustom && draggedLabel) {
+                  return { ...n, excludedChildLabels: [...(n.excludedChildLabels || []), draggedLabel] }
+                }
+                return n
+              })
+            }
+            mapsAPI.saveMap(result).catch(e => console.error('Failed to save after reparent:', e))
+            return result
           })
+          setMultiSelectedIds(new Set())
         }
       }
       nodeDragOverRef.current = null
       nodeDragDescendantsRef.current = new Set()
+      nodeDragIdsRef.current = new Set()
       setNodeDragActive(false)
       setNodeDragId(null)
+      setNodeDragIds(new Set())
       setNodeDragOver(null)
     }
     window.addEventListener('mousemove', handleMouseMove)
@@ -24437,6 +24449,7 @@ function App() {
       setSelectedId(null)
       setPanelOpen(false)
       setPanelExpanded(false)
+      setMultiSelectedIds(new Set())
     }
   }
   const handleMapMouseLeave = () => {
@@ -25106,17 +25119,17 @@ function App() {
                           width: computedNodeWidth,
                           height: computedNodeHeight,
                           transform: animatingIds.has(node.id) ? 'scale(0.8)' : 'scale(1)',
-                          opacity: nodeDragActive && nodeDragId === node.id ? 0.4 : animatingIds.has(node.id) ? 0 : 1,
+                          opacity: nodeDragActive && (nodeDragId === node.id || nodeDragIds.has(node.id)) ? 0.4 : animatingIds.has(node.id) ? 0 : 1,
                           transition: isDragging || !smoothPanning ? 'none' : undefined,
-                          outline: nodeDragActive && nodeDragOver === node.id && nodeDragId !== node.id ? '2px dashed #1d6fdc' : undefined,
-                          borderRadius: nodeDragActive && nodeDragOver === node.id && nodeDragId !== node.id ? '8px' : undefined,
-                          pointerEvents: nodeDragActive && (nodeDragId === node.id || nodeDragDescendantsRef.current.has(node.id)) ? 'none' : undefined,
+                          outline: nodeDragActive && nodeDragOver === node.id && !nodeDragIds.has(node.id) ? '2px dashed #1d6fdc' : undefined,
+                          borderRadius: nodeDragActive && nodeDragOver === node.id && !nodeDragIds.has(node.id) ? '8px' : undefined,
+                          pointerEvents: nodeDragActive && (nodeDragIds.has(node.id) || nodeDragDescendantsRef.current.has(node.id)) ? 'none' : undefined,
                         }}
                         onMouseDown={(e) => {
                           if (e.button === 0) e.stopPropagation() // Only stop propagation for left-click
                         }}
                         onMouseEnter={() => {
-                          if (nodeDragActive && nodeDragId !== node.id && !nodeDragDescendantsRef.current.has(node.id)) {
+                          if (nodeDragActive && !nodeDragIds.has(node.id) && !nodeDragDescendantsRef.current.has(node.id)) {
                             nodeDragOverRef.current = node.id
                             setNodeDragOver(node.id)
                           }
@@ -25171,15 +25184,18 @@ function App() {
                               width: computedNodeWidth,
                               height: computedNodeHeight,
                               color: selectedId === node.id && panelOpen ? '#1d6fdc' : 'inherit',
-                              backgroundColor: focusedElement?.nodeId === node.id && focusedElement?.type === 'node' ? 'rgba(29, 111, 220, 0.1)' : '#ffffff',
-                              outline: focusedElement?.nodeId === node.id && focusedElement?.type === 'node' ? '2px solid #1d6fdc' : 'none',
+                              backgroundColor: multiSelectedIds.has(node.id) ? 'rgba(245, 158, 11, 0.12)' : focusedElement?.nodeId === node.id && focusedElement?.type === 'node' ? 'rgba(29, 111, 220, 0.1)' : '#ffffff',
+                              outline: multiSelectedIds.has(node.id) ? '2px solid #f59e0b' : focusedElement?.nodeId === node.id && focusedElement?.type === 'node' ? '2px solid #1d6fdc' : 'none',
                               ...(getDisplayLabel(node.label).includes('\n') ? { justifyContent: 'flex-start', paddingLeft: '0.8rem' } : {}),
                             }}
                             onMouseDown={(e) => {
                               if (e.button === 0) {
                                 e.stopPropagation()
                                 if (canDragNodeToReparent(node)) {
-                                  nodeDragRef.current = { nodeId: node.id, startX: e.clientX, startY: e.clientY, label: node.label, active: false }
+                                  const dragIds = (multiSelectedIds.has(node.id) && multiSelectedIds.size > 1)
+                                    ? new Set(multiSelectedIds)
+                                    : new Set([node.id])
+                                  nodeDragRef.current = { nodeId: node.id, startX: e.clientX, startY: e.clientY, label: node.label, active: false, dragIds }
                                   suppressNodeClickRef.current = false
                                 }
                               }
@@ -25205,6 +25221,18 @@ function App() {
                                 setShowCreateNodeHint(false)
                                 return
                               }
+
+                              if (e.shiftKey) {
+                                setMultiSelectedIds(prev => {
+                                  const next = new Set(prev)
+                                  if (next.has(node.id)) next.delete(node.id)
+                                  else next.add(node.id)
+                                  return next
+                                })
+                                return
+                              }
+
+                              setMultiSelectedIds(new Set())
 
                               if (selectedId === node.id) {
                                 setFocusedElement(null)
@@ -25310,7 +25338,7 @@ function App() {
               userSelect: 'none',
             }}
           >
-            {getDisplayLabel(nodeDragLabel)}
+            {nodeDragIds.size > 1 ? `${nodeDragIds.size} nodes` : getDisplayLabel(nodeDragLabel)}
           </div>
         )}
         {selectedNode && panelOpen ? (
