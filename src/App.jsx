@@ -25353,7 +25353,7 @@ function App() {
                     <div>
                       <textarea
                         className="summary-textarea"
-                        value={selectedNode.summary || ''}
+                        value={selectedNode.summary || generateSummary(selectedNode.label) || ''}
                         onChange={(e) => updateNodeSummary(selectedNode.id, e.target.value)}
                         onBlur={(e) => updateNodeSummary(selectedNode.id, e.target.value, true)}
                         onKeyDown={(e) => {
