@@ -22060,7 +22060,16 @@ function App() {
     const deletedLabel = deletedNode?.label || 'Node'
     const parentId = deletedNode?.parentId ?? null
 
-    setNodes((prev) => prev.filter((node) => !nodeIdsToRemove.has(node.id)))
+    setNodes((prev) => prev
+      .filter((node) => !nodeIdsToRemove.has(node.id))
+      .map((node) => {
+        // Track this label as excluded on the parent so addChildren won't recreate it
+        if (node.id === parentId && deletedNode && !deletedNode.isCustom) {
+          return { ...node, excludedChildLabels: [...(node.excludedChildLabels || []), deletedNode.label] }
+        }
+        return node
+      })
+    )
 
     // Move selection/focus to parent of deleted node
     if (selectedId === nodeId) {
@@ -22269,6 +22278,10 @@ function App() {
           } else {
             labels = await getChildSuggestions(parent.label);
           }
+
+          // Filter out labels the user explicitly removed (deleted or reparented)
+          const excluded = new Set(parent.excludedChildLabels || [])
+          labels = labels.filter(label => !excluded.has(label))
 
           const maxExistingId = updatedNodes.reduce((maxId, node) => {
             if (!node || !Number.isFinite(node.id)) return maxId;
@@ -24311,12 +24324,21 @@ function App() {
             // Remove any non-custom node already under the target with the same label —
             // this happens when addChildren created the same label under both grandparent
             // and parent, producing a visual duplicate after reparenting.
-            const draggedLabel = prev.find(n => n.id === draggedId)?.label
+            const draggedNode = prev.find(n => n.id === draggedId)
+            const draggedLabel = draggedNode?.label
+            const originalParentId = draggedNode?.parentId
             const withoutDupe = draggedLabel
               ? prev.filter(n => !(n.parentId === targetId && !n.isCustom && n.label === draggedLabel && n.id !== draggedId))
               : prev
-            // Mark as isCustom so addChildren filter never deletes it when expanding new parent
-            return withoutDupe.map(n => n.id === draggedId ? { ...n, parentId: targetId, isCustom: true, hidden: shouldHide } : n)
+            // Mark as isCustom so addChildren filter never deletes it when expanding new parent.
+            // Also tell the original parent to exclude this label so addChildren won't recreate it.
+            return withoutDupe.map(n => {
+              if (n.id === draggedId) return { ...n, parentId: targetId, isCustom: true, hidden: shouldHide }
+              if (n.id === originalParentId && draggedNode && !draggedNode.isCustom && draggedLabel) {
+                return { ...n, excludedChildLabels: [...(n.excludedChildLabels || []), draggedLabel] }
+              }
+              return n
+            })
           })
         }
       }
