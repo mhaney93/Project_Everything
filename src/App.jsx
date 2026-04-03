@@ -24281,6 +24281,8 @@ function App() {
         const targetId = nodeDragOverRef.current
         if (targetId !== null && targetId !== draggedId) {
           lastFocusedIdRef.current = targetId
+          setBasePanOffset({ x: 0, y: 0 })
+          setDragOffset({ x: 0, y: 0 })
           setForceRecenter(true)
           setTimeout(() => setForceRecenter(false), 100)
           setNodes(prev => {
@@ -24303,8 +24305,15 @@ function App() {
             const targetHasHiddenKids = prev.some(x => x.parentId === targetId && x.hidden)
             const targetHasVisibleKids = prev.some(x => x.parentId === targetId && !x.hidden && x.id !== draggedId)
             const shouldHide = targetHasHiddenKids && !targetHasVisibleKids
+            // Remove any non-custom node already under the target with the same label —
+            // this happens when addChildren created the same label under both grandparent
+            // and parent, producing a visual duplicate after reparenting.
+            const draggedLabel = prev.find(n => n.id === draggedId)?.label
+            const withoutDupe = draggedLabel
+              ? prev.filter(n => !(n.parentId === targetId && !n.isCustom && n.label === draggedLabel && n.id !== draggedId))
+              : prev
             // Mark as isCustom so addChildren filter never deletes it when expanding new parent
-            return prev.map(n => n.id === draggedId ? { ...n, parentId: targetId, isCustom: true, hidden: shouldHide } : n)
+            return withoutDupe.map(n => n.id === draggedId ? { ...n, parentId: targetId, isCustom: true, hidden: shouldHide } : n)
           })
         }
       }
@@ -25369,17 +25378,17 @@ function App() {
                       onClick={() => setEditingSummaryId(selectedNode.id)}
                       title="Click to edit summary"
                     >
-                      {selectedNode.summary || 'Click to add a summary...'}
+                      {selectedNode.summary || generateSummary(selectedNode.label) || 'Click to add a summary...'}
                     </p>
                   )}
                 </div>
               ) : selectedNode.isCustom ? (
-                selectedNode.summary ? (
-                  <p className="panel-summary">{selectedNode.summary}</p>
+                (selectedNode.summary || generateSummary(selectedNode.label)) ? (
+                  <p className="panel-summary">{selectedNode.summary || generateSummary(selectedNode.label)}</p>
                 ) : null
               ) : (
-                selectedNode.summary ? (
-                  <p className="panel-summary">{selectedNode.summary}</p>
+                (selectedNode.summary || generateSummary(selectedNode.label)) ? (
+                  <p className="panel-summary">{selectedNode.summary || generateSummary(selectedNode.label)}</p>
                 ) : null
               )}
               <div className="panel-notes">
