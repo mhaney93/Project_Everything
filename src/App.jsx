@@ -22242,13 +22242,16 @@ function App() {
             return { ...node, hidden: false }
           }
           if (node.parentId !== parentNodeId) {
-            const ancestors = new Set()
+            // Walk up to find the direct child of parentNodeId that is this node's ancestor.
+            // If that direct child is a custom node (explicitly moved here), keep its subtree
+            // visible — hiding it would discard the children of a reparented node.
             let current = node
+            let directChild = null
             while (current && current.parentId) {
-              ancestors.add(current.parentId)
+              if (current.parentId === parentNodeId) { directChild = current; break }
               current = nodes.find(n => n.id === current.parentId)
             }
-            if (ancestors.has(parentNodeId)) {
+            if (directChild && !directChild.isCustom) {
               return { ...node, hidden: true }
             }
           }
