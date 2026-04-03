@@ -22080,8 +22080,16 @@ function App() {
       setFocusedElement(parentId ? { nodeId: parentId, type: 'node' } : null)
     }
 
-    // Save immediately, then offer undo toast for 5 seconds
-    const nodesAfterDelete = nodes.filter((node) => !nodeIdsToRemove.has(node.id))
+    // Save immediately, then offer undo toast for 5 seconds.
+    // Apply the same transform as setNodes above so excludedChildLabels is persisted.
+    const nodesAfterDelete = nodes
+      .filter((node) => !nodeIdsToRemove.has(node.id))
+      .map((node) => {
+        if (node.id === parentId && deletedNode && !deletedNode.isCustom) {
+          return { ...node, excludedChildLabels: [...(node.excludedChildLabels || []), deletedNode.label] }
+        }
+        return node
+      })
     suppressSaveUntil.current = Date.now() + 6000
     setUndoSnapshot({ nodes: removedNodes, label: deletedLabel })
     setNotification(null)
