@@ -22128,10 +22128,13 @@ function App() {
     const parentId = node?.parentId
 
     setNodes((prev) => {
-      // Update the label
-      const updated = prev.map((n) =>
-        n.id === nodeId ? { ...n, label: newLabel.trim() } : n
-      )
+      // Update the label. If the node has no stored summary, bake in the
+      // generated summary for the OLD label so it survives the rename.
+      const updated = prev.map((n) => {
+        if (n.id !== nodeId) return n
+        const preservedSummary = n.summary || generateSummary(n.label) || undefined
+        return { ...n, label: newLabel.trim(), summary: preservedSummary }
+      })
 
       // If it's a custom node, reorder it alphabetically among siblings
       if (isCustom && parentId !== undefined) {
