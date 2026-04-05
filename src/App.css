@@ -1194,6 +1194,43 @@ input.node-label-edit {
   background: rgba(184, 106, 0, 0.08);
 }
 
+.grid-col-resize-handle,
+.grid-row-resize-handle,
+.grid-corner-resize-handle {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  z-index: 2;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+.grid-col-resize-handle {
+  cursor: col-resize;
+  border-bottom: 2px solid rgba(184, 106, 0, 0.6);
+  border-right: 2px solid rgba(184, 106, 0, 0.6);
+}
+
+.grid-row-resize-handle {
+  cursor: row-resize;
+  border-bottom: 2px solid rgba(184, 106, 0, 0.6);
+  border-right: 2px solid rgba(184, 106, 0, 0.6);
+}
+
+.grid-corner-resize-handle {
+  cursor: nwse-resize;
+  border-bottom: 2px solid rgba(184, 106, 0, 0.6);
+  border-right: 2px solid rgba(184, 106, 0, 0.6);
+}
+
+.note-grid td:hover .grid-col-resize-handle,
+.note-grid td:hover .grid-row-resize-handle,
+.note-grid td:hover .grid-corner-resize-handle {
+  opacity: 1;
+}
+
 .grid-controls {
   display: flex;
   gap: 1rem;

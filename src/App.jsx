@@ -1415,6 +1415,7 @@ function App() {
   const datamuseSuggestionCacheRef = useRef(new Map())
   const draftNoteIdsRef = useRef(new Set())
   const draftGridIdsRef = useRef(new Set())
+  const gridResizeRef = useRef(null) // { type: 'col'|'row'|'both', nodeId, gridId, colIdx, rowIdx, startX, startY, startWidth, startHeight }
 
   // Keyboard shortcut: Ctrl+F toggles fullscreen mode
   useEffect(() => {
@@ -22687,6 +22688,7 @@ function App() {
                       ...note,
                       rows: note.rows + 1,
                       data: [...note.data, Array(note.cols).fill('')],
+                      rowHeights: note.rowHeights ? [...note.rowHeights, 32] : null,
                     }
                   : note
               ),
@@ -22708,6 +22710,7 @@ function App() {
                       ...note,
                       rows: note.rows - 1,
                       data: note.data.slice(0, -1),
+                      rowHeights: note.rowHeights ? note.rowHeights.slice(0, -1) : null,
                     }
                   : note
               ),
@@ -22729,6 +22732,7 @@ function App() {
                       ...note,
                       cols: note.cols + 1,
                       data: note.data.map((row) => [...row, '']),
+                      colWidths: note.colWidths ? [...note.colWidths, 120] : null,
                     }
                   : note
               ),
@@ -22750,6 +22754,7 @@ function App() {
                       ...note,
                       cols: note.cols - 1,
                       data: note.data.map((row) => row.slice(0, -1)),
+                      colWidths: note.colWidths ? note.colWidths.slice(0, -1) : null,
                     }
                   : note
               ),
@@ -22757,6 +22762,92 @@ function App() {
           : node
       )
     )
+  }
+
+  const handleCellResizeMouseDown = (e, nodeId, gridId, note, colIdx, rowIdx, type) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    const colWidths = note.colWidths ? [...note.colWidths] : Array(note.cols).fill(120)
+    const rowHeights = note.rowHeights ? [...note.rowHeights] : Array(note.rows).fill(32)
+
+    gridResizeRef.current = {
+      type,
+      nodeId,
+      gridId,
+      colIdx,
+      rowIdx,
+      startX: e.clientX,
+      startY: e.clientY,
+      startWidth: colWidths[colIdx],
+      startHeight: rowHeights[rowIdx],
+    }
+
+    const onMouseMove = (moveEvent) => {
+      const state = gridResizeRef.current
+      if (!state) return
+      const dx = moveEvent.clientX - state.startX
+      const dy = moveEvent.clientY - state.startY
+
+      if (state.type === 'col' || state.type === 'both') {
+        const newWidth = Math.max(40, state.startWidth + dx)
+        setNodes((prev) =>
+          prev.map((node) =>
+            node.id === state.nodeId
+              ? {
+                  ...node,
+                  notes: (node.notes || []).map((n) =>
+                    n.id === state.gridId && n.type === 'grid'
+                      ? {
+                          ...n,
+                          colWidths: (() => {
+                            const w = n.colWidths ? [...n.colWidths] : Array(n.cols).fill(120)
+                            w[state.colIdx] = newWidth
+                            return w
+                          })(),
+                        }
+                      : n
+                  ),
+                }
+              : node
+          )
+        )
+      }
+
+      if (state.type === 'row' || state.type === 'both') {
+        const newHeight = Math.max(24, state.startHeight + dy)
+        setNodes((prev) =>
+          prev.map((node) =>
+            node.id === state.nodeId
+              ? {
+                  ...node,
+                  notes: (node.notes || []).map((n) =>
+                    n.id === state.gridId && n.type === 'grid'
+                      ? {
+                          ...n,
+                          rowHeights: (() => {
+                            const h = n.rowHeights ? [...n.rowHeights] : Array(n.rows).fill(32)
+                            h[state.rowIdx] = newHeight
+                            return h
+                          })(),
+                        }
+                      : n
+                  ),
+                }
+              : node
+          )
+        )
+      }
+    }
+
+    const onMouseUp = () => {
+      gridResizeRef.current = null
+      document.removeEventListener('mousemove', onMouseMove)
+      document.removeEventListener('mouseup', onMouseUp)
+    }
+
+    document.addEventListener('mousemove', onMouseMove)
+    document.addEventListener('mouseup', onMouseUp)
   }
 
   const updateNodeSummary = (nodeId, summary, trim = false) => {
@@ -25574,24 +25665,59 @@ function App() {
                           <div className="grid-container">
                             <div className="grid-wrapper">
                               <table className="note-grid">
+                                {note.colWidths ? (
+                                  <colgroup>
+                                    {note.colWidths.map((w, i) => (
+                                      <col key={i} style={{ width: w }} />
+                                    ))}
+                                  </colgroup>
+                                ) : null}
                                 <tbody>
-                                  {note.data.map((row, rowIdx) => (
-                                    <tr key={rowIdx}>
-                                      {row.map((cell, colIdx) => (
-                                        <td key={colIdx}>
-                                          <input
-                                            type="text"
-                                            className="grid-cell-input"
-                                            value={cell}
-                                            onChange={(event) =>
-                                              updateGridCell(selectedNode.id, note.id, rowIdx, colIdx, event.target.value)
-                                            }
-                                            placeholder=""
-                                          />
-                                        </td>
-                                      ))}
-                                    </tr>
-                                  ))}
+                                  {note.data.map((row, rowIdx) => {
+                                    const isLastRow = rowIdx === note.rows - 1
+                                    const rowHeight = note.rowHeights ? note.rowHeights[rowIdx] : null
+                                    return (
+                                      <tr key={rowIdx} style={rowHeight ? { height: rowHeight } : undefined}>
+                                        {row.map((cell, colIdx) => {
+                                          const isLastCol = colIdx === note.cols - 1
+                                          const isCorner = isLastRow && isLastCol
+                                          const showColHandle = isAuthenticated && isLastRow && !isLastCol
+                                          const showRowHandle = isAuthenticated && isLastCol && !isLastRow
+                                          return (
+                                            <td key={colIdx} style={{ position: 'relative' }}>
+                                              <input
+                                                type="text"
+                                                className="grid-cell-input"
+                                                value={cell}
+                                                onChange={(event) =>
+                                                  updateGridCell(selectedNode.id, note.id, rowIdx, colIdx, event.target.value)
+                                                }
+                                                placeholder=""
+                                              />
+                                              {showColHandle && (
+                                                <div
+                                                  className="grid-col-resize-handle"
+                                                  onMouseDown={(e) => handleCellResizeMouseDown(e, selectedNode.id, note.id, note, colIdx, rowIdx, 'col')}
+                                                />
+                                              )}
+                                              {showRowHandle && (
+                                                <div
+                                                  className="grid-row-resize-handle"
+                                                  onMouseDown={(e) => handleCellResizeMouseDown(e, selectedNode.id, note.id, note, colIdx, rowIdx, 'row')}
+                                                />
+                                              )}
+                                              {isAuthenticated && isCorner && (
+                                                <div
+                                                  className="grid-corner-resize-handle"
+                                                  onMouseDown={(e) => handleCellResizeMouseDown(e, selectedNode.id, note.id, note, colIdx, rowIdx, 'both')}
+                                                />
+                                              )}
+                                            </td>
+                                          )
+                                        })}
+                                      </tr>
+                                    )
+                                  })}
                                 </tbody>
                               </table>
                             </div>
