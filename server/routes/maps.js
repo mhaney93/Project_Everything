@@ -3,6 +3,7 @@ const pool = require('../db/config');
 const { verifyToken } = require('../middleware/auth');
 const {
   TOTAL_STORAGE_LIMIT_PER_USER,
+  ADMIN_EMAIL,
   ADMIN_EMAILS,
   getFileStorageUsage,
   isUserAdmin
@@ -11,32 +12,26 @@ const {
 const router = express.Router();
 
 // Get global (non-personal) custom nodes — no auth required
+// Uses only the primary admin's map so the global view is consistent.
 router.get('/global', async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT m.nodes FROM maps m JOIN users u ON m.user_id = u.id WHERE u.email = ANY($1)',
-      [ADMIN_EMAILS]
+      'SELECT m.nodes FROM maps m JOIN users u ON m.user_id = u.id WHERE u.email = $1',
+      [ADMIN_EMAIL]
     );
 
     if (result.rows.length === 0) {
       return res.json({ nodes: [] });
     }
 
-    const seen = new Set();
-    const globalNodes = [];
-    for (const row of result.rows) {
-      let nodes = row.nodes;
-      if (typeof nodes === 'string') {
-        try { nodes = JSON.parse(nodes); } catch (e) { nodes = []; }
-      }
-      for (const n of (nodes || [])) {
-        if (n.isPersonal === true || n.label === 'Personal') continue;
-        if (seen.has(n.id)) continue;
-        seen.add(n.id);
-        const { notes, ...rest } = n;
-        globalNodes.push(rest);
-      }
+    let nodes = result.rows[0].nodes;
+    if (typeof nodes === 'string') {
+      try { nodes = JSON.parse(nodes); } catch (e) { nodes = []; }
     }
+
+    const globalNodes = (nodes || [])
+      .filter(n => n.isPersonal !== true && n.label !== 'Personal')
+      .map(({ notes, ...rest }) => rest);
 
     res.json({ nodes: globalNodes });
   } catch (err) {
