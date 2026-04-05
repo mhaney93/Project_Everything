@@ -21941,14 +21941,15 @@ function App() {
   const reorderCustomNode = (nodeId, direction) => {
     setNodes((prev) => {
       const node = prev.find(n => n.id === nodeId)
-      if (!node) return prev
-      if (!node.isCustom && !isAdmin) return prev
+      if (!node) { console.log('[reorder] node not found'); return prev }
+      if (!node.isCustom && !isAdmin) { console.log('[reorder] not custom and not admin'); return prev }
 
       if (isAdmin) {
         // Admin reordering any node: consider all siblings using layout sort order
         const parentNode = prev.find(n => n.id === node.parentId)
         const parentLabel = parentNode?.label
         const allSiblings = prev.filter(n => n.parentId === node.parentId && !n.hidden)
+        console.log('[reorder] admin path | parentLabel:', parentLabel, '| allSiblings:', allSiblings.map(s => s.label), '| direction:', direction)
 
         const sortedSiblings = [...allSiblings].sort((a, b) => {
           if (a.order !== undefined || b.order !== undefined) {
@@ -21968,8 +21969,9 @@ function App() {
         })
 
         const idx = sortedSiblings.findIndex(n => n.id === nodeId)
-        if (direction === 'left' && idx <= 0) return prev
-        if (direction === 'right' && idx >= sortedSiblings.length - 1) return prev
+        console.log('[reorder] sortedSiblings:', sortedSiblings.map(s => s.label), '| idx:', idx)
+        if (direction === 'left' && idx <= 0) { console.log('[reorder] already leftmost'); return prev }
+        if (direction === 'right' && idx >= sortedSiblings.length - 1) { console.log('[reorder] already rightmost'); return prev }
 
         const swapIdx = direction === 'left' ? idx - 1 : idx + 1
 
@@ -22028,26 +22030,38 @@ function App() {
       return
     }
 
-    const nodeToDelete = nodes.find((node) => node.id === nodeId)
-    if (!nodeToDelete) return
+    // If this node is part of a multi-selection (2+), delete all selected nodes
+    const idsToDelete = (multiSelectedIds.size >= 2 && multiSelectedIds.has(nodeId))
+      ? [...multiSelectedIds]
+      : [nodeId]
 
-    const hasChildren = nodes.some((node) => node.parentId === nodeId)
-    const confirmMessage = hasChildren 
-      ? `Delete "${nodeToDelete.label}" and all its children?`
-      : `Delete "${nodeToDelete.label}"?`
+    const hasChildren = idsToDelete.some(id => nodes.some(n => n.parentId === id))
+
+    let confirmMessage
+    if (idsToDelete.length > 1) {
+      confirmMessage = hasChildren
+        ? `Delete ${idsToDelete.length} selected nodes and their children?`
+        : `Delete ${idsToDelete.length} selected nodes?`
+    } else {
+      const nodeToDelete = nodes.find(n => n.id === nodeId)
+      if (!nodeToDelete) return
+      confirmMessage = hasChildren
+        ? `Delete "${nodeToDelete.label}" and all its children?`
+        : `Delete "${nodeToDelete.label}"?`
+    }
 
     // Show modern confirmation modal instead of window.confirm
     setDeleteModalChoice('cancel')
-    setDeleteConfirmation({ nodeId, message: confirmMessage, includeChildren: hasChildren })
+    setDeleteConfirmation({ nodeIds: idsToDelete, message: confirmMessage, includeChildren: hasChildren })
   }
 
   const confirmDelete = () => {
     if (!deleteConfirmation) return
-    const nodeId = deleteConfirmation.nodeId
-    console.log('[confirmDelete] nodeId:', nodeId, '| includeChildren:', deleteConfirmation.includeChildren, '| message:', deleteConfirmation.message)
+    const nodeIds = deleteConfirmation.nodeIds
+    console.log('[confirmDelete] nodeIds:', nodeIds, '| includeChildren:', deleteConfirmation.includeChildren, '| message:', deleteConfirmation.message)
 
-    // Remove the node and all its descendants
-    const nodeIdsToRemove = new Set([nodeId])
+    // Remove all target nodes and their descendants
+    const nodeIdsToRemove = new Set(nodeIds)
     const findDescendants = (parentId) => {
       nodes.forEach((node) => {
         if (node.parentId === parentId) {
@@ -22056,47 +22070,54 @@ function App() {
         }
       })
     }
-    findDescendants(nodeId)
+    nodeIds.forEach(id => findDescendants(id))
 
     const removedNodes = nodes.filter((n) => nodeIdsToRemove.has(n.id))
-    const deletedNode = nodes.find((n) => n.id === nodeId)
-    const deletedLabel = deletedNode?.label || 'Node'
-    const parentId = deletedNode?.parentId ?? null
+    const deletedLabel = nodeIds.length === 1
+      ? (nodes.find(n => n.id === nodeIds[0])?.label || 'Node')
+      : `${nodeIds.length} nodes`
 
-    setNodes((prev) => prev
+    // Build a map of parentId -> deleted non-custom children labels for excludedChildLabels tracking
+    const excludeByParent = {}
+    nodeIds.forEach(id => {
+      const deletedNode = nodes.find(n => n.id === id)
+      if (deletedNode && !deletedNode.isCustom && deletedNode.parentId != null) {
+        if (!excludeByParent[deletedNode.parentId]) excludeByParent[deletedNode.parentId] = []
+        excludeByParent[deletedNode.parentId].push(deletedNode.label)
+      }
+    })
+
+    const applyTransform = (nodeList) => nodeList
       .filter((node) => !nodeIdsToRemove.has(node.id))
       .map((node) => {
-        // Track this label as excluded on the parent so addChildren won't recreate it
-        if (node.id === parentId && deletedNode && !deletedNode.isCustom) {
-          return { ...node, excludedChildLabels: [...(node.excludedChildLabels || []), deletedNode.label] }
+        const labelsToExclude = excludeByParent[node.id]
+        if (labelsToExclude?.length) {
+          return { ...node, excludedChildLabels: [...(node.excludedChildLabels || []), ...labelsToExclude] }
         }
         return node
       })
-    )
 
-    // Move selection/focus to parent of deleted node
-    if (selectedId === nodeId) {
+    setNodes(applyTransform)
+
+    // Move selection/focus to parent of first deleted node (if selected/focused node is being deleted)
+    if (nodeIds.includes(selectedId)) {
+      const deletedSelected = nodes.find(n => n.id === selectedId)
+      const parentId = deletedSelected?.parentId ?? null
       setSelectedId(parentId)
       if (!parentId) setPanelOpen(false)
     }
-    if (focusedElement?.nodeId === nodeId) {
+    if (focusedElement && nodeIds.includes(focusedElement.nodeId)) {
+      const deletedFocused = nodes.find(n => n.id === focusedElement.nodeId)
+      const parentId = deletedFocused?.parentId ?? null
       setFocusedElement(parentId ? { nodeId: parentId, type: 'node' } : null)
     }
 
-    // Save immediately, then offer undo toast for 5 seconds.
-    // Apply the same transform as setNodes above so excludedChildLabels is persisted.
-    const nodesAfterDelete = nodes
-      .filter((node) => !nodeIdsToRemove.has(node.id))
-      .map((node) => {
-        if (node.id === parentId && deletedNode && !deletedNode.isCustom) {
-          return { ...node, excludedChildLabels: [...(node.excludedChildLabels || []), deletedNode.label] }
-        }
-        return node
-      })
+    // Save immediately, then offer undo toast for 5 seconds
+    const nodesAfterDelete = applyTransform(nodes)
     suppressSaveUntil.current = Date.now() + 6000
     setUndoSnapshot({ nodes: removedNodes, label: deletedLabel })
     setNotification(null)
-    mapsAPI.saveMap(nodesAfterDelete).catch(e => console.error('Failed to save after delete:', e))
+    mapsAPI.saveMap(nodesAfterDelete).catch(e => { console.error('Failed to save after delete:', e); setNotification({ message: 'Failed to save — changes may not persist after refresh.', type: 'error' }) })
 
     if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
     undoTimerRef.current = setTimeout(() => {
@@ -22105,6 +22126,7 @@ function App() {
       setNotification(null)
     }, 5000)
 
+    setMultiSelectedIds(new Set())
     setDeleteModalChoice('cancel')
     setDeleteConfirmation(null)
   }
@@ -22136,7 +22158,7 @@ function App() {
       if (node && node.isCustom) {
         // Show modern modal instead of window.confirm
         setDeleteModalChoice('cancel')
-        setDeleteConfirmation({ nodeId, message: 'Delete this empty node?', includeChildren: false })
+        setDeleteConfirmation({ nodeIds: [nodeId], message: 'Delete this empty node?', includeChildren: false })
       }
       setEditingNodeId(null)
       return
@@ -22150,10 +22172,12 @@ function App() {
     setNodes((prev) => {
       // Update the label. If the node has no stored summary, bake in the
       // generated summary for the OLD label so it survives the rename.
+      // Always mark as isCustom: true — a renamed node has a user-defined label
+      // and must not be stripped by normalizeLoadedNodes as a stale predefined child.
       const updated = prev.map((n) => {
         if (n.id !== nodeId) return n
         const preservedSummary = n.summary || generateSummary(n.label) || undefined
-        return { ...n, label: newLabel.trim(), summary: preservedSummary }
+        return { ...n, label: newLabel.trim(), summary: preservedSummary, isCustom: true }
       })
 
       // If it's a custom node, reorder it alphabetically among siblings
@@ -22880,6 +22904,7 @@ function App() {
         await mapsAPI.saveMap(nodes);
       } catch (err) {
         console.error('Failed to save map:', err);
+        setNotification({ message: 'Failed to save — changes may not persist after refresh.', type: 'error' });
       }
     }, 2000);
 
@@ -23344,14 +23369,25 @@ function App() {
         return
       }
 
-      // Handle Delete key: delete custom node
+      // Handle Delete key: delete custom node(s)
       if (event.key === 'Delete' && isAuthenticated) {
-        const targetNodeId = focusedElement?.nodeId ?? selectedId
-        if (targetNodeId !== null && targetNodeId !== undefined) {
-          const targetNode = nodes.find((n) => n.id === targetNodeId)
-          if (targetNode && (targetNode.isCustom || isAdmin)) {
+        if (multiSelectedIds.size >= 2) {
+          const allDeletable = [...multiSelectedIds].every(id => {
+            const n = nodes.find(nd => nd.id === id)
+            return n && (n.isCustom || isAdmin)
+          })
+          if (allDeletable) {
             event.preventDefault()
-            deleteCustomNode(targetNodeId)
+            deleteCustomNode([...multiSelectedIds][0])
+          }
+        } else {
+          const targetNodeId = focusedElement?.nodeId ?? selectedId
+          if (targetNodeId !== null && targetNodeId !== undefined) {
+            const targetNode = nodes.find((n) => n.id === targetNodeId)
+            if (targetNode && (targetNode.isCustom || isAdmin)) {
+              event.preventDefault()
+              deleteCustomNode(targetNodeId)
+            }
           }
         }
         return
@@ -23361,11 +23397,12 @@ function App() {
       if ((event.key === 'ArrowLeft' || event.key === 'ArrowRight') && event.ctrlKey && !event.shiftKey && !event.altKey) {
         const nodeId = focusedElement?.nodeId ?? selectedId
         const node = nodeId != null ? nodes.find(n => n.id === nodeId) : null
+        console.log('[Ctrl+Arrow] key:', event.key, '| nodeId:', nodeId, '| isAuthenticated:', isAuthenticated, '| isAdmin:', isAdmin, '| node?.isCustom:', node?.isCustom, '| node?.label:', node?.label)
         if (isAuthenticated && nodeId != null && node && (node.isCustom || isAdmin)) {
           event.preventDefault()
           reorderCustomNode(nodeId, event.key === 'ArrowLeft' ? 'left' : 'right')
-          return
         }
+        return
       }
 
       // Arrow key navigation: focus nodes and dots without selecting them
@@ -23571,7 +23608,7 @@ function App() {
     return () => {
       window.removeEventListener('keydown', handleShortcut)
     }
-  }, [selectedId, focusedElement, nodes, layout.positions, hasKnownSubdivisions, addChildren, addCustomChild, addCustomSibling, deleteCustomNode, reorderCustomNode, isAuthenticated, isAdmin, deleteConfirmation, deleteModalChoice, isFullscreenMode])
+  }, [selectedId, focusedElement, nodes, layout.positions, hasKnownSubdivisions, addChildren, addCustomChild, addCustomSibling, deleteCustomNode, reorderCustomNode, isAuthenticated, isAdmin, deleteConfirmation, deleteModalChoice, isFullscreenMode, multiSelectedIds])
 
   // Close search suggestions when clicking outside the search row
   useEffect(() => {
@@ -24364,7 +24401,7 @@ function App() {
                 return n
               })
             }
-            mapsAPI.saveMap(result).catch(e => console.error('Failed to save after reparent:', e))
+            mapsAPI.saveMap(result).catch(e => { console.error('Failed to save after reparent:', e); setNotification({ message: 'Failed to save — changes may not persist after refresh.', type: 'error' }) })
             return result
           })
           setMultiSelectedIds(new Set())
