@@ -25161,6 +25161,7 @@ function App() {
                           outline: nodeDragActive && nodeDragOver === node.id && !nodeDragIds.has(node.id) ? '2px dashed #1d6fdc' : undefined,
                           borderRadius: nodeDragActive && nodeDragOver === node.id && !nodeDragIds.has(node.id) ? '8px' : undefined,
                           pointerEvents: nodeDragActive && (nodeDragIds.has(node.id) || nodeDragDescendantsRef.current.has(node.id)) ? 'none' : undefined,
+                          zIndex: (focusedElement?.nodeId === node.id || selectedId === node.id || multiSelectedIds.has(node.id)) ? 3 : undefined,
                         }}
                         onMouseDown={(e) => {
                           if (e.button === 0) e.stopPropagation() // Only stop propagation for left-click
