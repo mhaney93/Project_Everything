@@ -1162,7 +1162,7 @@ input.node-label-edit {
 }
 
 .grid-wrapper {
-  resize: both;
+  position: relative;
   overflow: auto;
   min-width: 200px;
   min-height: 100px;
@@ -1170,6 +1170,25 @@ input.node-label-edit {
   border: 2px solid rgba(184, 106, 0, 0.25);
   border-radius: 8px;
   background: rgba(184, 106, 0, 0.04);
+}
+
+.grid-whole-resize-handle {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 12px;
+  height: 12px;
+  cursor: sw-resize;
+  z-index: 3;
+  opacity: 0;
+  transition: opacity 0.15s;
+  border-bottom: 2px solid rgba(184, 106, 0, 0.6);
+  border-left: 2px solid rgba(184, 106, 0, 0.6);
+  border-bottom-left-radius: 3px;
+}
+
+.grid-wrapper:hover .grid-whole-resize-handle {
+  opacity: 1;
 }
 
 .note-grid {

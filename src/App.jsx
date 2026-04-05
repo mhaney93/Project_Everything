@@ -22894,6 +22894,44 @@ function App() {
     document.addEventListener('mouseup', onMouseUp)
   }
 
+  const handleWrapperResizeMouseDown = (e, nodeId, gridId) => {
+    e.preventDefault()
+    e.stopPropagation()
+
+    const wrapper = e.currentTarget.parentElement
+    const startX = e.clientX
+    const startY = e.clientY
+    const startWidth = wrapper.offsetWidth
+    const startHeight = wrapper.offsetHeight
+
+    const onMouseMove = (moveEvent) => {
+      const newWidth = Math.max(200, startWidth + (moveEvent.clientX - startX))
+      const newHeight = Math.max(100, startHeight + (moveEvent.clientY - startY))
+      setNodes((prev) =>
+        prev.map((node) =>
+          node.id === nodeId
+            ? {
+                ...node,
+                notes: (node.notes || []).map((n) =>
+                  n.id === gridId && n.type === 'grid'
+                    ? { ...n, wrapperWidth: newWidth, wrapperHeight: newHeight }
+                    : n
+                ),
+              }
+            : node
+        )
+      )
+    }
+
+    const onMouseUp = () => {
+      document.removeEventListener('mousemove', onMouseMove)
+      document.removeEventListener('mouseup', onMouseUp)
+    }
+
+    document.addEventListener('mousemove', onMouseMove)
+    document.addEventListener('mouseup', onMouseUp)
+  }
+
   const updateNodeSummary = (nodeId, summary, trim = false) => {
     setNodes((prev) =>
       prev.map((node) =>
@@ -25707,7 +25745,14 @@ function App() {
                           tabIndex={0}
                         >
                           <div className="grid-container">
-                            <div className="grid-wrapper">
+                            <div
+                              className="grid-wrapper"
+                              style={note.wrapperWidth ? { width: note.wrapperWidth, height: note.wrapperHeight } : undefined}
+                            >
+                              <div
+                                className="grid-whole-resize-handle"
+                                onMouseDown={(e) => handleWrapperResizeMouseDown(e, selectedNode.id, note.id)}
+                              />
                               <table className="note-grid">
                                 {note.colWidths ? (
                                   <colgroup>
