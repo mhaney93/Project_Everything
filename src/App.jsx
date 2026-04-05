@@ -22618,8 +22618,8 @@ function App() {
         const isFirstCol = currentTd && currentTd.previousElementSibling === null
         const isFirstRow = currentTr && currentTr.previousElementSibling === null
 
-        if (isFirstRow && isFirstCol) {
-          // Top-left cell: indent (or outdent with Shift)
+        if (isFirstRow && isFirstCol && target.selectionStart === 0) {
+          // Top-left cell with cursor at start: indent (or outdent with Shift)
           updateNoteLevel(nodeId, gridId, event.shiftKey ? -1 : 1)
           return
         }
