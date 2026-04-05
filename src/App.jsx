@@ -22157,8 +22157,12 @@ function App() {
       const node = nodes.find(n => n.id === nodeId)
       if (node && node.isCustom) {
         // Show modern modal instead of window.confirm
+        const hasChildren = nodes.some(n => n.parentId === nodeId)
+        const confirmMessage = hasChildren
+          ? `Delete this empty node and all its children?`
+          : `Delete this empty node?`
         setDeleteModalChoice('cancel')
-        setDeleteConfirmation({ nodeIds: [nodeId], message: 'Delete this empty node?', includeChildren: false })
+        setDeleteConfirmation({ nodeIds: [nodeId], message: confirmMessage, includeChildren: hasChildren })
       }
       setEditingNodeId(null)
       return
