@@ -1151,8 +1151,14 @@ input.node-label-edit {
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 0.25rem;
   align-items: flex-start;
+}
+
+.grid-controls-row {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
 }
 
 .grid-wrapper {

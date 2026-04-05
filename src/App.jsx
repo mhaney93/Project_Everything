@@ -25720,60 +25720,62 @@ function App() {
                               </table>
                             </div>
                             {isAuthenticated ? (
-                              <div className="grid-controls">
-                                <div className="grid-size-controls">
-                                  <div className="grid-control-group">
-                                    <span className="grid-control-label">Rows:</span>
-                                    <button
-                                      type="button"
-                                      className="grid-control-button"
-                                      onClick={() => removeGridRow(selectedNode.id, note.id)}
-                                      disabled={note.rows <= 1}
-                                      aria-label="Remove row"
-                                    >
-                                      −
-                                    </button>
-                                    <span className="grid-size-display">{note.rows}</span>
-                                    <button
-                                      type="button"
-                                      className="grid-control-button"
-                                      onClick={() => addGridRow(selectedNode.id, note.id)}
-                                      aria-label="Add row"
-                                    >
-                                      +
-                                    </button>
+                              <div className="grid-controls-row">
+                                <div className="grid-controls">
+                                  <div className="grid-size-controls">
+                                    <div className="grid-control-group">
+                                      <span className="grid-control-label">Rows:</span>
+                                      <button
+                                        type="button"
+                                        className="grid-control-button"
+                                        onClick={() => removeGridRow(selectedNode.id, note.id)}
+                                        disabled={note.rows <= 1}
+                                        aria-label="Remove row"
+                                      >
+                                        −
+                                      </button>
+                                      <span className="grid-size-display">{note.rows}</span>
+                                      <button
+                                        type="button"
+                                        className="grid-control-button"
+                                        onClick={() => addGridRow(selectedNode.id, note.id)}
+                                        aria-label="Add row"
+                                      >
+                                        +
+                                      </button>
+                                    </div>
+                                    <div className="grid-control-group">
+                                      <span className="grid-control-label">Cols:</span>
+                                      <button
+                                        type="button"
+                                        className="grid-control-button"
+                                        onClick={() => removeGridColumn(selectedNode.id, note.id)}
+                                        disabled={note.cols <= 1}
+                                        aria-label="Remove column"
+                                      >
+                                        −
+                                      </button>
+                                      <span className="grid-size-display">{note.cols}</span>
+                                      <button
+                                        type="button"
+                                        className="grid-control-button"
+                                        onClick={() => addGridColumn(selectedNode.id, note.id)}
+                                        aria-label="Add column"
+                                      >
+                                        +
+                                      </button>
+                                    </div>
                                   </div>
-                                  <div className="grid-control-group">
-                                    <span className="grid-control-label">Cols:</span>
-                                    <button
-                                      type="button"
-                                      className="grid-control-button"
-                                      onClick={() => removeGridColumn(selectedNode.id, note.id)}
-                                      disabled={note.cols <= 1}
-                                      aria-label="Remove column"
-                                    >
-                                      −
-                                    </button>
-                                    <span className="grid-size-display">{note.cols}</span>
-                                    <button
-                                      type="button"
-                                      className="grid-control-button"
-                                      onClick={() => addGridColumn(selectedNode.id, note.id)}
-                                      aria-label="Add column"
-                                    >
-                                      +
-                                    </button>
-                                  </div>
+                                  <button
+                                    type="button"
+                                    className="grid-delete-button"
+                                    onClick={() => removeNoteFromNode(selectedNode.id, note.id)}
+                                    aria-label="Delete grid"
+                                    title="Delete grid"
+                                  >
+                                    ×
+                                  </button>
                                 </div>
-                                <button
-                                  type="button"
-                                  className="grid-delete-button"
-                                  onClick={() => removeNoteFromNode(selectedNode.id, note.id)}
-                                  aria-label="Delete grid"
-                                  title="Delete grid"
-                                >
-                                  ×
-                                </button>
                               </div>
                             ) : null}
                           </div>
