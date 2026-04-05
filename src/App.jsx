@@ -22608,6 +22608,36 @@ function App() {
     if (event.key === 'Tab') {
       event.preventDefault()
       event.stopPropagation()
+
+      const target = event.target
+      const isGridInput = target.classList && target.classList.contains('grid-cell-input')
+
+      if (isGridInput) {
+        const currentTd = target.closest('td')
+        const currentTr = target.closest('tr')
+        const isFirstCol = currentTd && currentTd.previousElementSibling === null
+        const isFirstRow = currentTr && currentTr.previousElementSibling === null
+
+        if (isFirstRow && isFirstCol) {
+          // Top-left cell: indent (or outdent with Shift)
+          updateNoteLevel(nodeId, gridId, event.shiftKey ? -1 : 1)
+          return
+        }
+
+        // Otherwise move to next cell: right, then wrap to next row's leftmost
+        const nextTd = currentTd?.nextElementSibling
+        if (nextTd) {
+          nextTd.querySelector('input')?.focus()
+        } else {
+          const nextTr = currentTr?.nextElementSibling
+          if (nextTr) {
+            nextTr.querySelector('input')?.focus()
+          }
+        }
+        return
+      }
+
+      // Grid container itself focused (no cell focused): indent/outdent
       updateNoteLevel(nodeId, gridId, event.shiftKey ? -1 : 1)
       return
     }
