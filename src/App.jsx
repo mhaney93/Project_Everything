@@ -22607,13 +22607,13 @@ function App() {
     }
 
     if (event.key === 'Tab') {
-      event.preventDefault()
-      event.stopPropagation()
-
       const target = event.target
       const isGridInput = target.classList && target.classList.contains('grid-cell-input')
 
       if (isGridInput) {
+        event.preventDefault()
+        event.stopPropagation()
+
         const currentTd = target.closest('td')
         const currentTr = target.closest('tr')
         const isFirstCol = currentTd && currentTd.previousElementSibling === null
@@ -22638,9 +22638,7 @@ function App() {
         return
       }
 
-      // Grid container itself focused (no cell focused): indent/outdent
-      updateNoteLevel(nodeId, gridId, event.shiftKey ? -1 : 1)
-      return
+      // Grid container itself focused: let Tab bubble to global handler (creates sibling node)
     }
 
     if (event.key === 'Backspace') {
