@@ -22641,6 +22641,52 @@ function App() {
       // Grid container itself focused: let Tab bubble to global handler (creates sibling node)
     }
 
+    const arrowKeys = ['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight']
+    if (arrowKeys.includes(event.key)) {
+      const target = event.target
+      const isGridInput = target.classList && target.classList.contains('grid-cell-input')
+      if (isGridInput) {
+        const currentTd = target.closest('td')
+        const currentTr = target.closest('tr')
+        let targetCell = null
+
+        if (event.key === 'ArrowUp') {
+          const prevRow = currentTr?.previousElementSibling
+          if (prevRow) {
+            const cellIndex = Array.from(currentTr.children).indexOf(currentTd)
+            targetCell = prevRow.children[cellIndex]?.querySelector('input')
+          }
+        } else if (event.key === 'ArrowDown') {
+          const nextRow = currentTr?.nextElementSibling
+          if (nextRow) {
+            const cellIndex = Array.from(currentTr.children).indexOf(currentTd)
+            targetCell = nextRow.children[cellIndex]?.querySelector('input')
+          }
+        } else if (event.key === 'ArrowLeft') {
+          if (target.selectionStart === 0 && target.selectionEnd === 0) {
+            const prevTd = currentTd?.previousElementSibling
+            if (prevTd) targetCell = prevTd.querySelector('input')
+          }
+        } else if (event.key === 'ArrowRight') {
+          if (target.selectionStart === target.value.length && target.selectionEnd === target.value.length) {
+            const nextTd = currentTd?.nextElementSibling
+            if (nextTd) targetCell = nextTd.querySelector('input')
+          }
+        }
+
+        if (targetCell) {
+          event.preventDefault()
+          targetCell.focus()
+          if (event.key === 'ArrowLeft') {
+            targetCell.setSelectionRange(targetCell.value.length, targetCell.value.length)
+          } else if (event.key === 'ArrowRight') {
+            targetCell.setSelectionRange(0, 0)
+          }
+        }
+      }
+      return
+    }
+
     if (event.key === 'Backspace') {
       const gridLevel = Number.isFinite(grid.level) ? grid.level : 0
       if (gridLevel <= 0) return
