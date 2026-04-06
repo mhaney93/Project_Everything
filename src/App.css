@@ -1108,6 +1108,11 @@ input.node-label-edit {
   color: #b86a00;
   font-size: 0.9rem;
   line-height: 1.35;
+  resize: none;
+  overflow: hidden;
+  font-family: inherit;
+  box-sizing: border-box;
+  display: block;
 }
 
 .note-input::placeholder {

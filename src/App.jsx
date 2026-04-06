@@ -22486,6 +22486,7 @@ function App() {
     }
 
     if (event.key === 'Enter') {
+      if (event.shiftKey) return // Shift+Enter inserts a line break in the textarea
       event.preventDefault()
       event.stopPropagation()
       const noteLevel = Number.isFinite(note.level) ? note.level : 0
@@ -26027,21 +26028,27 @@ function App() {
                           style={{ marginLeft: `${(Number.isFinite(note.level) ? note.level : 0) * 16}px` }}
                         >
                           <span className="note-bullet" aria-hidden="true">•</span>
-                          <input
+                          <textarea
                             ref={(element) => {
                               if (element) {
                                 noteInputRefs.current[note.id] = element
+                                element.style.height = 'auto'
+                                element.style.height = element.scrollHeight + 'px'
                               } else {
                                 delete noteInputRefs.current[note.id]
                               }
                             }}
                             className="note-input personal-note"
                             value={note.text}
-                            onChange={(event) =>
+                            onChange={(event) => {
                               updateNoteText(selectedNode.id, note.id, event.target.value)
-                            }
+                              const el = event.target
+                              el.style.height = 'auto'
+                              el.style.height = el.scrollHeight + 'px'
+                            }}
                             onKeyDown={(event) => handleNoteKeyDown(event, selectedNode.id, note)}
                             placeholder="Add a bullet point..."
+                            rows={1}
                           />
                           {isAuthenticated ? (
                             <button
