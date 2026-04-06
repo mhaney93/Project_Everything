@@ -1281,13 +1281,52 @@ input.node-label-edit {
   background: rgba(184, 106, 0, 0.15);
 }
 
+.grid-row-delete-btn,
+.grid-col-delete-btn {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 1px solid rgba(184, 106, 0, 0.4);
+  background: #fff;
+  color: #b86a00;
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  z-index: 4;
+  opacity: 0.7;
+}
+
+.grid-row-delete-btn:hover,
+.grid-col-delete-btn:hover {
+  background: rgba(220, 80, 60, 0.12);
+  border-color: rgba(220, 80, 60, 0.5);
+  color: #c0392b;
+  opacity: 1;
+}
+
 .grid-row-insert-btn {
   top: 1px;
   left: 1px;
 }
 
+.grid-row-delete-btn {
+  bottom: 1px;
+  left: 1px;
+}
+
 .grid-col-insert-btn {
   top: 1px;
+  right: 1px;
+}
+
+.grid-col-delete-btn {
+  bottom: 1px;
   right: 1px;
 }
 

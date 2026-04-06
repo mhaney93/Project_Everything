@@ -22809,6 +22809,54 @@ function App() {
     )
   }
 
+  const deleteGridRow = (nodeId, gridId, rowIdx) => {
+    setNodes((prev) =>
+      prev.map((node) =>
+        node.id === nodeId
+          ? {
+              ...node,
+              notes: (node.notes || []).map((note) =>
+                note.id === gridId && note.type === 'grid' && note.rows > 1
+                  ? {
+                      ...note,
+                      rows: note.rows - 1,
+                      data: note.data.filter((_, i) => i !== rowIdx),
+                      rowHeights: note.rowHeights
+                        ? note.rowHeights.filter((_, i) => i !== rowIdx)
+                        : null,
+                    }
+                  : note
+              ),
+            }
+          : node
+      )
+    )
+  }
+
+  const deleteGridColumn = (nodeId, gridId, colIdx) => {
+    setNodes((prev) =>
+      prev.map((node) =>
+        node.id === nodeId
+          ? {
+              ...node,
+              notes: (node.notes || []).map((note) =>
+                note.id === gridId && note.type === 'grid' && note.cols > 1
+                  ? {
+                      ...note,
+                      cols: note.cols - 1,
+                      data: note.data.map((row) => row.filter((_, i) => i !== colIdx)),
+                      colWidths: note.colWidths
+                        ? note.colWidths.filter((_, i) => i !== colIdx)
+                        : null,
+                    }
+                  : note
+              ),
+            }
+          : node
+      )
+    )
+  }
+
   const insertGridRowAbove = (nodeId, gridId, rowIdx) => {
     setNodes((prev) =>
       prev.map((node) =>
@@ -25834,7 +25882,9 @@ function App() {
                                           const showRowHandle = isAuthenticated && isLastCol && !isLastRow
                                           const isColHovered = hoveredGridCell?.gridId === note.id && hoveredGridCell?.colIdx === colIdx
                                           const showRowInsert = isAuthenticated && colIdx === 0 && isRowHovered
+                                          const showRowDelete = isAuthenticated && colIdx === 0 && isRowHovered && note.rows > 1
                                           const showColInsert = isAuthenticated && rowIdx === 0 && isColHovered
+                                          const showColDelete = isAuthenticated && rowIdx === 0 && isColHovered && note.cols > 1
                                           return (
                                             <td
                                               key={colIdx}
@@ -25858,6 +25908,14 @@ function App() {
                                                   onClick={(e) => { e.stopPropagation(); insertGridRowAbove(selectedNode.id, note.id, rowIdx) }}
                                                 >+</button>
                                               )}
+                                              {showRowDelete && (
+                                                <button
+                                                  className="grid-row-delete-btn"
+                                                  title="Delete this row"
+                                                  onMouseDown={(e) => e.stopPropagation()}
+                                                  onClick={(e) => { e.stopPropagation(); deleteGridRow(selectedNode.id, note.id, rowIdx) }}
+                                                >×</button>
+                                              )}
                                               {showColInsert && (
                                                 <button
                                                   className="grid-col-insert-btn"
@@ -25865,6 +25923,14 @@ function App() {
                                                   onMouseDown={(e) => e.stopPropagation()}
                                                   onClick={(e) => { e.stopPropagation(); insertGridColumnAfter(selectedNode.id, note.id, colIdx) }}
                                                 >+</button>
+                                              )}
+                                              {showColDelete && (
+                                                <button
+                                                  className="grid-col-delete-btn"
+                                                  title="Delete this column"
+                                                  onMouseDown={(e) => e.stopPropagation()}
+                                                  onClick={(e) => { e.stopPropagation(); deleteGridColumn(selectedNode.id, note.id, colIdx) }}
+                                                >×</button>
                                               )}
                                               {showColHandle && (
                                                 <div
