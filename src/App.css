@@ -1256,6 +1256,41 @@ input.node-label-edit {
   opacity: 1;
 }
 
+.grid-row-insert-btn,
+.grid-col-insert-btn {
+  position: absolute;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 1px solid rgba(184, 106, 0, 0.5);
+  background: #fff;
+  color: #b86a00;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  z-index: 4;
+}
+
+.grid-row-insert-btn:hover,
+.grid-col-insert-btn:hover {
+  background: rgba(184, 106, 0, 0.15);
+}
+
+.grid-row-insert-btn {
+  top: 1px;
+  left: 1px;
+}
+
+.grid-col-insert-btn {
+  top: 1px;
+  right: 1px;
+}
+
 .grid-controls {
   display: flex;
   gap: 1rem;

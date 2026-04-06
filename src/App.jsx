@@ -1367,6 +1367,7 @@ function App() {
   const [editingSummaryId, setEditingSummaryId] = useState(null)
   const [notification, setNotification] = useState(null) // { message, type: 'error' | 'success' | 'info' }
   const [lastCreatedGridId, setLastCreatedGridId] = useState(null) // Track newly created grid for Tab indent
+  const [hoveredGridCell, setHoveredGridCell] = useState(null) // { gridId, rowIdx, colIdx }
   const [deleteModalChoice, setDeleteModalChoice] = useState('cancel') // 'cancel' | 'delete'
   const [createNodeMode, setCreateNodeMode] = useState(null) // 'child' | 'sibling' | null - for button-based node creation
   const [createNodeHintPosition, setCreateNodeHintPosition] = useState(null)
@@ -22808,6 +22809,62 @@ function App() {
     )
   }
 
+  const insertGridRowAbove = (nodeId, gridId, rowIdx) => {
+    setNodes((prev) =>
+      prev.map((node) =>
+        node.id === nodeId
+          ? {
+              ...node,
+              notes: (node.notes || []).map((note) =>
+                note.id === gridId && note.type === 'grid'
+                  ? {
+                      ...note,
+                      rows: note.rows + 1,
+                      data: [
+                        ...note.data.slice(0, rowIdx),
+                        Array(note.cols).fill(''),
+                        ...note.data.slice(rowIdx),
+                      ],
+                      rowHeights: note.rowHeights
+                        ? [...note.rowHeights.slice(0, rowIdx), 32, ...note.rowHeights.slice(rowIdx)]
+                        : null,
+                    }
+                  : note
+              ),
+            }
+          : node
+      )
+    )
+  }
+
+  const insertGridColumnAfter = (nodeId, gridId, colIdx) => {
+    setNodes((prev) =>
+      prev.map((node) =>
+        node.id === nodeId
+          ? {
+              ...node,
+              notes: (node.notes || []).map((note) =>
+                note.id === gridId && note.type === 'grid'
+                  ? {
+                      ...note,
+                      cols: note.cols + 1,
+                      data: note.data.map((row) => [
+                        ...row.slice(0, colIdx + 1),
+                        '',
+                        ...row.slice(colIdx + 1),
+                      ]),
+                      colWidths: note.colWidths
+                        ? [...note.colWidths.slice(0, colIdx + 1), 120, ...note.colWidths.slice(colIdx + 1)]
+                        : null,
+                    }
+                  : note
+              ),
+            }
+          : node
+      )
+    )
+  }
+
   const handleCellResizeMouseDown = (e, nodeId, gridId, note, colIdx, rowIdx, type) => {
     e.preventDefault()
     e.stopPropagation()
@@ -25761,10 +25818,13 @@ function App() {
                                     ))}
                                   </colgroup>
                                 ) : null}
-                                <tbody>
+                                <tbody
+                                  onMouseLeave={() => setHoveredGridCell(null)}
+                                >
                                   {note.data.map((row, rowIdx) => {
                                     const isLastRow = rowIdx === note.rows - 1
                                     const rowHeight = note.rowHeights ? note.rowHeights[rowIdx] : null
+                                    const isRowHovered = hoveredGridCell?.gridId === note.id && hoveredGridCell?.rowIdx === rowIdx
                                     return (
                                       <tr key={rowIdx} style={rowHeight ? { height: rowHeight } : undefined}>
                                         {row.map((cell, colIdx) => {
@@ -25772,8 +25832,15 @@ function App() {
                                           const isCorner = isLastRow && isLastCol
                                           const showColHandle = isAuthenticated && isLastRow && !isLastCol
                                           const showRowHandle = isAuthenticated && isLastCol && !isLastRow
+                                          const isColHovered = hoveredGridCell?.gridId === note.id && hoveredGridCell?.colIdx === colIdx
+                                          const showRowInsert = isAuthenticated && colIdx === 0 && isRowHovered
+                                          const showColInsert = isAuthenticated && rowIdx === 0 && isColHovered
                                           return (
-                                            <td key={colIdx} style={{ position: 'relative' }}>
+                                            <td
+                                              key={colIdx}
+                                              style={{ position: 'relative' }}
+                                              onMouseEnter={() => setHoveredGridCell({ gridId: note.id, rowIdx, colIdx })}
+                                            >
                                               <input
                                                 type="text"
                                                 className="grid-cell-input"
@@ -25783,6 +25850,22 @@ function App() {
                                                 }
                                                 placeholder=""
                                               />
+                                              {showRowInsert && (
+                                                <button
+                                                  className="grid-row-insert-btn"
+                                                  title="Insert row above"
+                                                  onMouseDown={(e) => e.stopPropagation()}
+                                                  onClick={(e) => { e.stopPropagation(); insertGridRowAbove(selectedNode.id, note.id, rowIdx) }}
+                                                >+</button>
+                                              )}
+                                              {showColInsert && (
+                                                <button
+                                                  className="grid-col-insert-btn"
+                                                  title="Insert column to the right"
+                                                  onMouseDown={(e) => e.stopPropagation()}
+                                                  onClick={(e) => { e.stopPropagation(); insertGridColumnAfter(selectedNode.id, note.id, colIdx) }}
+                                                >+</button>
+                                              )}
                                               {showColHandle && (
                                                 <div
                                                   className="grid-col-resize-handle"
