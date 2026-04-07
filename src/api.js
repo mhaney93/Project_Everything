@@ -63,6 +63,15 @@ export const authAPI = {
     if (!res.ok) throw new Error(data.error);
     return data;
   },
+
+  getMe: async () => {
+    const res = await fetch(`${API_BASE_URL}/auth/me`, {
+      ...defaultFetchOptions,
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    return data;
+  },
 };
 
 // Maps API calls

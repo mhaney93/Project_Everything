@@ -23178,11 +23178,17 @@ function App() {
           setNodesFromBackend(collapseNodesToRoot(nodesWithHidden))
         }
 
-        // Use cached email or set a temporary user object
+        // Use cached email or fetch from server
         if (cachedUserEmail) {
           setCurrentUser({ email: cachedUserEmail })
         } else {
-          setCurrentUser({ authenticated: true })
+          try {
+            const meData = await authAPI.getMe()
+            setCurrentUser(meData.user)
+            localStorage.setItem('everything_user_email', meData.user.email)
+          } catch {
+            setCurrentUser({ authenticated: true })
+          }
         }
       } catch (err) {
         // Not authenticated, clear cached email
