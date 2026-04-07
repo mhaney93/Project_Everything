@@ -24030,7 +24030,7 @@ function App() {
         
         return a.localeCompare(b)
       })
-      .slice(0, 8) // Limit to 8 suggestions
+      .slice(0, 12) // Limit to 12 suggestions
 
     setSearchSuggestions(suggestions)
     // Auto-select the first suggestion
