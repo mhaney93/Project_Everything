@@ -24147,7 +24147,7 @@ function App() {
       merged.push(trimmed)
     })
 
-    return merged.slice(0, 8)
+    return merged.slice(0, 12)
   }
 
   const findNodePath = (label) => {
