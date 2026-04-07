@@ -23996,11 +23996,6 @@ function App() {
 
     const labels = Array.from(allLabels).filter((label) => typeof label === 'string')
 
-    if (trimmedQuery.toLowerCase() === 'wisdom') {
-      console.log('[search debug] labels containing wisdom:', labels.filter(l => l.toLowerCase().includes('wisdom')))
-      console.log('[search debug] wordsToMatch:', wordsToMatch)
-    }
-
     const suggestions = labels
       .filter(matchesQuery)
       .sort((a, b) => {
@@ -24033,6 +24028,10 @@ function App() {
           if (!aInOrder && bInOrder) return 1
         }
         
+        // Shorter labels are more specific matches — rank them higher
+        const lenDiff = a.length - b.length
+        if (lenDiff !== 0) return lenDiff
+
         return a.localeCompare(b)
       })
       .slice(0, 12) // Limit to 12 suggestions
