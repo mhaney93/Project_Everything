@@ -23928,17 +23928,18 @@ function App() {
     const handleClickOutside = (event) => {
       if (searchRowRef.current && !searchRowRef.current.contains(event.target)) {
         setSearchSuggestions([])
+        setRelatedIdeas([])
         setHighlightedSuggestion(-1)
       }
     }
 
-    if (searchSuggestions.length > 0) {
+    if (searchSuggestions.length > 0 || relatedIdeas.length > 0) {
       document.addEventListener('mousedown', handleClickOutside)
       return () => {
         document.removeEventListener('mousedown', handleClickOutside)
       }
     }
-  }, [searchSuggestions.length])
+  }, [searchSuggestions.length, relatedIdeas.length])
 
   const generateSearchSuggestions = (query, activeWords = null) => {
     const trimmedQuery = query.trim()
