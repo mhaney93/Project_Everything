@@ -24962,6 +24962,8 @@ function App() {
                           }, 0)
                         }
                       }
+                    } else if (searchSuggestions.length > 0) {
+                      handleSuggestionClick(searchSuggestions[0])
                     } else {
                       handleSearchWithQuery(searchQuery)
                     }
