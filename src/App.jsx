@@ -23996,6 +23996,11 @@ function App() {
 
     const labels = Array.from(allLabels).filter((label) => typeof label === 'string')
 
+    if (trimmedQuery.toLowerCase() === 'wisdom') {
+      console.log('[search debug] labels containing wisdom:', labels.filter(l => l.toLowerCase().includes('wisdom')))
+      console.log('[search debug] wordsToMatch:', wordsToMatch)
+    }
+
     const suggestions = labels
       .filter(matchesQuery)
       .sort((a, b) => {
