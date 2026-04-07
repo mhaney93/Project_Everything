@@ -23972,11 +23972,11 @@ function App() {
       if (wordsToMatch.length === 1) {
         const word = wordsToMatch[0]
         const regex = new RegExp(`\\b${escapeRegex(word)}`, 'i')
-        return regex.test(label) || lowerLabel.startsWith(word)
+        return regex.test(label) || lowerLabel.startsWith(word) || lowerLabel.includes(word)
       }
       return wordsToMatch.every((word) => {
         const regex = new RegExp(`\\b${escapeRegex(word)}`, 'i')
-        return regex.test(label)
+        return regex.test(label) || label.toLowerCase().includes(word)
       })
     }
     const allTopics = Object.keys(TOPIC_SUBDIVISIONS)
