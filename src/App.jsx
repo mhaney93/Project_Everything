@@ -23694,6 +23694,20 @@ function App() {
         return
       }
 
+      // Handle Space: enter title edit mode on selected/focused node
+      if (event.key === ' ' && (selectedId !== null || focusedElement !== null)) {
+        const targetNodeId = focusedElement?.nodeId ?? selectedId
+        if (targetNodeId !== null && targetNodeId !== undefined) {
+          const targetNode = nodes.find(n => n.id === targetNodeId)
+          if (targetNode && (isAdmin || targetNode.isCustom)) {
+            event.preventDefault()
+            setEditingNodeId(targetNodeId)
+            setTimeout(() => editInputRef.current?.focus(), 50)
+          }
+        }
+        return
+      }
+
       // Handle Shift+Enter: add custom child node
       if (event.key === 'Enter' && event.shiftKey && (selectedId !== null || focusedElement !== null)) {
         event.preventDefault()
