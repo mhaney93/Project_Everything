@@ -1407,6 +1407,7 @@ function App() {
   const [ghostPos, setGhostPos] = useState({ x: 0, y: 0 })
   const [nodeDragOver, setNodeDragOver] = useState(null)
   const [multiSelectedIds, setMultiSelectedIds] = useState(new Set())
+  const [copiedNodeId, setCopiedNodeId] = useState(null)
   const noteInputRefs = useRef({})
   const deleteCancelButtonRef = useRef(null)
   const deleteConfirmButtonRef = useRef(null)
@@ -23617,6 +23618,82 @@ function App() {
         return
       }
 
+      // Handle Ctrl+C: copy selected/focused node
+      if ((event.ctrlKey || event.metaKey) && event.key === 'c' && !event.shiftKey) {
+        const targetNodeId = focusedElement?.nodeId ?? selectedId
+        if (targetNodeId !== null && targetNodeId !== undefined && isAuthenticated) {
+          const targetNode = nodes.find(n => n.id === targetNodeId)
+          if (targetNode && (isAdmin || targetNode.isCustom)) {
+            event.preventDefault()
+            setCopiedNodeId(targetNodeId)
+          }
+        }
+        return
+      }
+
+      // Handle Ctrl+V: paste copied node as child of selected/focused node
+      if ((event.ctrlKey || event.metaKey) && event.key === 'v' && !event.shiftKey) {
+        if (copiedNodeId === null || copiedNodeId === undefined) return
+        const targetNodeId = focusedElement?.nodeId ?? selectedId
+        if (targetNodeId === null || targetNodeId === undefined || !isAuthenticated) return
+        event.preventDefault()
+
+        setNodes(prev => {
+          const sourceNode = prev.find(n => n.id === copiedNodeId)
+          if (!sourceNode) return prev
+
+          // Collect all descendants of the copied node (including the node itself)
+          const collectSubtree = (rootId) => {
+            const result = []
+            const queue = [rootId]
+            while (queue.length > 0) {
+              const id = queue.shift()
+              const node = prev.find(n => n.id === id)
+              if (!node) continue
+              result.push(node)
+              prev.filter(n => n.parentId === id).forEach(child => queue.push(child.id))
+            }
+            return result
+          }
+
+          const subtree = collectSubtree(copiedNodeId)
+
+          // Generate new IDs for all nodes in the subtree
+          const maxExistingId = prev.reduce((max, n) => Number.isFinite(n.id) ? Math.max(max, n.id) : max, 0)
+          let nextNewId = Math.max(nextId.current, maxExistingId + 1)
+          const idMap = new Map()
+          subtree.forEach(n => {
+            idMap.set(n.id, nextNewId++)
+          })
+          nextId.current = nextNewId
+
+          const targetPersonal = isInPersonalSubtree(targetNodeId)
+          const targetHasHiddenKids = prev.some(x => x.parentId === targetNodeId && x.hidden)
+          const targetHasVisibleKids = prev.some(x => x.parentId === targetNodeId && !x.hidden)
+          const shouldHide = targetHasHiddenKids && !targetHasVisibleKids
+
+          const newNodes = subtree.map(n => {
+            const newParentId = n.id === copiedNodeId ? targetNodeId : idMap.get(n.parentId)
+            return {
+              ...n,
+              id: idMap.get(n.id),
+              parentId: newParentId,
+              isCustom: true,
+              isPersonal: targetPersonal,
+              hidden: n.id === copiedNodeId ? shouldHide : n.hidden,
+            }
+          })
+
+          const result = [...prev, ...newNodes]
+          mapsAPI.saveMap(result).catch(e => {
+            console.error('Failed to save after paste:', e)
+            setNotification({ message: 'Failed to save — changes may not persist after refresh.', type: 'error' })
+          })
+          return result
+        })
+        return
+      }
+
       // Handle Shift+Enter: add custom child node
       if (event.key === 'Enter' && event.shiftKey && (selectedId !== null || focusedElement !== null)) {
         event.preventDefault()
@@ -23927,7 +24004,7 @@ function App() {
     return () => {
       window.removeEventListener('keydown', handleShortcut)
     }
-  }, [selectedId, focusedElement, nodes, layout.positions, hasKnownSubdivisions, addChildren, addCustomChild, addCustomSibling, deleteCustomNode, reorderCustomNode, isAuthenticated, isAdmin, deleteConfirmation, deleteModalChoice, isFullscreenMode, multiSelectedIds])
+  }, [selectedId, focusedElement, nodes, layout.positions, hasKnownSubdivisions, addChildren, addCustomChild, addCustomSibling, deleteCustomNode, reorderCustomNode, isAuthenticated, isAdmin, deleteConfirmation, deleteModalChoice, isFullscreenMode, multiSelectedIds, copiedNodeId])
 
   // Close search suggestions when clicking outside the search row
   useEffect(() => {
