@@ -1089,7 +1089,7 @@ const getDisplayLabelRaw = (label) => {
   const m = label.match(/\s\d+:(\d+)$/)
   if (m) return m[1]
   const pipeIdx = label.indexOf('|')
-  if (pipeIdx !== -1) return label.slice(0, pipeIdx)
+  if (pipeIdx > 0) return label.slice(0, pipeIdx)
   return label
 }
 
