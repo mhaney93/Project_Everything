@@ -779,6 +779,7 @@ button:not(:disabled):hover {
   pointer-events: none;
   line-height: 1.2;
   white-space: pre-wrap;
+  overflow-wrap: break-word;
 }
 
 input.node-label-edit {

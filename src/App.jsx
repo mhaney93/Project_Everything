@@ -11650,6 +11650,18 @@ function App() {
     else if (length <= 35) baseSizeRem = 0.8
     else if (length <= 45) baseSizeRem = 0.7
 
+    // Shrink further when there's a long unbreakable word that would overflow
+    // the node width. Available text width ≈ NODE_WIDTH − 2×1.2rem padding ≈ 137.6px.
+    // At baseSizeRem, a bold character is ~baseSizeRem×16×0.58 px wide.
+    // => max baseSizeRem for word of N chars = 137.6 / (N × 16 × 0.58) ≈ 14.8 / N
+    const longestWord = label.split(/\s+/).reduce((max, w) => w.length > max ? w.length : max, 0)
+    if (longestWord > 0) {
+      const maxForWord = 14.8 / longestWord
+      if (maxForWord < baseSizeRem) {
+        baseSizeRem = Math.max(0.4, maxForWord)
+      }
+    }
+
     const scaledSize = baseSizeRem * nodeSizeScale
     return `${scaledSize.toFixed(2)}rem`
   }
