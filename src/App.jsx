@@ -23217,14 +23217,41 @@ function App() {
       return;
     }
 
-    if (Date.now() < suppressSaveUntil.current) return;
+    if (Date.now() < suppressSaveUntil.current) {
+      // A change happened during the suppress window (e.g. title edit right after a delete).
+      // Schedule a save for after the window ends so the change isn't silently lost.
+      const remaining = suppressSaveUntil.current - Date.now();
+      const deferTimer = setTimeout(async () => {
+        try {
+          await mapsAPI.saveMap(nodesRef.current);
+        } catch (err) {
+          console.error('Failed to save map (deferred):', err);
+          // Retry once after 3 seconds
+          setTimeout(async () => {
+            try { await mapsAPI.saveMap(nodesRef.current); }
+            catch (err2) {
+              console.error('Failed to save map (retry):', err2);
+              setNotification({ message: 'Failed to save — changes may not persist after refresh.', type: 'error' });
+            }
+          }, 3000);
+        }
+      }, remaining + 100);
+      return () => clearTimeout(deferTimer);
+    }
 
     const saveTimer = setTimeout(async () => {
       try {
-        await mapsAPI.saveMap(nodes);
+        await mapsAPI.saveMap(nodesRef.current);
       } catch (err) {
         console.error('Failed to save map:', err);
-        setNotification({ message: 'Failed to save — changes may not persist after refresh.', type: 'error' });
+        // Retry once after 3 seconds before showing the error
+        setTimeout(async () => {
+          try { await mapsAPI.saveMap(nodesRef.current); }
+          catch (err2) {
+            console.error('Failed to save map (retry):', err2);
+            setNotification({ message: 'Failed to save — changes may not persist after refresh.', type: 'error' });
+          }
+        }, 3000);
       }
     }, 2000);
 
