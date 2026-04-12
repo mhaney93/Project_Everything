@@ -22275,6 +22275,7 @@ function App() {
       )
       setAnimatingIds(new Set())
       setSelectedId(null)
+      setFocusedElement(null)   // clear any stale keyboard-nav focus so camera uses lastFocusedIdRef
       lastFocusedIdRef.current = parentNodeId
       setBasePanOffset({ x: 0, y: 0 })
       setRecenterKey((k) => k + 1)
