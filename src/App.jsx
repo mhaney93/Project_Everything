@@ -23956,29 +23956,18 @@ function App() {
         let nextNode = null
         
         if (event.key === 'ArrowUp') {
-          const siblingsAbove = siblings.filter((n) => {
-            const pos = layout.positions.get(n.id)
-            return pos && pos.y < currentPos.y
-          })
-          if (siblingsAbove.length > 0) {
-            siblingsAbove.sort((a, b) => {
-              const posA = layout.positions.get(a.id)
-              const posB = layout.positions.get(b.id)
-              return posB.y - posA.y
-            })
-            nextNode = siblingsAbove[0]
-          } else {
-            const candidatesAbove = nodes.filter((n) => {
-              const pos = layout.positions.get(n.id)
-              return pos && pos.y < currentPos.y && n.id !== startNodeId
-            })
-            candidatesAbove.sort((a, b) => {
-              const posA = layout.positions.get(a.id)
-              const posB = layout.positions.get(b.id)
-              return posB.y - posA.y
-            })
-            nextNode = candidatesAbove[0]
+          // Navigate to the parent node's dots (or the parent node itself if it has no dots)
+          const parentNode = nodes.find((n) => n.id === currentNode.parentId)
+          if (parentNode) {
+            const parentHasDots =
+              (hasKnownSubdivisions(parentNode.label) &&
+                (TOPIC_SUBDIVISIONS[parentNode.label] || []).some(
+                  (l) => !(parentNode.excludedChildLabels || []).includes(l)
+                )) ||
+              nodes.some((n) => n.parentId === parentNode.id)
+            setFocusedElement({ nodeId: parentNode.id, type: parentHasDots ? 'dots' : 'node' })
           }
+          return
         } else if (event.key === 'ArrowDown') {
           const siblingsBelow = siblings.filter((n) => {
             const pos = layout.positions.get(n.id)
