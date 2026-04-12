@@ -23936,7 +23936,7 @@ function App() {
         
         // Special handling for Down/Up when navigating to/from dots
         if (event.key === 'ArrowDown') {
-          if (startType === 'node' && hasKnownSubdivisions(currentNode.label) && (TOPIC_SUBDIVISIONS[currentNode.label] || []).some(l => !(currentNode.excludedChildLabels || []).includes(l))) {
+          if (startType === 'node' && !currentNode.isCustom && hasKnownSubdivisions(currentNode.label) && (TOPIC_SUBDIVISIONS[currentNode.label] || []).some(l => !(currentNode.excludedChildLabels || []).includes(l))) {
             // Move from node to its dots
             setFocusedElement({ nodeId: startNodeId, type: 'dots' })
             return
@@ -23960,7 +23960,7 @@ function App() {
           const parentNode = nodes.find((n) => n.id === currentNode.parentId)
           if (parentNode) {
             const parentHasDots =
-              (hasKnownSubdivisions(parentNode.label) &&
+              (!parentNode.isCustom && hasKnownSubdivisions(parentNode.label) &&
                 (TOPIC_SUBDIVISIONS[parentNode.label] || []).some(
                   (l) => !(parentNode.excludedChildLabels || []).includes(l)
                 )) ||
@@ -25755,7 +25755,7 @@ function App() {
                             <span style={{ fontSize: getNodeFontSize(getDisplayLabel(node.label)), ...(getDisplayLabel(node.label).includes('\n') ? { textAlign: 'left', fontFamily: 'monospace' } : {}) }}>{getDisplayLabel(node.label)}</span>
                           </button>
                         )}
-                        {((hasKnownSubdivisions(node.label) && (TOPIC_SUBDIVISIONS[node.label] || []).some(l => !(node.excludedChildLabels || []).includes(l))) || nodes.some((n) => n.parentId === node.id)) ? (
+                        {((!node.isCustom && hasKnownSubdivisions(node.label) && (TOPIC_SUBDIVISIONS[node.label] || []).some(l => !(node.excludedChildLabels || []).includes(l))) || nodes.some((n) => n.parentId === node.id)) ? (
                         <span
                           className="node-dots"
                           role="button"
@@ -25913,7 +25913,7 @@ function App() {
                     <div>
                       <textarea
                         className="summary-textarea"
-                        value={selectedNode.summary || generateSummary(selectedNode.label) || ''}
+                        value={selectedNode.summary || (!selectedNode.isCustom ? generateSummary(selectedNode.label) : '') || ''}
                         onChange={(e) => updateNodeSummary(selectedNode.id, e.target.value)}
                         onBlur={(e) => updateNodeSummary(selectedNode.id, e.target.value, true)}
                         onKeyDown={(e) => {
@@ -25941,13 +25941,13 @@ function App() {
                       onClick={() => setEditingSummaryId(selectedNode.id)}
                       title="Click to edit summary"
                     >
-                      {selectedNode.summary || generateSummary(selectedNode.label) || 'Click to add a summary...'}
+                      {selectedNode.summary || (!selectedNode.isCustom ? generateSummary(selectedNode.label) : '') || 'Click to add a summary...'}
                     </p>
                   )}
                 </div>
               ) : selectedNode.isCustom ? (
-                (selectedNode.summary || generateSummary(selectedNode.label)) ? (
-                  <p className="panel-summary">{selectedNode.summary || generateSummary(selectedNode.label)}</p>
+                selectedNode.summary ? (
+                  <p className="panel-summary">{selectedNode.summary}</p>
                 ) : null
               ) : (
                 (selectedNode.summary || generateSummary(selectedNode.label)) ? (
