@@ -11596,6 +11596,11 @@ function App() {
   const [isZooming, setIsZooming] = useState(false)
   const isZoomingSetterRef = useRef(setIsZooming)
   const zoomTimeoutRef = useRef(null)
+  const [showZoomIndicator, setShowZoomIndicator] = useState(false)
+  const showZoomIndicatorSetterRef = useRef(setShowZoomIndicator)
+  const zoomIndicatorTimeoutRef = useRef(null)
+  const nodeSizePercentRef = useRef(nodeSizePercent)
+  nodeSizePercentRef.current = nodeSizePercent
 
   useEffect(() => {
     window.localStorage.setItem('nodeSizeScale', String(nodeSizeScale))
@@ -25032,6 +25037,9 @@ function App() {
       clearTimeout(zoomTimeoutRef.current)
       zoomTimeoutRef.current = setTimeout(() => isZoomingSetterRef.current(false), 150)
       adjustNodeSizeRef.current(e.deltaY < 0 ? NODE_SIZE_STEP : -NODE_SIZE_STEP)
+      showZoomIndicatorSetterRef.current(true)
+      clearTimeout(zoomIndicatorTimeoutRef.current)
+      zoomIndicatorTimeoutRef.current = setTimeout(() => showZoomIndicatorSetterRef.current(false), 1200)
     }
     el.addEventListener('wheel', onWheel, { passive: false })
     return () => {
@@ -26429,6 +26437,11 @@ function App() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Zoom indicator */}
+      {showZoomIndicator && (
+        <div className="zoom-indicator">{nodeSizePercent}%</div>
       )}
 
       {/* Undo Delete Toast */}

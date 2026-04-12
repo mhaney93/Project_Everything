@@ -2322,6 +2322,21 @@ input.node-label-edit {
   flex: 1;
 }
 
+.zoom-indicator {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  background: rgba(30, 41, 59, 0.85);
+  color: #f1f5f9;
+  border-radius: 8px;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  pointer-events: none;
+  z-index: 9999;
+  animation: notificationFadeIn 0.15s ease-out forwards;
+}
+
 .undo-toast {
   position: fixed;
   bottom: 2rem;
