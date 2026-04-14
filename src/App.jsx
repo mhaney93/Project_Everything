@@ -23423,8 +23423,20 @@ function App() {
   // Sync max upward pan limit into a ref so drag handlers always use the latest value.
   // Canvas top is always at effectiveHeaderHeight on screen, so ceiling in canvas coords = 0.
   // Constraint: top of lowest node (canvas Y) >= 0
-  // => totalPanY <= finalMaxY - nodeHeight + renderOffsetY
-  maxPanYRef.current = Math.max(0, finalMaxY - nodeHeight + renderOffsetY)
+  // Ceiling is based only on nodes currently visible in the viewport (at committed basePanOffset),
+  // NOT the entire layout — otherwise the user could pan all visible content above the search bar
+  // while waiting for deep off-screen nodes to "reach" the ceiling.
+  let ceilingMaxY = 0
+  const ceilingBuffer = isMobile ? 2000 : 500
+  layout.positions.forEach((pos, id) => {
+    if (!visibleNodeIdSet.has(id)) return
+    const screenY = pos.y + baseOffsetYCentered + renderOffsetY - (basePanOffset?.y ?? 0)
+    if (screenY > visibleViewportHeight + ceilingBuffer) return
+    if (screenY + nodeHeight < -ceilingBuffer) return
+    const bottom = pos.y + baseOffsetYCentered + nodeHeight
+    ceilingMaxY = Math.max(ceilingMaxY, bottom)
+  })
+  maxPanYRef.current = Math.max(0, ceilingMaxY - nodeHeight + renderOffsetY)
 
   // Calculate actual SVG bounds
   const svgWidth = Math.max(finalMaxX + renderOffsetX + PADDING / 2, viewportSize.width || 1000)
