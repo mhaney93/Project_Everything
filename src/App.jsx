@@ -1397,6 +1397,7 @@ function App() {
   const suppressNodeClickRef = useRef(false)
   const ghostPosRef = useRef({ x: 0, y: 0 })
   const clampPanOffsetRef = useRef(null)
+  const summaryTextareaHeightRef = useRef(null)
   const nodeDragDescendantsRef = useRef(new Set())
   const nodeDragScrollRafRef = useRef(null)
   const [nodeDragActive, setNodeDragActive] = useState(false)
@@ -25935,8 +25936,14 @@ function App() {
                             setEditingSummaryId(null)
                           }
                         }}
+                        onMouseUp={(e) => {
+                          if (e.target.style.height) {
+                            summaryTextareaHeightRef.current = e.target.style.height
+                          }
+                        }}
                         placeholder="Add a summary..."
                         rows={3}
+                        style={summaryTextareaHeightRef.current ? { height: summaryTextareaHeightRef.current } : undefined}
                         autoFocus
                       />
                       <button
