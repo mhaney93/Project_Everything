@@ -22136,7 +22136,7 @@ function App() {
     // Save immediately, then offer undo toast for 5 seconds
     const nodesAfterDelete = applyTransform(nodes)
     suppressSaveUntil.current = Date.now() + 6000
-    setUndoSnapshot({ nodes: removedNodes, label: deletedLabel })
+    setUndoSnapshot({ type: 'node-delete', nodes: removedNodes, label: deletedLabel, message: `"${deletedLabel}" deleted.` })
     setNotification(null)
     mapsAPI.saveMap(nodesAfterDelete).catch(e => { console.error('Failed to save after delete:', e); setNotification({ message: 'Failed to save — changes may not persist after refresh.', type: 'error' }) })
 
@@ -22157,7 +22157,65 @@ function App() {
     if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
     undoTimerRef.current = null
     suppressSaveUntil.current = 0
-    const restoredNodes = [...nodesRef.current, ...undoSnapshot.nodes]
+
+    let restoredNodes
+    if (undoSnapshot.type === 'note-delete') {
+      const { nodeId, note } = undoSnapshot
+      restoredNodes = nodesRef.current.map(node =>
+        node.id === nodeId
+          ? { ...node, notes: [...(node.notes || []), note] }
+          : node
+      )
+    } else if (undoSnapshot.type === 'grid-row-delete') {
+      const { nodeId, gridId, rowIdx, rowData, rowHeight } = undoSnapshot
+      restoredNodes = nodesRef.current.map(node =>
+        node.id === nodeId
+          ? {
+              ...node,
+              notes: (node.notes || []).map(note =>
+                note.id === gridId
+                  ? {
+                      ...note,
+                      rows: note.rows + 1,
+                      data: [...note.data.slice(0, rowIdx), rowData, ...note.data.slice(rowIdx)],
+                      rowHeights: note.rowHeights
+                        ? [...note.rowHeights.slice(0, rowIdx), rowHeight, ...note.rowHeights.slice(rowIdx)]
+                        : null,
+                    }
+                  : note
+              ),
+            }
+          : node
+      )
+    } else if (undoSnapshot.type === 'grid-col-delete') {
+      const { nodeId, gridId, colIdx, colData, colWidth } = undoSnapshot
+      restoredNodes = nodesRef.current.map(node =>
+        node.id === nodeId
+          ? {
+              ...node,
+              notes: (node.notes || []).map(note =>
+                note.id === gridId
+                  ? {
+                      ...note,
+                      cols: note.cols + 1,
+                      data: note.data.map((row, rIdx) => [
+                        ...row.slice(0, colIdx),
+                        colData[rIdx],
+                        ...row.slice(colIdx),
+                      ]),
+                      colWidths: note.colWidths
+                        ? [...note.colWidths.slice(0, colIdx), colWidth, ...note.colWidths.slice(colIdx)]
+                        : null,
+                    }
+                  : note
+              ),
+            }
+          : node
+      )
+    } else {
+      restoredNodes = [...nodesRef.current, ...undoSnapshot.nodes]
+    }
+
     setNodes(restoredNodes)
     mapsAPI.saveMap(restoredNodes).catch(e => console.error('Failed to save after undo:', e))
     setUndoSnapshot(null)
@@ -22269,11 +22327,20 @@ function App() {
       !visiblePredefined.some(n => expectedLabelsForParent.includes(n.label))
 
     if (existingChildren.length > 0 && !visibleAreStale) {
-      setNodes((prev) =>
-        prev.map((node) =>
-          node.parentId === parentNodeId ? { ...node, hidden: true } : node
-        )
-      )
+      setNodes((prev) => {
+        const toHide = new Set()
+        const queue = [parentNodeId]
+        while (queue.length > 0) {
+          const id = queue.shift()
+          for (const n of prev) {
+            if (n.parentId === id) {
+              toHide.add(n.id)
+              queue.push(n.id)
+            }
+          }
+        }
+        return prev.map((node) => toHide.has(node.id) ? { ...node, hidden: true } : node)
+      })
       setAnimatingIds(new Set())
       setSelectedId(null)
       setFocusedElement(null)   // clear any stale keyboard-nav focus so camera uses lastFocusedIdRef
@@ -22478,19 +22545,35 @@ function App() {
   }
 
   const removeNoteFromNode = (nodeId, noteId) => {
+    const isDraft = draftNoteIdsRef.current.has(noteId)
     draftNoteIdsRef.current.delete(noteId)
     draftGridIdsRef.current.delete(noteId)
     if (lastCreatedGridId === noteId) {
       setLastCreatedGridId(null)
     }
 
-    setNodes((prev) =>
-      prev.map((node) =>
-        node.id === nodeId
-          ? { ...node, notes: (node.notes || []).filter((note) => note.id !== noteId) }
-          : node
-      )
+    const parentNode = nodesRef.current.find(n => n.id === nodeId)
+    const noteToDelete = parentNode?.notes?.find(n => n.id === noteId)
+    const nodesAfter = nodesRef.current.map(node =>
+      node.id === nodeId
+        ? { ...node, notes: (node.notes || []).filter(n => n.id !== noteId) }
+        : node
     )
+
+    setNodes(nodesAfter)
+
+    const hasContent = noteToDelete && (noteToDelete.type === 'grid' || (noteToDelete.text || '').trim())
+    if (noteToDelete && !isDraft && hasContent) {
+      const noteLabel = noteToDelete.type === 'grid' ? 'Grid' : 'Note'
+      suppressSaveUntil.current = Date.now() + 6000
+      setUndoSnapshot({ type: 'note-delete', nodeId, note: noteToDelete, message: `${noteLabel} deleted.` })
+      mapsAPI.saveMap(nodesAfter).catch(e => console.error('Failed to save after delete:', e))
+      if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
+      undoTimerRef.current = setTimeout(() => {
+        suppressSaveUntil.current = 0
+        setUndoSnapshot(null)
+      }, 5000)
+    }
   }
 
   const handleNoteKeyDown = (event, nodeId, note) => {
@@ -22831,51 +22914,77 @@ function App() {
   }
 
   const deleteGridRow = (nodeId, gridId, rowIdx) => {
-    setNodes((prev) =>
-      prev.map((node) =>
-        node.id === nodeId
-          ? {
-              ...node,
-              notes: (node.notes || []).map((note) =>
-                note.id === gridId && note.type === 'grid' && note.rows > 1
-                  ? {
-                      ...note,
-                      rows: note.rows - 1,
-                      data: note.data.filter((_, i) => i !== rowIdx),
-                      rowHeights: note.rowHeights
-                        ? note.rowHeights.filter((_, i) => i !== rowIdx)
-                        : null,
-                    }
-                  : note
-              ),
-            }
-          : node
-      )
+    const parentNode = nodesRef.current.find(n => n.id === nodeId)
+    const grid = parentNode?.notes?.find(n => n.id === gridId)
+    if (!grid || grid.type !== 'grid' || grid.rows <= 1) return
+
+    const rowData = grid.data[rowIdx]
+    const rowHeight = grid.rowHeights?.[rowIdx] ?? null
+
+    const nodesAfter = nodesRef.current.map(node =>
+      node.id === nodeId
+        ? {
+            ...node,
+            notes: (node.notes || []).map(note =>
+              note.id === gridId
+                ? {
+                    ...note,
+                    rows: note.rows - 1,
+                    data: note.data.filter((_, i) => i !== rowIdx),
+                    rowHeights: note.rowHeights ? note.rowHeights.filter((_, i) => i !== rowIdx) : null,
+                  }
+                : note
+            ),
+          }
+        : node
     )
+
+    setNodes(nodesAfter)
+    suppressSaveUntil.current = Date.now() + 6000
+    setUndoSnapshot({ type: 'grid-row-delete', nodeId, gridId, rowIdx, rowData, rowHeight, message: 'Row deleted.' })
+    mapsAPI.saveMap(nodesAfter).catch(e => console.error('Failed to save after delete:', e))
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
+    undoTimerRef.current = setTimeout(() => {
+      suppressSaveUntil.current = 0
+      setUndoSnapshot(null)
+    }, 5000)
   }
 
   const deleteGridColumn = (nodeId, gridId, colIdx) => {
-    setNodes((prev) =>
-      prev.map((node) =>
-        node.id === nodeId
-          ? {
-              ...node,
-              notes: (node.notes || []).map((note) =>
-                note.id === gridId && note.type === 'grid' && note.cols > 1
-                  ? {
-                      ...note,
-                      cols: note.cols - 1,
-                      data: note.data.map((row) => row.filter((_, i) => i !== colIdx)),
-                      colWidths: note.colWidths
-                        ? note.colWidths.filter((_, i) => i !== colIdx)
-                        : null,
-                    }
-                  : note
-              ),
-            }
-          : node
-      )
+    const parentNode = nodesRef.current.find(n => n.id === nodeId)
+    const grid = parentNode?.notes?.find(n => n.id === gridId)
+    if (!grid || grid.type !== 'grid' || grid.cols <= 1) return
+
+    const colData = grid.data.map(row => row[colIdx])
+    const colWidth = grid.colWidths?.[colIdx] ?? null
+
+    const nodesAfter = nodesRef.current.map(node =>
+      node.id === nodeId
+        ? {
+            ...node,
+            notes: (node.notes || []).map(note =>
+              note.id === gridId
+                ? {
+                    ...note,
+                    cols: note.cols - 1,
+                    data: note.data.map(row => row.filter((_, i) => i !== colIdx)),
+                    colWidths: note.colWidths ? note.colWidths.filter((_, i) => i !== colIdx) : null,
+                  }
+                : note
+            ),
+          }
+        : node
     )
+
+    setNodes(nodesAfter)
+    suppressSaveUntil.current = Date.now() + 6000
+    setUndoSnapshot({ type: 'grid-col-delete', nodeId, gridId, colIdx, colData, colWidth, message: 'Column deleted.' })
+    mapsAPI.saveMap(nodesAfter).catch(e => console.error('Failed to save after delete:', e))
+    if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
+    undoTimerRef.current = setTimeout(() => {
+      suppressSaveUntil.current = 0
+      setUndoSnapshot(null)
+    }, 5000)
   }
 
   const insertGridRowAbove = (nodeId, gridId, rowIdx) => {
@@ -26456,7 +26565,7 @@ function App() {
       {/* Undo Delete Toast */}
       {undoSnapshot && (
         <div className="undo-toast">
-          <span>"{undoSnapshot.label}" deleted.</span>
+          <span>{undoSnapshot.message}</span>
           <button className="undo-toast-button" type="button" onClick={handleUndoDelete}>
             Undo
           </button>
