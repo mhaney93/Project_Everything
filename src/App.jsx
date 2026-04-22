@@ -24058,7 +24058,11 @@ function App() {
         
         // Special handling for Down/Up when navigating to/from dots
         if (event.key === 'ArrowDown') {
-          if (startType === 'node' && !currentNode.isCustom && hasKnownSubdivisions(currentNode.label) && (TOPIC_SUBDIVISIONS[currentNode.label] || []).some(l => !(currentNode.excludedChildLabels || []).includes(l))) {
+          const currentHasDots =
+            (!currentNode.isCustom && hasKnownSubdivisions(currentNode.label) &&
+              (TOPIC_SUBDIVISIONS[currentNode.label] || []).some(l => !(currentNode.excludedChildLabels || []).includes(l))) ||
+            nodes.some((n) => n.parentId === currentNode.id)
+          if (startType === 'node' && currentHasDots) {
             // Move from node to its dots
             setFocusedElement({ nodeId: startNodeId, type: 'dots' })
             return
