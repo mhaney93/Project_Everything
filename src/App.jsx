@@ -1390,6 +1390,7 @@ function App() {
   const maxPanYRef = useRef(2000)
   const didDragRef = useRef(false)
   const suppressClickRef = useRef(false)
+  const mousedownInSidebarRef = useRef(false)
   const sidebarTitleInputRef = useRef(null)
   const pendingSidebarTitleRef = useRef(null)
   const nodeDragRef = useRef(null)
@@ -25057,7 +25058,9 @@ function App() {
     didDragRef.current = false
 
     // Close sidebar when clicking empty canvas (not a drag, left button, target is the canvas itself)
-    if (!wasDrag && e.button === 0 && e.target === canvasRef.current) {
+    const fromSidebar = mousedownInSidebarRef.current
+    mousedownInSidebarRef.current = false
+    if (!wasDrag && e.button === 0 && e.target === canvasRef.current && !fromSidebar) {
       setSelectedId(null)
       setPanelOpen(false)
       setPanelExpanded(false)
@@ -25960,7 +25963,7 @@ function App() {
           </div>
         )}
         {selectedNode && panelOpen ? (
-          <aside className={`side-panel${panelExpanded ? ' expanded' : ''}`}>
+          <aside className={`side-panel${panelExpanded ? ' expanded' : ''}`} onMouseDown={() => { mousedownInSidebarRef.current = true }}>
             <div className="panel-card">
               <div className="panel-header">
                 {windowSize.width >= 768 && (
