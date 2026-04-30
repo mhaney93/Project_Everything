@@ -24687,7 +24687,7 @@ function App() {
 
     if (matchingNode) {
       // Node exists, select it
-      
+      setFocusedElement(null)
       // Unhide the node, all its ancestors, and all siblings along the path
       const unhideNodeAndAncestors = (nodeId) => {
         setNodes((prevNodes) => {
@@ -24786,6 +24786,7 @@ function App() {
                        nodes.find((n) => n.label.toLowerCase() === searchTerm || getDisplayLabel(n.label).toLowerCase() === searchTerm)
 
     if (targetNode) {
+      setFocusedElement(null)
       setBasePanOffset({ x: 0, y: 0 })
       // Unhide the target node, all its ancestors, and all siblings along the path
       // then set selectedId so layout has positions for the newly-unhidden node
