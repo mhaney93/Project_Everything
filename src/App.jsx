@@ -25202,6 +25202,11 @@ function App() {
               aria-label="Search ideas"
               value={searchQuery}
               onChange={handleSearchInputChange}
+              onFocus={() => {
+                if (searchQuery.trim() && searchSuggestions.length === 0 && relatedIdeas.length === 0) {
+                  handleSearchInputChange({ target: { value: searchQuery } })
+                }
+              }}
               onKeyDown={(e) => {
                 const totalItems = searchSuggestions.length + relatedIdeas.length
                 if (totalItems > 0) {
