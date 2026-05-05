@@ -25348,6 +25348,15 @@ function App() {
               Add Sibling
             </button>
           </div>
+          <div>
+            <button
+              className="top-link"
+              type="button"
+              onClick={() => window.open('https://www.preveil.shop/', '_blank')}
+            >
+              Shop
+            </button>
+          </div>
         </div>
         <div className="top-right">
           <div className="top-button-group">
