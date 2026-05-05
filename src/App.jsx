@@ -25180,9 +25180,9 @@ function App() {
       {!isFullscreenMode && (
         <header className="app-header" ref={headerRef}>
           <div className="title-block">
-          <div className="title-stack" aria-label="Everything">
+          <div className="title-stack" aria-label="Preveil">
             <h1 className="title">
-              <span className="cool-e">E</span>verything
+              <span className="cool-e">P</span>reveil
             </h1>
             <p className="title-sub title-grid" aria-hidden="true">
               <span className="title-left title-bottom">Knowledge</span>
