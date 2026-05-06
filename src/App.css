@@ -1813,6 +1813,8 @@ input.node-label-edit {
     display: flex;
     flex: 1 1 0;
     gap: 0.5rem !important;
+    flex-wrap: wrap;
+    align-self: flex-start;
     margin-bottom: 0;
     position: static;
     top: auto;
@@ -1825,6 +1827,8 @@ input.node-label-edit {
     display: flex;
     flex: 1 1 0;
     gap: 0.5rem !important;
+    flex-wrap: wrap;
+    align-self: flex-start;
     position: static;
     top: auto;
     left: auto;
@@ -2063,8 +2067,9 @@ input.node-label-edit {
   }
 
   .top-link {
-    font-size: 0.85rem;
-    padding: 0.5rem 0.8rem;
+    font-size: 0.78rem;
+    padding: 0.4rem 0.65rem;
+    min-height: 38px;
   }
 
   .search-input {

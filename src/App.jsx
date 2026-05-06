@@ -25348,7 +25348,7 @@ function App() {
               Add Sibling
             </button>
           </div>
-          <div>
+          <div className="top-button-group">
             <button
               className="top-link"
               type="button"
