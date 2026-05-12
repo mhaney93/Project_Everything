@@ -22312,6 +22312,27 @@ function App() {
     setEditingSidebarNodeId(null)
   }, [panelOpen, selectedId]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Clear textarea selection on mousedown outside while still focused (setSelectionRange requires focus)
+  useEffect(() => {
+    if (!editingNodeId) return
+    const clearSel = (e) => {
+      const el = editInputRef.current
+      if (el && !el.contains(e.target)) el.setSelectionRange(0, 0)
+    }
+    document.addEventListener('mousedown', clearSel, true)
+    return () => document.removeEventListener('mousedown', clearSel, true)
+  }, [editingNodeId])
+
+  useEffect(() => {
+    if (!editingSidebarNodeId) return
+    const clearSel = (e) => {
+      const el = sidebarTitleInputRef.current
+      if (el && !el.contains(e.target)) el.setSelectionRange(0, 0)
+    }
+    document.addEventListener('mousedown', clearSel, true)
+    return () => document.removeEventListener('mousedown', clearSel, true)
+  }, [editingSidebarNodeId])
+
   const addChildren = async (parentNodeId) => {
     const parent = nodes.find((node) => node.id === parentNodeId)
     if (!parent) return { expanded: false }
@@ -25809,7 +25830,6 @@ function App() {
                               e.stopPropagation()
                             }}
                             onBlur={(e) => {
-                              e.target.setSelectionRange(0, 0)
                               updateNodeLabel(node.id, e.target.value)
                             }}
                           />
@@ -26021,7 +26041,6 @@ function App() {
                       }
                     }}
                     onBlur={(e) => {
-                      e.target.setSelectionRange(0, 0)
                       pendingSidebarTitleRef.current = null
                       updateNodeLabel(selectedNode.id, e.target.value)
                       setEditingSidebarNodeId(null)
