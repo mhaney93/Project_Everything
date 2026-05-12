@@ -1374,7 +1374,6 @@ function App() {
 
   const canvasRef = useRef(null)
   const editInputRef = useRef(null)
-  const editingNodeBlurFromKeyRef = useRef(false)
   const mapPanelRef = useRef(null)
   const headerRef = useRef(null)
   const createModeButtonsRef = useRef(null)
@@ -25802,24 +25801,16 @@ function App() {
                             onKeyDown={(e) => {
                               if (e.key === 'Enter' && !e.shiftKey) {
                                 e.preventDefault()
-                                editingNodeBlurFromKeyRef.current = true
                                 updateNodeLabel(node.id, e.target.value)
                               } else if (e.key === 'Escape') {
                                 e.preventDefault()
-                                editingNodeBlurFromKeyRef.current = true
                                 setEditingNodeId(null)
                               }
                               e.stopPropagation()
                             }}
                             onBlur={(e) => {
-                              const fromKey = editingNodeBlurFromKeyRef.current
-                              editingNodeBlurFromKeyRef.current = false
                               updateNodeLabel(node.id, e.target.value)
-                              if (!fromKey && !e.relatedTarget) {
-                                setSelectedId(null)
-                                setPanelOpen(false)
-                                setPanelExpanded(false)
-                              }
+                              window.getSelection()?.removeAllRanges()
                             }}
                           />
                         ) : (
