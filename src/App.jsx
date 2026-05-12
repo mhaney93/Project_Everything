@@ -25810,7 +25810,6 @@ function App() {
                             }}
                             onBlur={(e) => {
                               updateNodeLabel(node.id, e.target.value)
-                              window.getSelection()?.removeAllRanges()
                             }}
                           />
                         ) : (

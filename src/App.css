@@ -759,6 +759,7 @@ button:not(:disabled):hover {
   box-shadow: 0 14px 30px rgba(54, 39, 25, 0.12);
   font-weight: 600;
   transition: transform 160ms ease, box-shadow 160ms ease, border-color 160ms ease;
+  user-select: none;
 }
 
 
