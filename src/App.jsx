@@ -25809,8 +25809,8 @@ function App() {
                               e.stopPropagation()
                             }}
                             onBlur={(e) => {
+                              e.target.setSelectionRange(0, 0)
                               updateNodeLabel(node.id, e.target.value)
-                              requestAnimationFrame(() => window.getSelection()?.removeAllRanges())
                             }}
                           />
                         ) : (
@@ -26021,10 +26021,10 @@ function App() {
                       }
                     }}
                     onBlur={(e) => {
+                      e.target.setSelectionRange(0, 0)
                       pendingSidebarTitleRef.current = null
                       updateNodeLabel(selectedNode.id, e.target.value)
                       setEditingSidebarNodeId(null)
-                      requestAnimationFrame(() => window.getSelection()?.removeAllRanges())
                     }}
                   />
                 ) : (
