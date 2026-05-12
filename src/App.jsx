@@ -25016,6 +25016,7 @@ function App() {
       setMidPanAnchor(null)
     }
     if (e.button === 0) {
+      if (editingNodeId) editInputRef.current?.blur()
       e.preventDefault()
       didDragRef.current = false
       suppressClickRef.current = false
@@ -25783,6 +25784,7 @@ function App() {
                               if (el && el !== editInputRef.current) {
                                 editInputRef.current = el
                                 el.focus()
+                                el.select()
                               } else {
                                 editInputRef.current = el
                               }
@@ -25997,6 +25999,7 @@ function App() {
                       sidebarTitleInputRef.current = el
                       if (el) {
                         el.focus()
+                        el.select()
                       }
                     }}
                     defaultValue={selectedNode.label}
