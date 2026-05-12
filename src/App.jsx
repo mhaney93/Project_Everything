@@ -25017,6 +25017,7 @@ function App() {
     }
     if (e.button === 0) {
       if (editingNodeId) editInputRef.current?.blur()
+      if (editingSidebarNodeId) sidebarTitleInputRef.current?.blur()
       e.preventDefault()
       didDragRef.current = false
       suppressClickRef.current = false
