@@ -1501,6 +1501,58 @@ input.node-label-edit {
   transition: color 0.2s ease;
 }
 
+.upload-queue {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.upload-queue-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-rows: auto auto;
+  gap: 0.25rem 0.5rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  border: 1px solid rgba(184, 106, 0, 0.35);
+  background: rgba(184, 106, 0, 0.08);
+}
+
+.upload-queue-name {
+  grid-column: 1;
+  grid-row: 1;
+  font-size: 0.82rem;
+  color: #b86a00;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.upload-progress-pct {
+  grid-column: 2;
+  grid-row: 1;
+  font-size: 0.82rem;
+  color: rgba(184, 106, 0, 0.7);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.upload-progress-track {
+  grid-column: 1 / -1;
+  grid-row: 2;
+  height: 5px;
+  border-radius: 99px;
+  background: rgba(184, 106, 0, 0.18);
+  overflow: hidden;
+}
+
+.upload-progress-fill {
+  height: 100%;
+  border-radius: 99px;
+  background: #b86a00;
+  transition: width 0.15s ease;
+}
+
 .file-link:hover {
   color: #5a22c7;
   text-decoration: underline;

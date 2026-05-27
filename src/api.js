@@ -109,19 +109,34 @@ export const mapsAPI = {
 
 // Files API calls
 export const filesAPI = {
-  uploadFile: async (file, nodeId) => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('nodeId', nodeId);
+  uploadFile: (file, nodeId, onProgress) => {
+    return new Promise((resolve, reject) => {
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('nodeId', nodeId);
 
-    const res = await fetch(`${API_BASE_URL}/files/upload`, {
-      ...defaultFetchOptions,
-      method: 'POST',
-      body: formData,
+      const xhr = new XMLHttpRequest();
+      xhr.withCredentials = true;
+      xhr.open('POST', `${API_BASE_URL}/files/upload`);
+
+      if (onProgress) {
+        xhr.upload.addEventListener('progress', (e) => {
+          if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
+        });
+      }
+
+      xhr.onload = () => {
+        try {
+          const data = JSON.parse(xhr.responseText);
+          if (xhr.status >= 200 && xhr.status < 300) resolve(data);
+          else reject(new Error(data.error || 'Upload failed'));
+        } catch {
+          reject(new Error('Upload failed'));
+        }
+      };
+      xhr.onerror = () => reject(new Error('Upload failed'));
+      xhr.send(formData);
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
-    return data;
   },
 
   getFiles: async (nodeId) => {

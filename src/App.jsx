@@ -1343,6 +1343,7 @@ function App() {
   const [uploadingNodeId, setUploadingNodeId] = useState(null)
   const [fileContextMenu, setFileContextMenu] = useState(null) // { x, y, file }
   const [isDraggingOver, setIsDraggingOver] = useState(false)
+  const [uploadQueue, setUploadQueue] = useState([]) // [{ name, progress }]
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [loginForm, setLoginForm] = useState({ email: '', password: '' })
   const [authError, setAuthError] = useState('')
@@ -23182,10 +23183,15 @@ function App() {
 
   const handleFileUpload = async (nodeId, files) => {
     const fileList = Array.isArray(files) ? files : [files]
+    setUploadingNodeId(nodeId)
+    setUploadQueue(fileList.map((f) => ({ name: f.name, progress: 0 })))
     try {
-      setUploadingNodeId(nodeId)
-      for (const file of fileList) {
-        const uploadedFile = await filesAPI.uploadFile(file, nodeId)
+      for (let i = 0; i < fileList.length; i++) {
+        const file = fileList[i]
+        const uploadedFile = await filesAPI.uploadFile(file, nodeId, (progress) => {
+          setUploadQueue((prev) => prev.map((item, idx) => idx === i ? { ...item, progress } : item))
+        })
+        setUploadQueue((prev) => prev.map((item, idx) => idx === i ? { ...item, progress: 100 } : item))
         setNodeFiles((prev) => ({
           ...prev,
           [nodeId]: [...(prev[nodeId] || []), uploadedFile]
@@ -23196,6 +23202,7 @@ function App() {
       alert(`Failed to upload file: ${err.message}`)
     } finally {
       setUploadingNodeId(null)
+      setUploadQueue([])
     }
   }
 
@@ -26433,6 +26440,22 @@ function App() {
                     </label>
                   ) : null}
                 </div>
+                {uploadingNodeId === selectedNode.id && uploadQueue.length > 0 && (
+                  <div className="upload-queue">
+                    {uploadQueue.map((item, i) => (
+                      <div key={i} className="upload-queue-item">
+                        <div className="upload-queue-name" title={item.name}>{item.name}</div>
+                        <div className="upload-progress-track">
+                          <div
+                            className="upload-progress-fill"
+                            style={{ width: `${item.progress}%` }}
+                          />
+                        </div>
+                        <span className="upload-progress-pct">{item.progress}%</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 {nodeFiles[selectedNode.id] && nodeFiles[selectedNode.id].length > 0 ? (
                   <div className="files-list">
                     {nodeFiles[selectedNode.id].map((file) => (
