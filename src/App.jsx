@@ -1341,6 +1341,7 @@ function App() {
   const [currentUser, setCurrentUser] = useState(null)
   const [nodeFiles, setNodeFiles] = useState({}) // Map of nodeId -> files array
   const [uploadingNodeId, setUploadingNodeId] = useState(null)
+  const [fileContextMenu, setFileContextMenu] = useState(null) // { x, y, file }
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [loginForm, setLoginForm] = useState({ email: '', password: '' })
   const [authError, setAuthError] = useState('')
@@ -23591,6 +23592,14 @@ function App() {
   });
   const renderableNodeIds = new Set(renderableNodes.map((node) => node.id));
   const fileDownloadBaseUrl = API_BASE_URL.replace(/\/api\/?$/, '')
+  const fileViewBaseUrl = fileDownloadBaseUrl
+
+  const handleFileContextMenu = (e, file) => {
+    e.preventDefault()
+    setFileContextMenu({ x: e.clientX, y: e.clientY, file })
+  }
+
+  const closeFileContextMenu = () => setFileContextMenu(null)
   const passwordRuleChecks = useMemo(() => getPasswordRuleChecks(loginForm.password), [loginForm.password])
   const isPasswordCompliant = passwordRuleChecks.every((rule) => rule.met)
 
@@ -26407,11 +26416,12 @@ function App() {
                     {nodeFiles[selectedNode.id].map((file) => (
                       <div key={file.id} className="file-item">
                         <a
-                          href={`${fileDownloadBaseUrl}${file.downloadUrl}`}
+                          href={`${fileViewBaseUrl}${file.downloadUrl.replace('/download/', '/view/')}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="file-link"
                           title={file.originalFilename}
+                          onContextMenu={(e) => handleFileContextMenu(e, file)}
                         >
                           📄 {file.originalFilename}
                         </a>
@@ -26449,6 +26459,49 @@ function App() {
           </aside>
         ) : null}
       </main>
+
+      {/* File context menu */}
+      {fileContextMenu && (
+        <div
+          style={{ position: 'fixed', inset: 0, zIndex: 9999 }}
+          onClick={closeFileContextMenu}
+          onContextMenu={(e) => { e.preventDefault(); closeFileContextMenu(); }}
+        >
+          <div
+            style={{
+              position: 'fixed',
+              top: fileContextMenu.y,
+              left: fileContextMenu.x,
+              background: '#1e1e1e',
+              border: '1px solid #444',
+              borderRadius: 6,
+              boxShadow: '0 4px 16px rgba(0,0,0,0.5)',
+              padding: '4px 0',
+              minWidth: 160,
+              zIndex: 10000,
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <a
+              href={`${fileDownloadBaseUrl}${fileContextMenu.file.downloadUrl}`}
+              download={fileContextMenu.file.originalFilename}
+              style={{
+                display: 'block',
+                padding: '8px 16px',
+                color: '#e0e0e0',
+                textDecoration: 'none',
+                fontSize: 14,
+                cursor: 'pointer',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = '#2e2e2e'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+              onClick={closeFileContextMenu}
+            >
+              Download
+            </a>
+          </div>
+        </div>
+      )}
 
       {/* Sign In Required Modal */}
       {signInRequired && (

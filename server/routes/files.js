@@ -152,13 +152,38 @@ router.get('/node/:nodeId', verifyToken, async (req, res) => {
   }
 });
 
+// View file inline (left-click open in tab)
+router.get('/view/:fileId', verifyToken, async (req, res) => {
+  try {
+    const { fileId } = req.params;
+
+    const result = await pool.query(
+      `SELECT filename, original_filename, file_type, file_path FROM files
+       WHERE id = $1 AND user_id = $2`,
+      [fileId, req.userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'File not found' });
+    }
+
+    const file = result.rows[0];
+    res.setHeader('Content-Type', file.file_type);
+    res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(file.original_filename)}"`);
+    res.sendFile(file.file_path);
+  } catch (err) {
+    console.error('View file error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Download file
 router.get('/download/:fileId', verifyToken, async (req, res) => {
   try {
     const { fileId } = req.params;
-    
+
     const result = await pool.query(
-      `SELECT filename, original_filename, file_path FROM files 
+      `SELECT filename, original_filename, file_path FROM files
        WHERE id = $1 AND user_id = $2`,
       [fileId, req.userId]
     );
