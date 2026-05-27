@@ -26458,7 +26458,7 @@ function App() {
                 )}
                 {nodeFiles[selectedNode.id] && nodeFiles[selectedNode.id].length > 0 ? (
                   <div className="files-list">
-                    {nodeFiles[selectedNode.id].map((file) => (
+                    {[...nodeFiles[selectedNode.id]].sort((a, b) => a.originalFilename.localeCompare(b.originalFilename)).map((file) => (
                       <div key={file.id} className="file-item">
                         <a
                           href={`${fileViewBaseUrl}${file.downloadUrl.replace('/download/', '/view/')}`}
