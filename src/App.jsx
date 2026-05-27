@@ -23183,15 +23183,16 @@ function App() {
 
   const handleFileUpload = async (nodeId, files) => {
     const fileList = Array.isArray(files) ? files : [files]
+    const queueItems = fileList.map((f, i) => ({ id: i, name: f.name, progress: 0 }))
     setUploadingNodeId(nodeId)
-    setUploadQueue(fileList.map((f) => ({ name: f.name, progress: 0 })))
+    setUploadQueue(queueItems)
     try {
-      for (let i = 0; i < fileList.length; i++) {
-        const file = fileList[i]
+      for (const queueItem of queueItems) {
+        const file = fileList[queueItem.id]
         const uploadedFile = await filesAPI.uploadFile(file, nodeId, (progress) => {
-          setUploadQueue((prev) => prev.map((item, idx) => idx === i ? { ...item, progress } : item))
+          setUploadQueue((prev) => prev.map((item) => item.id === queueItem.id ? { ...item, progress } : item))
         })
-        setUploadQueue((prev) => prev.map((item, idx) => idx === i ? { ...item, progress: 100 } : item))
+        setUploadQueue((prev) => prev.filter((item) => item.id !== queueItem.id))
         setNodeFiles((prev) => ({
           ...prev,
           [nodeId]: [...(prev[nodeId] || []), uploadedFile]
