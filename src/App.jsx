@@ -1342,6 +1342,7 @@ function App() {
   const [nodeFiles, setNodeFiles] = useState({}) // Map of nodeId -> files array
   const [uploadingNodeId, setUploadingNodeId] = useState(null)
   const [fileContextMenu, setFileContextMenu] = useState(null) // { x, y, file }
+  const [isDraggingOver, setIsDraggingOver] = useState(false)
   const [showLoginModal, setShowLoginModal] = useState(false)
   const [loginForm, setLoginForm] = useState({ email: '', password: '' })
   const [authError, setAuthError] = useState('')
@@ -23179,16 +23180,17 @@ function App() {
     )
   }
 
-  const handleFileUpload = async (nodeId, file) => {
+  const handleFileUpload = async (nodeId, files) => {
+    const fileList = Array.isArray(files) ? files : [files]
     try {
       setUploadingNodeId(nodeId)
-      const uploadedFile = await filesAPI.uploadFile(file, nodeId)
-      
-      // Add file to nodeFiles state
-      setNodeFiles((prev) => ({
-        ...prev,
-        [nodeId]: [...(prev[nodeId] || []), uploadedFile]
-      }))
+      for (const file of fileList) {
+        const uploadedFile = await filesAPI.uploadFile(file, nodeId)
+        setNodeFiles((prev) => ({
+          ...prev,
+          [nodeId]: [...(prev[nodeId] || []), uploadedFile]
+        }))
+      }
     } catch (err) {
       console.error('File upload error:', err)
       alert(`Failed to upload file: ${err.message}`)
@@ -26373,7 +26375,26 @@ function App() {
                   </p>
                 )}
               </div>
-              <div className="panel-files">
+              <div
+                className={`panel-files${isDraggingOver ? ' panel-files--drag-over' : ''}`}
+                onDragOver={(e) => {
+                  if (!isAuthenticated) return
+                  e.preventDefault()
+                  setIsDraggingOver(true)
+                }}
+                onDragLeave={(e) => {
+                  if (!e.currentTarget.contains(e.relatedTarget)) {
+                    setIsDraggingOver(false)
+                  }
+                }}
+                onDrop={(e) => {
+                  e.preventDefault()
+                  setIsDraggingOver(false)
+                  if (!isAuthenticated) return
+                  const files = Array.from(e.dataTransfer.files)
+                  if (files.length > 0) handleFileUpload(selectedNode.id, files)
+                }}
+              >
                 <div className="panel-files-header">
                   <p className="panel-label">Files & Documents</p>
                   {isAuthenticated ? (
@@ -26384,11 +26405,12 @@ function App() {
                     >
                       <input
                         type="file"
+                        multiple
                         hidden
                         onChange={(e) => {
-                          const file = e.target.files?.[0]
-                          if (file) {
-                            handleFileUpload(selectedNode.id, file)
+                          const files = Array.from(e.target.files || [])
+                          if (files.length > 0) {
+                            handleFileUpload(selectedNode.id, files)
                             e.target.value = ''
                           }
                         }}

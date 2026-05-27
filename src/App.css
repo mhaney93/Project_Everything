@@ -1423,6 +1423,14 @@ input.node-label-edit {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
+  border-radius: 10px;
+  border: 2px dashed transparent;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.panel-files--drag-over {
+  border-color: rgba(184, 106, 0, 0.6);
+  background: rgba(184, 106, 0, 0.06);
 }
 
 .panel-files-header {
