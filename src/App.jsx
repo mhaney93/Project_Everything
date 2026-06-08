@@ -22704,6 +22704,11 @@ function App() {
     )
   }
 
+  const autoSizeGridCell = (el) => {
+    el.style.height = 'auto'
+    el.style.height = `${el.scrollHeight}px`
+  }
+
   const handleGridKeyDown = (event, nodeId, gridId, grid) => {
     if (event.key === 'Escape') {
       const isDraft = draftGridIdsRef.current.has(gridId)
@@ -22711,6 +22716,18 @@ function App() {
         event.preventDefault()
         event.stopPropagation()
         removeNoteFromNode(nodeId, gridId)
+      }
+      return
+    }
+
+    if (event.key === 'Enter') {
+      const target = event.target
+      const isGridInput = target.classList && target.classList.contains('grid-cell-input')
+      if (isGridInput) {
+        if (event.shiftKey) return // Shift+Enter inserts a line break in the cell
+        // Plain Enter: don't insert a stray newline (use Shift+Enter for that)
+        event.preventDefault()
+        event.stopPropagation()
       }
       return
     }
@@ -22737,11 +22754,11 @@ function App() {
         // Otherwise move to next cell: right, then wrap to next row's leftmost
         const nextTd = currentTd?.nextElementSibling
         if (nextTd) {
-          nextTd.querySelector('input')?.focus()
+          nextTd.querySelector('textarea')?.focus()
         } else {
           const nextTr = currentTr?.nextElementSibling
           if (nextTr) {
-            nextTr.querySelector('input')?.focus()
+            nextTr.querySelector('textarea')?.focus()
           }
         }
         return
@@ -22760,26 +22777,32 @@ function App() {
         let targetCell = null
 
         if (event.key === 'ArrowUp') {
-          const prevRow = currentTr?.previousElementSibling
-          if (prevRow) {
-            const cellIndex = Array.from(currentTr.children).indexOf(currentTd)
-            targetCell = prevRow.children[cellIndex]?.querySelector('input')
+          // Only leave the cell when the caret is on the first line
+          if (target.value.lastIndexOf('\n', target.selectionStart - 1) === -1) {
+            const prevRow = currentTr?.previousElementSibling
+            if (prevRow) {
+              const cellIndex = Array.from(currentTr.children).indexOf(currentTd)
+              targetCell = prevRow.children[cellIndex]?.querySelector('textarea')
+            }
           }
         } else if (event.key === 'ArrowDown') {
-          const nextRow = currentTr?.nextElementSibling
-          if (nextRow) {
-            const cellIndex = Array.from(currentTr.children).indexOf(currentTd)
-            targetCell = nextRow.children[cellIndex]?.querySelector('input')
+          // Only leave the cell when the caret is on the last line
+          if (target.value.indexOf('\n', target.selectionStart) === -1) {
+            const nextRow = currentTr?.nextElementSibling
+            if (nextRow) {
+              const cellIndex = Array.from(currentTr.children).indexOf(currentTd)
+              targetCell = nextRow.children[cellIndex]?.querySelector('textarea')
+            }
           }
         } else if (event.key === 'ArrowLeft') {
           if (target.selectionStart === 0 && target.selectionEnd === 0) {
             const prevTd = currentTd?.previousElementSibling
-            if (prevTd) targetCell = prevTd.querySelector('input')
+            if (prevTd) targetCell = prevTd.querySelector('textarea')
           }
         } else if (event.key === 'ArrowRight') {
           if (target.selectionStart === target.value.length && target.selectionEnd === target.value.length) {
             const nextTd = currentTd?.nextElementSibling
-            if (nextTd) targetCell = nextTd.querySelector('input')
+            if (nextTd) targetCell = nextTd.querySelector('textarea')
           }
         }
 
@@ -24013,44 +24036,53 @@ function App() {
 
         // If we're inside a grid cell input, handle grid navigation instead of node navigation
         if (isGridInput) {
-          event.preventDefault()
-          
           const currentCell = event.target
           const currentTd = currentCell.parentElement
           const currentTr = currentTd.parentElement
           const currentTbody = currentTr.parentElement
-          
+
           let targetCell = null
-          
+
           if (event.key === 'ArrowUp') {
-            const prevRow = currentTr.previousElementSibling
-            if (prevRow) {
-              const cellIndex = Array.from(currentTr.children).indexOf(currentTd)
-              targetCell = prevRow.children[cellIndex]?.querySelector('input')
+            // Stay in the cell when the caret is not yet on the first line
+            if (currentCell.value.lastIndexOf('\n', currentCell.selectionStart - 1) === -1) {
+              const prevRow = currentTr.previousElementSibling
+              if (prevRow) {
+                const cellIndex = Array.from(currentTr.children).indexOf(currentTd)
+                targetCell = prevRow.children[cellIndex]?.querySelector('textarea')
+              }
             }
           } else if (event.key === 'ArrowDown') {
-            const nextRow = currentTr.nextElementSibling
-            if (nextRow) {
-              const cellIndex = Array.from(currentTr.children).indexOf(currentTd)
-              targetCell = nextRow.children[cellIndex]?.querySelector('input')
+            // Stay in the cell when the caret is not yet on the last line
+            if (currentCell.value.indexOf('\n', currentCell.selectionStart) === -1) {
+              const nextRow = currentTr.nextElementSibling
+              if (nextRow) {
+                const cellIndex = Array.from(currentTr.children).indexOf(currentTd)
+                targetCell = nextRow.children[cellIndex]?.querySelector('textarea')
+              }
             }
           } else if (event.key === 'ArrowLeft') {
-            const prevTd = currentTd.previousElementSibling
-            if (prevTd) {
-              targetCell = prevTd.querySelector('input')
+            if (currentCell.selectionStart === 0 && currentCell.selectionEnd === 0) {
+              const prevTd = currentTd.previousElementSibling
+              if (prevTd) {
+                targetCell = prevTd.querySelector('textarea')
+              }
             }
           } else if (event.key === 'ArrowRight') {
-            const nextTd = currentTd.nextElementSibling
-            if (nextTd) {
-              targetCell = nextTd.querySelector('input')
+            if (currentCell.selectionStart === currentCell.value.length && currentCell.selectionEnd === currentCell.value.length) {
+              const nextTd = currentTd.nextElementSibling
+              if (nextTd) {
+                targetCell = nextTd.querySelector('textarea')
+              }
             }
           }
-          
+
           if (targetCell) {
+            event.preventDefault()
             targetCell.focus()
             targetCell.select()
           }
-          
+
           return
         }
 
@@ -26204,13 +26236,15 @@ function App() {
                                               style={{ position: 'relative' }}
                                               onMouseEnter={() => setHoveredGridCell({ gridId: note.id, rowIdx, colIdx })}
                                             >
-                                              <input
-                                                type="text"
+                                              <textarea
+                                                rows={1}
                                                 className="grid-cell-input"
                                                 value={cell}
-                                                onChange={(event) =>
+                                                ref={(el) => { if (el) autoSizeGridCell(el) }}
+                                                onChange={(event) => {
+                                                  autoSizeGridCell(event.target)
                                                   updateGridCell(selectedNode.id, note.id, rowIdx, colIdx, event.target.value)
-                                                }
+                                                }}
                                                 placeholder=""
                                               />
                                               {showRowInsert && (
