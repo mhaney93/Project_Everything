@@ -24794,13 +24794,15 @@ function App() {
         })
       }
       
-      unhideNodeAndAncestors(matchingNode.id)
       setBasePanOffset({ x: 0, y: 0 })
-      setSelectedId(matchingNode.id)
-      setPanelOpen(true)
       setSearchQuery('')
       setSearchSuggestions([])
       setRelatedIdeas([])
+      setTimeout(() => {
+        unhideNodeAndAncestors(matchingNode.id)
+        setSelectedId(matchingNode.id)
+        setPanelOpen(true)
+      }, 0)
       return
     }
 
