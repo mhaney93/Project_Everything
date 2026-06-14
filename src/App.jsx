@@ -24320,6 +24320,11 @@ function App() {
     const suggestions = labels
       .filter(matchesQuery)
       .filter((s) => !excludedLabels.has(s))
+      .filter((s) => {
+        const term = s.toLowerCase()
+        // Keep if it's a live node or findNodePath can reach it (findNodePath skips excluded/deleted nodes)
+        return nodes.some((n) => getDisplayLabel(n.label).toLowerCase() === term) || Boolean(findNodePath(term))
+      })
       .sort((a, b) => {
         const lowerA = a.toLowerCase()
         const lowerB = b.toLowerCase()
