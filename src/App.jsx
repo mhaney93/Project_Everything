@@ -26575,13 +26575,8 @@ function App() {
                             target="_blank"
                             rel="noopener noreferrer"
                             className="file-link"
-                            title="Click to open · Double-click to rename"
+                            title={file.originalFilename}
                             onContextMenu={(e) => handleFileContextMenu(e, file)}
-                            onDoubleClick={(e) => {
-                              e.preventDefault()
-                              setRenamingFileId(file.id)
-                              setRenameValue(file.originalFilename)
-                            }}
                           >
                             📄 {file.originalFilename}
                           </a>
@@ -26643,6 +26638,29 @@ function App() {
             }}
             onClick={(e) => e.stopPropagation()}
           >
+            <button
+              style={{
+                display: 'block',
+                width: '100%',
+                padding: '8px 16px',
+                color: '#e0e0e0',
+                background: 'transparent',
+                border: 'none',
+                fontSize: 14,
+                cursor: 'pointer',
+                textAlign: 'left',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = '#2e2e2e'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+              onClick={() => {
+                const file = fileContextMenu.file
+                closeFileContextMenu()
+                setRenamingFileId(file.id)
+                setRenameValue(file.originalFilename)
+              }}
+            >
+              Rename
+            </button>
             <a
               href={`${fileDownloadBaseUrl}${fileContextMenu.file.downloadUrl}`}
               download={fileContextMenu.file.originalFilename}
