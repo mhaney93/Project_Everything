@@ -24309,42 +24309,41 @@ function App() {
         return regex.test(label) || label.toLowerCase().includes(word)
       })
     }
-    // Collect all labels that have been explicitly deleted (tracked via excludedChildLabels)
-    const excludedLabels = new Set()
+    // Build excluded-child sets from live node state (keyed by raw parent label)
+    const excludedByParentLabel = new Map()
     nodes.forEach((node) => {
-      if (node.excludedChildLabels) {
-        node.excludedChildLabels.forEach((lbl) => excludedLabels.add(getDisplayLabel(lbl)))
+      if (node.excludedChildLabels?.length) {
+        excludedByParentLabel.set(node.label, new Set(node.excludedChildLabels))
       }
     })
 
-    const allTopics = Object.keys(TOPIC_SUBDIVISIONS)
+    // Walk the reachable tree from Everything, skipping deleted branches
+    const reachableLabels = new Set()
+    const visited = new Set()
+    const walkTree = (parentLabel) => {
+      if (visited.has(parentLabel)) return
+      visited.add(parentLabel)
+      reachableLabels.add(getDisplayLabel(parentLabel))
+      const excluded = excludedByParentLabel.get(parentLabel)
+      const children = TOPIC_SUBDIVISIONS[parentLabel] || []
+      for (const child of children) {
+        if (excluded?.has(child)) continue
+        walkTree(child)
+      }
+    }
+    walkTree('Everything')
 
-    // Get all topics (include both keys and their values); use display labels for pipe-keyed nodes
-    const allLabels = new Set(allTopics.map(getDisplayLabel).filter((lbl) => !excludedLabels.has(lbl)))
-    Object.values(TOPIC_SUBDIVISIONS).forEach((children) => {
-      children.forEach((child) => {
-        const display = getDisplayLabel(child)
-        if (!excludedLabels.has(display)) allLabels.add(display)
-      })
-    })
-
-    // Add custom nodes from current state
+    // Also include custom nodes that are still in the live node state
     nodes.forEach((node) => {
-      if (typeof node.label === 'string' && node.label.trim()) {
-        allLabels.add(getDisplayLabel(node.label))
+      if (node.isCustom && typeof node.label === 'string' && node.label.trim()) {
+        reachableLabels.add(getDisplayLabel(node.label))
       }
     })
 
-    const labels = Array.from(allLabels).filter((label) => typeof label === 'string')
+    const labels = Array.from(reachableLabels).filter((label) => typeof label === 'string')
 
     const suggestions = labels
       .filter(matchesQuery)
-      .filter((s) => !excludedLabels.has(s))
-      .filter((s) => {
-        const term = s.toLowerCase()
-        // Keep if it's a live node or findNodePath can reach it (findNodePath skips excluded/deleted nodes)
-        return nodes.some((n) => getDisplayLabel(n.label).toLowerCase() === term) || Boolean(findNodePath(term))
-      })
       .sort((a, b) => {
         const lowerA = a.toLowerCase()
         const lowerB = b.toLowerCase()
