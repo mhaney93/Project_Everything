@@ -1342,6 +1342,8 @@ function App() {
   const [nodeFiles, setNodeFiles] = useState({}) // Map of nodeId -> files array
   const [uploadingNodeId, setUploadingNodeId] = useState(null)
   const [fileContextMenu, setFileContextMenu] = useState(null) // { x, y, file }
+  const [renamingFileId, setRenamingFileId] = useState(null)
+  const [renameValue, setRenameValue] = useState('')
   const [isDraggingOver, setIsDraggingOver] = useState(false)
   const [uploadQueue, setUploadQueue] = useState([]) // [{ name, progress }]
   const [showLoginModal, setShowLoginModal] = useState(false)
@@ -23244,6 +23246,23 @@ function App() {
     }
   }
 
+  const handleFileRename = async (nodeId, fileId, newName) => {
+    const trimmed = newName.trim()
+    if (!trimmed) { setRenamingFileId(null); return }
+    try {
+      await filesAPI.renameFile(fileId, trimmed)
+      setNodeFiles((prev) => ({
+        ...prev,
+        [nodeId]: (prev[nodeId] || []).map((f) => f.id === fileId ? { ...f, originalFilename: trimmed } : f)
+      }))
+    } catch (err) {
+      console.error('File rename error:', err)
+      alert(`Failed to rename file: ${err.message}`)
+    } finally {
+      setRenamingFileId(null)
+    }
+  }
+
   const loadFilesForNode = async (nodeId) => {
     try {
       const files = await filesAPI.getFiles(nodeId)
@@ -26538,16 +26557,35 @@ function App() {
                   <div className="files-list">
                     {[...nodeFiles[selectedNode.id]].sort((a, b) => a.originalFilename.localeCompare(b.originalFilename)).map((file) => (
                       <div key={file.id} className="file-item">
-                        <a
-                          href={`${fileViewBaseUrl}${file.downloadUrl.replace('/download/', '/view/')}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="file-link"
-                          title={file.originalFilename}
-                          onContextMenu={(e) => handleFileContextMenu(e, file)}
-                        >
-                          📄 {file.originalFilename}
-                        </a>
+                        {renamingFileId === file.id ? (
+                          <input
+                            className="file-rename-input"
+                            autoFocus
+                            value={renameValue}
+                            onChange={(e) => setRenameValue(e.target.value)}
+                            onBlur={() => handleFileRename(selectedNode.id, file.id, renameValue)}
+                            onKeyDown={(e) => {
+                              if (e.key === 'Enter') { e.preventDefault(); handleFileRename(selectedNode.id, file.id, renameValue) }
+                              if (e.key === 'Escape') setRenamingFileId(null)
+                            }}
+                          />
+                        ) : (
+                          <a
+                            href={`${fileViewBaseUrl}${file.downloadUrl.replace('/download/', '/view/')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="file-link"
+                            title="Click to open · Double-click to rename"
+                            onContextMenu={(e) => handleFileContextMenu(e, file)}
+                            onDoubleClick={(e) => {
+                              e.preventDefault()
+                              setRenamingFileId(file.id)
+                              setRenameValue(file.originalFilename)
+                            }}
+                          >
+                            📄 {file.originalFilename}
+                          </a>
+                        )}
                         <button
                           className="file-delete-btn"
                           onClick={() => handleFileDelete(selectedNode.id, file.id)}

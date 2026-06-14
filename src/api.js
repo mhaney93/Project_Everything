@@ -148,6 +148,18 @@ export const filesAPI = {
     return data;
   },
 
+  renameFile: async (fileId, newName) => {
+    const res = await fetch(`${API_BASE_URL}/files/${fileId}/rename`, {
+      ...defaultFetchOptions,
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ newName }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    return data;
+  },
+
   deleteFile: async (fileId) => {
     const res = await fetch(`${API_BASE_URL}/files/${fileId}`, {
       ...defaultFetchOptions,

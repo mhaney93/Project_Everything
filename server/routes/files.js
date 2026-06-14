@@ -200,6 +200,31 @@ router.get('/download/:fileId', verifyToken, async (req, res) => {
   }
 });
 
+// Rename file (update original_filename only)
+router.patch('/:fileId/rename', verifyToken, async (req, res) => {
+  try {
+    const { fileId } = req.params;
+    const { newName } = req.body;
+    if (!newName || !newName.trim()) {
+      return res.status(400).json({ error: 'newName is required' });
+    }
+
+    const result = await pool.query(
+      `UPDATE files SET original_filename = $1 WHERE id = $2 AND user_id = $3 RETURNING id, original_filename`,
+      [newName.trim(), fileId, req.userId]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(404).json({ error: 'File not found' });
+    }
+
+    res.json({ id: result.rows[0].id, originalFilename: result.rows[0].original_filename });
+  } catch (err) {
+    console.error('Rename file error:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Delete file
 router.delete('/:fileId', verifyToken, async (req, res) => {
   try {
