@@ -24319,6 +24319,7 @@ function App() {
 
     const suggestions = labels
       .filter(matchesQuery)
+      .filter((s) => !excludedLabels.has(s))
       .sort((a, b) => {
         const lowerA = a.toLowerCase()
         const lowerB = b.toLowerCase()
@@ -24475,6 +24476,14 @@ function App() {
     const target = String(label || '').trim().toLowerCase()
     if (!target) return null
 
+    // Build a map of parentLabel -> Set of excluded child labels from live node state
+    const excludedByParent = new Map()
+    nodes.forEach((node) => {
+      if (node.excludedChildLabels?.length) {
+        excludedByParent.set(node.label, new Set(node.excludedChildLabels))
+      }
+    })
+
     const visited = new Set()
     const search = (parentLabel, path) => {
       if (visited.has(parentLabel)) return null
@@ -24484,8 +24493,10 @@ function App() {
         return path
       }
 
+      const excluded = excludedByParent.get(parentLabel)
       const children = TOPIC_SUBDIVISIONS[parentLabel] || []
       for (const childLabel of children) {
+        if (excluded?.has(childLabel)) continue
         const result = search(childLabel, [...path, childLabel])
         if (result) return result
       }
