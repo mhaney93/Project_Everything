@@ -24289,12 +24289,23 @@ function App() {
         return regex.test(label) || label.toLowerCase().includes(word)
       })
     }
+    // Collect all labels that have been explicitly deleted (tracked via excludedChildLabels)
+    const excludedLabels = new Set()
+    nodes.forEach((node) => {
+      if (node.excludedChildLabels) {
+        node.excludedChildLabels.forEach((lbl) => excludedLabels.add(getDisplayLabel(lbl)))
+      }
+    })
+
     const allTopics = Object.keys(TOPIC_SUBDIVISIONS)
 
     // Get all topics (include both keys and their values); use display labels for pipe-keyed nodes
-    const allLabels = new Set(allTopics.map(getDisplayLabel))
+    const allLabels = new Set(allTopics.map(getDisplayLabel).filter((lbl) => !excludedLabels.has(lbl)))
     Object.values(TOPIC_SUBDIVISIONS).forEach((children) => {
-      children.forEach((child) => allLabels.add(getDisplayLabel(child)))
+      children.forEach((child) => {
+        const display = getDisplayLabel(child)
+        if (!excludedLabels.has(display)) allLabels.add(display)
+      })
     })
 
     // Add custom nodes from current state
@@ -24787,6 +24798,17 @@ function App() {
       return
     }
 
+    // Check if any node along the path was deleted (tracked via excludedChildLabels)
+    for (let i = 1; i < path.length; i++) {
+      const parentLabel = path[i - 1]
+      const childLabel = path[i]
+      const parentNode = nodes.find((n) => n.label === parentLabel)
+      if (parentNode && (parentNode.excludedChildLabels || []).includes(childLabel)) {
+        setNotification({ message: 'Node not found.', type: 'error' })
+        return
+      }
+    }
+
     // Build all nodes needed to show this search result
     let nodesToAdd = []
     let latestNodeId = Math.max(nextId.current, ...nodes.map(n => n.id)) + 1
@@ -24810,11 +24832,13 @@ function App() {
         // Get all siblings from the knowledge base
         const siblings = TOPIC_SUBDIVISIONS[parentLabel] || []
         
-        // Add siblings if not already added
+        // Add siblings if not already added and not excluded (deleted)
+        const excludedLabels = new Set(parentNode.excludedChildLabels || [])
         for (const siblingLabel of siblings) {
+          if (excludedLabels.has(siblingLabel)) continue
           const alreadyExists = nodes.some((n) => n.label === siblingLabel && n.parentId === parentNode.id) ||
                                 nodesToAdd.some((n) => n.label === siblingLabel && n.parentId === parentNode.id)
-          
+
           if (!alreadyExists) {
             nodesToAdd.push({
               id: latestNodeId++,
