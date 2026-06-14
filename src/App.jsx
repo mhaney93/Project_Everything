@@ -22705,8 +22705,9 @@ function App() {
   }
 
   const autoSizeGridCell = (el) => {
+    const lineCount = (el.value || '').split('\n').length
     el.style.height = 'auto'
-    el.style.height = `${el.scrollHeight}px`
+    el.style.height = lineCount > 1 ? `${el.scrollHeight}px` : ''
   }
 
   const handleGridKeyDown = (event, nodeId, gridId, grid) => {
