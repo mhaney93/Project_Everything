@@ -22706,10 +22706,11 @@ function App() {
     )
   }
 
-  const autoSizeGridCell = (el) => {
+  const autoSizeGridCell = (el, rowHeight = null) => {
     const lineCount = (el.value || '').split('\n').length
+    el.style.minHeight = rowHeight ? `${rowHeight}px` : ''
     el.style.height = 'auto'
-    el.style.height = lineCount > 1 ? `${el.scrollHeight}px` : ''
+    el.style.height = (lineCount > 1 || rowHeight) ? `${Math.max(el.scrollHeight, rowHeight || 0)}px` : ''
   }
 
   const handleGridKeyDown = (event, nodeId, gridId, grid) => {
@@ -26280,7 +26281,7 @@ function App() {
                                     const rowHeight = note.rowHeights ? note.rowHeights[rowIdx] : null
                                     const isRowHovered = hoveredGridCell?.gridId === note.id && hoveredGridCell?.rowIdx === rowIdx
                                     return (
-                                      <tr key={rowIdx} style={rowHeight ? { height: rowHeight } : undefined}>
+                                      <tr key={rowIdx}>
                                         {row.map((cell, colIdx) => {
                                           const isLastCol = colIdx === note.cols - 1
                                           const isCorner = isLastRow && isLastCol
@@ -26294,16 +26295,16 @@ function App() {
                                           return (
                                             <td
                                               key={colIdx}
-                                              style={{ position: 'relative' }}
+                                              style={{ position: 'relative', ...(rowHeight ? { minHeight: rowHeight } : {}) }}
                                               onMouseEnter={() => setHoveredGridCell({ gridId: note.id, rowIdx, colIdx })}
                                             >
                                               <textarea
                                                 rows={1}
                                                 className="grid-cell-input"
                                                 value={cell}
-                                                ref={(el) => { if (el) autoSizeGridCell(el) }}
+                                                ref={(el) => { if (el) autoSizeGridCell(el, rowHeight) }}
                                                 onChange={(event) => {
-                                                  autoSizeGridCell(event.target)
+                                                  autoSizeGridCell(event.target, rowHeight)
                                                   updateGridCell(selectedNode.id, note.id, rowIdx, colIdx, event.target.value)
                                                 }}
                                                 placeholder=""
