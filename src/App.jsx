@@ -26300,6 +26300,7 @@ function App() {
                                             >
                                               <textarea
                                                 rows={1}
+                                                wrap="off"
                                                 className="grid-cell-input"
                                                 value={cell}
                                                 ref={(el) => { if (el) autoSizeGridCell(el, rowHeight) }}
