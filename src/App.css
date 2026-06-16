@@ -1273,17 +1273,15 @@ input.node-label-edit {
   padding: 0;
   cursor: row-resize;
   background: transparent;
-  border-left: 2px solid transparent;
-  border-bottom: 1px solid rgba(184, 106, 0, 0.2);
-  transition: background 0.15s, border-left-color 0.15s;
+  border-bottom: 1px solid transparent;
+  transition: border-bottom-color 0.15s;
   position: sticky;
   right: 0;
   z-index: 1;
 }
 
 .grid-row-resize-td:hover {
-  background: rgba(184, 106, 0, 0.15);
-  border-left-color: rgba(184, 106, 0, 0.6);
+  border-bottom: 2px solid rgba(184, 106, 0, 0.6);
 }
 
 .grid-row-resize-td-corner {
@@ -1291,8 +1289,7 @@ input.node-label-edit {
 }
 
 .grid-row-resize-td-corner:hover {
-  background: transparent;
-  border-left-color: transparent;
+  border-bottom-color: transparent;
 }
 
 .grid-corner-resize-handle {
