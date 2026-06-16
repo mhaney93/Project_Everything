@@ -1276,6 +1276,9 @@ input.node-label-edit {
   border-left: 2px solid rgba(184, 106, 0, 0.25);
   border-bottom: 1px solid rgba(184, 106, 0, 0.2);
   transition: background 0.15s;
+  position: sticky;
+  right: 0;
+  z-index: 1;
 }
 
 .grid-row-resize-td:hover {
