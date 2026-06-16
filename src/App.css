@@ -1260,9 +1260,10 @@ input.node-label-edit {
   cursor: row-resize;
   top: 0;
   right: 0;
-  width: 10px;
+  width: 8px;
   height: 100%;
-  border-right: 2px solid rgba(184, 106, 0, 0.6);
+  background: rgba(184, 106, 0, 0.15);
+  border-right: 3px solid rgba(184, 106, 0, 0.6);
 }
 
 .grid-corner-resize-handle {
