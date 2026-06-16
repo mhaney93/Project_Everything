@@ -26285,7 +26285,7 @@ function App() {
                                           const isLastCol = colIdx === note.cols - 1
                                           const isCorner = isLastRow && isLastCol
                                           const showColHandle = isAuthenticated && isLastRow && !isLastCol
-                                          const showRowHandle = isAuthenticated && isLastCol && !isLastRow
+                                          const showRowHandle = false // handled by dedicated td
                                           const isColHovered = hoveredGridCell?.gridId === note.id && hoveredGridCell?.colIdx === colIdx
                                           const showRowInsert = isAuthenticated && colIdx === 0 && isRowHovered
                                           const showRowDelete = isAuthenticated && colIdx === 0 && isRowHovered && note.rows > 1
@@ -26361,6 +26361,12 @@ function App() {
                                             </td>
                                           )
                                         })}
+                                        {isAuthenticated && (
+                                          <td
+                                            className={`grid-row-resize-td${isLastRow ? ' grid-row-resize-td-corner' : ''}`}
+                                            onMouseDown={(e) => handleCellResizeMouseDown(e, selectedNode.id, note.id, note, note.cols - 1, rowIdx, 'row')}
+                                          />
+                                        )}
                                       </tr>
                                     )
                                   })}

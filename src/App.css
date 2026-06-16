@@ -1266,6 +1266,33 @@ input.node-label-edit {
   border-right: 3px solid rgba(184, 106, 0, 0.6);
 }
 
+.grid-row-resize-td {
+  width: 10px;
+  min-width: 10px;
+  max-width: 10px;
+  padding: 0;
+  cursor: row-resize;
+  background: rgba(184, 106, 0, 0.06);
+  border-left: 2px solid rgba(184, 106, 0, 0.25);
+  border-bottom: 1px solid rgba(184, 106, 0, 0.2);
+  transition: background 0.15s;
+}
+
+.grid-row-resize-td:hover {
+  background: rgba(184, 106, 0, 0.22);
+  border-left-color: rgba(184, 106, 0, 0.6);
+}
+
+.grid-row-resize-td-corner {
+  cursor: default;
+  background: rgba(184, 106, 0, 0.03);
+}
+
+.grid-row-resize-td-corner:hover {
+  background: rgba(184, 106, 0, 0.03);
+  border-left-color: rgba(184, 106, 0, 0.25);
+}
+
 .grid-corner-resize-handle {
   cursor: nwse-resize;
   bottom: 0;
