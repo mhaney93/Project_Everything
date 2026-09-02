@@ -28,3 +28,13 @@ server/uploads
 *.njsproj
 *.sln
 *.sw?
+
+# Secrets / local scratch files
+PersonalAccessToken.txt
+*token*.txt
+*.token
+Untitled.png
+
+# Database backups / migration scratch
+*.dump
+migration-commands.txt
