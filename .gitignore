@@ -17,6 +17,8 @@ dist-ssr
 *.ppk
 *.tgz
 server/uploads
+_ec2_uploads
+.vercel
 
 # Editor directories and files
 .vscode/*

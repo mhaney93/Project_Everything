@@ -1,99 +1,117 @@
 const express = require('express');
-const multer = require('multer');
-const path = require('path');
-const fs = require('fs');
+const { handleUpload } = require('@vercel/blob/client');
+const { del } = require('@vercel/blob');
+const jwt = require('jsonwebtoken');
 const pool = require('../db/config');
 const { verifyToken } = require('../middleware/auth');
-const { 
-  TOTAL_STORAGE_LIMIT_PER_USER, 
-  getTotalStorageUsage, 
-  isUserAdmin 
+const {
+  TOTAL_STORAGE_LIMIT_PER_USER,
+  getTotalStorageUsage,
+  isUserAdmin
 } = require('../utils/storage');
 
 const router = express.Router();
 
-// Create uploads directory if it doesn't exist
-const uploadsDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
+const ALLOWED_MIMES = [
+  'image/jpeg', 'image/png', 'image/gif', 'image/webp',
+  'application/pdf', 'application/msword',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+  'application/vnd.ms-excel',
+  'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'text/plain',
+  'video/mp4', 'video/mpeg', 'video/quicktime', 'video/x-msvideo',
+  'video/x-flv', 'video/x-matroska', 'video/webm', 'video/3gpp', 'video/ogg'
+];
+
+// Hard per-file ceiling for a single Blob upload.
+const MAX_SINGLE_FILE_BYTES = 500 * 1024 * 1024; // 500MB
+
+function userIdFromCookie(req) {
+  const token = req.cookies && req.cookies.token;
+  if (!token) return null;
+  try {
+    return jwt.verify(token, process.env.JWT_SECRET).userId;
+  } catch {
+    return null;
+  }
 }
 
-// Configure multer
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, uploadsDir);
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    const ext = path.extname(file.originalname);
-    const name = path.basename(file.originalname, ext);
-    cb(null, `${name}-${uniqueSuffix}${ext}`);
-  }
-});
-
-const upload = multer({
-  storage,
-  fileFilter: (req, file, cb) => {
-    const allowedMimes = [
-      'image/jpeg', 'image/png', 'image/gif', 'image/webp',
-      'application/pdf', 'application/msword',
-      'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-      'application/vnd.ms-excel',
-      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      'text/plain',
-      'video/mp4', 'video/mpeg', 'video/quicktime', 'video/x-msvideo',
-      'video/x-flv', 'video/x-matroska', 'video/webm', 'video/3gpp', 'video/ogg'
-    ];
-    
-    if (allowedMimes.includes(file.mimetype)) {
-      cb(null, true);
-    } else {
-      cb(new Error('Invalid file type'), false);
-    }
-  }
-});
-
-// Deprecated: use getTotalStorageUsage from utils/storage.js instead
-
-// Upload file
-router.post('/upload', verifyToken, upload.single('file'), async (req, res) => {
+// --- Client-upload token endpoint -------------------------------------------
+// The browser uploads the file bytes straight to Vercel Blob. This route only
+// (a) authorizes the upload and mints a scoped token, and (b) is pinged by
+// Blob when the upload finishes. Metadata is persisted via POST /complete.
+router.post('/upload', async (req, res) => {
   try {
-    if (!req.file) {
-      return res.status(400).json({ error: 'No file provided' });
-    }
+    const jsonResponse = await handleUpload({
+      body: req.body,
+      request: req,
+      onBeforeGenerateToken: async (pathname, clientPayload) => {
+        const userId = userIdFromCookie(req);
+        if (!userId) throw new Error('Not authenticated');
 
-    const { nodeId } = req.body;
-    if (!nodeId) {
-      return res.status(400).json({ error: 'nodeId is required' });
-    }
+        let payload = {};
+        try { payload = clientPayload ? JSON.parse(clientPayload) : {}; } catch { /* ignore */ }
+        const { nodeId, size } = payload;
+        if (!nodeId) throw new Error('nodeId is required');
 
-    // Check storage limit for non-admin users
+        // Approximate storage check up front (exact re-check happens in /complete).
+        const isAdmin = await isUserAdmin(userId);
+        if (!isAdmin && typeof size === 'number') {
+          const usage = await getTotalStorageUsage(userId);
+          if (usage.total + size > TOTAL_STORAGE_LIMIT_PER_USER) {
+            throw new Error('Storage limit exceeded');
+          }
+        }
+
+        return {
+          allowedContentTypes: ALLOWED_MIMES,
+          addRandomSuffix: true,
+          maximumSizeInBytes: MAX_SINGLE_FILE_BYTES,
+          tokenPayload: JSON.stringify({ userId, nodeId }),
+        };
+      },
+      onUploadCompleted: async ({ blob }) => {
+        // Metadata is written by POST /complete (which returns the row to the
+        // client). Nothing required here; log for observability.
+        console.log('Blob upload completed:', blob.pathname);
+      },
+    });
+    return res.json(jsonResponse);
+  } catch (err) {
+    console.error('File upload token error:', err);
+    return res.status(400).json({ error: err.message });
+  }
+});
+
+// --- Persist metadata after the browser finished uploading to Blob ----------
+router.post('/complete', verifyToken, async (req, res) => {
+  const { nodeId, url, pathname, size, contentType, originalName } = req.body || {};
+  if (!nodeId || !url || !pathname) {
+    return res.status(400).json({ error: 'nodeId, url and pathname are required' });
+  }
+
+  try {
+    const fileSize = Number(size) || 0;
+
     const isAdmin = await isUserAdmin(req.userId);
     if (!isAdmin) {
-      const storageUsage = await getTotalStorageUsage(req.userId);
-      const newTotalSize = storageUsage.total + req.file.size;
-
-      if (newTotalSize > TOTAL_STORAGE_LIMIT_PER_USER) {
-        // Clean up uploaded file
-        fs.unlink(req.file.path, (unlinkErr) => {
-          if (unlinkErr) console.error('Failed to delete file:', unlinkErr);
-        });
-        const limitGB = (TOTAL_STORAGE_LIMIT_PER_USER / (1024 * 1024 * 1024)).toFixed(1);
-        const usedGB = (storageUsage.total / (1024 * 1024 * 1024)).toFixed(2);
-        const fileUsedGB = (storageUsage.fileStorage / (1024 * 1024 * 1024)).toFixed(2);
-        const mapUsedGB = (storageUsage.mapStorage / (1024 * 1024 * 1024)).toFixed(2);
-        return res.status(413).json({ 
-          error: `Storage limit exceeded. You have ${limitGB}GB total. Currently using ${usedGB}GB (${fileUsedGB}GB files + ${mapUsedGB}GB notes/nodes).` 
+      const usage = await getTotalStorageUsage(req.userId);
+      if (usage.total + fileSize > TOTAL_STORAGE_LIMIT_PER_USER) {
+        // Roll back the orphaned blob.
+        try { await del(url); } catch (e) { console.error('Failed to delete orphan blob:', e); }
+        const limitGB = (TOTAL_STORAGE_LIMIT_PER_USER / (1024 ** 3)).toFixed(1);
+        const usedGB = (usage.total / (1024 ** 3)).toFixed(2);
+        return res.status(413).json({
+          error: `Storage limit exceeded. You have ${limitGB}GB total and are using ${usedGB}GB.`
         });
       }
     }
 
-    // Save file metadata to database
     const result = await pool.query(
       `INSERT INTO files (user_id, node_id, filename, original_filename, file_type, file_size, file_path)
        VALUES ($1, $2, $3, $4, $5, $6, $7)
        RETURNING id, filename, original_filename, file_type, file_size, created_at`,
-      [req.userId, nodeId, req.file.filename, req.file.originalname, req.file.mimetype, req.file.size, req.file.path]
+      [req.userId, nodeId, pathname, originalName || pathname, contentType || 'application/octet-stream', fileSize, url]
     );
 
     const file = result.rows[0];
@@ -107,19 +125,8 @@ router.post('/upload', verifyToken, upload.single('file'), async (req, res) => {
       downloadUrl: `/api/files/download/${file.id}`
     });
   } catch (err) {
-    // Clean up uploaded file on error
-    if (req.file) {
-      fs.unlink(req.file.path, (unlinkErr) => {
-        if (unlinkErr) console.error('Failed to delete file:', unlinkErr);
-      });
-    }
-    console.error('File upload error:', err);
-    
-    // Handle disk full error specifically
-    if (err.code === 'ENOSPC' || err.message.includes('no space left on device')) {
-      return res.status(507).json({ error: 'Server storage is full. Please contact support.' });
-    }
-    
+    console.error('File complete error:', err);
+    try { await del(url); } catch (e) { console.error('Failed to delete orphan blob:', e); }
     res.status(500).json({ error: err.message });
   }
 });
@@ -128,10 +135,10 @@ router.post('/upload', verifyToken, upload.single('file'), async (req, res) => {
 router.get('/node/:nodeId', verifyToken, async (req, res) => {
   try {
     const { nodeId } = req.params;
-    
+
     const result = await pool.query(
-      `SELECT id, filename, original_filename, file_type, file_size, created_at 
-       FROM files 
+      `SELECT id, filename, original_filename, file_type, file_size, created_at
+       FROM files
        WHERE user_id = $1 AND node_id = $2
        ORDER BY created_at DESC`,
       [req.userId, nodeId]
@@ -152,48 +159,32 @@ router.get('/node/:nodeId', verifyToken, async (req, res) => {
   }
 });
 
-// View file inline (left-click open in tab)
+// View file inline (left-click open in tab) — auth-check then redirect to Blob.
 router.get('/view/:fileId', verifyToken, async (req, res) => {
   try {
-    const { fileId } = req.params;
-
     const result = await pool.query(
-      `SELECT filename, original_filename, file_type, file_path FROM files
-       WHERE id = $1 AND user_id = $2`,
-      [fileId, req.userId]
+      `SELECT file_path FROM files WHERE id = $1 AND user_id = $2`,
+      [req.params.fileId, req.userId]
     );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'File not found' });
-    }
-
-    const file = result.rows[0];
-    res.setHeader('Content-Type', file.file_type);
-    res.setHeader('Content-Disposition', `inline; filename="${encodeURIComponent(file.original_filename)}"`);
-    res.sendFile(file.file_path);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'File not found' });
+    res.redirect(result.rows[0].file_path);
   } catch (err) {
     console.error('View file error:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// Download file
+// Download file — auth-check then redirect to Blob with forced attachment.
 router.get('/download/:fileId', verifyToken, async (req, res) => {
   try {
-    const { fileId } = req.params;
-
     const result = await pool.query(
-      `SELECT filename, original_filename, file_path FROM files
-       WHERE id = $1 AND user_id = $2`,
-      [fileId, req.userId]
+      `SELECT file_path FROM files WHERE id = $1 AND user_id = $2`,
+      [req.params.fileId, req.userId]
     );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'File not found' });
-    }
-
-    const file = result.rows[0];
-    res.download(file.file_path, file.original_filename);
+    if (result.rows.length === 0) return res.status(404).json({ error: 'File not found' });
+    const url = result.rows[0].file_path;
+    const sep = url.includes('?') ? '&' : '?';
+    res.redirect(`${url}${sep}download=1`);
   } catch (err) {
     console.error('Download file error:', err);
     res.status(500).json({ error: err.message });
@@ -225,11 +216,11 @@ router.patch('/:fileId/rename', verifyToken, async (req, res) => {
   }
 });
 
-// Delete file
+// Delete file — remove DB row and the Blob object.
 router.delete('/:fileId', verifyToken, async (req, res) => {
   try {
     const { fileId } = req.params;
-    
+
     const result = await pool.query(
       `SELECT file_path FROM files WHERE id = $1 AND user_id = $2`,
       [fileId, req.userId]
@@ -241,13 +232,13 @@ router.delete('/:fileId', verifyToken, async (req, res) => {
 
     const filePath = result.rows[0].file_path;
 
-    // Delete from database
     await pool.query('DELETE FROM files WHERE id = $1', [fileId]);
 
-    // Delete from filesystem
-    fs.unlink(filePath, (err) => {
-      if (err) console.error('Failed to delete file from disk:', err);
-    });
+    try {
+      await del(filePath);
+    } catch (e) {
+      console.error('Failed to delete blob object:', e);
+    }
 
     res.json({ success: true });
   } catch (err) {
@@ -264,7 +255,7 @@ router.get('/storage/usage', verifyToken, async (req, res) => {
     const limitGB = TOTAL_STORAGE_LIMIT_PER_USER / (1024 * 1024 * 1024);
     const usedGB = totalBytes / (1024 * 1024 * 1024);
     const remainingGB = (TOTAL_STORAGE_LIMIT_PER_USER - totalBytes) / (1024 * 1024 * 1024);
-    
+
     res.json({
       used: totalBytes,
       usedGB: usedGB.toFixed(2),

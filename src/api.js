@@ -1,3 +1,5 @@
+import { upload } from '@vercel/blob/client';
+
 export const API_BASE_URL =
   import.meta.env.VITE_API_URL ||
   (import.meta.env.PROD ? '/api' : 'http://localhost:5000/api');
@@ -109,34 +111,35 @@ export const mapsAPI = {
 
 // Files API calls
 export const filesAPI = {
-  uploadFile: (file, nodeId, onProgress) => {
-    return new Promise((resolve, reject) => {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('nodeId', nodeId);
-
-      const xhr = new XMLHttpRequest();
-      xhr.withCredentials = true;
-      xhr.open('POST', `${API_BASE_URL}/files/upload`);
-
-      if (onProgress) {
-        xhr.upload.addEventListener('progress', (e) => {
-          if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
-        });
-      }
-
-      xhr.onload = () => {
-        try {
-          const data = JSON.parse(xhr.responseText);
-          if (xhr.status >= 200 && xhr.status < 300) resolve(data);
-          else reject(new Error(data.error || 'Upload failed'));
-        } catch {
-          reject(new Error('Upload failed'));
-        }
-      };
-      xhr.onerror = () => reject(new Error('Upload failed'));
-      xhr.send(formData);
+  uploadFile: async (file, nodeId, onProgress) => {
+    // Upload bytes straight to Vercel Blob (bypasses the 4.5MB function limit).
+    const blob = await upload(file.name, file, {
+      access: 'public',
+      contentType: file.type || 'application/octet-stream',
+      handleUploadUrl: `${API_BASE_URL}/files/upload`,
+      clientPayload: JSON.stringify({ nodeId, size: file.size }),
+      onUploadProgress: (e) => {
+        if (onProgress) onProgress(Math.round(e.percentage));
+      },
     });
+
+    // Persist metadata and get back the DB row.
+    const res = await fetch(`${API_BASE_URL}/files/complete`, {
+      ...defaultFetchOptions,
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        nodeId,
+        url: blob.url,
+        pathname: blob.pathname,
+        size: file.size,
+        contentType: file.type || 'application/octet-stream',
+        originalName: file.name,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Upload failed');
+    return data;
   },
 
   getFiles: async (nodeId) => {
