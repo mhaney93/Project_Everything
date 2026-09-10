@@ -1,162 +1,132 @@
-## Docker Build Info
+# Deployment Guide
 
-The root Dockerfile builds the frontend inside the container:
-- Runs `npm ci` and `npm run build` during the build stage.
-- Copies the build output (`dist/`) to the Nginx image.
-- You do NOT need to run `npm run build` locally or commit `dist/`.
-- Just push your code, and when you redeploy, the container will build the frontend from your latest source.
+The app runs entirely on managed free tiers. There is no server to SSH into.
 
-**Deployment steps:**
-1. Push your code.
-2. SSH into your server.
-3. Run the deployment commands (`git pull`, `docker compose up -d --build`).
-4. The Docker setup will build the frontend inside the container automatically.
-# Deployment Guide - HTTP-Only Cookie Auth
+| Layer | Provider | Notes |
+|---|---|---|
+| Frontend | **Vercel** static hosting | Vite build → `dist/` |
+| API | **Vercel** serverless function | `api/index.js` wraps the Express app in `server/app.js` |
+| Database | **Neon** (Postgres) | `DATABASE_URL` + SSL |
+| File storage | **Vercel Blob** | store `everything-files` (public); browser uploads direct to Blob |
 
-> **Data Migrations:** Before deploying, review any pending label renames in `src/App.jsx` under `LABEL_MIGRATIONS_BY_VERSION`. See [SETUP.md](SETUP.md#data-migrations) or [README.md](README.md#data-migrations) for details.
+- **Live URL:** https://projecteverything.vercel.app
+- **Vercel project:** `matts-projects-4cc0b5df/project_everything` (linked to GitHub `mhaney93/Project_Everything`)
 
-## Completed: Frontend & Backend Cookie Migration
+---
 
-**Date:** March 5, 2026  
-**Commit:** `23cb1f2` - Migrate auth to HTTP-only cookies
+## Deploying
 
-### What Changed
+### Normal path — git push
 
-#### Backend (`server/`)
-- ✅ Added `cookie-parser` dependency
-- ✅ Updated CORS to allow `credentials: true` and list origins
-- ✅ Modified auth routes to set HTTP-only cookies (not return tokens)
-- ✅ Added `/logout` endpoint to clear cookies
-- ✅ Updated `verifyToken` middleware to read from `req.cookies.token`
-
-#### Frontend (`src/`)
-- ✅ Removed `getAuthToken()` and `setAuthToken()` functions from `api.js`
-- ✅ Added `credentials: 'include'` to all fetch calls
-- ✅ Removed all `Authorization: Bearer` headers
-- ✅ Updated login/register handlers to use cookies
-- ✅ Updated logout to call `/api/auth/logout` endpoint
-
-### Testing (Local - localhost:5174)
-
-**Backend validation (✅ verified):**
 ```bash
-# Register
-curl -X POST http://localhost:5000/api/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"password123"}' \
-  -c /tmp/cookies.txt
-
-# Response includes: Set-Cookie header with HttpOnly, Secure, SameSite=Strict
-# Response body: {"user":{"id":2,"email":"test@example.com"}} (NO token)
+git push origin main
 ```
 
-**Cookie verification (✅ verified):**
+Vercel auto-builds and deploys `main` to production. Watch it in the dashboard or:
+
 ```bash
-# Use the cookie from registration
-curl -X GET http://localhost:5000/api/maps -b /tmp/cookies.txt
-
-# Response: 200 OK with map data (cookie auto-sent)
+npx vercel ls          # recent deployments + status
+npx vercel inspect <url>
 ```
 
-### Production Deployment
+### Manual deploy (no commit)
 
-**EC2 Server Details:**
-**Public DNS:** ec2-13-56-3-121.us-west-1.compute.amazonaws.com
-**Public IPv4 address:** 13.56.3.121
-**Private IP:** ip-172-31-8-152.us-west-1.compute.internal
-**Local PEM Key Path:** `C:/Users/matth/OneDrive/Desktop/Programming/ProjectEverything/project-everything-key.pem`
-
-**SSH into EC2:**
 ```bash
-ssh project-everything
+npx vercel deploy --prod     # production
+npx vercel deploy            # throwaway preview URL
 ```
-> Uses SSH alias from your ~/.ssh/config for easier connection.
 
-**Pull latest code and rebuild:**
+### Rollback
+
+Dashboard → Deployments → pick a previous **Ready** production deploy → **Promote to Production**. Or `npx vercel promote <old-deployment-url>`.
+
+---
+
+## How routing works
+
+`vercel.json` rewrites `/api/*` and `/health` to the single function `api/index.js`.
+Everything else is served as static files, with SPA fallback to `index.html` (Vite preset).
+The Express app in `server/app.js` does its own routing on `req.url`, so `/api/auth/*`,
+`/api/maps/*`, `/api/files/*` all resolve inside the one function.
+
+Local dev is unchanged: `npm run dev` (frontend) + `cd server && npm run dev` (API on :5000).
+
+---
+
+## Environment variables
+
+Managed in Vercel (Settings → Environment Variables), **not** in any committed file.
+
+| Var | Where it's used |
+|---|---|
+| `DATABASE_URL` | Neon pooled connection string, `?sslmode=require` |
+| `JWT_SECRET` | signs the auth cookie (`server/middleware/auth.js`) |
+| `BLOB_READ_WRITE_TOKEN` | Vercel Blob (auto-added when the store was linked) |
+| `EMAIL_USER` / `EMAIL_PASS` | Gmail + app password for password-reset mail |
+| `FRONTEND_URL` | `https://projecteverything.vercel.app` — used in reset-email links and CORS |
+| `NODE_ENV` | `production` — gates `secure` cookie flag and CORS allow-list |
+
+CLI:
+
 ```bash
-cd ~/project_everything
-git pull
-set -a
-source server/.env
-set +a
-docker compose -f docker-compose.prod.yml up -d --build
+npx vercel env ls
+npx vercel env add   <NAME> production      # prompts for value (stdin)
+npx vercel env rm    <NAME> production
+npx vercel env pull  .env.local             # sync down for local scripts (gitignored)
 ```
 
-`POSTGRES_PASSWORD` must stay in `server/.env` on the server. Do not store real passwords in this repo.
+### Rotating a secret
 
-**Verify deployment:**
 ```bash
-# Check containers running
-docker compose -f docker-compose.prod.yml ps
-
-# Check logs
-docker compose -f docker-compose.prod.yml logs -f api
+npx vercel env rm  JWT_SECRET production preview
+printf '%s' "$(node -e "console.log(require('crypto').randomBytes(48).toString('base64'))")" \
+  | npx vercel env add JWT_SECRET production
+# repeat for preview, then:
+npx vercel deploy --prod
 ```
 
-### Testing Production (https://matthew-haney.com)
+Rotating `JWT_SECRET` invalidates every existing login cookie (everyone re-logs-in once).
 
-1. **Sign up a test account**
-   - Open https://matthew-haney.com
-   - Click "Sign Up"
-   - Enter email and password
-   - Verify no token in DevTools > Application > Local Storage (should be empty)
+---
 
-2. **Check cookie was set**
-   - DevTools > Application > Cookies > matthew-haney.com
-   - Find `token` cookie
-   - Verify it has:
-     - ✅ `HttpOnly` flag (JavaScript cannot access)
-     - ✅ `Secure` flag (HTTPS only, not sent over HTTP)
-     - ✅ `SameSite=Strict` (CSRF protection)
+## Database
 
-3. **Test session persistence**
-   - Refresh the page (F5)
-   - Verify you're still logged in (cookie auto-sent)
-   - Verify maps load from backend
-
-4. **Test logout**
-   - Click logout
-   - Verify cookie is deleted
-   - Refresh page → should show login screen
-
-5. **Test login**
-   - Sign back in with the test account
-   - Verify maps load
-   - Verify cookie is set again
-
-### Security Benefits
-
-- ✅ **No localStorage tokens** - Token invisible to browser F12 console
-- ✅ **HttpOnly cookies** - Immune to XSS attacks (JavaScript cannot read)
-- ✅ **Secure flag** - Only sent over HTTPS, never over HTTP
-- ✅ **SameSite=Strict** - CSRF attack protection (cookie only sent in same-site requests)
-- ✅ **Automatic transmission** - Browser handles cookie inclusion, no manual headers needed
-
-### Rollback (if needed)
-
-If you need to rollback to token-based auth:
 ```bash
-cd ~/project_everything
-git revert 23cb1f2
-git push
-# Then redeploy on EC2
+psql "$DATABASE_URL"                       # DATABASE_URL is in .env.local after `vercel env pull`
 ```
 
-### File Changes Summary
+Schema lives in `server/db/schema.sql`; migrations in `server/db/*.sql`. Apply against Neon
+manually (`psql "$DATABASE_URL" -f server/db/<file>.sql`) — there is no automated migration step.
+Node **label** migrations are separate and run client-side (see [SETUP.md](SETUP.md#data-migrations)).
 
+---
+
+## Files / Vercel Blob
+
+- Uploads: the browser calls `POST /api/files/upload` for a scoped token, then uploads bytes
+  straight to Blob (`@vercel/blob/client`), then `POST /api/files/complete` writes the DB row.
+  This bypasses the 4.5 MB serverless request-body limit, so large videos work.
+- `files.file_path` stores the Blob URL. `view`/`download` auth-check the row then 302-redirect
+  to Blob; `delete` removes the Blob object.
+- One-time legacy import script: `scripts/migrate-files-to-blob.mjs` (already run for the
+  original 15 files; kept for reference).
+
+---
+
+## Logs & debugging
+
+```bash
+npx vercel logs <deployment-url>          # runtime logs
+npx vercel logs <deployment-url> --follow
 ```
- src/api.js                          | 58 lines changed
- src/App.jsx                         | 35 lines changed
- server/index.js                     |  7 lines changed
- server/routes/auth.js               | 12 lines changed
- server/middleware/auth.js           |  3 lines changed
- server/package.json                 |  1 line added (cookie-parser)
- 7 files changed, 89 insertions(+), 42 deletions(-)
-```
 
-### Next Steps (Optional)
+Or Vercel dashboard → the deployment → **Runtime Logs** / **Build Logs**.
 
-1. Add security headers (CSP, HSTS, X-Frame-Options)
-2. Implement refresh token rotation
-3. Add token revocation system (logout all devices)
-4. Set up rate limiting on auth endpoints
+---
+
+## History
+
+Migrated off a self-managed AWS EC2 + Docker Compose stack in Sept 2026 (Neon first, then
+Vercel + Blob). The EC2 instance, Elastic IP, and Route 53 zone were torn down. Earlier
+AWS/Docker instructions previously here — and the stale AWS section still in `SETUP.md` — no
+longer apply.
