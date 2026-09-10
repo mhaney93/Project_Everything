@@ -63,12 +63,10 @@ npm start      # Production
 
 ### Configure Frontend API
 
-In the frontend, the API URL defaults to `http://localhost:5000/api`.
-
-To change it, add to `.env`:
-```
-REACT_APP_API_URL=http://your-server:5000/api
-```
+The frontend API base URL (`src/api.js`) resolves to:
+- `VITE_API_URL` if set, else
+- `/api` in a production build (same-origin serverless function), else
+- `http://localhost:5000/api` in dev
 
 ## Features
 
@@ -122,12 +120,7 @@ REACT_APP_API_URL=http://your-server:5000/api
 
 ## Environment Variables
 
-### Frontend (`.env`)
-```
-REACT_APP_API_URL=http://localhost:5000/api
-```
-
-### Backend (`server/.env`)
+### Local development (`server/.env`)
 ```
 DB_HOST=localhost
 DB_PORT=5432
@@ -138,6 +131,15 @@ JWT_SECRET=your_secret_key
 PORT=5000
 NODE_ENV=development
 ```
+
+Frontend dev needs no `.env` (it defaults to `http://localhost:5000/api`). Set
+`VITE_API_URL` only to point at a non-default API.
+
+### Production
+
+Runs on Vercel; env vars are managed there, not in a file. `server/db/config.js`
+prefers a single `DATABASE_URL` (with SSL) over the discrete `DB_*` vars above.
+See [DEPLOYMENT.md](DEPLOYMENT.md#environment-variables) for the full list.
 
 ## Development Notes
 
@@ -176,79 +178,14 @@ const LABEL_MIGRATIONS_BY_VERSION = {
 }
 ```
 
-## Deploy to AWS (Recommended: EC2 + RDS)
+## Deployment
 
-This repo now includes production Docker files and `docker-compose.prod.yml`.
+Production runs on Vercel (frontend + serverless API), Neon (Postgres), and Vercel
+Blob (file storage). Push to `main` and Vercel deploys automatically.
 
-### 1) Provision AWS resources
+See **[DEPLOYMENT.md](DEPLOYMENT.md)** for the full workflow, env vars, rollback, and
+database access.
 
-- Create an Ubuntu EC2 instance (t3.small or larger)
-- Security Group inbound:
-  - `22` from your IP
-  - `80` from `0.0.0.0/0`
-  - `443` from `0.0.0.0/0` (if using SSL)
-- Create PostgreSQL on Amazon RDS (or use existing)
-- Allow EC2 security group to access RDS port `5432`
-
-### 2) Install Docker on EC2
-
-```bash
-sudo apt-get update
-sudo apt-get install -y ca-certificates curl gnupg
-sudo install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-echo \
-  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-  $(. /etc/os-release && echo $VERSION_CODENAME) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt-get update
-sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-sudo usermod -aG docker $USER
-newgrp docker
-```
-
-### 3) Deploy app
-
-```bash
-git clone <your-repo-url>
-cd project_everything
-cp server/.env.example server/.env
-```
-
-Edit `server/.env` for production values:
-
-```dotenv
-DB_HOST=<rds-endpoint>
-DB_PORT=5432
-DB_NAME=everything_db
-DB_USER=<db-user>
-DB_PASSWORD=<db-password>
-JWT_SECRET=<long-random-secret>
-PORT=5000
-NODE_ENV=production
-```
-
-Start stack:
-
-```bash
-docker compose -f docker-compose.prod.yml up -d --build
-docker compose -f docker-compose.prod.yml ps
-```
-
-### 4) Initialize database schema
-
-Run once against your RDS database:
-
-```bash
-psql "host=<rds-endpoint> port=5432 dbname=everything_db user=<db-user> password=<db-password>" -f server/db/schema.sql
-```
-
-### 5) Verify
-
-- App: `http://<ec2-public-ip>`
-- API health: `http://<ec2-public-ip>/health`
-
-### 6) Optional SSL + domain
-
-- Point your domain A record to EC2 public IP
-- Install Caddy or Nginx+Certbot on host for automatic HTTPS termination
-- Proxy HTTPS traffic to container port `80`
+> The repo still contains `Dockerfile`, `server/Dockerfile`, `docker-compose.prod.yml`,
+> and `deploy/nginx/` from the old self-hosted AWS EC2 setup (retired Sept 2026). They
+> are no longer used and kept only for reference.
