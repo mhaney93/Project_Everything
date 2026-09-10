@@ -10,6 +10,7 @@
 
 import { readFile } from 'node:fs/promises';
 import path from 'node:path';
+import 'dotenv/config';
 import { put } from '@vercel/blob';
 import pkg from 'pg';
 
