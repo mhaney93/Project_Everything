@@ -40,3 +40,4 @@ Untitled.png
 # Database backups / migration scratch
 *.dump
 migration-commands.txt
+.claude/settings.local.json
