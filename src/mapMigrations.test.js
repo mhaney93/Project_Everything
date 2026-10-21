@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
-import { applyStructuralMigrations, applySummaryMigrations, SUMMARY_MIGRATIONS_BY_VERSION, removeStalePredefinedChildren } from './mapMigrations.js'
+import { applyStructuralMigrations, applySummaryMigrations, dropStaleChildren, SUMMARY_MIGRATIONS_BY_VERSION, removeStalePredefinedChildren } from './mapMigrations.js'
 
 // TOPIC_SUBDIVISIONS and generateSummary's summaries live inside the App
 // component, so evaluate the object literals from the source.
@@ -21,7 +21,7 @@ const appSummary = (label) => BUILT_IN_SUMMARIES[label] || ''
 
 const normalize = (mapNodes, builtInSummary = () => '') => {
   const structural = applyStructuralMigrations(mapNodes, builtInSummary, TOPIC_SUBDIVISIONS)
-  const pruned = removeStalePredefinedChildren(structural.nodes, TOPIC_SUBDIVISIONS)
+  const pruned = removeStalePredefinedChildren(structural.nodes, TOPIC_SUBDIVISIONS, builtInSummary)
   return { nodes: pruned.nodes, changed: structural.changed || pruned.changed }
 }
 
@@ -1252,5 +1252,245 @@ test('the ancient Migration Period merges into a medieval branch that is not sto
     assert.ok(nodes.some((n) => n.label === 'Late Antiquity (250 - 500 AD)'))
     assert.deepEqual(orphansOf(nodes), [])
     assert.equal(normalize(nodes, appSummary).changed, false)
+  }
+})
+
+// Production map 7 (admin map backup, 2026-10-21): 32 nodes whose parents
+// 515, 516, 1271-1275 and 1510 are no longer stored, plus the chains to their
+// homes. Notes and the Personal branch are left out of the fixture.
+const map7Orphans = () => JSON.parse(readFileSync(new URL('./fixtures/map7-orphans.json', import.meta.url), 'utf8')).nodes
+
+const reachableFrom = (mapNodes) => {
+  const ids = new Set()
+  const stack = mapNodes.filter((n) => n.parentId === null).map((n) => n.id)
+  while (stack.length > 0) {
+    const id = stack.pop()
+    ids.add(id)
+    for (const child of mapNodes.filter((n) => n.parentId === id)) stack.push(child.id)
+  }
+  return mapNodes.filter((n) => ids.has(n.id))
+}
+
+test('production map 7 puts every orphan back in the tree without losing a summary', () => {
+  const before = map7Orphans()
+  const byId = new Map(before.map((n) => [n.id, n]))
+  assert.equal(orphansOf(before).length, 28)
+  assert.equal(before.length - reachableFrom(before).length, 32)
+
+  const { nodes, changed } = normalize(before, appSummary)
+  assert.equal(changed, true)
+  assert.deepEqual(orphansOf(nodes), [])
+  assert.equal(reachableFrom(nodes).length, nodes.length)
+  const node = (id) => nodes.find((n) => n.id === id)
+  const childrenOf = (id) => nodes.filter((n) => n.parentId === id).map((n) => n.id).sort((a, b) => a - b)
+
+  // Visible copies without a summary take the hidden copy's; hidden copies go.
+  for (const [hidden, visible] of [[517, 1811], [518, 1812], [519, 1813], [520, 1814], [521, 1815], [522, 1816], [1290, 1871], [1291, 1872], [1292, 1873], [1293, 1874]]) {
+    assert.equal(byId.get(visible).summary, undefined)
+    assert.equal(node(visible).summary, byId.get(hidden).summary, byId.get(hidden).label)
+    assert.equal(node(visible).notes, undefined)
+  }
+  for (const id of [517, 518, 519, 520, 521, 522, 1276, 1284, 1277, 1278, 1279, 1280, 1281, 1282, 1283, 1288, 1289, 1290, 1291, 1292, 1293]) {
+    assert.equal(node(id), undefined, byId.get(id).label)
+  }
+
+  // Unique content moves under its built-in parent, keeping its summary.
+  assert.deepEqual(childrenOf(1787), [1268, 1269])
+  assert.deepEqual(childrenOf(1812), [1285, 1286, 1287])
+  // The hidden Mossad theory is not restored.
+  assert.deepEqual(childrenOf(1816), [])
+  assert.equal(nodes.some((n) => n.label === 'Mossad Killed Kennedy'), false)
+  const aliyahs = nodes.filter((n) => n.label === 'Aliyahs (1882 - 1948)')
+  assert.equal(aliyahs.length, 1)
+  assert.equal(aliyahs[0].parentId, 1508)
+  assert.equal(aliyahs[0].isCustom, undefined)
+  // The slot between Balfour Declaration (0) and End of Ottoman Palestine (2).
+  assert.equal(aliyahs[0].order, 1)
+  assert.deepEqual(childrenOf(aliyahs[0].id), [1522, 1523, 1524, 1525, 1526, 1527])
+  for (const id of [1268, 1269, 1285, 1286, 1287, 1522, 1523, 1524, 1525, 1526, 1527]) {
+    assert.equal(node(id).summary, byId.get(id).summary)
+    assert.equal(node(id).hidden, true)
+    assert.equal(node(id).order, undefined)
+  }
+
+  // Inauguration and Dulles were refiled under 1961 with the same summaries.
+  for (const [hidden, visible] of [[1288, 1808], [1289, 1809]]) {
+    assert.equal(node(visible).summary, byId.get(hidden).summary)
+  }
+
+  // No hidden summary is lost, and nothing else changes.
+  const shown = new Set(reachableFrom(nodes).map((n) => n.summary))
+  for (const id of before.filter((n) => !reachableFrom(before).includes(n) && n.id !== 1284).map((n) => n.id)) {
+    assert.ok(shown.has(byId.get(id).summary), byId.get(id).label)
+  }
+  const touched = new Set([1268, 1269, 1285, 1286, 1287, 1522, 1523, 1524, 1525, 1526, 1527, 1811, 1812, 1813, 1814, 1815, 1816, 1871, 1872, 1873, 1874])
+  for (const n of reachableFrom(before)) {
+    if (!touched.has(n.id)) assert.deepEqual(node(n.id), n, n.label)
+  }
+
+  const again = normalize(nodes, appSummary)
+  assert.equal(again.changed, false)
+  assert.deepEqual(again.nodes, nodes)
+})
+
+const jfkMap = (namesakeExtra, orphans) => [
+  ...buildMap(['Everything', [
+    ['Assassination of President John F. Kennedy (1963)', [['Lee Harvey Oswald (1939 - 1963)', [], namesakeExtra]]],
+  ]]),
+  ...orphans,
+]
+
+test('an orphan never overwrites what the owner wrote on its namesake', () => {
+  const before = jfkMap(
+    { summary: 'My own words.', notes: [{ id: 'note-visible', text: 'mine', level: 0 }] },
+    [
+      { id: 100, label: 'Lee Harvey Oswald (1939 - 1963)', parentId: 99, hidden: true, summary: 'Old hidden words.', notes: [{ id: 'note-hidden', text: 'hidden', level: 0 }] },
+      { id: 101, label: 'Oswald under Custody (1963)', parentId: 100, hidden: true, summary: 'Custody.' },
+    ],
+  )
+  const { nodes } = normalize(before, appSummary)
+  const oswald = nodes.find((n) => n.label === 'Lee Harvey Oswald (1939 - 1963)')
+  assert.equal(nodes.filter((n) => n.label === oswald.label).length, 1)
+  assert.equal(oswald.summary, 'My own words.')
+  assert.deepEqual(oswald.notes.map((n) => n.id), ['note-visible', 'note-hidden', 'merged-summary-100'])
+  assert.match(oswald.notes[2].text, /Old hidden words\.$/)
+  assert.equal(nodes.find((n) => n.id === 101).parentId, oswald.id)
+  assert.deepEqual(orphansOf(nodes), [])
+})
+
+test('an orphan with no home stays as stored unless it is bare; a Personal one stays', () => {
+  const before = [
+    ...buildMap(['Everything', [['Sciences']]]),
+    { id: 50, label: 'Somewhere Unknown', parentId: 40, hidden: true, notes: [{ id: 'note-x', text: 'keep', level: 0 }] },
+    { id: 51, label: 'Under It', parentId: 50, hidden: true },
+    { id: 52, label: 'Nothing Here', parentId: 41, hidden: true },
+    { id: 53, label: 'Custom Thing', parentId: 42, hidden: true, isCustom: true },
+    { id: 54, label: 'Private', parentId: 43, hidden: true, isPersonal: true, summary: 'private' },
+  ]
+  const log = []
+  const { nodes } = applyStructuralMigrations(before, appSummary, TOPIC_SUBDIVISIONS, log)
+  assert.equal(nodes.length, before.length - 1)
+  assert.equal(nodes.some((n) => n.id === 52), false)
+  for (const id of [1, 2, 50, 51, 53, 54]) assert.deepEqual(nodes.find((n) => n.id === id), before.find((n) => n.id === id))
+  assert.equal(log.length, 4)
+  assert.ok(log.every((line) => !line.includes('Private')))
+
+  const again = applyStructuralMigrations(nodes, appSummary, TOPIC_SUBDIVISIONS)
+  assert.equal(again.changed, false)
+  assert.deepEqual(again.nodes, nodes)
+})
+
+test('dropping a stale built-in child takes its whole subtree, never leaving orphans', () => {
+  const before = buildMap(['Everything', [
+    ['Sciences', [
+      ['Retired Topic', [['Retired Child', [['Retired Grandchild', [], { summary: 'Stored built-in text.' }]]]], { summary: 'Old.' }],
+      ['Owner Topic', [['Built-in Child', [['My Idea', [], { isCustom: true }]]]]],
+      ['Noted Topic', [['Noted Child', [], { notes: [{ id: 'note-n', text: 'mine', level: 0 }] }]]],
+      ['Natural Sciences'],
+    ]],
+  ]])
+  const sciences = before.find((n) => n.label === 'Sciences')
+  const stale = before.filter((n) => n.parentId === sciences.id && n.label !== 'Natural Sciences').map((n) => n.id)
+  const builtInTexts = { 'Owner Topic': 'Built-in owner text.', 'Retired Topic': 'Old.', 'Retired Grandchild': 'Stored built-in text.' }
+  const { nodes, changed } = dropStaleChildren(before, stale, (label) => builtInTexts[label] || '')
+
+  assert.equal(changed, true)
+  assert.deepEqual(orphansOf(nodes), [])
+  assert.ok(!nodes.some((n) => n.label.startsWith('Retired')))
+  const owner = nodes.find((n) => n.label === 'Owner Topic')
+  assert.equal(owner.isCustom, true)
+  assert.equal(owner.summary, 'Built-in owner text.')
+  assert.ok(nodes.some((n) => n.label === 'My Idea' && n.parentId === nodes.find((m) => m.label === 'Built-in Child').id))
+  const noted = nodes.find((n) => n.label === 'Noted Topic')
+  assert.equal(noted.isCustom, true)
+  assert.equal('summary' in noted, false)
+  assert.equal(dropStaleChildren(nodes, [], () => '').changed, false)
+})
+
+test('the stale-child prune keeps a retired branch the owner wrote under, as a custom node', () => {
+  const before = buildMap(['Everything', [
+    ['Sciences', [
+      ['Natural Sciences'],
+      ['Physics', [['Mechanics', [], { notes: [{ id: 'note-m', text: 'mine', level: 0 }] }]], { summary: 'Stored built-in text.' }],
+      ['Chemistry', [['Organic Chemistry', [], { summary: 'Stored built-in text.' }]]],
+    ]],
+  ]])
+  assert.ok(!TOPIC_SUBDIVISIONS.Sciences.includes('Physics'))
+  const builtInText = () => 'Stored built-in text.'
+  const { nodes } = removeStalePredefinedChildren(before, TOPIC_SUBDIVISIONS, builtInText)
+  assert.deepEqual(orphansOf(nodes), [])
+  assert.equal(nodes.find((n) => n.label === 'Physics').isCustom, true)
+  assert.equal(nodes.find((n) => n.label === 'Mechanics').notes[0].id, 'note-m')
+  assert.ok(!nodes.some((n) => n.label === 'Chemistry' || n.label === 'Organic Chemistry'))
+  assert.equal(removeStalePredefinedChildren(nodes, TOPIC_SUBDIVISIONS, builtInText).changed, false)
+})
+
+test('the stale-child prune keeps a retired branch whose summary the owner edited, as a custom node', () => {
+  const before = buildMap(['Everything', [
+    ['Sciences', [
+      ['Natural Sciences'],
+      ['Chemistry', [['Organic Chemistry', [], { summary: 'My edited words.' }]], { summary: 'Stored built-in text.' }],
+    ]],
+  ]])
+  assert.ok(!TOPIC_SUBDIVISIONS.Sciences.includes('Chemistry'))
+  const builtInText = () => 'Stored built-in text.'
+  const { nodes, changed } = removeStalePredefinedChildren(before, TOPIC_SUBDIVISIONS, builtInText)
+  assert.equal(changed, true)
+  assert.deepEqual(orphansOf(nodes), [])
+  const chemistry = nodes.find((n) => n.label === 'Chemistry')
+  assert.equal(chemistry.isCustom, true)
+  assert.equal(chemistry.summary, 'Stored built-in text.')
+  const organic = nodes.find((n) => n.label === 'Organic Chemistry')
+  assert.equal(organic.parentId, chemistry.id)
+  assert.equal(organic.summary, 'My edited words.')
+  assert.equal(removeStalePredefinedChildren(nodes, TOPIC_SUBDIVISIONS, builtInText).changed, false)
+})
+
+test('Alternate Theories lists no built-in children, so expanding it adds no Mossad Killed Kennedy', () => {
+  assert.deepEqual([...TOPIC_SUBDIVISIONS['Alternate Theories']], [])
+})
+
+const ARCHIVED_MOSSAD = () => map7Orphans().find((n) => n.id === 1284)
+
+test('a hidden Mossad Killed Kennedy holding only the archived or built-in text is deleted', () => {
+  for (const summary of [ARCHIVED_MOSSAD().summary, appSummary('Mossad Killed Kennedy'), undefined]) {
+    const before = [
+      ...buildMap(['Everything', [['Alternate Theories']]]),
+      { id: 90, label: 'Mossad Killed Kennedy', parentId: 89, hidden: true, summary },
+    ]
+    const { nodes } = applyStructuralMigrations(before, appSummary, TOPIC_SUBDIVISIONS)
+    assert.equal(nodes.some((n) => n.label === 'Mossad Killed Kennedy'), false)
+    assert.deepEqual(orphansOf(nodes), [])
+  }
+})
+
+test('a hidden Mossad Killed Kennedy holding owner content is left untouched', () => {
+  const variants = [
+    [{ id: 90, label: 'Mossad Killed Kennedy', parentId: 89, hidden: true, summary: 'My own edited words.' }],
+    [{ id: 90, label: 'Mossad Killed Kennedy', parentId: 89, hidden: true, notes: [{ id: 'note-m', text: 'mine', level: 0 }] }],
+    [
+      { id: 90, label: 'Mossad Killed Kennedy', parentId: 89, hidden: true },
+      { id: 91, label: 'My Lead', parentId: 90, hidden: true, isCustom: true },
+    ],
+    [
+      { id: 90, label: 'Mossad Killed Kennedy', parentId: 89, hidden: true },
+      { id: 91, label: 'Private', parentId: 90, hidden: true, isPersonal: true },
+    ],
+  ]
+  for (const hidden of variants) {
+    const before = [...buildMap(['Everything', [['Alternate Theories']]]), ...hidden]
+    const { nodes } = applyStructuralMigrations(before, appSummary, TOPIC_SUBDIVISIONS)
+    for (const n of hidden) assert.deepEqual(nodes.find((m) => m.id === n.id), n)
+  }
+})
+
+test('a reachable Mossad Killed Kennedy survives the full normalize', () => {
+  for (const extra of [{}, { summary: ARCHIVED_MOSSAD().summary }, { summary: 'Mine.' }]) {
+    const before = buildMap(['Root', [
+      ['Assassination of President John F. Kennedy (1963)', [['Alternate Theories', [['Mossad Killed Kennedy', [], extra]]]]],
+    ]])
+    const { nodes, changed } = normalize(before, appSummary)
+    assert.equal(changed, false)
+    assert.deepEqual(nodes, before)
   }
 })
