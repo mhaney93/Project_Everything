@@ -1745,6 +1745,153 @@ test('node edits leave nodes the owner has edited, and other maps\' nodes, alone
   assert.deepEqual(builtIn.nodes, [builtInArrays])
 })
 
+const OLD_SERMON = '5:13–7:27 (The Sermon on the Mount)'
+const SERMON = '5–7 (The Sermon on the Mount)'
+const BEATITUDES = '5:1–12 (The Beatitudes)'
+const GALILEAN_MINISTRY = '4:12–9:35 (The Galilean Ministry Begins)'
+const OLD_JOB_REPLY = '23–24 (Job\'s Sixth Response)'
+const OLD_PETER = '18:15-27 (Peter\'s First Denial and High Priest Questioning)'
+const PETER = '18:15-27 (Peter\'s Denials and Jesus Before Annas)'
+const OLD_PETER_SUMMARY = 'Peter follows into the high priest\'s courtyard and denies Jesus twice at the gate; meanwhile Jesus is questioned about his teaching and struck by a guard.'
+const PSALMS_19_24 = '19–24 (God\'s Glory, Law, and Kingship)'
+const PSALM_21 = '21 (The King\'s Joy in God\'s Strength)'
+const ASSYRIA = '14:24–27 (The Oracle Against Assyria)'
+const PHILISTIA = '14:28–32 (The Oracle Against Philistia)'
+const ISAIAH_29 = 'Do not rejoice, all you Philistines, that the rod that struck you is broken; from the root of that snake will spring up a viper, its fruit will be a darting, venomous serpent.'
+
+// Rewrites a built-in tuple tree the way the taxonomy stood before migration 10.
+const toOldBible = ([label, children, extra]) => {
+  const old = children.map(toOldBible)
+  if (label === SERMON) return [OLD_SERMON, old.filter(([child]) => child !== BEATITUDES), extra]
+  if (label === GALILEAN_MINISTRY) {
+    const sermonAt = old.findIndex(([child]) => child === OLD_SERMON)
+    const beatitudes = children.find(([child]) => child === SERMON)[1].find(([child]) => child === BEATITUDES)
+    return [label, [...old.slice(0, sermonAt), beatitudes, ...old.slice(sermonAt)], extra]
+  }
+  if (label === '23–24 (Job\'s Seventh Response)') return [OLD_JOB_REPLY, old, extra]
+  if (label === PETER) return [OLD_PETER, old, extra]
+  if (label === PSALMS_19_24) return [label, old.filter(([child]) => child !== PSALM_21), extra]
+  return [label, old, extra]
+}
+
+// The Bible books the fixes touch, stored the way the live map held them.
+const bibleMap = () => {
+  const books = ['Isaiah', 'Job', '1–41 (Book I: Genesis Comparison)', 'Matthew', 'John'].map((label) => toOldBible(builtIn(label)))
+  const nodes = buildMap(['Root', books, { isCustom: true }])
+  const assyria = nodes.find((n) => n.label === ASSYRIA)
+  nodes.push({ id: 5076, label: '29', parentId: assyria.id, hidden: false, isCustom: true, summary: ISAIAH_29, order: 0 })
+  return nodes
+}
+
+const labelsUnder = (mapNodes, label) => {
+  const [parent] = mapNodes.filter((n) => n.label === label)
+  return mapNodes.filter((n) => n.parentId === parent.id).map((n) => n.label)
+}
+
+test('the taxonomy fixes the Isaiah, Job, Psalms, Matthew and John slips', () => {
+  assert.ok(TOPIC_SUBDIVISIONS['22–27 (The Third Cycle of Speeches)'].includes('23–24 (Job\'s Seventh Response)'))
+  assert.ok(TOPIC_SUBDIVISIONS.John.includes(PETER))
+  assert.ok(appSummary(PETER).includes('three times, once at the gate and twice by the fire'))
+  assert.deepEqual([...TOPIC_SUBDIVISIONS[PSALMS_19_24]].map((label) => label.split(' ')[0]), ['19', '20', '21', '22', '23', '24'])
+  assert.ok(appSummary(PSALM_21))
+  assert.equal(TOPIC_SUBDIVISIONS[SERMON][0], BEATITUDES)
+  assert.ok(!TOPIC_SUBDIVISIONS[GALILEAN_MINISTRY].includes(BEATITUDES))
+  assert.ok(TOPIC_SUBDIVISIONS[GALILEAN_MINISTRY].includes(SERMON))
+  assert.ok(appSummary(SERMON))
+  for (const label of [OLD_SERMON, OLD_JOB_REPLY, OLD_PETER]) {
+    assert.equal(TOPIC_SUBDIVISIONS[label], undefined)
+    assert.equal(appSummary(label), '')
+  }
+})
+
+test('migration 10 fixes the stored Bible slips without losing notes or children', () => {
+  const before = bibleMap()
+  const note = { id: 'note-sermon', text: 'mine', level: 0 }
+  const sermonBefore = before.find((n) => n.label === OLD_SERMON)
+  sermonBefore.notes = [note]
+  before.push({ id: 9001, label: 'My Sermon Notes', parentId: sermonBefore.id, hidden: false, isCustom: true, order: 3 })
+  const beatitudesBefore = before.find((n) => n.label === BEATITUDES)
+  beatitudesBefore.notes = [{ id: 'note-beatitudes', text: 'blessed', level: 0 }]
+  const sermonSubtree = descendantsOf(before, sermonBefore.id)
+
+  const { nodes, changed } = normalize(before, appSummary)
+
+  assert.equal(changed, true)
+  assert.deepEqual(orphansOf(nodes), [])
+  assert.equal(nodes.length, before.length + 1)
+
+  const verse = nodes.find((n) => n.id === 5076)
+  assert.equal(pathOf(nodes, verse), `Root > Isaiah > 1–35 (Judgment and Promise) > 13:1–23:18 (Oracles Against the Nations) > ${PHILISTIA} > 29`)
+  assert.equal(verse.summary, ISAIAH_29)
+  assert.equal(verse.isCustom, true)
+  assert.deepEqual(labelsUnder(nodes, ASSYRIA), [])
+
+  assert.deepEqual(nodes.filter((n) => n.label === OLD_JOB_REPLY), [])
+  assert.equal(pathOf(nodes, nodes.find((n) => n.label === '23–24 (Job\'s Seventh Response)')), 'Root > Job > 3–31 (The Dialogue Cycles) > 22–27 (The Third Cycle of Speeches) > 23–24 (Job\'s Seventh Response)')
+  assert.deepEqual(nodes.filter((n) => n.label === OLD_PETER), [])
+  assert.equal(pathOf(nodes, nodes.find((n) => n.label === PETER)), `Root > John > ${PETER}`)
+
+  assert.deepEqual(labelsUnder(nodes, PSALMS_19_24).sort(), [...TOPIC_SUBDIVISIONS[PSALMS_19_24]].sort())
+  assert.equal(nodes.find((n) => n.label === PSALM_21).hidden, false)
+
+  const sermon = nodes.find((n) => n.id === sermonBefore.id)
+  assert.equal(sermon.label, SERMON)
+  assert.deepEqual(sermon.notes, [note])
+  assert.equal(pathOf(nodes, sermon), `Root > Matthew > ${GALILEAN_MINISTRY} > ${SERMON}`)
+  const beatitudes = nodes.find((n) => n.id === beatitudesBefore.id)
+  assert.equal(beatitudes.parentId, sermon.id)
+  assert.deepEqual(beatitudes.notes, beatitudesBefore.notes)
+  assert.deepEqual(descendantsOf(nodes, sermon.id).filter((n) => n.id !== beatitudes.id), sermonSubtree)
+  assert.ok(!labelsUnder(nodes, GALILEAN_MINISTRY).includes(BEATITUDES))
+
+  assert.equal(normalize(nodes, appSummary).changed, false)
+})
+
+test('migration 10 leaves nodes the owner already changed alone', () => {
+  const before = bibleMap()
+  const verse = before.find((n) => n.id === 5076)
+  verse.label = '14:29'
+  const peter = before.find((n) => n.label === OLD_PETER)
+  peter.summary = 'My own summary.'
+  const { nodes } = normalize(before, appSummary)
+
+  assert.equal(nodes.find((n) => n.id === 5076).parentId, verse.parentId)
+  const renamed = nodes.find((n) => n.id === peter.id)
+  assert.equal(renamed.label, PETER)
+  assert.equal(renamed.summary, 'My own summary.')
+
+  // Another map's custom 29 under the Assyria oracle has a different id and stays.
+  const other = bibleMap()
+  other.find((n) => n.id === 5076).id = 6000
+  const moved = normalize(other, appSummary).nodes.find((n) => n.id === 6000)
+  assert.equal(moved.parentId, other.find((n) => n.label === ASSYRIA).id)
+})
+
+test('a stored copy of the old Peter summary is dropped so the corrected one shows', () => {
+  const before = bibleMap()
+  before.find((n) => n.label === OLD_PETER).summary = OLD_PETER_SUMMARY
+  const { nodes } = normalize(before, appSummary)
+  assert.equal(nodes.find((n) => n.label === PETER).summary, undefined)
+})
+
+test('an unexpanded Sermon on the Mount gets its full built-in set around the Beatitudes', () => {
+  const before = buildMap(['Root', [
+    ['Matthew', [[GALILEAN_MINISTRY, [
+      ['4:12–25 (Jesus Begins His Ministry and Calls the First Disciples)'],
+      [BEATITUDES, [], { hidden: true }],
+      [OLD_SERMON, [], { hidden: true }],
+    ]]]],
+  ], { isCustom: true }])
+  const { nodes } = normalize(before, appSummary)
+  assert.deepEqual([...labelsUnder(nodes, SERMON)].sort(), [...TOPIC_SUBDIVISIONS[SERMON]].sort())
+  assert.deepEqual(orphansOf(nodes), [])
+  assert.equal(normalize(nodes, appSummary).changed, false)
+
+  // Psalms 19–24 that was never expanded generates Psalm 21 on expand instead.
+  const psalms = buildMap(['Root', [['1–41 (Book I: Genesis Comparison)', [[PSALMS_19_24]]]], { isCustom: true }])
+  assert.equal(normalize(psalms, appSummary).changed, false)
+})
+
 const labelsOf = (mapNodes) => mapNodes.map((n) => n.label)
 
 test('a custom node with an old built-in label is never renamed', () => {
