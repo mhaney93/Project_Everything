@@ -17,7 +17,7 @@
 //
 // Entries with a path (a chain of labels ending at the built-in node itself)
 // change one place in the tree instead:
-// - `rename` relabels the node to `label`, dropping a stored summary only when
+// - `rename` relabels the node to `label` (possibly its own label), dropping a stored summary only when
 //   it is one of `dropSummaries`, so the built-in summary of the new label shows.
 // - `add` creates a built-in child `add` under the node at `under`, when that
 //   node's built-in children are already stored (expanding never adds more).
@@ -32,6 +32,9 @@ const MARK_PEARSON = [...PERSONALITY_ARCHETYPES, 'Mark & Pearson\'s 12 Archetype
 const MARK_PEARSON_FIGURES = [...MARK_PEARSON, 'Universal Archetypal Figures/Patterns']
 const ARCHETYPE_COMBINATIONS = [...PERSONALITY_ARCHETYPES, 'My Archetype Combinations']
 const JUNG_ARCHETYPAL_FIGURES = ['Collective Unconscious', 'Jungian Archetypes', 'Situational Archetypes/Motifs', 'Archetypal Figures']
+const UNIVERSAL_FIGURES_SUMMARY = 'The recurring character types and narrative patterns that appear universally across myth, religion, and storytelling as expressions of the collective unconscious.'
+const WISE_OLD_MAN_SUMMARY = 'An archetype representing wisdom, guidance, and spiritual insight, often appearing as a mentor or advisor figure.'
+const JUNGIAN_HERO_SUMMARY = 'An archetype representing the ego\'s journey of overcoming obstacles, achieving individuation, and integrating the Self.'
 const JUNGIAN_ARCHETYPES_SUMMARY = 'Universal, inherited patterns of thought and imagery residing in the collective unconscious, influencing human behavior and cultural expressions as described by Carl Jung.'
 const PANAS_RESULTS = ['Positive And Negative Affect Schedule (PANAS)', 'Results|PANAS']
 
@@ -58,7 +61,9 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
     { move: [...MARK_PEARSON_FIGURES, 'The Healer'], into: ARCHETYPE_COMBINATIONS },
     { remove: [...MARK_PEARSON, 'The Archetypes of Orientation'] },
     { rename: [...MARK_PEARSON_FIGURES, 'The Trickster'], label: 'The Jester' },
-    { rename: [...MARK_PEARSON_FIGURES, 'The Wise Old Man/Sage'], label: 'The Sage' },
+    { rename: [...MARK_PEARSON_FIGURES, 'The Wise Old Man/Sage'], label: 'The Sage', dropSummaries: [WISE_OLD_MAN_SUMMARY] },
+    { rename: MARK_PEARSON_FIGURES, label: MARK_PEARSON_FIGURES.at(-1), dropSummaries: [UNIVERSAL_FIGURES_SUMMARY] },
+    { rename: [...MARK_PEARSON_FIGURES, 'The Hero'], label: 'The Hero|Mark & Pearson', dropSummaries: [JUNGIAN_HERO_SUMMARY] },
     { remove: [...MARK_PEARSON_FIGURES, 'The Child'], mergeInto: JUNG_ARCHETYPAL_FIGURES },
     { remove: [...MARK_PEARSON_FIGURES, 'The Great Mother'], mergeInto: JUNG_ARCHETYPAL_FIGURES },
     { add: 'The Caregiver', under: MARK_PEARSON_FIGURES },
@@ -328,6 +333,7 @@ const renameBuiltInNode = (mapNodes, { rename, label, dropSummaries = [] }, buil
   let nodes = mapNodes
   const byId = new Map(mapNodes.map((node) => [node.id, node]))
   for (const match of nodesAtPath(mapNodes, byId, rename)) {
+    if (match.label === label && !dropSummaries.includes(match.summary)) continue
     const sourcePath = labelPathOf(nodes, match.id)
     nodes = nodes.map((node) => {
       if (node.id !== match.id) return node

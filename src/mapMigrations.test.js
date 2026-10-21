@@ -691,7 +691,7 @@ test('summary migration fixes only the stored Memory Tricks summary that still h
 })
 
 const MARK_PEARSON = 'Mark & Pearson\'s 12 Archetypes'
-const MARK_PEARSON_FIGURES = ['The Innocent', 'The Everyman', 'The Orphan', 'The Hero', 'The Caregiver', 'The Explorer', 'The Rebel/Outlaw', 'The Lover', 'The Creator', 'The Jester', 'The Sage', 'The Magician', 'The Ruler']
+const MARK_PEARSON_FIGURES = ['The Innocent', 'The Everyman', 'The Orphan', 'The Hero|Mark & Pearson', 'The Caregiver', 'The Explorer', 'The Rebel/Outlaw', 'The Lover', 'The Creator', 'The Jester', 'The Sage', 'The Magician', 'The Ruler']
 
 test('the DMT and 5-MeO-DMT pharmacology summaries lead with the receptor mechanism', () => {
   assert.equal(BUILT_IN_SUMMARIES['Pharmacology|DMT'], 'Acts mainly as a serotonin 5-HT2A receptor agonist (also sigma-1 and trace-amine receptors). Speculative hypotheses also propose effects on neuronal microtubule order.')
@@ -868,6 +868,49 @@ test('a removed Jungian figure with its own summary leaves it as a note on the J
     text: `Merged from Root > Psychology > Personality Psychology > Archetypes > ${MARK_PEARSON} > Universal Archetypal Figures/Patterns > The Child: My Mark & Pearson child words.`,
     level: 0,
   }])
+
+  const again = normalize(nodes)
+  assert.equal(again.changed, false)
+  assert.deepEqual(again.nodes, nodes)
+})
+
+const OLD_HERO_SUMMARY = 'An archetype representing the ego\'s journey of overcoming obstacles, achieving individuation, and integrating the Self.'
+const OLD_SAGE_SUMMARY = 'An archetype representing wisdom, guidance, and spiritual insight, often appearing as a mentor or advisor figure.'
+const OLD_FIGURES_SUMMARY = 'The recurring character types and narrative patterns that appear universally across myth, religion, and storytelling as expressions of the collective unconscious.'
+
+test('Mark & Pearson figures drop stored Jungian built-in text but keep the Jung tree and owner words', () => {
+  const before = buildMap(['Root', [['Psychology', [
+    ['Personality Psychology', [['Archetypes', [['Jungian Archetypes', [
+      ['Universal Archetypal Figures/Patterns', [
+        ['The Hero', [['My Quest', [], { isCustom: true }]], { summary: OLD_HERO_SUMMARY, notes: [{ id: 'note-hero', text: 'my hero', level: 0 }] }],
+        ['The Wise Old Man/Sage', [], { summary: OLD_SAGE_SUMMARY }],
+        ['The Lover', [], { summary: 'My lover words.' }],
+      ], { summary: OLD_FIGURES_SUMMARY }],
+    ]]]]]],
+    ['Collective Unconscious', [['The Hero', [], { isCustom: true, summary: OLD_HERO_SUMMARY }]], { isCustom: true }],
+  ]]]])
+  const old = new Map(before.map((n) => [n.id, n]))
+  const { nodes, changed } = normalize(before)
+  assert.equal(changed, true)
+  assert.deepEqual(orphansOf(nodes), [])
+
+  const hero = nodes.find((n) => n.label === 'The Hero|Mark & Pearson')
+  const oldHero = before.find((n) => n.label === 'The Hero' && !n.isCustom)
+  assert.equal(hero.id, oldHero.id)
+  assert.equal(hero.summary, undefined)
+  assert.deepEqual(hero.notes, oldHero.notes)
+  assert.deepEqual(childLabelsOf(nodes, hero), ['My Quest'])
+  assert.ok(BUILT_IN_SUMMARIES['The Hero|Mark & Pearson'])
+  assert.equal(BUILT_IN_SUMMARIES['The Hero'], OLD_HERO_SUMMARY)
+
+  const jungHero = before.find((n) => n.label === 'The Hero' && n.isCustom)
+  assert.deepEqual(nodes.find((n) => n.id === jungHero.id), jungHero)
+
+  const sage = nodes.find((n) => n.label === 'The Sage')
+  assert.equal(sage.summary, undefined)
+  assert.equal(nodes.find((n) => n.label === 'Universal Archetypal Figures/Patterns').summary, undefined)
+  const lover = nodes.find((n) => n.label === 'The Lover')
+  assert.deepEqual(lover, old.get(lover.id))
 
   const again = normalize(nodes)
   assert.equal(again.changed, false)
