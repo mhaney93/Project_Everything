@@ -17,8 +17,10 @@ const loadAppObject = (declaration, indent) => {
 const TOPIC_SUBDIVISIONS = loadAppObject('const TOPIC_SUBDIVISIONS = {', '  ')
 const BUILT_IN_SUMMARIES = loadAppObject('const summaries = {', '    ')
 
-const normalize = (mapNodes) => {
-  const structural = applyStructuralMigrations(mapNodes, () => '', TOPIC_SUBDIVISIONS)
+const appSummary = (label) => BUILT_IN_SUMMARIES[label] || ''
+
+const normalize = (mapNodes, builtInSummary = () => '') => {
+  const structural = applyStructuralMigrations(mapNodes, builtInSummary, TOPIC_SUBDIVISIONS)
   const pruned = removeStalePredefinedChildren(structural.nodes, TOPIC_SUBDIVISIONS)
   return { nodes: pruned.nodes, changed: structural.changed || pruned.changed }
 }
@@ -688,4 +690,385 @@ test('summary migration fixes only the stored Memory Tricks summary that still h
   const again = applySummaryMigrations(nodes)
   assert.equal(again.changed, false)
   assert.equal(again.nodes, nodes)
+})
+
+test('summary migration rewrites stored copies of the reworded built-in summaries only while they hold the old text', () => {
+  const changes = SUMMARY_MIGRATIONS_BY_VERSION[5]
+  assert.deepEqual(changes.map((c) => c.label).sort(), ['Combinations of Combinations', 'Combinations|Jungian', 'Pharmacology|5-MeO-DMT', 'Pharmacology|DMT', 'Results|PANAS'])
+  const before = buildMap(['Root', changes.flatMap(({ label, from }) => [
+    [label, [], { summary: from }],
+    [label, [], { summary: `${from} My edit.`, isCustom: true }],
+  ])])
+  const { nodes, changed } = applySummaryMigrations(before)
+  assert.equal(changed, true)
+  for (const { label, from, to } of changes) {
+    const [exact, edited] = nodes.filter((n) => n.label === label)
+    assert.equal(to, BUILT_IN_SUMMARIES[label])
+    assert.equal(exact.summary, to)
+    assert.equal(edited.summary, `${from} My edit.`)
+  }
+
+  const again = applySummaryMigrations(nodes)
+  assert.equal(again.changed, false)
+  assert.equal(again.nodes, nodes)
+})
+
+test('the Jester drops stored Trickster built-in text but keeps an edited summary', () => {
+  const trickster = 'An archetype embodying chaos, disruption, and the challenging of norms, often bringing about change through unconventional or subversive means.'
+  const figures = (summary) => buildMap(['Root', [['Personality Psychology', [['Archetypes', [['Jungian Archetypes', [
+    ['Universal Archetypal Figures/Patterns', [['The Trickster', [], { summary }]]],
+  ]]]]]]]])
+  const exact = normalize(figures(trickster), appSummary).nodes.find((n) => n.label === 'The Jester')
+  assert.equal('summary' in exact, false)
+  const edited = normalize(figures(`${trickster} Mine.`), appSummary).nodes.find((n) => n.label === 'The Jester')
+  assert.equal(edited.summary, `${trickster} Mine.`)
+})
+
+const MARK_PEARSON = 'Mark & Pearson\'s 12 Archetypes'
+const MARK_PEARSON_FIGURES = ['The Innocent', 'The Everyman', 'The Orphan', 'The Hero|Mark & Pearson', 'The Caregiver', 'The Explorer', 'The Rebel/Outlaw', 'The Lover', 'The Creator', 'The Jester', 'The Sage', 'The Magician', 'The Ruler']
+
+test('the DMT and 5-MeO-DMT pharmacology summaries lead with the receptor mechanism', () => {
+  assert.equal(BUILT_IN_SUMMARIES['Pharmacology|DMT'], 'Acts mainly as a serotonin 5-HT2A receptor agonist (also sigma-1 and trace-amine receptors). Speculative hypotheses also propose effects on neuronal microtubule order.')
+  assert.equal(BUILT_IN_SUMMARIES['Pharmacology|5-MeO-DMT'], 'Acts mainly on serotonin 5-HT1A receptors, with 5-HT2A activity. A speculative hypothesis proposes it scrambles microtubule liquid-crystal order.')
+  assert.deepEqual([...TOPIC_SUBDIVISIONS['Pharmacology|DMT']], ['Microtubule Ordering Hypothesis'])
+  assert.deepEqual([...TOPIC_SUBDIVISIONS['Pharmacology|5-MeO-DMT']], ['Microtubule Scrambling Hypothesis'])
+})
+
+test('the taxonomy splits Personality Archetypes into Mark & Pearson and my combinations', () => {
+  assert.deepEqual([...TOPIC_SUBDIVISIONS.Archetypes], [MARK_PEARSON, 'My Archetype Combinations'])
+  assert.deepEqual([...TOPIC_SUBDIVISIONS[MARK_PEARSON]], ['Universal Archetypal Figures/Patterns'])
+  assert.deepEqual([...TOPIC_SUBDIVISIONS['Universal Archetypal Figures/Patterns']].sort(), [...MARK_PEARSON_FIGURES].sort())
+  assert.deepEqual([...TOPIC_SUBDIVISIONS['My Archetype Combinations']], ['The Healer', 'Combinations|Jungian', 'Combinations of Combinations'])
+  assert.equal(TOPIC_SUBDIVISIONS['Jungian Archetypes'], undefined)
+  assert.equal(BUILT_IN_SUMMARIES[MARK_PEARSON], 'Twelve story and brand archetypes from Margaret Mark and Carol S. Pearson (The Hero and the Outlaw, 2001).')
+  assert.equal(BUILT_IN_SUMMARIES['My Archetype Combinations'], 'My own combinations of archetypes.')
+  for (const label of [...MARK_PEARSON_FIGURES, ...TOPIC_SUBDIVISIONS['My Archetype Combinations']]) {
+    assert.ok(BUILT_IN_SUMMARIES[label], label)
+  }
+})
+
+const JUNGIAN_SUMMARY_WITH_POINTER = 'Universal, inherited patterns of thought and imagery residing in the collective unconscious, influencing human behavior and cultural expressions as described by Carl Jung.  See: Jung\'s Analytical Psychology under Depth Psychology.'
+
+// The live map's two archetype trees (2026-10-21 review): the built-in
+// Personality Psychology copy, stored down to its combinations, and the
+// owner's Jung tree under Depth Psychology.
+const archetypesMap = ({ figureExtras = {}, withJungTree = true } = {}) => buildMap(
+  ['Root', [
+    ['Psychology', [
+      ['Personality Psychology', [
+        ['Personality Theory'],
+        ['Archetypes', [
+          ['Jungian Archetypes', [
+            ['Universal Archetypal Figures/Patterns', [
+              ['The Child', [], figureExtras['The Child']],
+              ['The Creator', [['The Artist', [['The Poet']]]]],
+              ['The Everyman'],
+              ['The Explorer'],
+              ['The Great Mother', [], figureExtras['The Great Mother']],
+              ['The Healer', [], { notes: [{ id: 'note-healer', text: 'my healer', level: 0 }] }],
+              ['The Hero'],
+              ['The Innocent'],
+              ['The Lover'],
+              ['The Orphan'],
+              ['The Rebel/Outlaw'],
+              ['The Trickster', [], { summary: 'My own trickster words.' }],
+              ['The Wise Old Man/Sage'],
+            ]],
+            ['Combinations|Jungian', [
+              ['The Great Mother and The Innocent and The Self', [['The Caregiver']]],
+              ['The Wise Old Man and The Hero'],
+            ]],
+            ['Combinations of Combinations', [
+              ['The Creator and The Magician', [['The Mad Scientist']]],
+              ['The Healer and The Magician'],
+              ['The Innocent and The Caregiver and The Lover'],
+              ['The Ruler and The Wise Old Man'],
+            ]],
+          ], { summary: JUNGIAN_SUMMARY_WITH_POINTER, excludedChildLabels: ['The Archetypes of Orientation'] }],
+        ]],
+      ]],
+      ...(withJungTree ? [['Collective Unconscious', [
+        ['Jungian Archetypes', [
+          ['Situational Archetypes/Motifs', [
+            ['Archetypal Figures', [
+              ['The Child', [], { isCustom: true, summary: 'Jung tree child.' }],
+              ['The Great Mother', [], { isCustom: true, summary: 'Jung tree mother.' }],
+              ['The Trickster', [], { isCustom: true, summary: 'Jung tree trickster.' }],
+            ], { isCustom: true }],
+          ], { isCustom: true }],
+        ], { isCustom: true, summary: 'Jung tree archetypes.' }],
+      ], { isCustom: true }]] : []),
+    ], { excludedChildLabels: ['Emotions'] }],
+  ]],
+)
+
+
+test('archetype migration keeps Mark & Pearson figures and moves my combinations to their own node', () => {
+  const before = archetypesMap()
+  const byLabelPath = (mapNodes) => new Map(mapNodes.map((n) => [pathOf(mapNodes, n), n]))
+  const old = byLabelPath(before)
+  const P = 'Root > Psychology > Personality Psychology > Archetypes'
+  const { nodes, changed } = normalize(before, appSummary)
+  const now = byLabelPath(nodes)
+
+  assert.equal(changed, true)
+  assert.deepEqual(orphansOf(nodes), [])
+  assert.equal(now.size, nodes.length)
+  assert.deepEqual(childLabelsOf(nodes, now.get(P)), [MARK_PEARSON, 'My Archetype Combinations'])
+
+  const markPearson = now.get(`${P} > ${MARK_PEARSON}`)
+  assert.equal(markPearson.id, old.get(`${P} > Jungian Archetypes`).id)
+  assert.equal(markPearson.summary, undefined)
+  assert.deepEqual(markPearson.excludedChildLabels, ['The Archetypes of Orientation'])
+  assert.deepEqual(childLabelsOf(nodes, markPearson), ['Universal Archetypal Figures/Patterns'])
+
+  const figures = now.get(`${P} > ${MARK_PEARSON} > Universal Archetypal Figures/Patterns`)
+  assert.deepEqual(childLabelsOf(nodes, figures), [...MARK_PEARSON_FIGURES].sort())
+  const oldFigures = `${P} > Jungian Archetypes > Universal Archetypal Figures/Patterns`
+  const jester = now.get(`${figures && pathOf(nodes, figures)} > The Jester`)
+  assert.equal(jester.id, old.get(`${oldFigures} > The Trickster`).id)
+  assert.equal(jester.summary, 'My own trickster words.')
+  assert.equal(now.get(`${pathOf(nodes, figures)} > The Sage`).id, old.get(`${oldFigures} > The Wise Old Man/Sage`).id)
+  assert.equal(now.get(`${pathOf(nodes, figures)} > The Creator > The Artist > The Poet`).id, old.get(`${oldFigures} > The Creator > The Artist > The Poet`).id)
+
+  const combinations = now.get(`${P} > My Archetype Combinations`)
+  assert.deepEqual(childLabelsOf(nodes, combinations), ['Combinations of Combinations', 'Combinations|Jungian', 'The Healer'])
+  // Every node of my combinations keeps its id, label, notes and subtree.
+  for (const [path, node] of old) {
+    const moved = path
+      .replace(`${P} > Jungian Archetypes > Universal Archetypal Figures/Patterns > The Healer`, `${P} > My Archetype Combinations > The Healer`)
+      .replace(`${P} > Jungian Archetypes > Combinations`, `${P} > My Archetype Combinations > Combinations`)
+    if (moved === path) continue
+    const after = now.get(moved)
+    assert.equal(after?.id, node.id, moved)
+    assert.deepEqual(after.notes, node.notes)
+  }
+
+  // The Jungian-only figures stay in the Jung tree alone. Each keeps its own
+  // summary and gains the built-in text the removed copy showed as a note.
+  const jungFigures = 'Root > Psychology > Collective Unconscious > Jungian Archetypes > Situational Archetypes/Motifs > Archetypal Figures'
+  for (const label of ['The Child', 'The Great Mother']) {
+    const source = old.get(`${oldFigures} > ${label}`)
+    assert.deepEqual(now.get(`${jungFigures} > ${label}`), {
+      ...old.get(`${jungFigures} > ${label}`),
+      notes: [{
+        id: `merged-summary-${source.id}`,
+        text: `Merged from ${P} > ${MARK_PEARSON} > Universal Archetypal Figures/Patterns > ${label}: ${BUILT_IN_SUMMARIES[label]}`,
+        level: 0,
+      }],
+    })
+  }
+  assert.deepEqual(now.get(`${jungFigures} > The Trickster`), old.get(`${jungFigures} > The Trickster`))
+  assert.equal(nodes.filter((n) => n.label === 'The Child' || n.label === 'The Great Mother').length, 2)
+
+  // Only the two bare Jungian copies are gone; the three new figures and the
+  // combinations node are the only additions.
+  const ids = new Set(nodes.map((n) => n.id))
+  const gone = before.filter((n) => !ids.has(n.id)).map((n) => pathOf(before, n)).sort()
+  assert.deepEqual(gone, [`${oldFigures} > The Child`, `${oldFigures} > The Great Mother`])
+  const beforeIds = new Set(before.map((n) => n.id))
+  const added = nodes.filter((n) => !beforeIds.has(n.id)).map((n) => pathOf(nodes, n)).sort()
+  assert.deepEqual(added, [
+    `${P} > ${MARK_PEARSON} > Universal Archetypal Figures/Patterns > The Caregiver`,
+    `${P} > ${MARK_PEARSON} > Universal Archetypal Figures/Patterns > The Magician`,
+    `${P} > ${MARK_PEARSON} > Universal Archetypal Figures/Patterns > The Ruler`,
+    `${P} > My Archetype Combinations`,
+  ])
+
+  const again = normalize(nodes, appSummary)
+  assert.equal(again.changed, false)
+  assert.deepEqual(again.nodes, nodes)
+})
+
+test('a removed Jungian figure carries what the owner wrote into its Jung tree namesake', () => {
+  const before = archetypesMap({
+    figureExtras: {
+      'The Child': { notes: [{ id: 'note-child', text: 'my child note', level: 0 }] },
+    },
+  })
+  const custom = { id: Math.max(...before.map((n) => n.id)) + 1, label: 'Inner Child', parentId: before.find((n) => n.label === 'The Child' && !n.isCustom).id, hidden: false, isCustom: true }
+  const { nodes } = normalize([...before, custom], appSummary)
+
+  assert.deepEqual(orphansOf(nodes), [])
+  const children = nodes.filter((n) => n.label === 'The Child')
+  assert.equal(children.length, 1)
+  const [jungChild] = children
+  assert.equal(jungChild.isCustom, true)
+  assert.equal(jungChild.summary, 'Jung tree child.')
+  const source = before.find((n) => n.label === 'The Child' && !n.isCustom)
+  assert.deepEqual(jungChild.notes.map((n) => n.id), ['note-child', `merged-summary-${source.id}`])
+  assert.equal(nodes.find((n) => n.id === custom.id).parentId, jungChild.id)
+})
+
+test('a removed Jungian figure with its own summary leaves it as a note on the Jung tree namesake', () => {
+  const before = archetypesMap({ figureExtras: { 'The Child': { summary: 'My Mark & Pearson child words.' } } })
+  const source = before.find((n) => n.label === 'The Child' && !n.isCustom)
+  const { nodes } = normalize(before, appSummary)
+
+  const children = nodes.filter((n) => n.label === 'The Child')
+  assert.equal(children.length, 1)
+  assert.equal(children[0].summary, 'Jung tree child.')
+  assert.deepEqual(children[0].notes, [{
+    id: `merged-summary-${source.id}`,
+    text: `Merged from Root > Psychology > Personality Psychology > Archetypes > ${MARK_PEARSON} > Universal Archetypal Figures/Patterns > The Child: My Mark & Pearson child words.`,
+    level: 0,
+  }])
+
+  const again = normalize(nodes, appSummary)
+  assert.equal(again.changed, false)
+  assert.deepEqual(again.nodes, nodes)
+})
+
+const OLD_HERO_SUMMARY = 'An archetype representing the ego\'s journey of overcoming obstacles, achieving individuation, and integrating the Self.'
+const OLD_SAGE_SUMMARY = 'An archetype representing wisdom, guidance, and spiritual insight, often appearing as a mentor or advisor figure.'
+const OLD_FIGURES_SUMMARY = 'The recurring character types and narrative patterns that appear universally across myth, religion, and storytelling as expressions of the collective unconscious.'
+
+test('Mark & Pearson figures drop stored Jungian built-in text but keep the Jung tree and owner words', () => {
+  const before = buildMap(['Root', [['Psychology', [
+    ['Personality Psychology', [['Archetypes', [['Jungian Archetypes', [
+      ['Universal Archetypal Figures/Patterns', [
+        ['The Hero', [['My Quest', [], { isCustom: true }]], { summary: OLD_HERO_SUMMARY, notes: [{ id: 'note-hero', text: 'my hero', level: 0 }] }],
+        ['The Wise Old Man/Sage', [], { summary: OLD_SAGE_SUMMARY }],
+        ['The Lover', [], { summary: 'My lover words.' }],
+      ], { summary: OLD_FIGURES_SUMMARY }],
+    ]]]]]],
+    ['Collective Unconscious', [['The Hero', [], { isCustom: true, summary: OLD_HERO_SUMMARY }]], { isCustom: true }],
+  ]]]])
+  const old = new Map(before.map((n) => [n.id, n]))
+  const { nodes, changed } = normalize(before, appSummary)
+  assert.equal(changed, true)
+  assert.deepEqual(orphansOf(nodes), [])
+
+  const hero = nodes.find((n) => n.label === 'The Hero|Mark & Pearson')
+  const oldHero = before.find((n) => n.label === 'The Hero' && !n.isCustom)
+  assert.equal(hero.id, oldHero.id)
+  assert.equal(hero.summary, undefined)
+  assert.deepEqual(hero.notes, oldHero.notes)
+  assert.deepEqual(childLabelsOf(nodes, hero), ['My Quest'])
+  assert.ok(BUILT_IN_SUMMARIES['The Hero|Mark & Pearson'])
+  assert.equal(BUILT_IN_SUMMARIES['The Hero'], OLD_HERO_SUMMARY)
+
+  const jungHero = before.find((n) => n.label === 'The Hero' && n.isCustom)
+  assert.deepEqual(nodes.find((n) => n.id === jungHero.id), jungHero)
+
+  const sage = nodes.find((n) => n.label === 'The Sage')
+  assert.equal(sage.summary, undefined)
+  assert.equal(nodes.find((n) => n.label === 'Universal Archetypal Figures/Patterns').summary, undefined)
+  const lover = nodes.find((n) => n.label === 'The Lover')
+  assert.deepEqual(lover, old.get(lover.id))
+
+  const again = normalize(nodes, appSummary)
+  assert.equal(again.changed, false)
+  assert.deepEqual(again.nodes, nodes)
+})
+
+test('without a Jung tree a figure holding owner content stays as a custom node', () => {
+  const before = archetypesMap({
+    withJungTree: false,
+    figureExtras: { 'The Child': { notes: [{ id: 'note-child', text: 'keep me', level: 0 }] } },
+  })
+  const summaries = { 'The Child': 'Built-in child summary.' }
+  const structural = applyStructuralMigrations(before, (label) => summaries[label] || '', TOPIC_SUBDIVISIONS)
+  const { nodes } = removeStalePredefinedChildren(structural.nodes, TOPIC_SUBDIVISIONS)
+
+  const child = nodes.find((n) => n.label === 'The Child')
+  assert.equal(child.isCustom, true)
+  assert.equal(child.summary, 'Built-in child summary.')
+  assert.deepEqual(child.notes.map((n) => n.id), ['note-child'])
+  assert.match(pathOf(nodes, child), /Universal Archetypal Figures\/Patterns > The Child$/)
+  assert.equal(nodes.some((n) => n.label === 'The Great Mother'), false)
+})
+
+test('an unexpanded Jungian Archetypes is renamed and gains a combinations sibling', () => {
+  const before = buildMap(['Root', [['Personality Psychology', [
+    ['Archetypes', [['Jungian Archetypes', [], { summary: 'My own words.' }]]],
+  ]]]])
+  const { nodes, changed } = normalize(before, appSummary)
+  assert.equal(changed, true)
+  const archetypes = nodes.find((n) => n.label === 'Archetypes')
+  assert.deepEqual(childLabelsOf(nodes, archetypes), [MARK_PEARSON, 'My Archetype Combinations'])
+  assert.equal(nodes.find((n) => n.label === MARK_PEARSON).summary, 'My own words.')
+  assert.equal(nodes.length, before.length + 1)
+  assert.equal(normalize(nodes, appSummary).changed, false)
+})
+
+test('archetype migration leaves Personal and custom copies alone', () => {
+  const before = buildMap(['Root', [
+    ['Personality Psychology', [['Archetypes']]],
+    ['Personal', [
+      ['Jungian Archetypes', [['The Trickster', [], { isPersonal: true }]], { isPersonal: true }],
+    ], { isPersonal: true }],
+    ['Notes', [['Archetypes', [['Jungian Archetypes', [], { isCustom: true }]], { isCustom: true }]], { isCustom: true }],
+  ]])
+  const { nodes, changed } = applyStructuralMigrations(before, () => '', TOPIC_SUBDIVISIONS)
+  assert.equal(changed, false)
+  assert.deepEqual(nodes, before)
+})
+
+const panasMap = () => buildMap(['Root', [['Positive And Negative Affect Schedule (PANAS)', [
+  ['Positive Affect'],
+  ['Negative Affect'],
+  ['Results|PANAS', [
+    ['Cheerleader Archetype', [['Good Emotional Regulation Skills']], { notes: [{ id: 'note-cheer', text: 'me?', level: 0 }] }],
+    ['Judge/Surgeon Archetype'],
+    ['Mad Scientist Archetype', [['High Potential for Emotional Intelligence'], ['Sensitive to Nuance'], ['Wide Emotional Range']]],
+    ['Poet Archetype', [], { summary: 'My poet summary.' }],
+  ]],
+]]]])
+
+test('PANAS profiles take the Archer & Garcia names and keep their nicknames, notes and children', () => {
+  const renames = {
+    'Cheerleader Archetype': 'Self-fulfilling (Cheerleader)',
+    'Mad Scientist Archetype': 'High affective (Mad Scientist)',
+    'Judge/Surgeon Archetype': 'Low affective (Judge/Surgeon)',
+    'Poet Archetype': 'Self-destructive (Poet)',
+  }
+  const before = panasMap()
+  const { nodes, changed } = normalize(before)
+  assert.equal(changed, true)
+  assert.equal(nodes.length, before.length)
+  for (const node of before) {
+    const after = nodes.find((n) => n.id === node.id)
+    assert.deepEqual(after, { ...node, label: renames[node.label] || node.label })
+  }
+  assert.deepEqual([...TOPIC_SUBDIVISIONS['Results|PANAS']].sort(), Object.values(renames).sort())
+  assert.equal(BUILT_IN_SUMMARIES['Results|PANAS'], 'Archer & Garcia\'s four affective profiles, built from PANAS\'s two scores: high or low positive affect (PA) combined with high or low negative affect (NA).')
+  for (const [label, combo] of [['Self-fulfilling (Cheerleader)', 'High PA + Low NA'], ['High affective (Mad Scientist)', 'High PA + High NA'], ['Low affective (Judge/Surgeon)', 'Low PA + Low NA'], ['Self-destructive (Poet)', 'Low PA + High NA']]) {
+    assert.ok(BUILT_IN_SUMMARIES[label].startsWith(`${combo} profile:`), label)
+  }
+  assert.equal(normalize(nodes).changed, false)
+})
+
+test('consolidating a copy with a different summary keeps it as a note on the kept copy', () => {
+  const before = buildMap(['Root', [['Psychology', [
+    ['Emotions', [], { summary: 'Kept summary.', notes: [{ id: 'note-kept', text: 'kept', level: 0 }] }],
+    ['Cognitive Psychology', [['Emotions', [], { summary: 'Copy summary.' }]]],
+  ]]]])
+  const copy = before.find((n) => n.label === 'Emotions' && n.summary === 'Copy summary.')
+  const { nodes, changed } = applyStructuralMigrations(before, () => '', TOPIC_SUBDIVISIONS)
+
+  assert.equal(changed, true)
+  const emotions = nodes.filter((n) => n.label === 'Emotions')
+  assert.equal(emotions.length, 1)
+  assert.equal(emotions[0].summary, 'Kept summary.')
+  assert.deepEqual(emotions[0].notes, [
+    { id: 'note-kept', text: 'kept', level: 0 },
+    { id: `merged-summary-${copy.id}`, text: 'Merged from Root > Psychology > Cognitive Psychology > Emotions: Copy summary.', level: 0 },
+  ])
+
+  const again = applyStructuralMigrations(nodes, () => '', TOPIC_SUBDIVISIONS)
+  assert.equal(again.changed, false)
+  assert.deepEqual(again.nodes, nodes)
+})
+
+test('consolidating a copy with the same summary adds no note', () => {
+  const before = buildMap(['Root', [['Psychology', [
+    ['Emotions', [], { summary: 'Same.' }],
+    ['Cognitive Psychology', [['Emotions', [], { summary: 'Same.' }]]],
+  ]]]])
+  const { nodes } = applyStructuralMigrations(before, () => '', TOPIC_SUBDIVISIONS)
+  const emotions = nodes.filter((n) => n.label === 'Emotions')
+  assert.equal(emotions.length, 1)
+  assert.equal(emotions[0].summary, 'Same.')
+  assert.equal(emotions[0].notes, undefined)
 })
