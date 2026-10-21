@@ -24,7 +24,10 @@
 // - `move` reparents the node, with its subtree, under the node at `into`,
 //   creating `into` when only its parent is stored.
 // - `remove` merges the node into its namesake under `mergeInto` (notes,
-//   children carry over, a differing summary becomes a note). Without one, a node holding anything
+//   children carry over, a differing summary becomes a note). With `as`, it
+//   merges into the node labelled `as` there instead, creating the missing
+//   levels of that path from the built-in taxonomy, and `summary` stands in
+//   for the removed node's retired built-in summary. Without a target, a node holding anything
 //   the owner wrote becomes custom and stays put; a bare one is deleted.
 // A node that lands beside a namesake is merged into it the same way.
 const PERSONALITY_ARCHETYPES = ['Personality Psychology', 'Archetypes']
@@ -38,6 +41,8 @@ const TRICKSTER_SUMMARY = 'An archetype embodying chaos, disruption, and the cha
 const JUNGIAN_HERO_SUMMARY = 'An archetype representing the ego\'s journey of overcoming obstacles, achieving individuation, and integrating the Self.'
 const JUNGIAN_ARCHETYPES_SUMMARY = 'Universal, inherited patterns of thought and imagery residing in the collective unconscious, influencing human behavior and cultural expressions as described by Carl Jung.'
 const PANAS_RESULTS = ['Positive And Negative Affect Schedule (PANAS)', 'Results|PANAS']
+const RWANDAN_GENOCIDE = 'Rwandan Genocide (1994)'
+const ANCIENT_MIGRATION_PERIOD_SUMMARY = 'Characterized by significant movements of various peoples, primarily Germanic tribes, leading to widespread upheaval, the decline of the Western Roman Empire, and the emergence of new political entities across Europe.'
 
 export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
   3: [
@@ -74,6 +79,17 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
     { rename: [...PANAS_RESULTS, 'Mad Scientist Archetype'], label: 'High affective (Mad Scientist)' },
     { rename: [...PANAS_RESULTS, 'Judge/Surgeon Archetype'], label: 'Low affective (Judge/Surgeon)' },
     { rename: [...PANAS_RESULTS, 'Poet Archetype'], label: 'Self-destructive (Poet)' },
+  ],
+  6: [
+    // 1994 is after the Cold War; the copy under the post-Cold War Rwanda node stays.
+    { remove: ['Rwanda During the Cold War Era', RWANDAN_GENOCIDE], mergeInto: ['Rwanda During the Post-Cold War Era'] },
+    // One Migration Period, under the medieval Late Antiquity; the ancient copy merges into it.
+    {
+      remove: ['Late Antiquity (250 - 500 AD)', 'Migration Period (300 - 500 AD)'],
+      mergeInto: ['History', 'Medieval Period (476 - 1453)', 'Early Middle Ages (476 - 1000)', 'Late Antiquity (500 - 750)'],
+      as: 'Migration Period (c. 375 - 568)',
+      summary: ANCIENT_MIGRATION_PERIOD_SUMMARY,
+    },
   ],
 }
 
@@ -113,6 +129,13 @@ export const SUMMARY_MIGRATIONS_BY_VERSION = {
       label: 'Combinations of Combinations',
       from: 'Higher-order Jungian archetypes that emerge from combining already-blended archetypal patterns.',
       to: 'My own higher-order combinations, built by combining archetypes that are already blends.',
+    },
+  ],
+  6: [
+    {
+      label: 'Operation Northwoods (1962)',
+      from: 'A March 1962 proposed CIA plan to stage false-flag attacks and blame them on Cuba to justify a U.S. military invasion, rejected by President Kennedy.',
+      to: 'A March 1962 Joint Chiefs of Staff proposal, part of the Operation Mongoose anti-Castro planning, to stage false-flag attacks and blame them on Cuba to justify a U.S. invasion; rejected by the Kennedy administration.',
     },
   ],
 }
@@ -412,19 +435,27 @@ const moveBuiltInNode = (mapNodes, { move, into }, builtInSummary) => {
   return { nodes, changed: nodes !== mapNodes }
 }
 
-const removeBuiltInNode = (mapNodes, { remove, mergeInto }, builtInSummary) => {
+const removeBuiltInNode = (mapNodes, { remove, mergeInto, as, summary: retiredSummary }, builtInSummary, topicSubdivisions) => {
   let nodes = mapNodes
+  const sourceSummary = (label) => (label === remove.at(-1) && retiredSummary) || builtInSummary(label)
   for (const source of nodesAtPath(mapNodes, new Map(mapNodes.map((node) => [node.id, node])), remove)) {
     const byId = new Map(nodes.map((node) => [node.id, node]))
     const notPersonal = (node) => !node.isPersonal
-    const target = mergeInto && nodesAtPath(nodes, byId, [...mergeInto, source.label], notPersonal).find((node) => node.id !== source.id)
+    let target = mergeInto && nodesAtPath(nodes, byId, [...mergeInto, as || source.label], notPersonal).find((node) => node.id !== source.id)
+    if (!target && as) {
+      const ensured = ensureHome(nodes, [...mergeInto, as], topicSubdivisions)
+      if (ensured) {
+        nodes = ensured.nodes
+        target = ensured.home
+      }
+    }
     if (target) {
-      nodes = mergeNode(nodes, source.id, target.id, builtInSummary)
+      nodes = mergeNode(nodes, source.id, target.id, sourceSummary)
       continue
     }
     const ids = subtreeIds(buildChildrenByParent(nodes), source.id)
     if (ids.some((id) => holdsOwnerContent(byId.get(id)))) {
-      const summary = source.summary || builtInSummary(source.label) || undefined
+      const summary = source.summary || sourceSummary(source.label) || undefined
       nodes = nodes.map((node) => (node.id === source.id ? { ...node, isCustom: true, summary } : node))
     } else {
       const removed = new Set(ids)
@@ -438,7 +469,7 @@ const runStructuralMigration = (mapNodes, migration, builtInSummary, topicSubdiv
   if (migration.rename) return renameBuiltInNode(mapNodes, migration, builtInSummary)
   if (migration.add) return addBuiltInNode(mapNodes, migration)
   if (migration.move) return moveBuiltInNode(mapNodes, migration, builtInSummary)
-  if (migration.remove) return removeBuiltInNode(mapNodes, migration, builtInSummary)
+  if (migration.remove) return removeBuiltInNode(mapNodes, migration, builtInSummary, topicSubdivisions)
   return consolidateBuiltInNode(mapNodes, migration, builtInSummary, topicSubdivisions)
 }
 
