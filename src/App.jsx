@@ -25267,9 +25267,9 @@ function App() {
       {!isFullscreenMode && (
         <header className="app-header" ref={headerRef}>
           <div className="title-block">
-          <div className="title-stack" aria-label="Preveil">
+          <div className="title-stack" aria-label="Project Everything">
             <h1 className="title">
-              <span className="cool-e">P</span>reveil
+              <span className="cool-e">P</span>roject Everything
             </h1>
             <p className="title-sub title-grid" aria-hidden="true">
               <span className="title-left title-bottom">Knowledge</span>
@@ -25433,15 +25433,6 @@ function App() {
               onClick={() => toggleCreateNodeMode('sibling')}
             >
               Add Sibling
-            </button>
-          </div>
-          <div className="top-button-group">
-            <button
-              className="top-link"
-              type="button"
-              onClick={() => window.open('https://www.preveil.shop/', '_blank')}
-            >
-              Shop
             </button>
           </div>
         </div>
