@@ -50,6 +50,7 @@ const RWANDAN_GENOCIDE = 'Rwandan Genocide (1994)'
 const FINE_ARTS = ['Arts', 'Visual Arts', 'Fine Arts']
 const MEDIA_ARTS = ['Arts', 'Media Arts']
 const FINE_ARTS_SUMMARY = 'The visual and performing arts created primarily for aesthetic and expressive purposes, including film, painting, and sculpture.'
+const KECCAK256_SUMMARY = 'Computes the Keccak-256 hash (a bytes32) of a bytes input, often built with abi.encode or abi.encodePacked, e.g. keccak256(abi.encodePacked("x")).'
 const ANCIENT_MIGRATION_PERIOD_SUMMARY = 'Characterized by significant movements of various peoples, primarily Germanic tribes, leading to widespread upheaval, the decline of the Western Roman Empire, and the emergence of new political entities across Europe.'
 
 // The admin map's hidden Mossad Killed Kennedy summary, archived off-map.
@@ -163,6 +164,123 @@ export const SUMMARY_MIGRATIONS_BY_VERSION = {
       label: 'Operation Northwoods (1962)',
       from: 'A March 1962 proposed CIA plan to stage false-flag attacks and blame them on Cuba to justify a U.S. military invasion, rejected by President Kennedy.',
       to: 'A March 1962 Joint Chiefs of Staff proposal, part of the Operation Mongoose anti-Castro planning, to stage false-flag attacks and blame them on Cuba to justify a U.S. invasion; rejected by the Kennedy administration.',
+    },
+  ],
+  9: [
+    {
+      label: 'Data Types',
+      from: 'The set of value types (fixed-size, stack-stored) and reference types (dynamic, heap-stored) available in Solidity for representing and organizing contract data.',
+      to: 'Solidity\'s value types, copied whenever they are assigned or passed, and reference types (arrays, structs, mappings), which refer to data in storage, memory or calldata.',
+    },
+    {
+      label: 'Value Types/Static Types/Fixed-Size Data Types',
+      from: 'Types whose size is known and fixed at compile time, stored directly on the stack — includes booleans, integers, addresses, and fixed-size byte arrays.',
+      to: 'Types whose size is fixed at compile time and whose values are copied whenever they are assigned or passed — includes booleans, integers, addresses, and fixed-size byte arrays.',
+    },
+    {
+      label: 'Primitive/Value',
+      from: 'Immutable value types stored on the stack: Number, BigInt, String, Boolean, Undefined, Null, Symbol.',
+      to: 'Immutable values that are not objects and are copied and compared by value: Number, BigInt, String, Boolean, Undefined, Null, Symbol.',
+    },
+    {
+      label: 'Chaining Operator|JSX',
+      from: 'The optional chaining operator in JSX — safely accesses a property, returning null or undefined instead of throwing an error.',
+      to: 'The optional chaining operator ?. (plain JavaScript since ES2020, so it also works in JSX): a?.b returns undefined instead of throwing if a is null or undefined.',
+    },
+    {
+      label: 'keccak256',
+      from: 'A cryptographic hash function native to the EVM that generates a unique 256-bit hash of its input; input must be ABI-encoded first using abi.encodePacked(), e.g. keccak256(abi.encodePacked("x")).',
+      to: KECCAK256_SUMMARY,
+    },
+    {
+      label: 'keccak256',
+      from: 'A cryptographic hash function native to the EVM that generates a unique 256-bit hash of its input; input must be ABI-encoded first using abi.encodePacked()',
+      to: KECCAK256_SUMMARY,
+    },
+    {
+      label: 'Methods',
+      from: 'Functions defined within a contract that interact with its state variables, distinguished from pure/view functions by their ability to modify on-chain state.',
+      to: 'Solidity has no separate method kind: a "method" is a function called on a value with dot syntax, such as array.push(x) or a library function attached with using A for B.',
+    },
+    {
+      label: 'Modules|py-packages',
+      from: 'See: Types/Data Types → Modules',
+      to: 'A single .py file whose definitions can be imported; a package is a directory of modules.',
+    },
+    {
+      label: 'Bash',
+      from: 'The Bourne-Again SHell — a popular command-line interpreter and scripting language, the default shell on most Linux distributions and macOS, enabling users to interact with the OS by typing commands.',
+      to: 'The Bourne-Again SHell — a popular command-line interpreter and scripting language, the default shell on most Linux distributions (and on macOS until Catalina switched to zsh in 2019), enabling users to interact with the OS by typing commands.',
+    },
+    {
+      label: 'Uncles',
+      from: 'Valid but non-canonical blocks that narrowly lost the race to be included in the main chain, rewarded by Ethereum to reduce centralization pressure caused by its fast ~17-second block times.',
+      to: 'Under proof-of-work Ethereum (before The Merge, September 2022): valid but non-canonical blocks that narrowly lost the race to be included in the main chain, rewarded to reduce centralization pressure from its fast ~13-second block times. Proof-of-stake Ethereum has no uncles.',
+    },
+    {
+      label: 'Ethash (PoW)',
+      from: 'Ethereum\'s original memory-hard, ASIC-resistant proof-of-work mining algorithm, designed to favor GPU miners over centralized mining farms by requiring large amounts of memory.',
+      to: 'Ethereum\'s original memory-hard, ASIC-resistant proof-of-work mining algorithm, designed to favor GPU miners over centralized mining farms by requiring large amounts of memory. Retired at The Merge (September 2022), when Ethereum moved to proof-of-stake.',
+    },
+  ],
+}
+
+// Each entry edits one stored custom node, found by `id`, only while it is
+// still custom and has exactly `label` and `summary` ('' for none), so a node
+// the owner has edited since, or a built-in node that happens to share the
+// id on another map, is left alone. `set` holds the new label and/or summary.
+// A `swap` entry exchanges the labels and sibling order of two such nodes,
+// so each keeps its summary and subtree under the other's placeholder.
+// Use these only for custom nodes, which have no built-in text to fix.
+export const NODE_EDITS_BY_VERSION = {
+  9: [
+    {
+      id: 3295,
+      label: 'x[y]',
+      summary: 'Selects any element that has the attribute x, regardless of its value.',
+      set: { summary: 'Mapping access: returns the value stored for key y in mapping x, or the value type\'s zero value if y was never set.' },
+    },
+    {
+      id: 2419,
+      label: '>=0.8.7',
+      summary: 'Returns true if the left operand is greater than or equal to the right operand.',
+      set: { summary: 'Any compiler version 0.8.7 or newer, including 0.9.0 and later breaking releases.' },
+    },
+    { id: 2603, label: '^0.8.7', summary: '', set: { summary: 'Any 0.8.x compiler from 0.8.7 up: the same as >=0.8.7 <0.9.0.' } },
+    { id: 2604, label: '0.8.7', summary: '', set: { summary: 'Exactly compiler version 0.8.7.' } },
+    // In `address x y = z;` visibility comes before the name, as in `address public owner = ...;`.
+    {
+      swap: [
+        { id: 2467, label: 'x', summary: 'the variable name' },
+        { id: 3059, label: 'y', summary: 'optional visibility modifiers' },
+      ],
+    },
+    { id: 2427, label: 'True', summary: '', set: { label: 'true' } },
+    { id: 2428, label: 'False', summary: '', set: { label: 'false' } },
+    { id: 3105, label: 'Default Value', summary: 'False', set: { summary: 'false' } },
+    {
+      id: 3414,
+      label: 'selfdestruct',
+      summary: 'destroys a contract and forwards its remaining ETH balance to a specified address, though it is deprecated and its behavior is changing in future Ethereum upgrades.',
+      set: { summary: 'sends the contract\'s whole ETH balance to a specified address. Since the Dencun upgrade (EIP-6780, March 2024) it deletes the contract\'s code and storage only when called in the transaction that created the contract; otherwise it only sends the ETH. Deprecated since Solidity 0.8.18.' },
+    },
+    {
+      id: 3316,
+      label: 'x',
+      summary: 'the name of the event.  Typically contractname_event (this is an industry standard.',
+      set: { summary: 'the name of the event, conventionally in CapWords (e.g. Transfer, Approval).' },
+    },
+    {
+      id: 3293,
+      label: 'Arrays',
+      summary: 'A fixed-size, contiguous block of memory storing elements of the same type with O(1) random access.',
+      set: { summary: 'An ordered collection of same-type elements, of fixed or dynamic length, accessed by zero-based index.' },
+    },
+    {
+      id: 3183,
+      label: 'Custom Errors',
+      summary: 'named, optionally parameterized error types declared at the contract level that can only be triggered with revert, and are more gas efficient than string messages.',
+      set: { summary: 'named, optionally parameterized error types, triggered with revert or (since 0.8.26 via IR, 0.8.27 in the legacy pipeline) require(condition, MyError()), and more gas efficient than string messages.' },
     },
   ],
 }
@@ -704,6 +822,40 @@ export const applySummaryMigrations = (mapNodes) => {
     return { ...node, summary }
   })
   return { nodes: changed ? nodes : mapNodes, changed }
+}
+
+export const applyNodeEdits = (mapNodes) => {
+  if (!Array.isArray(mapNodes)) return { nodes: [], changed: false }
+
+  const edits = Object.keys(NODE_EDITS_BY_VERSION)
+    .map((version) => Number(version))
+    .sort((a, b) => a - b)
+    .flatMap((version) => NODE_EDITS_BY_VERSION[version])
+
+  let nodes = mapNodes
+  const unedited = ({ id, label, summary }) => {
+    const node = nodes.find((n) => n.id === id)
+    return node && node.isCustom === true && node.label === label && (node.summary || '') === summary ? node : null
+  }
+  const takePlaceOf = (node, other) => {
+    const moved = withoutOrder({ ...node, label: other.label })
+    return 'order' in other ? { ...moved, order: other.order } : moved
+  }
+  for (const edit of edits) {
+    const updates = new Map()
+    if (edit.swap) {
+      const [a, b] = edit.swap.map(unedited)
+      if (!a || !b) continue
+      updates.set(a.id, takePlaceOf(a, b))
+      updates.set(b.id, takePlaceOf(b, a))
+    } else {
+      const node = unedited(edit)
+      if (!node) continue
+      updates.set(node.id, { ...node, ...edit.set })
+    }
+    nodes = nodes.map((node) => updates.get(node.id) || node)
+  }
+  return { nodes, changed: nodes !== mapNodes }
 }
 
 // Drops the stale built-in children `staleIds` together with their subtrees,
