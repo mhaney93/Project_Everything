@@ -690,15 +690,12 @@ test('summary migration fixes only the stored Memory Tricks summary that still h
   assert.equal(again.nodes, nodes)
 })
 
-const APP_SOURCE = readFileSync(new URL('./App.jsx', import.meta.url), 'utf8')
-const builtInSummaryLine = (label, text) => `'${label.replace(/'/g, "\\'")}': '${text.replace(/'/g, "\\'")}',`
-
 const MARK_PEARSON = 'Mark & Pearson\'s 12 Archetypes'
 const MARK_PEARSON_FIGURES = ['The Innocent', 'The Everyman', 'The Orphan', 'The Hero', 'The Caregiver', 'The Explorer', 'The Rebel/Outlaw', 'The Lover', 'The Creator', 'The Jester', 'The Sage', 'The Magician', 'The Ruler']
 
 test('the DMT and 5-MeO-DMT pharmacology summaries lead with the receptor mechanism', () => {
-  assert.ok(APP_SOURCE.includes(builtInSummaryLine('Pharmacology|DMT', 'Acts mainly as a serotonin 5-HT2A receptor agonist (also sigma-1 and trace-amine receptors). Speculative hypotheses also propose effects on neuronal microtubule order.')))
-  assert.ok(APP_SOURCE.includes(builtInSummaryLine('Pharmacology|5-MeO-DMT', 'Acts mainly on serotonin 5-HT1A receptors, with 5-HT2A activity. A speculative hypothesis proposes it scrambles microtubule liquid-crystal order.')))
+  assert.equal(BUILT_IN_SUMMARIES['Pharmacology|DMT'], 'Acts mainly as a serotonin 5-HT2A receptor agonist (also sigma-1 and trace-amine receptors). Speculative hypotheses also propose effects on neuronal microtubule order.')
+  assert.equal(BUILT_IN_SUMMARIES['Pharmacology|5-MeO-DMT'], 'Acts mainly on serotonin 5-HT1A receptors, with 5-HT2A activity. A speculative hypothesis proposes it scrambles microtubule liquid-crystal order.')
   assert.deepEqual([...TOPIC_SUBDIVISIONS['Pharmacology|DMT']], ['Microtubule Ordering Hypothesis'])
   assert.deepEqual([...TOPIC_SUBDIVISIONS['Pharmacology|5-MeO-DMT']], ['Microtubule Scrambling Hypothesis'])
 })
@@ -709,10 +706,10 @@ test('the taxonomy splits Personality Archetypes into Mark & Pearson and my comb
   assert.deepEqual([...TOPIC_SUBDIVISIONS['Universal Archetypal Figures/Patterns']].sort(), [...MARK_PEARSON_FIGURES].sort())
   assert.deepEqual([...TOPIC_SUBDIVISIONS['My Archetype Combinations']], ['The Healer', 'Combinations|Jungian', 'Combinations of Combinations'])
   assert.equal(TOPIC_SUBDIVISIONS['Jungian Archetypes'], undefined)
-  assert.ok(APP_SOURCE.includes(builtInSummaryLine(MARK_PEARSON, 'Twelve story and brand archetypes from Margaret Mark and Carol S. Pearson (The Hero and the Outlaw, 2001).')))
-  assert.ok(APP_SOURCE.includes(builtInSummaryLine('My Archetype Combinations', 'My own combinations of archetypes.')))
+  assert.equal(BUILT_IN_SUMMARIES[MARK_PEARSON], 'Twelve story and brand archetypes from Margaret Mark and Carol S. Pearson (The Hero and the Outlaw, 2001).')
+  assert.equal(BUILT_IN_SUMMARIES['My Archetype Combinations'], 'My own combinations of archetypes.')
   for (const label of [...MARK_PEARSON_FIGURES, ...TOPIC_SUBDIVISIONS['My Archetype Combinations']]) {
-    assert.match(APP_SOURCE, new RegExp(`\\n {6}'${label.replace(/[|/()]/g, '\\$&')}': '`), label)
+    assert.ok(BUILT_IN_SUMMARIES[label], label)
   }
 })
 
@@ -928,9 +925,9 @@ test('PANAS profiles take the Archer & Garcia names and keep their nicknames, no
     assert.deepEqual(after, { ...node, label: renames[node.label] || node.label })
   }
   assert.deepEqual([...TOPIC_SUBDIVISIONS['Results|PANAS']].sort(), Object.values(renames).sort())
-  assert.ok(APP_SOURCE.includes(builtInSummaryLine('Results|PANAS', 'Archer & Garcia\'s four affective profiles, built from PANAS\'s two scores: high or low positive affect (PA) combined with high or low negative affect (NA).')))
+  assert.equal(BUILT_IN_SUMMARIES['Results|PANAS'], 'Archer & Garcia\'s four affective profiles, built from PANAS\'s two scores: high or low positive affect (PA) combined with high or low negative affect (NA).')
   for (const [label, combo] of [['Self-fulfilling (Cheerleader)', 'High PA + Low NA'], ['High affective (Mad Scientist)', 'High PA + High NA'], ['Low affective (Judge/Surgeon)', 'Low PA + Low NA'], ['Self-destructive (Poet)', 'Low PA + High NA']]) {
-    assert.ok(APP_SOURCE.includes(`'${label}': '${combo} profile:`), label)
+    assert.ok(BUILT_IN_SUMMARIES[label].startsWith(`${combo} profile:`), label)
   }
   assert.equal(normalize(nodes).changed, false)
 })
