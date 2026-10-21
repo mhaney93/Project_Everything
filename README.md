@@ -65,6 +65,10 @@ Structural migrations live in `src/mapMigrations.js` (`STRUCTURAL_MIGRATIONS_BY_
 
 When a built-in summary in `src/App.jsx` changes, add an entry to `SUMMARY_MIGRATIONS_BY_VERSION` in `src/mapMigrations.js` so stored copies of the old text are rewritten on load. A stored summary that no longer matches the old text exactly is left alone.
 
+### Fix one custom node
+
+Custom nodes have no built-in text to correct, so give a `NODE_EDITS_BY_VERSION` entry in `src/mapMigrations.js` the node's `id`, its current `label` and `summary` (`''` for none), and the new label and/or summary under `set`. The edit applies only while the node still has exactly that label and summary, so a node the owner edited since is left alone. A `swap` entry names two such nodes and exchanges their labels and sibling order, so each keeps its summary and subtree.
+
 ### Rename, add, move or remove one built-in node
 
 To change a single place in the tree rather than every copy of a label, give a `STRUCTURAL_MIGRATIONS_BY_VERSION` entry a path: a chain of labels ending at the built-in node itself (the first label can sit at any depth). `rename` relabels the node (a stored summary is dropped only when it is listed in `dropSummaries`); `add` creates a built-in child under a node whose built-in children are already stored, since expanding never adds more; `move` reparents the node and its subtree under `into`, creating that node if only its parent is stored (a renamed or moved node that lands next to a namesake is merged into it the same way); `remove` merges the node into its namesake under `mergeInto` (with `as`, into the node labelled `as` there instead, creating the missing levels of that path from `TOPIC_SUBDIVISIONS`, and with `summary` standing in for the removed node's retired built-in summary), or, with no target, keeps a node holding anything the owner wrote as a custom node and deletes a bare one (a stored copy of `summary` on the node itself does not count as the owner's). Global label renames belong in `LABEL_MIGRATIONS_BY_VERSION` instead. Update `TOPIC_SUBDIVISIONS` and the built-in summaries in the same change.

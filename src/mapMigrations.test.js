@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
-import { applyStructuralMigrations, applySummaryMigrations, dropStaleChildren, SUMMARY_MIGRATIONS_BY_VERSION, removeStalePredefinedChildren } from './mapMigrations.js'
+import { applyNodeEdits, applyStructuralMigrations, applySummaryMigrations, dropStaleChildren, NODE_EDITS_BY_VERSION, SUMMARY_MIGRATIONS_BY_VERSION, removeStalePredefinedChildren } from './mapMigrations.js'
 
 // TOPIC_SUBDIVISIONS and generateSummary's summaries live inside the App
 // component, so evaluate the object literals from the source.
@@ -1645,4 +1645,107 @@ test('the Media Arts move leaves maps without those nodes, and Personal or custo
   const mediaArts = nodes.filter((n) => n.label === 'Media Arts')
   assert.equal(mediaArts.length, 1)
   assert.deepEqual(nodes.filter((n) => n.parentId === mediaArts[0].id), [])
+})
+
+test('built-in Solidity, JavaScript, shell and Ethereum summaries are corrected, and stored copies rewritten', () => {
+  const migrations = SUMMARY_MIGRATIONS_BY_VERSION[9]
+  for (const { label, to } of migrations) assert.equal(BUILT_IN_SUMMARIES[label], to)
+  const retired = ['stack-stored', 'heap-stored', 'stored directly on the stack', 'stored on the stack', 'returning null or undefined', 'generates a unique 256-bit', 'distinguished from pure/view', 'See: Types/Data Types → Modules', '~17-second', 'Linux distributions and macOS']
+  for (const text of Object.values(BUILT_IN_SUMMARIES)) {
+    for (const phrase of retired) assert.equal(text.includes(phrase), false, `${phrase} in ${text}`)
+  }
+
+  const before = buildMap(['Root', [
+    ...migrations.map(({ label, from }) => [label, [], { summary: from }]),
+    ['Bash', [], { summary: 'My own Bash notes.' }],
+    ['Uncles'],
+  ]])
+  const { nodes, changed } = applySummaryMigrations(before)
+  assert.equal(changed, true)
+  migrations.forEach(({ to }, index) => assert.equal(nodes[index + 1].summary, to))
+  assert.equal(nodes.at(-2).summary, 'My own Bash notes.')
+  assert.equal('summary' in nodes.at(-1), false)
+  assert.equal(applySummaryMigrations(nodes).changed, false)
+})
+
+// The custom Solidity nodes of production map 7, as stored on 2026-10-21.
+const SOLIDITY_NODES = [
+  { id: 2465, label: 'address x y = z;', parentId: 1197, hidden: false },
+  { id: 2467, label: 'x', parentId: 2465, hidden: false, isCustom: true, order: 0, summary: 'the variable name' },
+  { id: 3059, label: 'y', parentId: 2465, hidden: false, isCustom: true, order: 1, summary: 'optional visibility modifiers' },
+  { id: 3060, label: 'Options', parentId: 3059, hidden: true, isCustom: true },
+  { id: 2468, label: 'z', parentId: 2465, hidden: false, isCustom: true, order: 2, summary: 'the Ethereum address value, where 0x indicates it\'s a hexadecimal number.' },
+  { id: 3071, label: 'y', parentId: 2475, hidden: false, isCustom: true, summary: 'optional visibility modifiers' },
+  { id: 3295, label: 'x[y]', parentId: 3294, hidden: false, isCustom: true, summary: 'Selects any element that has the attribute x, regardless of its value.' },
+  { id: 2419, label: '>=0.8.7', parentId: 2418, hidden: false, isCustom: true, summary: 'Returns true if the left operand is greater than or equal to the right operand.' },
+  { id: 2603, label: '^0.8.7', parentId: 2418, hidden: false, isCustom: true },
+  { id: 2604, label: '0.8.7', parentId: 2418, hidden: false, isCustom: true },
+  { id: 2427, label: 'True', parentId: 2426, hidden: false, isCustom: true },
+  { id: 2428, label: 'False', parentId: 2426, hidden: false, isCustom: true },
+  { id: 3105, label: 'Default Value', parentId: 2425, hidden: false, isCustom: true, summary: 'False' },
+  { id: 3414, label: 'selfdestruct', parentId: 1204, hidden: false, isCustom: true, summary: 'destroys a contract and forwards its remaining ETH balance to a specified address, though it is deprecated and its behavior is changing in future Ethereum upgrades.' },
+  { id: 3316, label: 'x', parentId: 3315, hidden: false, isCustom: true, summary: 'the name of the event.  Typically contractname_event (this is an industry standard.' },
+  { id: 3293, label: 'Arrays', parentId: 3244, hidden: false, isCustom: true, summary: 'A fixed-size, contiguous block of memory storing elements of the same type with O(1) random access.' },
+  { id: 3183, label: 'Custom Errors', parentId: 3171, hidden: false, isCustom: true, summary: 'named, optionally parameterized error types declared at the contract level that can only be triggered with revert, and are more gas efficient than string messages.' },
+]
+
+test('custom Solidity nodes of map 7 take corrected labels and summaries', () => {
+  const { nodes, changed } = applyNodeEdits(SOLIDITY_NODES)
+  assert.equal(changed, true)
+  const byId = new Map(nodes.map((n) => [n.id, n]))
+  assert.match(byId.get(3295).summary, /^Mapping access: returns the value stored for key y in mapping x/)
+  assert.match(byId.get(2419).summary, /0\.8\.7 or newer/)
+  assert.match(byId.get(2603).summary, />=0\.8\.7 <0\.9\.0/)
+  assert.equal(byId.get(2604).summary, 'Exactly compiler version 0.8.7.')
+  assert.deepEqual([2427, 2428].map((id) => byId.get(id).label), ['true', 'false'])
+  assert.equal(byId.get(3105).summary, 'false')
+  assert.match(byId.get(3414).summary, /EIP-6780/)
+  assert.match(byId.get(3316).summary, /CapWords/)
+  assert.match(byId.get(3293).summary, /fixed or dynamic length/)
+  assert.match(byId.get(3183).summary, /require\(condition, MyError\(\)\)/)
+  // Only labels, summaries and the swapped orders change, and only on edited nodes.
+  const editedIds = new Set(NODE_EDITS_BY_VERSION[9].flatMap((edit) => (edit.swap || [edit]).map(({ id }) => id)))
+  for (const node of SOLIDITY_NODES) {
+    const strip = (n) => Object.fromEntries(Object.entries(n).filter(([key]) => !['label', 'summary', 'order'].includes(key)))
+    assert.deepEqual(editedIds.has(node.id) ? strip(byId.get(node.id)) : byId.get(node.id), editedIds.has(node.id) ? strip(node) : node)
+  }
+  assert.equal(applyNodeEdits(nodes).changed, false)
+})
+
+test('address x y = z; puts visibility before the name, keeping each placeholder\'s summary and subtree', () => {
+  const { nodes } = applyNodeEdits(SOLIDITY_NODES)
+  const children = nodes.filter((n) => n.parentId === 2465).sort((a, b) => a.order - b.order)
+  assert.deepEqual(children.map((n) => [n.label, n.summary]), [
+    ['x', 'optional visibility modifiers'],
+    ['y', 'the variable name'],
+    ['z', 'the Ethereum address value, where 0x indicates it\'s a hexadecimal number.'],
+  ])
+  assert.equal(nodes.find((n) => n.id === 3060).parentId, 3059)
+  // The bytes placeholder with the same text is already in the right order.
+  assert.deepEqual(nodes.find((n) => n.id === 3071), SOLIDITY_NODES.find((n) => n.id === 3071))
+
+  // Without stored orders the swap adds none.
+  const unordered = SOLIDITY_NODES.map((node) => Object.fromEntries(Object.entries(node).filter(([key]) => key !== 'order')))
+  const swapped = applyNodeEdits(unordered).nodes
+  assert.deepEqual([2467, 3059].map((id) => swapped.find((n) => n.id === id)), [
+    { id: 2467, label: 'y', parentId: 2465, hidden: false, isCustom: true, summary: 'the variable name' },
+    { id: 3059, label: 'x', parentId: 2465, hidden: false, isCustom: true, summary: 'optional visibility modifiers' },
+  ])
+})
+
+test('node edits leave nodes the owner has edited, and other maps\' nodes, alone', () => {
+  const edited = SOLIDITY_NODES.map((node) => {
+    if (node.id === 3295) return { ...node, summary: 'Mine.' }
+    if (node.id === 2427) return { ...node, label: 'TRUE' }
+    if (node.id === 2603) return { ...node, summary: 'Caret range.' }
+    if (node.id === 3059) return { ...node, summary: 'visibility' }
+    return node
+  })
+  const byId = new Map(applyNodeEdits(edited).nodes.map((n) => [n.id, n]))
+  for (const id of [3295, 2427, 2603, 2467, 3059]) assert.deepEqual(byId.get(id), edited.find((n) => n.id === id))
+  assert.equal(byId.get(2428).label, 'false')
+
+  // The same labels and text under other ids are not touched.
+  const elsewhere = SOLIDITY_NODES.map((node) => ({ ...node, id: node.id + 100000 }))
+  assert.equal(applyNodeEdits(elsewhere).changed, false)
 })

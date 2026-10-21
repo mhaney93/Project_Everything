@@ -3,7 +3,7 @@ import { useMobileHeaderSpacer } from './mobileHeaderSpacer';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import './App.css';
 import { authAPI, mapsAPI, filesAPI, API_BASE_URL } from './api';
-import { applyStructuralMigrations, applySummaryMigrations, dropStaleChildren, removeStalePredefinedChildren } from './mapMigrations';
+import { applyNodeEdits, applyStructuralMigrations, applySummaryMigrations, dropStaleChildren, removeStalePredefinedChildren } from './mapMigrations';
 import { stripLabelSuffix } from './labels';
 
 // Node size and layout constants
@@ -1267,7 +1267,8 @@ function App() {
       const { nodes: restructuredNodes, changed: structureChanged } = applyStructuralMigrations(migratedNodes, generateSummary, TOPIC_SUBDIVISIONS)
       const { nodes: prunedNodes, changed: pruneChanged } = removeStalePredefinedChildren(restructuredNodes, TOPIC_SUBDIVISIONS, generateSummary)
       const { nodes: summarizedNodes, changed: summaryChanged } = applySummaryMigrations(prunedNodes)
-      return { nodes: summarizedNodes, changed: migrationChanged || structureChanged || pruneChanged || summaryChanged }
+      const { nodes: editedNodes, changed: editChanged } = applyNodeEdits(summarizedNodes)
+      return { nodes: editedNodes, changed: migrationChanged || structureChanged || pruneChanged || summaryChanged || editChanged }
     }
 
     const collapseNodesToRoot = (mapNodes) => {
@@ -15891,8 +15892,8 @@ function App() {
       'Gas': 'A metering system that assigns a computational cost to every EVM operation, preventing abuse of Turing-completeness and compensating validators — consumed even by failed transactions.',
       'Transaction Receipts': 'Records generated after a transaction executes, logging its outcome, gas used, status, and any events emitted by smart contracts during execution.',
       'Merkle Patricia Tries': 'The cryptographic data structure Ethereum uses to efficiently store and verify state, storage, and transaction data, enabling lightweight clients to validate blockchain data without downloading the full chain.',
-      'Ethash (PoW)': 'Ethereum\'s original memory-hard, ASIC-resistant proof-of-work mining algorithm, designed to favor GPU miners over centralized mining farms by requiring large amounts of memory.',
-      'Uncles': 'Valid but non-canonical blocks that narrowly lost the race to be included in the main chain, rewarded by Ethereum to reduce centralization pressure caused by its fast ~17-second block times.',
+      'Ethash (PoW)': 'Ethereum\'s original memory-hard, ASIC-resistant proof-of-work mining algorithm, designed to favor GPU miners over centralized mining farms by requiring large amounts of memory. Retired at The Merge (September 2022), when Ethereum moved to proof-of-stake.',
+      'Uncles': 'Under proof-of-work Ethereum (before The Merge, September 2022): valid but non-canonical blocks that narrowly lost the race to be included in the main chain, rewarded to reduce centralization pressure from its fast ~13-second block times. Proof-of-stake Ethereum has no uncles.',
       'World Computer': 'A conceptual framing of Ethereum as a global singleton computer — existing nowhere physically yet with only one instance — accessible to anyone and capable of running any program without a central authority.',
       'Global & Singular': 'Ethereum has no physical location yet exists as a single shared instance worldwide, with no off switch and no duplicate — every participant interacts with the same global state.',
       'Ubiquitous': 'Ethereum is accessible to anyone with internet access, supporting unlimited simultaneous users without gatekeepers or geographic restrictions.',
@@ -15941,8 +15942,8 @@ function App() {
       'MIT': 'A permissive free software license allowing anyone to use, copy, modify, merge, publish, distribute, sublicense, and sell copies of the software, provided the original copyright and permission notice are included.',
       'UNLICENSED': 'Indicates the source code is not open source and is proprietary — all rights are reserved by the author.',
       'Version Pragma': 'A declaration at the top of a Solidity file specifying which compiler version(s) the code is compatible with, e.g. pragma solidity >=0.5.0 <0.6.0;',
-      'Data Types': 'The set of value types (fixed-size, stack-stored) and reference types (dynamic, heap-stored) available in Solidity for representing and organizing contract data.',
-      'Value Types/Static Types/Fixed-Size Data Types': 'Types whose size is known and fixed at compile time, stored directly on the stack — includes booleans, integers, addresses, and fixed-size byte arrays.',
+      'Data Types': 'Solidity\'s value types, copied whenever they are assigned or passed, and reference types (arrays, structs, mappings), which refer to data in storage, memory or calldata.',
+      'Value Types/Static Types/Fixed-Size Data Types': 'Types whose size is fixed at compile time and whose values are copied whenever they are assigned or passed — includes booleans, integers, addresses, and fixed-size byte arrays.',
       'Booleans': 'Declared with bool; holds either true or false.',
       'Integers': 'Whole-number types available in signed (int) and unsigned (uint) variants, each in sizes from 8 to 256 bits (e.g. uint256, int8).',
       'Signed Integers': 'Whole numbers that can be positive, negative, or zero, declared as intX where X is the bit size (8–256); int is an alias for int256.',
@@ -15969,10 +15970,10 @@ function App() {
       'Exponent': 'The ** operator; computes x raised to the power of y.',
       'Contracts': 'Declared with contract x { }, a contract is a collection of state variables and functions stored at a specific blockchain address, serving as a self-executing agreement or application.',
       'Functions': 'Blocks of code within a contract declared as function x(params) visibility modifier returns (type) { }, performing tasks that may read or modify state.',
-      'Methods': 'Functions defined within a contract that interact with its state variables, distinguished from pure/view functions by their ability to modify on-chain state.',
+      'Methods': 'Solidity has no separate method kind: a "method" is a function called on a value with dot syntax, such as array.push(x) or a library function attached with using A for B.',
       'Calling a Function': 'Invoking a function by its name with arguments: x(y, z); where x is the function name and y, z are the parameter values.',
       'Built-in Functions': 'Native functions provided by Solidity and the EVM, such as keccak256, that are available without importing any library.',
-      'keccak256': 'A cryptographic hash function native to the EVM that generates a unique 256-bit hash of its input; input must be ABI-encoded first using abi.encodePacked(), e.g. keccak256(abi.encodePacked("x")).',
+      'keccak256': 'Computes the Keccak-256 hash (a bytes32) of a bytes input, often built with abi.encode or abi.encodePacked, e.g. keccak256(abi.encodePacked("x")).',
       'Events': 'A gas-efficient mechanism for logging immutable information to transaction receipts, enabling external applications to monitor and react to contract activity.',
       'Define an Event': 'Declared inside a contract as event x(type1 param1, type2 param2); to specify the event\'s name and the types of data it logs.',
       'Declare that an Event has Occurred': 'Emitted inside a function body as emit x(val1, val2); to record that the event has occurred with the given parameter values.',
@@ -15998,7 +15999,7 @@ function App() {
       'Command Line Interfaces (CLIs)': 'Text-based interfaces where users type commands to interact with software and the operating system.',
       'Terminals': 'Hardware or software providing text input/output capabilities for interacting with a computer system.',
       'Shells/Command Line Interpreters': 'Programs that interpret and execute commands entered by a user in a terminal.',
-      'Bash': 'The Bourne-Again SHell — a popular command-line interpreter and scripting language, the default shell on most Linux distributions and macOS, enabling users to interact with the OS by typing commands.',
+      'Bash': 'The Bourne-Again SHell — a popular command-line interpreter and scripting language, the default shell on most Linux distributions (and on macOS until Catalina switched to zsh in 2019), enabling users to interact with the OS by typing commands.',
       'Terminal/Command Line Commands': 'The full set of Bash commands organized by category: file management, text processing, networking, process control, and more.',
       'Global Constructs': 'Shell-wide operators and flags that work across most commands.',
       '--help': 'Appended to most commands to print usage and available options, e.g. ls --help.',
@@ -16712,7 +16713,7 @@ function App() {
       'y|let-kw': 'The initial value of the variable (can be reassigned with = later).',
       'scope|let': 'block scope',
       'JS Data Types': 'JavaScript\'s two categories of data: primitive (value) types and object (reference) types.',
-      'Primitive/Value': 'Immutable value types stored on the stack: Number, BigInt, String, Boolean, Undefined, Null, Symbol.',
+      'Primitive/Value': 'Immutable values that are not objects and are copied and compared by value: Number, BigInt, String, Boolean, Undefined, Null, Symbol.',
       'Numeric Values': 'JS\'s two numeric primitive types: Number (64-bit float) and BigInt (arbitrary-precision integer).',
       'JS Numbers': 'Represents integers and floating-point values as 64-bit doubles. Supports decimal, hex (0x), octal (0o), binary (0b), and BigInt (n suffix) literals.',
       'BigInts': 'Arbitrarily large integers beyond Number.MAX_SAFE_INTEGER, written with an n suffix (e.g. 9007199254740993n).',
@@ -17591,7 +17592,7 @@ function App() {
       'x|jsx-comment': 'The comment text.',
       'CSS|JSX': 'In JSX, class= cannot be used for CSS classes.',
       'className|JSX': 'Use className="x" instead of class="x" to apply CSS classes to JSX elements.',
-      'Chaining Operator|JSX': 'The optional chaining operator in JSX — safely accesses a property, returning null or undefined instead of throwing an error.',
+      'Chaining Operator|JSX': 'The optional chaining operator ?. (plain JavaScript since ES2020, so it also works in JSX): a?.b returns undefined instead of throwing if a is null or undefined.',
       'x?.y|JSX': 'Accesses property y of variable x safely. Returns null or undefined instead of throwing an error if x is nullish.',
       'x|jsx-chain': 'A variable.',
       'y|jsx-chain': 'The name of a property of x.',
@@ -21582,7 +21583,7 @@ function App() {
       'Options|py-pkg-fn-call': 'How to call the imported function.',
       'x()|py-pkg-fn-call': 'Syntax for calling the imported function.',
       'x|py-pkg-fn-call': 'the name of the imported function',
-      'Modules|py-packages': 'See: Types/Data Types → Modules',
+      'Modules|py-packages': 'A single .py file whose definitions can be imported; a package is a directory of modules.',
       'Python Standard Library': 'the giant library of modules that comes with downloading python',
       'random|py': 'A built-in module for generating pseudo-random numbers.',
       'Methods|py-random': 'Methods available in the random module.',
