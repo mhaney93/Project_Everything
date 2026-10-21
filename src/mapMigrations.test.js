@@ -451,6 +451,39 @@ test('Front-End Frameworks moves into Packages > Frameworks even when Packages w
   assert.deepEqual(again.nodes, nodes)
 })
 
+test('Front-End Frameworks stays under DApps when the owner deleted a level of its home', () => {
+  const dapps = ['DApps (Decentralized Applications)', [
+    ['Contract Interaction'],
+    ['Front-End Frameworks', [
+      ['React', [['My React Hooks', [], { isCustom: true, summary: 'custom react summary' }]], { notes: [{ id: 'note-react', text: 'react note', level: 0 }] }],
+    ], { summary: 'stored fef summary', notes: [{ id: 'note-fef', text: 'front-end note', level: 0 }] }],
+  ]]
+  const engineeringWithout = (excluded) => {
+    const softwareEngineering = excluded === 'Software Engineering'
+      ? []
+      : [['Software Engineering', [['Software Development/Programming', [['Runtime Environments']], { excludedChildLabels: [excluded] }]]]]
+    return buildMap(['Root', [
+      ['Engineering', [['Computer Systems Engineering', [['Blockchain levels', [dapps], { isCustom: true }]]], ...softwareEngineering], { excludedChildLabels: excluded === 'Software Engineering' ? [excluded] : [] }],
+    ]])
+  }
+
+  for (const excluded of ['Packages', 'Software Engineering']) {
+    const before = engineeringWithout(excluded)
+    const original = before.find((n) => n.label === 'Front-End Frameworks')
+    const { nodes } = normalize(before)
+    assert.deepEqual(orphansOf(nodes), [])
+    const fef = nodes.find((n) => n.id === original.id)
+    assert.equal(pathOf(nodes, fef), pathOf(before, original))
+    assert.equal(fef.summary, 'stored fef summary')
+    assert.deepEqual(fef.notes.map((n) => n.id), ['note-fef'])
+    assert.deepEqual(descendantsOf(nodes, fef.id), descendantsOf(before, original.id))
+    assert.equal(nodes.some((n) => n.label === excluded), false)
+
+    const again = normalize(nodes)
+    assert.equal(again.changed, false)
+  }
+})
+
 test('migration merges PowerShell > Python into Object-Oriented > Python and deletes PowerShell > Node.js', () => {
   const before = engineeringMap()
   const home = before.find((n) => n.label === 'Python' && before.find((p) => p.id === n.parentId).label === 'Object-Oriented')

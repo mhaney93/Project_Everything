@@ -306,9 +306,11 @@ export const applySummaryMigrations = (mapNodes) => {
 // Remove stale predefined children: for any node with known subdivisions,
 // drop predefined children whose labels are not in the expected set, along
 // with all their descendants. addChildren recreates correct children on
-// first expand.
+// first expand. A copy of a structurally migrated label is never dropped: if
+// its home could not be stored (the owner deleted a level of it), it stays put.
 export const removeStalePredefinedChildren = (mapNodes, topicSubdivisions) => {
   const childrenByParent = buildChildrenByParent(mapNodes)
+  const migratedLabels = new Set(Object.values(STRUCTURAL_MIGRATIONS_BY_VERSION).flat().map(({ label }) => label))
 
   const idsToRemove = new Set()
   for (const node of mapNodes) {
@@ -316,7 +318,7 @@ export const removeStalePredefinedChildren = (mapNodes, topicSubdivisions) => {
     if (!expected || expected.length === 0) continue
     const children = childrenByParent.get(node.id) || []
     for (const child of children) {
-      if (!child.isCustom && !expected.includes(child.label)) {
+      if (!child.isCustom && !expected.includes(child.label) && !migratedLabels.has(child.label)) {
         const stack = [child.id]
         while (stack.length > 0) {
           const id = stack.pop()
