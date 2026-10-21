@@ -120,6 +120,13 @@ export const SUMMARY_MIGRATIONS_BY_VERSION = {
       to: 'My own higher-order combinations, built by combining archetypes that are already blends.',
     },
   ],
+  6: [
+    {
+      label: 'Operation Northwoods (1962)',
+      from: 'A March 1962 proposed CIA plan to stage false-flag attacks and blame them on Cuba to justify a U.S. military invasion, rejected by President Kennedy.',
+      to: 'A March 1962 Joint Chiefs of Staff proposal, part of the Operation Mongoose anti-Castro planning, to stage false-flag attacks and blame them on Cuba to justify a U.S. invasion; rejected by the Kennedy administration.',
+    },
+  ],
 }
 
 const buildChildrenByParent = (mapNodes) => {

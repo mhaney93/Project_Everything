@@ -1114,3 +1114,69 @@ test('the built-in Rwanda (1962 - present) keeps its Rwandan Genocide child', ()
   assert.deepEqual([...TOPIC_SUBDIVISIONS['Rwanda (1962 - present)']], ['Rwandan Genocide (1994)'])
   assert.equal(normalize(before, appSummary).changed, false)
 })
+
+// LABEL_MIGRATIONS_BY_VERSION ends with `};`, so loadAppObject cannot find it.
+const LABEL_MIGRATIONS = (() => {
+  const source = readFileSync(new URL('./App.jsx', import.meta.url), 'utf8')
+  const start = source.indexOf('{', source.indexOf('const LABEL_MIGRATIONS_BY_VERSION = {'))
+  return vm.runInNewContext(`(${source.slice(start, source.indexOf('\n};\n', start) + 2)})`)
+})()
+
+// Mirrors applyLabelMigrations in App.jsx, which runs before the structural migrations.
+const relabel = (mapNodes) => mapNodes.map((node) => {
+  let label = node.label
+  for (const version of Object.keys(LABEL_MIGRATIONS).map(Number).sort((a, b) => a - b)) label = LABEL_MIGRATIONS[version][label] || label
+  return label === node.label ? node : { ...node, label }
+})
+
+test('history labels take corrected dates and keep their summaries, notes and children', () => {
+  const notes = [{ id: 'note-trump', text: 'mine', level: 0 }]
+  const lateAntiquitySummary = 'Significantly shaped post-Roman Europe through the consolidation and development of Germanic kingdoms during the late antique period.'
+  const carolingianSummary = 'Reflects the consolidation of previously established Germanic kingdoms and the foundational developments leading to the Carolingian Empire.'
+  const before = buildMap(['Root', [
+    ['Early Middle Ages (476 - 1000)', [
+      ['Late Antiquity (500 - 750)', [['Migration Period (500 - 750)', [], { summary: lateAntiquitySummary }]]],
+      ['Migration Period (750 - 800)', [['My Carolingian note', [], { isCustom: true }]], { summary: carolingianSummary }],
+      ['Carolingian Era (800 - 887)'],
+      ['Post-Carolingian Era (887 - 1000)'],
+    ]],
+    ['America During the Post-Cold War Era', [
+      ['First Trump Presidency (2016 - 2020)', [['Tax Cuts', [], { isCustom: true }]], { isCustom: true, summary: 'My summary.', notes }],
+    ], { isCustom: true }],
+  ]])
+  const renames = {
+    'First Trump Presidency (2016 - 2020)': 'First Trump Presidency (2017 - 2021)',
+    'Migration Period (500 - 750)': 'Migration Period (c. 375 - 568)',
+    'Migration Period (750 - 800)': 'Rise of the Carolingians (750 - 800)',
+  }
+  const { nodes } = normalize(relabel(before), appSummary)
+
+  assert.equal(nodes.length, before.length)
+  for (const node of before) assert.deepEqual(nodes.find((n) => n.id === node.id), { ...node, label: renames[node.label] || node.label })
+  assert.deepEqual([...TOPIC_SUBDIVISIONS['Early Middle Ages (476 - 1000)']], ['Late Antiquity (500 - 750)', 'Rise of the Carolingians (750 - 800)', 'Carolingian Era (800 - 887)', 'Post-Carolingian Era (887 - 1000)'])
+  assert.deepEqual([...TOPIC_SUBDIVISIONS['Late Antiquity (500 - 750)']], ['Migration Period (c. 375 - 568)'])
+  assert.equal(BUILT_IN_SUMMARIES['Migration Period (c. 375 - 568)'], lateAntiquitySummary)
+  assert.equal(BUILT_IN_SUMMARIES['Rise of the Carolingians (750 - 800)'], carolingianSummary)
+  for (const label of ['Migration Period (500 - 750)', 'Migration Period (750 - 800)']) {
+    assert.equal(label in TOPIC_SUBDIVISIONS, false)
+    assert.equal(label in BUILT_IN_SUMMARIES, false)
+  }
+  assert.deepEqual(relabel(nodes), nodes)
+})
+
+test('Operation Northwoods credits the Joint Chiefs and rewrites only an unedited stored summary', () => {
+  const [{ label, from, to }] = SUMMARY_MIGRATIONS_BY_VERSION[6]
+  assert.equal(label, 'Operation Northwoods (1962)')
+  assert.equal(BUILT_IN_SUMMARIES[label], to)
+  assert.equal(to, 'A March 1962 Joint Chiefs of Staff proposal, part of the Operation Mongoose anti-Castro planning, to stage false-flag attacks and blame them on Cuba to justify a U.S. invasion; rejected by the Kennedy administration.')
+  const notes = [{ id: 'note-northwoods', text: 'mine', level: 0 }]
+  const before = buildMap(['Root', [[label, [], { summary: from, notes }], [label, [], { summary: `${from} Mine.` }], [label]]])
+  const { nodes, changed } = applySummaryMigrations(before)
+  assert.equal(changed, true)
+  const [exact, edited, unset] = nodes.filter((n) => n.label === label)
+  assert.equal(exact.summary, to)
+  assert.equal(exact.notes, notes)
+  assert.equal(edited.summary, `${from} Mine.`)
+  assert.equal('summary' in unset, false)
+  assert.equal(applySummaryMigrations(nodes).changed, false)
+})
