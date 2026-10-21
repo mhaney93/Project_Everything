@@ -35,7 +35,7 @@ Node label migrations are handled in `src/App.jsx` through a versioned map:
 - `LABEL_MIGRATIONS_BY_VERSION`
 - `applyLabelMigrations(...)`
 
-When a user map loads from the backend, migrations are applied to loaded nodes before rendering. If any labels change, the app automatically saves the migrated nodes back to the backend so the fix is permanent.
+When a user map loads from the backend, migrations are applied to loaded nodes before rendering. If any migration changes the map, the app automatically saves the migrated nodes back to the backend so the fix is permanent.
 
 ### Add a new label rename
 
@@ -59,4 +59,4 @@ const LABEL_MIGRATIONS_BY_VERSION = {
 
 ### Move or merge a built-in node
 
-Structural migrations live in `src/mapMigrations.js` (`STRUCTURAL_MIGRATIONS_BY_VERSION`) and run on every load after the label migrations, before stale built-in children are pruned. Each entry names a built-in label and the `homePath` of labels it belongs under: the richest stored copy moves there, and every other copy is merged into it (notes, summaries and custom children are kept) and removed with all its descendants. Remove the label from its old parents in `TOPIC_SUBDIVISIONS` and add it under the new one in the same change. Migrations must be idempotent.
+Structural migrations live in `src/mapMigrations.js` (`STRUCTURAL_MIGRATIONS_BY_VERSION`) and run on every load after the label migrations, before stale built-in children are pruned. Each entry names a built-in label and the `homePath` of labels it belongs under: a copy already there is kept (otherwise the richest stored copy moves there), and every other copy is merged into it (notes, summaries, custom children and deeper subtrees are carried over) and then removed. Remove the label from its old parents in `TOPIC_SUBDIVISIONS` and add it under the new one in the same change. Migrations must be idempotent.
