@@ -7,10 +7,32 @@
 // built-in copy is merged into it: matching children merge recursively,
 // anything the home copy lacks (custom nodes, deeper subtrees) is moved
 // across, notes and summaries are carried over, and the copy itself is removed.
+// With `dropBareCopies`, copies outside the home that hold nothing the owner
+// wrote (no custom node, note or stored summary in their subtree) are deleted
+// outright instead.
 export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
   3: [
     { label: 'Emotions', homePath: ['Psychology'] },
     { label: 'Emotional Regulation', homePath: ['Psychology', 'Emotions'] },
+  ],
+  4: [
+    { label: 'Front-End Frameworks', homePath: ['Software Development/Programming', 'Packages', 'Frameworks'] },
+    { label: 'Python', homePath: ['Programming Languages', 'Imperative Languages', 'Object-Oriented'] },
+    { label: 'Node.js', homePath: ['Software Development/Programming', 'Runtime Environments'], dropBareCopies: true },
+    { label: 'Asynchronous Operations', homePath: ['JavaScript', 'Control Flow'] },
+  ],
+}
+
+// Each entry rewrites a stored summary on a node with `label` only while it
+// still reads exactly `from`, so a summary the owner edited is left alone.
+// Change the built-in summary in App.jsx to `to` in the same change.
+export const SUMMARY_MIGRATIONS_BY_VERSION = {
+  4: [
+    {
+      label: 'Memory Tricks',
+      from: 'Mnemonics for the V of each key: Car→Gas, Data→Analysis, Eyes→Blink, Fire→Coal, Garden→Dirt, Artist→Easel, Bitch→Fuck.',
+      to: 'Mnemonics for the V of each key: Car→Gas, Data→Analysis, Eyes→Blink, Fire→Coal, Garden→Dirt, Artist→Easel, Bitch→Fuck (sharp!).',
+    },
   ],
 }
 
@@ -58,6 +80,33 @@ const findHome = (mapNodes, byId, homePath) => {
   })
   matches.sort((a, b) => a.id - b.id)
   return matches[0] || null
+}
+
+const subtreeIds = (childrenByParent, nodeId) => {
+  const ids = [nodeId]
+  for (let i = 0; i < ids.length; i++) {
+    for (const child of childrenByParent.get(ids[i]) || []) ids.push(child.id)
+  }
+  return ids
+}
+
+const holdsOwnerContent = (node) =>
+  Boolean(node.isCustom || node.isPersonal || node.summary || (Array.isArray(node.notes) && node.notes.length > 0))
+
+const dropBareCopies = (mapNodes, { label, homePath }) => {
+  const byId = new Map(mapNodes.map((node) => [node.id, node]))
+  const home = findHome(mapNodes, byId, homePath)
+  const childrenByParent = buildChildrenByParent(mapNodes)
+  const removed = new Set()
+  for (const node of mapNodes) {
+    if (node.label !== label || node.isCustom || node.isPersonal || removed.has(node.id)) continue
+    if (home && node.parentId === home.id) continue
+    const ids = subtreeIds(childrenByParent, node.id)
+    if (ids.some((id) => holdsOwnerContent(byId.get(id)))) continue
+    for (const id of ids) removed.add(id)
+  }
+  if (removed.size === 0) return { nodes: mapNodes, changed: false }
+  return { nodes: mapNodes.filter((node) => !removed.has(node.id)), changed: true }
 }
 
 const mergeNotes = (targetNotes, sourceNotes) => {
@@ -178,12 +227,38 @@ export const applyStructuralMigrations = (mapNodes, builtInSummary = () => '', t
   let changed = false
   for (const version of orderedVersions) {
     for (const migration of STRUCTURAL_MIGRATIONS_BY_VERSION[version]) {
+      if (migration.dropBareCopies) {
+        const dropped = dropBareCopies(nodes, migration)
+        nodes = dropped.nodes
+        changed = changed || dropped.changed
+      }
       const result = consolidateBuiltInNode(nodes, migration, builtInSummary, topicSubdivisions)
       nodes = result.nodes
       changed = changed || result.changed
     }
   }
   return { nodes, changed }
+}
+
+export const applySummaryMigrations = (mapNodes) => {
+  if (!Array.isArray(mapNodes)) return { nodes: [], changed: false }
+
+  const migrations = Object.keys(SUMMARY_MIGRATIONS_BY_VERSION)
+    .map((version) => Number(version))
+    .sort((a, b) => a - b)
+    .flatMap((version) => SUMMARY_MIGRATIONS_BY_VERSION[version])
+
+  let changed = false
+  const nodes = mapNodes.map((node) => {
+    let summary = node.summary
+    for (const { label, from, to } of migrations) {
+      if (node.label === label && summary === from) summary = to
+    }
+    if (summary === node.summary) return node
+    changed = true
+    return { ...node, summary }
+  })
+  return { nodes: changed ? nodes : mapNodes, changed }
 }
 
 // Remove stale predefined children: for any node with known subdivisions,

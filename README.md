@@ -59,4 +59,8 @@ const LABEL_MIGRATIONS_BY_VERSION = {
 
 ### Move or merge a built-in node
 
-Structural migrations live in `src/mapMigrations.js` (`STRUCTURAL_MIGRATIONS_BY_VERSION`) and run on every load after the label migrations, before stale built-in children are pruned. Each entry names a built-in label and the `homePath` of labels it belongs under: a copy already there is kept (otherwise the richest stored copy moves there), and every other copy is merged into it (notes, summaries, custom children and deeper subtrees are carried over) and then removed. Remove the label from its old parents in `TOPIC_SUBDIVISIONS` and add it under the new one in the same change. Migrations must be idempotent.
+Structural migrations live in `src/mapMigrations.js` (`STRUCTURAL_MIGRATIONS_BY_VERSION`) and run on every load after the label migrations, before stale built-in children are pruned. Each entry names a built-in label and the `homePath` of labels it belongs under: a copy already there is kept (otherwise the richest stored copy moves there), and every other copy is merged into it (notes, summaries, custom children and deeper subtrees are carried over) and then removed. An entry with `dropBareCopies` instead deletes outright any copy outside the home whose subtree holds nothing the owner wrote (no custom node, note or stored summary). Remove the label from its old parents in `TOPIC_SUBDIVISIONS` and add it under the new one in the same change. Migrations must be idempotent.
+
+### Fix a built-in summary
+
+When a built-in summary in `src/App.jsx` changes, add an entry to `SUMMARY_MIGRATIONS_BY_VERSION` in `src/mapMigrations.js` so stored copies of the old text are rewritten on load. A stored summary that no longer matches the old text exactly is left alone.

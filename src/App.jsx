@@ -3,7 +3,7 @@ import { useMobileHeaderSpacer } from './mobileHeaderSpacer';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import './App.css';
 import { authAPI, mapsAPI, filesAPI, API_BASE_URL } from './api';
-import { applyStructuralMigrations, removeStalePredefinedChildren } from './mapMigrations';
+import { applyStructuralMigrations, applySummaryMigrations, removeStalePredefinedChildren } from './mapMigrations';
 
 // Node size and layout constants
 const NODE_SIZE_MIN = 0.6;
@@ -1260,7 +1260,8 @@ function App() {
       const { nodes: migratedNodes, changed: migrationChanged } = applyLabelMigrations(mapNodes)
       const { nodes: restructuredNodes, changed: structureChanged } = applyStructuralMigrations(migratedNodes, generateSummary, TOPIC_SUBDIVISIONS)
       const { nodes: prunedNodes, changed: pruneChanged } = removeStalePredefinedChildren(restructuredNodes, TOPIC_SUBDIVISIONS)
-      return { nodes: prunedNodes, changed: migrationChanged || structureChanged || pruneChanged }
+      const { nodes: summarizedNodes, changed: summaryChanged } = applySummaryMigrations(prunedNodes)
+      return { nodes: summarizedNodes, changed: migrationChanged || structureChanged || pruneChanged || summaryChanged }
     }
 
     const collapseNodesToRoot = (mapNodes) => {
@@ -5709,7 +5710,7 @@ function App() {
     'opcodes (operation codes)': ['keccak256'],
     'precompiled contracts': [],
     'Blockchain Development': ['DApps (Decentralized Applications)', 'Smart Contracts'],
-    'DApps (Decentralized Applications)': ['Contract Interaction', 'Deployment and Maintenance', 'Front-End Frameworks', 'UI/UX Considerations', 'Wallet Integration', 'Web3 Libraries'],
+    'DApps (Decentralized Applications)': ['Contract Interaction', 'Deployment and Maintenance', 'UI/UX Considerations', 'Wallet Integration', 'Web3 Libraries'],
     'Web3 Libraries': ['ethers.js', 'web3.js'],
     'web3.js': [],
     'ethers.js': [],
@@ -5904,7 +5905,7 @@ function App() {
     'Command Prompt': ['Ctrl + c', 'cd', 'dir'],
     'dir': [],
     'Git Bash': [],
-    'PowerShell': ['Node.js', 'Python'],
+    'PowerShell': [],
     'Windows PowerShell': [],
     'Terminal Emulators': ['GNOME Terminal', 'Terminal', 'Windows Terminal'],
     'GNOME Terminal': [],
@@ -15773,7 +15774,7 @@ function App() {
       'The Overtone Series': 'Certain notes sound better together than others based on how they align with a note\'s natural overtones; lower notes have more audible overtones.',
       'Tension': 'The feeling of unmet expectation in music, resolved when that expectation is met; approximately 25% tension across melodic contour, scale, and rhythm is ideal.',
       'Dominant Chord (Tension)': 'The V chord in every key creates maximum tension that resolves by returning to the I; adding intervals (V7, V9, V11, V13) increases tension further.',
-      'Memory Tricks': 'Mnemonics for the V of each key: Car→Gas, Data→Analysis, Eyes→Blink, Fire→Coal, Garden→Dirt, Artist→Easel, Bitch→Fuck.',
+      'Memory Tricks': 'Mnemonics for the V of each key: Car→Gas, Data→Analysis, Eyes→Blink, Fire→Coal, Garden→Dirt, Artist→Easel, Bitch→Fuck (sharp!).',
       'Dominant Chords by Key': 'C→G, C#→G#, Db→Ab, D→A, D#→A#, Eb→Bb, E→B, F→C, F#→C#, Gb→Db, G→D, G#→D#, Ab→Eb, A→E, A#→E#, Bb→F, B→F#',
       'Melody': 'A musical entity moving simultaneously with chords using notes from the current progression; tends to follow a linear half-step path within a scale and, after leaping, returns in the opposite direction (melodic contour/gravity).',
       'Basslines': 'The lowest notes in chords experienced as a melody, with a progression potentially different from the overall chord progression.',
