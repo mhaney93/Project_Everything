@@ -15,7 +15,7 @@ const loadTopicSubdivisions = () => {
 const TOPIC_SUBDIVISIONS = loadTopicSubdivisions()
 
 const normalize = (mapNodes) => {
-  const structural = applyStructuralMigrations(mapNodes)
+  const structural = applyStructuralMigrations(mapNodes, () => '', TOPIC_SUBDIVISIONS)
   const pruned = removeStalePredefinedChildren(structural.nodes, TOPIC_SUBDIVISIONS)
   return { nodes: pruned.nodes, changed: structural.changed || pruned.changed }
 }
@@ -173,6 +173,28 @@ test('a stored Emotions without Emotional Regulation gains one', () => {
   const added = nodes.find((n) => n.label === 'Emotional Regulation')
   assert.equal(pathOf(nodes, added), 'Root > Psychology > Emotions > Emotional Regulation')
   assert.ok(added.id > Math.max(...before.map((n) => n.id)))
+})
+
+test('moving the kept copy into an unexpanded Emotions adds its other built-in children', () => {
+  const before = buildMap(['Root', [
+    ['Psychology', [
+      ['Emotions', [], { excludedChildLabels: ['Neutral'] }],
+      ['Positive Psychology', [['Emotional Well-Being', [builtIn('Emotional Regulation')]]]],
+    ]],
+  ]])
+  const { nodes, changed } = normalize(before)
+  assert.equal(changed, true)
+  assert.deepEqual(orphansOf(nodes), [])
+  const emotions = nodes.find((n) => n.label === 'Emotions')
+  const childLabels = nodes.filter((n) => n.parentId === emotions.id).map((n) => n.label).sort()
+  const expected = [...TOPIC_SUBDIVISIONS.Emotions].filter((l) => l !== 'Neutral').sort()
+  assert.deepEqual(childLabels, expected)
+  assert.equal(nodes.filter((n) => n.label === 'Emotional Regulation').length, 1)
+  assert.equal(new Set(nodes.map((n) => n.id)).size, nodes.length)
+
+  const again = normalize(nodes)
+  assert.equal(again.changed, false)
+  assert.deepEqual(again.nodes, nodes)
 })
 
 test('an unexpanded Emotions and Personal copies are left alone', () => {

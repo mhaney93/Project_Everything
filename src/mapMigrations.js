@@ -68,7 +68,7 @@ const mergeNotes = (targetNotes, sourceNotes) => {
   return additions.length > 0 ? [...existing, ...additions] : targetNotes
 }
 
-const consolidateBuiltInNode = (mapNodes, { label, homePath }, builtInSummary) => {
+const consolidateBuiltInNode = (mapNodes, { label, homePath }, builtInSummary, topicSubdivisions) => {
   let byId = new Map(mapNodes.map((node) => [node.id, node]))
   const home = findHome(mapNodes, byId, homePath)
   if (!home) return { nodes: mapNodes, changed: false }
@@ -103,11 +103,24 @@ const consolidateBuiltInNode = (mapNodes, { label, homePath }, builtInSummary) =
     changed = true
   }
 
+  const created = []
   if (canonical.parentId !== home.id) {
     const moved = { ...canonical, parentId: home.id, hidden: homeChildren[0]?.hidden ?? canonical.hidden }
     delete moved.order
     updates.set(canonical.id, moved)
     changed = true
+
+    // addChildren only generates built-in children for a node that has none,
+    // so a home that was never expanded gets its full built-in set here.
+    if (!homeChildren.some((child) => !child.isCustom)) {
+      const skip = new Set([label, ...(home.excludedChildLabels || []), ...homeChildren.map((child) => child.label)])
+      const maxId = mapNodes.reduce((max, node) => (Number.isFinite(node.id) ? Math.max(max, node.id) : max), 0)
+      for (const childLabel of topicSubdivisions[home.label] || []) {
+        if (skip.has(childLabel)) continue
+        skip.add(childLabel)
+        created.push({ id: maxId + created.length + 1, label: childLabel, parentId: home.id, hidden: moved.hidden })
+      }
+    }
   }
 
   const refresh = () => {
@@ -148,12 +161,13 @@ const consolidateBuiltInNode = (mapNodes, { label, homePath }, builtInSummary) =
 
   if (!changed) return { nodes: mapNodes, changed: false }
   const nodes = mapNodes.filter((node) => !removed.has(node.id)).map((node) => current(node.id))
-  return { nodes, changed: true }
+  return { nodes: [...nodes, ...created], changed: true }
 }
 
 // builtInSummary(label) returns the built-in summary text for a label, so a
 // merged copy's displayed summary can be kept on a custom node.
-export const applyStructuralMigrations = (mapNodes, builtInSummary = () => '') => {
+// topicSubdivisions maps a label to its built-in child labels.
+export const applyStructuralMigrations = (mapNodes, builtInSummary = () => '', topicSubdivisions = {}) => {
   if (!Array.isArray(mapNodes)) return { nodes: [], changed: false }
 
   const orderedVersions = Object.keys(STRUCTURAL_MIGRATIONS_BY_VERSION)
@@ -164,7 +178,7 @@ export const applyStructuralMigrations = (mapNodes, builtInSummary = () => '') =
   let changed = false
   for (const version of orderedVersions) {
     for (const migration of STRUCTURAL_MIGRATIONS_BY_VERSION[version]) {
-      const result = consolidateBuiltInNode(nodes, migration, builtInSummary)
+      const result = consolidateBuiltInNode(nodes, migration, builtInSummary, topicSubdivisions)
       nodes = result.nodes
       changed = changed || result.changed
     }
