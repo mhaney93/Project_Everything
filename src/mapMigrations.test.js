@@ -1748,4 +1748,11 @@ test('node edits leave nodes the owner has edited, and other maps\' nodes, alone
   // The same labels and text under other ids are not touched.
   const elsewhere = SOLIDITY_NODES.map((node) => ({ ...node, id: node.id + 100000 }))
   assert.equal(applyNodeEdits(elsewhere).changed, false)
+
+  // A built-in node that shares an edited id and text is not touched.
+  const builtInArrays = { id: 3293, label: 'Arrays', parentId: 12, hidden: false, summary: SOLIDITY_NODES.find((n) => n.id === 3293).summary }
+  assert.equal(builtInArrays.summary, BUILT_IN_SUMMARIES.Arrays)
+  const builtIn = applyNodeEdits([builtInArrays])
+  assert.equal(builtIn.changed, false)
+  assert.deepEqual(builtIn.nodes, [builtInArrays])
 })

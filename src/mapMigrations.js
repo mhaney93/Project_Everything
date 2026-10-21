@@ -225,12 +225,13 @@ export const SUMMARY_MIGRATIONS_BY_VERSION = {
   ],
 }
 
-// Each entry edits one stored node, found by `id`, only while it still has
-// exactly `label` and `summary` ('' for none), so a node the owner has
-// edited since is left alone. `set` holds the new label and/or summary.
+// Each entry edits one stored custom node, found by `id`, only while it is
+// still custom and has exactly `label` and `summary` ('' for none), so a node
+// the owner has edited since, or a built-in node that happens to share the
+// id on another map, is left alone. `set` holds the new label and/or summary.
 // A `swap` entry exchanges the labels and sibling order of two such nodes,
 // so each keeps its summary and subtree under the other's placeholder.
-// Use these for custom nodes, which have no built-in text to fix.
+// Use these only for custom nodes, which have no built-in text to fix.
 export const NODE_EDITS_BY_VERSION = {
   9: [
     {
@@ -834,7 +835,7 @@ export const applyNodeEdits = (mapNodes) => {
   let nodes = mapNodes
   const unedited = ({ id, label, summary }) => {
     const node = nodes.find((n) => n.id === id)
-    return node && node.label === label && (node.summary || '') === summary ? node : null
+    return node && node.isCustom === true && node.label === label && (node.summary || '') === summary ? node : null
   }
   const takePlaceOf = (node, other) => {
     const moved = withoutOrder({ ...node, label: other.label })

@@ -67,7 +67,7 @@ When a built-in summary in `src/App.jsx` changes, add an entry to `SUMMARY_MIGRA
 
 ### Fix one custom node
 
-Custom nodes have no built-in text to correct, so give a `NODE_EDITS_BY_VERSION` entry in `src/mapMigrations.js` the node's `id`, its current `label` and `summary` (`''` for none), and the new label and/or summary under `set`. The edit applies only while the node still has exactly that label and summary, so a node the owner edited since is left alone. A `swap` entry names two such nodes and exchanges their labels and sibling order, so each keeps its summary and subtree.
+Custom nodes have no built-in text to correct, so give a `NODE_EDITS_BY_VERSION` entry in `src/mapMigrations.js` the node's `id`, its current `label` and `summary` (`''` for none), and the new label and/or summary under `set`. The edit applies only to a custom node (`isCustom: true`) that still has exactly that label and summary, so a node the owner edited since, or a built-in node that shares the id on another map, is left alone. A `swap` entry names two such nodes and exchanges their labels and sibling order, so each keeps its summary and subtree.
 
 ### Rename, add, move or remove one built-in node
 
