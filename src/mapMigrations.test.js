@@ -1180,3 +1180,65 @@ test('Operation Northwoods credits the Joint Chiefs and rewrites only an unedite
   assert.equal('summary' in unset, false)
   assert.equal(applySummaryMigrations(nodes).changed, false)
 })
+
+const MIGRATION_PERIOD = 'Migration Period (c. 375 - 568)'
+const MEDIEVAL_MIGRATION_PERIOD = `History > Medieval Period (476 - 1453) > Early Middle Ages (476 - 1000) > Late Antiquity (500 - 750) > ${MIGRATION_PERIOD}`
+
+const historyWithAncientMigrationPeriod = (ancientCopy, medieval = [builtIn('Medieval Period (476 - 1453)')]) => buildMap(['History', [
+  ['Ancient History (3,200 BC - 476 AD)', [
+    ['Late Antiquity (250 - 500 AD)', [ancientCopy]],
+  ]],
+  ...medieval,
+]])
+
+test('the ancient Migration Period merges into the medieval one, keeping its summary, notes and children', () => {
+  const ancientSummary = 'Movements of Germanic peoples.'
+  const before = historyWithAncientMigrationPeriod(['Migration Period (300 - 500 AD)', [['Goths', [], { isCustom: true }]], {
+    summary: ancientSummary,
+    notes: [{ id: 'note-ancient', text: 'mine', level: 0 }],
+  }]).map((n) => (n.label === MIGRATION_PERIOD ? { ...n, summary: 'My medieval summary.' } : n))
+  const { nodes, changed } = normalize(before, appSummary)
+
+  assert.equal(changed, true)
+  assert.ok(!nodes.some((n) => n.label === 'Migration Period (300 - 500 AD)'))
+  const kept = nodes.filter((n) => n.label === MIGRATION_PERIOD)
+  assert.equal(kept.length, 1)
+  assert.equal(pathOf(nodes, kept[0]), MEDIEVAL_MIGRATION_PERIOD)
+  assert.equal(kept[0].summary, 'My medieval summary.')
+  assert.deepEqual(kept[0].notes, [
+    { id: 'note-ancient', text: 'mine', level: 0 },
+    { id: `merged-summary-${before.find((n) => n.label === 'Migration Period (300 - 500 AD)').id}`, text: `Merged from History > Ancient History (3,200 BC - 476 AD) > Late Antiquity (250 - 500 AD) > ${MIGRATION_PERIOD}: ${ancientSummary}`, level: 0 },
+  ])
+  assert.equal(pathOf(nodes, nodes.find((n) => n.label === 'Goths')), `${MEDIEVAL_MIGRATION_PERIOD} > Goths`)
+  for (const label of ['Late Antiquity (250 - 500 AD)', 'Late Antiquity (500 - 750)']) assert.equal(nodes.filter((n) => n.label === label).length, 1)
+  assert.deepEqual(orphansOf(nodes), [])
+  assert.equal(normalize(nodes, appSummary).changed, false)
+})
+
+test('a bare ancient Migration Period is merged away without adding a note', () => {
+  const before = historyWithAncientMigrationPeriod(['Migration Period (300 - 500 AD)'])
+  const { nodes } = normalize(before, appSummary)
+
+  assert.deepEqual(nodes, before.filter((n) => n.label !== 'Migration Period (300 - 500 AD)'))
+  assert.deepEqual([...TOPIC_SUBDIVISIONS['Late Antiquity (250 - 500 AD)']], [])
+  assert.equal('Migration Period (300 - 500 AD)' in TOPIC_SUBDIVISIONS, false)
+  assert.equal('Migration Period (300 - 500 AD)' in BUILT_IN_SUMMARIES, false)
+})
+
+test('the ancient Migration Period moves into a medieval branch that is not stored yet', () => {
+  for (const extra of [{}, { notes: [{ id: 'note-ancient', text: 'mine', level: 0 }] }]) {
+    const before = historyWithAncientMigrationPeriod(['Migration Period (300 - 500 AD)', [], extra], [])
+    const ancientCopy = before.find((n) => n.label === 'Migration Period (300 - 500 AD)')
+    const { nodes, changed } = normalize(before, appSummary)
+
+    assert.equal(changed, true)
+    const kept = nodes.filter((n) => n.label === MIGRATION_PERIOD)
+    assert.equal(kept.length, 1)
+    assert.equal(kept[0].id, ancientCopy.id)
+    assert.equal(pathOf(nodes, kept[0]), MEDIEVAL_MIGRATION_PERIOD)
+    assert.deepEqual(kept[0].notes, extra.notes)
+    assert.ok(nodes.some((n) => n.label === 'Late Antiquity (250 - 500 AD)'))
+    assert.deepEqual(orphansOf(nodes), [])
+    assert.equal(normalize(nodes, appSummary).changed, false)
+  }
+})

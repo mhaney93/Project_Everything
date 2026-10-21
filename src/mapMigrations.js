@@ -39,6 +39,7 @@ const JUNGIAN_HERO_SUMMARY = 'An archetype representing the ego\'s journey of ov
 const JUNGIAN_ARCHETYPES_SUMMARY = 'Universal, inherited patterns of thought and imagery residing in the collective unconscious, influencing human behavior and cultural expressions as described by Carl Jung.'
 const PANAS_RESULTS = ['Positive And Negative Affect Schedule (PANAS)', 'Results|PANAS']
 const RWANDAN_GENOCIDE = 'Rwandan Genocide (1994)'
+const MIGRATION_PERIOD = 'Migration Period (c. 375 - 568)'
 
 export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
   3: [
@@ -79,6 +80,9 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
   6: [
     // 1994 is after the Cold War; the copy under the post-Cold War Rwanda node stays.
     { remove: ['Rwanda During the Cold War Era', RWANDAN_GENOCIDE], mergeInto: ['Rwanda During the Post-Cold War Era'] },
+    // One Migration Period, under the medieval Late Antiquity; the ancient copy merges into it.
+    { rename: ['Late Antiquity (250 - 500 AD)', 'Migration Period (300 - 500 AD)'], label: MIGRATION_PERIOD },
+    { label: MIGRATION_PERIOD, homePath: ['History', 'Medieval Period (476 - 1453)', 'Early Middle Ages (476 - 1000)', 'Late Antiquity (500 - 750)'] },
   ],
 }
 
