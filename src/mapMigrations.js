@@ -6,9 +6,10 @@
 // `homePath` (a chain of labels ending at the new parent). Every other
 // built-in copy is merged into it: matching children merge recursively,
 // anything the home copy lacks (custom nodes, deeper subtrees) is moved
-// across, notes are carried over, and the copy itself is removed.
+// across, notes and summaries are carried over, and the copy itself is removed.
 export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
   3: [
+    { label: 'Emotions', homePath: ['Psychology'] },
     { label: 'Emotional Regulation', homePath: ['Psychology', 'Emotions'] },
   ],
 }
@@ -67,7 +68,7 @@ const mergeNotes = (targetNotes, sourceNotes) => {
   return additions.length > 0 ? [...existing, ...additions] : targetNotes
 }
 
-const consolidateBuiltInNode = (mapNodes, { label, homePath }) => {
+const consolidateBuiltInNode = (mapNodes, { label, homePath }, builtInSummary) => {
   let byId = new Map(mapNodes.map((node) => [node.id, node]))
   const home = findHome(mapNodes, byId, homePath)
   if (!home) return { nodes: mapNodes, changed: false }
@@ -121,7 +122,11 @@ const consolidateBuiltInNode = (mapNodes, { label, homePath }) => {
     const target = byId.get(targetId)
     const notes = mergeNotes(target.notes, source.notes)
     if (notes !== target.notes) update(targetId, { notes })
+    // A summary written on the copy wins over the built-in text; otherwise keep
+    // whatever the copy displayed when the kept node displays nothing.
+    const displayed = (node) => node.summary || (!node.isCustom ? builtInSummary(node.label) : '')
     if (!target.summary && source.summary) update(targetId, { summary: source.summary })
+    else if (!displayed(target) && displayed(source)) update(targetId, { summary: displayed(source) })
 
     for (const child of childrenByParent.get(sourceId) || []) {
       refresh()
@@ -146,7 +151,9 @@ const consolidateBuiltInNode = (mapNodes, { label, homePath }) => {
   return { nodes, changed: true }
 }
 
-export const applyStructuralMigrations = (mapNodes) => {
+// builtInSummary(label) returns the built-in summary text for a label, so a
+// merged copy's displayed summary can be kept on a custom node.
+export const applyStructuralMigrations = (mapNodes, builtInSummary = () => '') => {
   if (!Array.isArray(mapNodes)) return { nodes: [], changed: false }
 
   const orderedVersions = Object.keys(STRUCTURAL_MIGRATIONS_BY_VERSION)
@@ -157,7 +164,7 @@ export const applyStructuralMigrations = (mapNodes) => {
   let changed = false
   for (const version of orderedVersions) {
     for (const migration of STRUCTURAL_MIGRATIONS_BY_VERSION[version]) {
-      const result = consolidateBuiltInNode(nodes, migration)
+      const result = consolidateBuiltInNode(nodes, migration, builtInSummary)
       nodes = result.nodes
       changed = changed || result.changed
     }

@@ -34,8 +34,14 @@ const buildMap = (tree) => {
   return nodes
 }
 
-// Expands a built-in label the way the app does, all the way down.
-const builtIn = (label, extra = {}) => [label, (TOPIC_SUBDIVISIONS[label] || []).map((child) => builtIn(child)), extra]
+// Expands a built-in label the way the app does, all the way down. The
+// taxonomy has cycles (Appreciation > ... > Respecting > Appreciation) that the
+// app only ever expands lazily, so stop at a label already on the path.
+const builtIn = (label, extra = {}, path = []) => [
+  label,
+  (TOPIC_SUBDIVISIONS[label] || []).filter((child) => !path.includes(child)).map((child) => builtIn(child, {}, [...path, label])),
+  extra,
+]
 
 const pathOf = (mapNodes, node) => {
   const byId = new Map(mapNodes.map((n) => [n.id, n]))
@@ -177,4 +183,75 @@ test('an unexpanded Emotions and Personal copies are left alone', () => {
   const { nodes, changed } = applyStructuralMigrations(before)
   assert.equal(changed, false)
   assert.deepEqual(nodes, before)
+})
+
+test('the taxonomy lists Emotions only under Psychology', () => {
+  const parents = Object.entries(TOPIC_SUBDIVISIONS)
+    .filter(([, children]) => children.includes('Emotions'))
+    .map(([parent]) => parent)
+  assert.deepEqual(parents, ['Psychology'])
+  assert.ok(TOPIC_SUBDIVISIONS['Affective Psychology'].length > 0)
+})
+
+// The live map's two Emotions: Psychology > Emotions (with a custom Neutral)
+// and the Cognitive Psychology > Affective Psychology copy.
+const emotionsMap = () => buildMap(
+  ['Root', [
+    ['Psychology', [
+      ['Cognitive Psychology', [
+        ['Affective Psychology', [
+          ['Emotions', [
+            ...builtIn('Emotions')[1],
+            ['Awe', [], { isCustom: true, notes: [{ id: 'note-awe', text: 'only in affective copy', level: 0 }] }],
+          ], { notes: [{ id: 'note-emotions', text: 'affective copy note', level: 0 }] }],
+          ['Moods'],
+          ['Positive And Negative Affect Schedule (PANAS)'],
+        ]],
+      ]],
+      ['Emotions', [
+        ['Components of Emotions'],
+        ['Types of Emotions'],
+        ['Pleasant'],
+        ['Neutral', [['Ambivalent'], ['Melancholy']], { isCustom: true }],
+        ['Unpleasant'],
+      ]],
+    ]],
+  ]],
+)
+
+const fakeSummary = (label) => (label === 'Neutral' ? 'Built-in Neutral summary.' : '')
+
+test('migration keeps Psychology > Emotions as the only Emotions and merges the Affective copy', () => {
+  const before = emotionsMap()
+  const kept = before.find((n) => n.label === 'Emotions' && before.find((p) => p.id === n.parentId).label === 'Psychology')
+  const structural = applyStructuralMigrations(before, fakeSummary)
+  const { nodes } = removeStalePredefinedChildren(structural.nodes, TOPIC_SUBDIVISIONS)
+
+  assert.equal(structural.changed, true)
+  assert.deepEqual(orphansOf(nodes), [])
+  const emotions = nodes.filter((n) => n.label === 'Emotions')
+  assert.equal(emotions.length, 1)
+  assert.equal(emotions[0].id, kept.id)
+  assert.equal(pathOf(nodes, emotions[0]), 'Root > Psychology > Emotions')
+  assert.deepEqual(emotions[0].notes.map((n) => n.id), ['note-emotions'])
+
+  const byPath = new Map(nodes.map((n) => [pathOf(nodes, n), n]))
+  assert.equal(byPath.size, nodes.length)
+  assert.deepEqual(byPath.get('Root > Psychology > Emotions > Awe')?.notes.map((n) => n.id), ['note-awe'])
+  const neutral = byPath.get('Root > Psychology > Emotions > Neutral')
+  assert.equal(neutral.isCustom, true)
+  assert.equal(neutral.summary, 'Built-in Neutral summary.')
+  for (const label of TOPIC_SUBDIVISIONS.Neutral) {
+    assert.ok(byPath.has(`Root > Psychology > Emotions > Neutral > ${label}`), label)
+  }
+  assert.ok(byPath.has('Root > Psychology > Emotions > Emotional Regulation > Mindfulness > Equanimity Cultivation'))
+
+  const affective = byPath.get('Root > Psychology > Cognitive Psychology > Affective Psychology')
+  assert.deepEqual(
+    nodes.filter((n) => n.parentId === affective.id).map((n) => n.label).sort(),
+    ['Moods', 'Positive And Negative Affect Schedule (PANAS)'],
+  )
+
+  const again = applyStructuralMigrations(nodes, fakeSummary)
+  assert.equal(again.changed, false)
 })

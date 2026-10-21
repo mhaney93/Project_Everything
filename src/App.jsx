@@ -1258,7 +1258,7 @@ function App() {
 
     const normalizeLoadedNodes = (mapNodes) => {
       const { nodes: migratedNodes, changed: migrationChanged } = applyLabelMigrations(mapNodes)
-      const { nodes: restructuredNodes, changed: structureChanged } = applyStructuralMigrations(migratedNodes)
+      const { nodes: restructuredNodes, changed: structureChanged } = applyStructuralMigrations(migratedNodes, generateSummary)
       const { nodes: prunedNodes, changed: pruneChanged } = removeStalePredefinedChildren(restructuredNodes, TOPIC_SUBDIVISIONS)
       return { nodes: prunedNodes, changed: migrationChanged || structureChanged || pruneChanged }
     }
@@ -10420,7 +10420,7 @@ function App() {
     '30% Losing Threshold': [],
 
     // Affective Psychology / Emotions
-    'Affective Psychology': ['Emotions', 'Moods', 'Positive And Negative Affect Schedule (PANAS)'],
+    'Affective Psychology': ['Moods', 'Positive And Negative Affect Schedule (PANAS)'],
     'Moods': [],
     'Components of Emotions': ['Physiological Arousal', 'Qualia', 'Expressive Behavior', 'Cognitive Appraisal/Interpretation'],
     'Physiological Arousal': [],
