@@ -64,3 +64,7 @@ Structural migrations live in `src/mapMigrations.js` (`STRUCTURAL_MIGRATIONS_BY_
 ### Fix a built-in summary
 
 When a built-in summary in `src/App.jsx` changes, add an entry to `SUMMARY_MIGRATIONS_BY_VERSION` in `src/mapMigrations.js` so stored copies of the old text are rewritten on load. A stored summary that no longer matches the old text exactly is left alone.
+
+### Rename, add, move or remove one built-in node
+
+To change a single place in the tree rather than every copy of a label, give a `STRUCTURAL_MIGRATIONS_BY_VERSION` entry a path: a chain of labels ending at the built-in node itself (the first label can sit at any depth). `rename` relabels the node (a stored summary is dropped only when it is listed in `dropSummaries`); `add` creates a built-in child under a node whose built-in children are already stored, since expanding never adds more; `move` reparents the node and its subtree under `into`, creating that node if only its parent is stored; `remove` merges the node into its namesake under `mergeInto`, or, with no namesake, keeps a node holding anything the owner wrote as a custom node and deletes a bare one. Global label renames belong in `LABEL_MIGRATIONS_BY_VERSION` instead. Update `TOPIC_SUBDIVISIONS` and the built-in summaries in the same change.

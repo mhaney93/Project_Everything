@@ -13,6 +13,27 @@
 // With `dropBareCopies`, copies outside the home that hold nothing the owner
 // wrote (no custom node, note or stored summary in their subtree) are deleted
 // outright instead.
+//
+// Entries with a path (a chain of labels ending at the built-in node itself)
+// change one place in the tree instead:
+// - `rename` relabels the node to `label`, dropping a stored summary only when
+//   it is one of `dropSummaries`, so the built-in summary of the new label shows.
+// - `add` creates a built-in child `add` under the node at `under`, when that
+//   node's built-in children are already stored (expanding never adds more).
+// - `move` reparents the node, with its subtree, under the node at `into`,
+//   creating `into` when only its parent is stored.
+// - `remove` merges the node into its namesake under `mergeInto` (notes,
+//   summary and children carry over). Without one, a node holding anything
+//   the owner wrote becomes custom and stays put; a bare one is deleted.
+// A node that lands beside a namesake is merged into it the same way.
+const PERSONALITY_ARCHETYPES = ['Personality Psychology', 'Archetypes']
+const MARK_PEARSON = [...PERSONALITY_ARCHETYPES, 'Mark & Pearson\'s 12 Archetypes']
+const MARK_PEARSON_FIGURES = [...MARK_PEARSON, 'Universal Archetypal Figures/Patterns']
+const ARCHETYPE_COMBINATIONS = [...PERSONALITY_ARCHETYPES, 'My Archetype Combinations']
+const JUNG_ARCHETYPAL_FIGURES = ['Collective Unconscious', 'Jungian Archetypes', 'Situational Archetypes/Motifs', 'Archetypal Figures']
+const JUNGIAN_ARCHETYPES_SUMMARY = 'Universal, inherited patterns of thought and imagery residing in the collective unconscious, influencing human behavior and cultural expressions as described by Carl Jung.'
+const PANAS_RESULTS = ['Positive And Negative Affect Schedule (PANAS)', 'Results|PANAS']
+
 export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
   3: [
     { label: 'Emotions', homePath: ['Psychology'] },
@@ -23,6 +44,29 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
     { label: 'Python', homePath: ['Programming Languages', 'Imperative Languages', 'Object-Oriented'] },
     { label: 'Node.js', homePath: ['Software Development/Programming', 'Runtime Environments'], dropBareCopies: true },
     { label: 'Asynchronous Operations', homePath: ['JavaScript', 'Control Flow'] },
+  ],
+  5: [
+    {
+      rename: [...PERSONALITY_ARCHETYPES, 'Jungian Archetypes'],
+      label: MARK_PEARSON.at(-1),
+      dropSummaries: [JUNGIAN_ARCHETYPES_SUMMARY, `${JUNGIAN_ARCHETYPES_SUMMARY}  See: Jung's Analytical Psychology under Depth Psychology.`],
+    },
+    { add: ARCHETYPE_COMBINATIONS.at(-1), under: PERSONALITY_ARCHETYPES },
+    { move: [...MARK_PEARSON, 'Combinations|Jungian'], into: ARCHETYPE_COMBINATIONS },
+    { move: [...MARK_PEARSON, 'Combinations of Combinations'], into: ARCHETYPE_COMBINATIONS },
+    { move: [...MARK_PEARSON_FIGURES, 'The Healer'], into: ARCHETYPE_COMBINATIONS },
+    { remove: [...MARK_PEARSON, 'The Archetypes of Orientation'] },
+    { rename: [...MARK_PEARSON_FIGURES, 'The Trickster'], label: 'The Jester' },
+    { rename: [...MARK_PEARSON_FIGURES, 'The Wise Old Man/Sage'], label: 'The Sage' },
+    { remove: [...MARK_PEARSON_FIGURES, 'The Child'], mergeInto: JUNG_ARCHETYPAL_FIGURES },
+    { remove: [...MARK_PEARSON_FIGURES, 'The Great Mother'], mergeInto: JUNG_ARCHETYPAL_FIGURES },
+    { add: 'The Caregiver', under: MARK_PEARSON_FIGURES },
+    { add: 'The Magician', under: MARK_PEARSON_FIGURES },
+    { add: 'The Ruler', under: MARK_PEARSON_FIGURES },
+    { rename: [...PANAS_RESULTS, 'Cheerleader Archetype'], label: 'Self-fulfilling (Cheerleader)' },
+    { rename: [...PANAS_RESULTS, 'Mad Scientist Archetype'], label: 'High affective (Mad Scientist)' },
+    { rename: [...PANAS_RESULTS, 'Judge/Surgeon Archetype'], label: 'Low affective (Judge/Surgeon)' },
+    { rename: [...PANAS_RESULTS, 'Poet Archetype'], label: 'Self-destructive (Poet)' },
   ],
 }
 
@@ -71,19 +115,23 @@ const isAncestorOrSelf = (byId, ancestorId, nodeId) => {
   return false
 }
 
-const findHome = (mapNodes, byId, homePath) => {
+const isBuiltIn = (node) => !node.isCustom && !node.isPersonal
+
+// Every node accepted by `accepts` whose label chain ends with `path`, oldest first.
+const nodesAtPath = (mapNodes, byId, path, accepts = isBuiltIn) => {
   const matches = mapNodes.filter((node) => {
-    if (node.isCustom || node.isPersonal) return false
+    if (!accepts(node)) return false
     let current = node
-    for (let i = homePath.length - 1; i >= 0; i--) {
-      if (!current || current.label !== homePath[i]) return false
+    for (let i = path.length - 1; i >= 0; i--) {
+      if (!current || current.label !== path[i]) return false
       current = byId.get(current.parentId)
     }
     return true
   })
-  matches.sort((a, b) => a.id - b.id)
-  return matches[0] || null
+  return matches.sort((a, b) => a.id - b.id)
 }
+
+const findHome = (mapNodes, byId, homePath) => nodesAtPath(mapNodes, byId, homePath)[0] || null
 
 const subtreeIds = (childrenByParent, nodeId) => {
   const ids = [nodeId]
@@ -255,6 +303,131 @@ const consolidateBuiltInNode = (mapNodes, { label, homePath }, builtInSummary, t
   return { nodes: [...nodes, ...created], changed: true }
 }
 
+const withoutOrder = (node) => {
+  const copy = { ...node }
+  delete copy.order
+  return copy
+}
+
+// Merges the node `sourceId` into `targetId` the way consolidation does:
+// notes and summaries carry over, children merge with namesakes or move
+// across, and the source node is removed.
+const mergeNode = (mapNodes, sourceId, targetId, builtInSummary) => {
+  let nodes = mapNodes
+  const merge = (fromId, toId) => {
+    const source = nodes.find((node) => node.id === fromId)
+    const target = nodes.find((node) => node.id === toId)
+    const fields = {}
+    const notes = mergeNotes(target.notes, source.notes)
+    if (notes !== target.notes) fields.notes = notes
+    const displayed = (node) => node.summary || (!node.isCustom ? builtInSummary(node.label) : '')
+    if (!target.summary && source.summary) fields.summary = source.summary
+    else if (!displayed(target) && displayed(source)) fields.summary = displayed(source)
+    if (Object.keys(fields).length > 0) nodes = nodes.map((node) => (node.id === toId ? { ...node, ...fields } : node))
+
+    for (const child of nodes.filter((node) => node.parentId === fromId)) {
+      const match = nodes.find((node) => node.parentId === toId && node.label === child.label)
+      if (match) merge(child.id, match.id)
+      else nodes = nodes.map((node) => (node.id === child.id ? withoutOrder({ ...node, parentId: toId }) : node))
+    }
+    nodes = nodes.filter((node) => node.id !== fromId)
+  }
+  merge(sourceId, targetId)
+  return nodes
+}
+
+// Puts `node` (already updated in `mapNodes`) under `parentId`, merging it into
+// a namesake already there.
+const settleUnder = (mapNodes, nodeId, parentId, builtInSummary) => {
+  const namesake = mapNodes.find((node) => {
+    if (node.parentId !== parentId || node.id === nodeId) return false
+    return node.label === mapNodes.find((n) => n.id === nodeId).label
+  })
+  return namesake ? mergeNode(mapNodes, nodeId, namesake.id, builtInSummary) : mapNodes
+}
+
+const renameBuiltInNode = (mapNodes, { rename, label, dropSummaries = [] }, builtInSummary) => {
+  let nodes = mapNodes
+  const byId = new Map(mapNodes.map((node) => [node.id, node]))
+  for (const match of nodesAtPath(mapNodes, byId, rename)) {
+    nodes = nodes.map((node) => {
+      if (node.id !== match.id) return node
+      const renamed = { ...node, label }
+      if (dropSummaries.includes(node.summary)) delete renamed.summary
+      return renamed
+    })
+    nodes = settleUnder(nodes, match.id, match.parentId, builtInSummary)
+  }
+  return { nodes, changed: nodes !== mapNodes }
+}
+
+const addBuiltInNode = (mapNodes, { add, under }) => {
+  const byId = new Map(mapNodes.map((node) => [node.id, node]))
+  const childrenByParent = buildChildrenByParent(mapNodes)
+  let maxId = maxIdOf(mapNodes)
+  const created = []
+  for (const parent of nodesAtPath(mapNodes, byId, under)) {
+    const children = childrenByParent.get(parent.id) || []
+    if (!children.some((child) => !child.isCustom)) continue
+    if (children.some((child) => child.label === add)) continue
+    if ((parent.excludedChildLabels || []).includes(add)) continue
+    created.push({ id: ++maxId, label: add, parentId: parent.id, hidden: children[0].hidden ?? true })
+  }
+  if (created.length === 0) return { nodes: mapNodes, changed: false }
+  return { nodes: [...mapNodes, ...created], changed: true }
+}
+
+const moveBuiltInNode = (mapNodes, { move, into }, builtInSummary) => {
+  let nodes = mapNodes
+  for (const source of nodesAtPath(mapNodes, new Map(mapNodes.map((node) => [node.id, node])), move)) {
+    let byId = new Map(nodes.map((node) => [node.id, node]))
+    let target = findHome(nodes, byId, into)
+    if (!target) {
+      const parent = findHome(nodes, byId, into.slice(0, -1))
+      if (!parent) continue
+      target = { id: maxIdOf(nodes) + 1, label: into.at(-1), parentId: parent.id, hidden: source.hidden }
+      nodes = [...nodes, target]
+      byId = new Map(nodes.map((node) => [node.id, node]))
+    }
+    if (isAncestorOrSelf(byId, source.id, target.id)) continue
+    const targetChildren = nodes.filter((node) => node.parentId === target.id && node.id !== source.id)
+    const hidden = targetChildren[0]?.hidden ?? (target.hidden || source.hidden)
+    nodes = nodes.map((node) => (node.id === source.id ? withoutOrder({ ...node, parentId: target.id, hidden }) : node))
+    nodes = settleUnder(nodes, source.id, target.id, builtInSummary)
+  }
+  return { nodes, changed: nodes !== mapNodes }
+}
+
+const removeBuiltInNode = (mapNodes, { remove, mergeInto }, builtInSummary) => {
+  let nodes = mapNodes
+  for (const source of nodesAtPath(mapNodes, new Map(mapNodes.map((node) => [node.id, node])), remove)) {
+    const byId = new Map(nodes.map((node) => [node.id, node]))
+    const notPersonal = (node) => !node.isPersonal
+    const target = mergeInto && nodesAtPath(nodes, byId, [...mergeInto, source.label], notPersonal).find((node) => node.id !== source.id)
+    if (target) {
+      nodes = mergeNode(nodes, source.id, target.id, builtInSummary)
+      continue
+    }
+    const ids = subtreeIds(buildChildrenByParent(nodes), source.id)
+    if (ids.some((id) => holdsOwnerContent(byId.get(id)))) {
+      const summary = source.summary || builtInSummary(source.label) || undefined
+      nodes = nodes.map((node) => (node.id === source.id ? { ...node, isCustom: true, summary } : node))
+    } else {
+      const removed = new Set(ids)
+      nodes = nodes.filter((node) => !removed.has(node.id))
+    }
+  }
+  return { nodes, changed: nodes !== mapNodes }
+}
+
+const runStructuralMigration = (mapNodes, migration, builtInSummary, topicSubdivisions) => {
+  if (migration.rename) return renameBuiltInNode(mapNodes, migration, builtInSummary)
+  if (migration.add) return addBuiltInNode(mapNodes, migration)
+  if (migration.move) return moveBuiltInNode(mapNodes, migration, builtInSummary)
+  if (migration.remove) return removeBuiltInNode(mapNodes, migration, builtInSummary)
+  return consolidateBuiltInNode(mapNodes, migration, builtInSummary, topicSubdivisions)
+}
+
 // builtInSummary(label) returns the built-in summary text for a label, so a
 // merged copy's displayed summary can be kept on a custom node.
 // topicSubdivisions maps a label to its built-in child labels.
@@ -274,7 +447,7 @@ export const applyStructuralMigrations = (mapNodes, builtInSummary = () => '', t
         nodes = dropped.nodes
         changed = changed || dropped.changed
       }
-      const result = consolidateBuiltInNode(nodes, migration, builtInSummary, topicSubdivisions)
+      const result = runStructuralMigration(nodes, migration, builtInSummary, topicSubdivisions)
       nodes = result.nodes
       changed = changed || result.changed
     }
