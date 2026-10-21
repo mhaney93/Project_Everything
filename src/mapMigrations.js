@@ -64,8 +64,8 @@ const ARCHIVED_MOSSAD_SUMMARY = "The theory that Israeli intelligence orchestrat
 // (labelMigrationVersion), so a node the owner later gives an old label keeps
 // it. A built-in node is renamed only under a parent whose built-in children
 // list the new label (or the parent named in LABEL_MIGRATION_PARENTS), so a
-// namesake elsewhere in the map is left alone; custom and Personal nodes are
-// never renamed unless their entry there allows it.
+// namesake elsewhere in the map is left alone. Personal nodes are never
+// renamed, and custom nodes only where their entry there sets `custom`.
 export const LABEL_MIGRATIONS_BY_VERSION = {
   1: {
     Art: 'Arts',
@@ -145,7 +145,8 @@ export const LABEL_MIGRATIONS_BY_VERSION = {
 }
 
 // The parent of a renamed label that its built-in parent no longer lists.
-// `custom` lets the rename reach the owner's own node, for a fix the owner asked for.
+// `custom` lets the rename reach the owner's own custom node (never a Personal
+// one), for a fix the owner asked for.
 const LABEL_MIGRATION_PARENTS = {
   '21st Century (2001 - present)': { parent: 'Contemporary Period (1945 - present)' },
   // Owner-requested date correction from PR #8: terms run inauguration to inauguration, so 2017 - 2021.
@@ -920,8 +921,9 @@ export const applyStructuralMigrations = (mapNodes, builtInSummary = () => '', t
 
 export const LATEST_LABEL_MIGRATION_VERSION = Math.max(...Object.keys(LABEL_MIGRATIONS_BY_VERSION).map(Number))
 
-// builtInSummary and topicSubdivisions are as for applyStructuralMigrations.
-export const applyLabelMigrations = (mapNodes, builtInSummary = () => '', topicSubdivisions = {}) => {
+// topicSubdivisions is as for applyStructuralMigrations. A renamed node is
+// relabelled in place, even beside a sibling that already has the new label.
+export const applyLabelMigrations = (mapNodes, topicSubdivisions = {}) => {
   if (!Array.isArray(mapNodes)) return { nodes: [], changed: false }
   const roots = mapNodes.filter(isRoot)
   const applied = Math.max(0, ...roots.map((root) => Number(root.labelMigrationVersion) || 0))
@@ -941,7 +943,7 @@ export const applyLabelMigrations = (mapNodes, builtInSummary = () => '', topicS
   // Walk down from the roots, so a parent's new label is known before its children.
   const childrenByParent = buildChildrenByParent(mapNodes)
   const labelAfter = new Map()
-  const renames = []
+  const renames = new Map()
   const queue = [...roots]
   const seen = new Set()
   while (queue.length > 0) {
@@ -954,18 +956,15 @@ export const applyLabelMigrations = (mapNodes, builtInSummary = () => '', topicS
     const allowed = isBuiltIn(node) || (LABEL_MIGRATION_PARENTS[label]?.custom && !node.isPersonal)
     if (label !== node.label && allowed && parentLabel !== undefined && belongsUnder(label, parentLabel)) {
       labelAfter.set(node.id, label)
-      renames.push({ id: node.id, label })
+      renames.set(node.id, label)
     }
     queue.push(...(childrenByParent.get(node.id) || []))
   }
 
-  let nodes = mapNodes.map((node) => (isRoot(node) ? { ...node, labelMigrationVersion: LATEST_LABEL_MIGRATION_VERSION } : node))
-  for (const { id, label } of renames) {
-    if (!nodes.some((node) => node.id === id)) continue
-    const sourcePath = labelPathOf(nodes, id)
-    nodes = nodes.map((node) => (node.id === id ? { ...node, label } : node))
-    nodes = settleUnder(nodes, id, nodes.find((node) => node.id === id).parentId, builtInSummary, sourcePath)
-  }
+  const nodes = mapNodes.map((node) => {
+    if (isRoot(node)) return { ...node, labelMigrationVersion: LATEST_LABEL_MIGRATION_VERSION }
+    return renames.has(node.id) ? { ...node, label: renames.get(node.id) } : node
+  })
   return { nodes, changed: true }
 }
 

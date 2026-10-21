@@ -1157,7 +1157,7 @@ function App() {
     };
 
     const normalizeLoadedNodes = (mapNodes) => {
-      const { nodes: migratedNodes, changed: migrationChanged } = applyLabelMigrations(mapNodes, generateSummary, TOPIC_SUBDIVISIONS)
+      const { nodes: migratedNodes, changed: migrationChanged } = applyLabelMigrations(mapNodes, TOPIC_SUBDIVISIONS)
       const { nodes: restructuredNodes, changed: structureChanged } = applyStructuralMigrations(migratedNodes, generateSummary, TOPIC_SUBDIVISIONS)
       const { nodes: prunedNodes, changed: pruneChanged } = removeStalePredefinedChildren(restructuredNodes, TOPIC_SUBDIVISIONS, generateSummary)
       const { nodes: summarizedNodes, changed: summaryChanged } = applySummaryMigrations(prunedNodes)

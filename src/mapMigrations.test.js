@@ -1115,7 +1115,7 @@ test('the built-in Rwanda (1962 - present) keeps its Rwandan Genocide child', ()
   assert.equal(normalize(before, appSummary).changed, false)
 })
 
-const relabel = (mapNodes) => applyLabelMigrations(mapNodes, appSummary, TOPIC_SUBDIVISIONS)
+const relabel = (mapNodes) => applyLabelMigrations(mapNodes, TOPIC_SUBDIVISIONS)
 
 test('history labels take corrected dates and keep their summaries, notes and children', () => {
   const notes = [{ id: 'note-trump', text: 'mine', level: 0 }]
@@ -1964,14 +1964,16 @@ test('the owner-requested Trump presidency fix reaches the custom node only unde
   assert.equal(nodes[2].isCustom, true)
 })
 
-test('a renamed node beside its new namesake merges into it', () => {
+test('a built-in node beside a custom namesake is renamed in place, nothing merged', () => {
   const before = buildMap(['Everything', [['Humanities', [
-    ['Art', [['Painting Notes', [], { isCustom: true }]], { notes: [{ id: 'n1', text: 'kept', level: 0 }] }],
-    ['Arts'],
+    ['Art', [['Painting'], ['Painting Notes', [], { isCustom: true }]], { notes: [{ id: 'n1', text: 'built-in', level: 0 }] }],
+    ['Arts', [['Sculpture Notes', [], { isCustom: true }]], { isCustom: true, notes: [{ id: 'n2', text: 'mine', level: 0 }] }],
   ]]]])
   const { nodes } = relabel(before)
-  const arts = nodes.filter((n) => n.label === 'Arts')
-  assert.equal(arts.length, 1)
-  assert.deepEqual(arts[0].notes.map((n) => n.id), ['n1'])
-  assert.equal(nodes.find((n) => n.label === 'Painting Notes').parentId, arts[0].id)
+  assert.equal(nodes.length, before.length)
+  const art = before.find((n) => n.label === 'Art')
+  assert.deepEqual(nodes.find((n) => n.id === art.id), { ...art, label: 'Arts' })
+  for (const node of before.filter((n) => n.id !== art.id && n.parentId !== null)) {
+    assert.deepEqual(nodes.find((n) => n.id === node.id), node)
+  }
 })

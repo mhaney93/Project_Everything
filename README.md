@@ -37,7 +37,7 @@ Node label migrations live in `src/mapMigrations.js`:
 
 When a user map loads from the backend, migrations are applied to loaded nodes before rendering. If any migration changes the map, the app automatically saves the migrated nodes back to the backend so the fix is permanent.
 
-Label renames run once per map: the map's root records the last version applied (`labelMigrationVersion`), so only newer versions run on later loads, and a label the owner sets afterwards is kept. A built-in node is renamed only where its parent's built-in children in `TOPIC_SUBDIVISIONS` list the new label (or under the parent named in `LABEL_MIGRATION_PARENTS`), so a namesake elsewhere in the map is left alone; custom and Personal nodes are not renamed unless their `LABEL_MIGRATION_PARENTS` entry sets `custom`.
+Label renames run once per map: the map's root records the last version applied (`labelMigrationVersion`), so only newer versions run on later loads, and a label the owner sets afterwards is kept. A built-in node is renamed only where its parent's built-in children in `TOPIC_SUBDIVISIONS` list the new label (or under the parent named in `LABEL_MIGRATION_PARENTS`), so a namesake elsewhere in the map is left alone. A renamed node keeps its place, id, notes and children, even beside a sibling that already has the new label. Personal nodes are never renamed, and custom nodes only where their `LABEL_MIGRATION_PARENTS` entry sets `custom`.
 
 ### Add a new label rename
 
