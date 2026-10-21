@@ -300,8 +300,10 @@ test('the taxonomy lists the moved engineering branches only in their new homes'
 // PowerShell, and JavaScript's Asynchronous Operations under Solidity's custom
 // Control Flow. Their homes are stored but empty. The custom wrappers stand in
 // for the levels in between.
+const inEngineering = (children) => ['Root', [['Applied Sciences', [['Engineering', children]]]]]
+
 const engineeringMap = () => buildMap(
-  ['Root', [
+  inEngineering([
     ['Blockchain levels', [
       ['DApps (Decentralized Applications)', [
         ['Contract Interaction'],
@@ -369,10 +371,10 @@ const engineeringMap = () => buildMap(
         ['Runtime Environments'],
       ]],
     ]],
-  ]],
+  ]),
 )
 
-const SOFTWARE_DEVELOPMENT = 'Root > Software Engineering > Software Development/Programming'
+const SOFTWARE_DEVELOPMENT = 'Root > Applied Sciences > Engineering > Software Engineering > Software Development/Programming'
 const JAVASCRIPT = `${SOFTWARE_DEVELOPMENT} > Programming Languages > Imperative Languages > Object-Oriented > JavaScript`
 
 test('migration moves Front-End Frameworks from DApps to Packages > Frameworks', () => {
@@ -390,6 +392,12 @@ test('migration moves Front-End Frameworks from DApps to Packages > Frameworks',
   assert.equal(pathOf(nodes, fef), `${SOFTWARE_DEVELOPMENT} > Packages > Frameworks > Front-End Frameworks`)
   assert.deepEqual(fef.notes.map((n) => n.id), ['note-fef'])
   assert.deepEqual(childLabelsOf(nodes, fef), [...TOPIC_SUBDIVISIONS['Front-End Frameworks']].sort())
+
+  // Only the moved node's place changes: every stored field of it and of each
+  // descendant (labels, summaries, notes, custom flags) is kept as it was.
+  const placement = (node) => Object.fromEntries(Object.entries(node).filter(([key]) => !['parentId', 'hidden', 'order'].includes(key)))
+  assert.deepEqual(placement(fef), placement(original))
+  assert.deepEqual(descendantsOf(nodes, fef.id), descendantsOf(before, original.id))
 
   // The whole React subtree, its note and its custom child came along.
   const originalReact = before.find((n) => n.label === 'React')
@@ -409,7 +417,7 @@ test('migration moves Front-End Frameworks from DApps to Packages > Frameworks',
 })
 
 test('Front-End Frameworks moves into Packages > Frameworks even when Packages was never expanded', () => {
-  const before = buildMap(['Root', [
+  const before = buildMap(inEngineering([
     ['Blockchain levels', [
       ['DApps (Decentralized Applications)', [
         ['Contract Interaction'],
@@ -422,7 +430,7 @@ test('Front-End Frameworks moves into Packages > Frameworks even when Packages w
     ['Software Engineering', [
       ['Software Development/Programming', [['Packages'], ['Runtime Environments']]],
     ]],
-  ]])
+  ]))
   const original = before.find((n) => n.label === 'Front-End Frameworks')
   const { nodes, changed } = normalize(before)
   assert.equal(changed, true)
@@ -451,6 +459,52 @@ test('Front-End Frameworks moves into Packages > Frameworks even when Packages w
   assert.deepEqual(again.nodes, nodes)
 })
 
+// Production map 1 (2026-10-21): DApps > Front-End Frameworks is stored under
+// Computer Systems Engineering, but no Frameworks node exists, because Software
+// Engineering was never expanded (or never stored at all).
+test('Front-End Frameworks moves when no level below Engineering is stored on the Software Engineering side', () => {
+  const dapps = ['DApps (Decentralized Applications)', [
+    ['Contract Interaction'],
+    ['Front-End Frameworks', [
+      ['React', [['My React Hooks', [], { isCustom: true, summary: 'custom react summary' }]], { notes: [{ id: 'note-react', text: 'react note', level: 0 }] }],
+      ['Vue.js'],
+    ], { notes: [{ id: 'note-fef', text: 'front-end note', level: 0 }] }],
+  ]]
+  const computerSystems = ['Computer Systems Engineering', [['Blockchain levels', [dapps], { isCustom: true }]]]
+  const shapes = {
+    'Software Engineering unexpanded': [computerSystems, ['Software Engineering']],
+    'Software Engineering not stored': [computerSystems, ['Civil Engineering']],
+  }
+
+  for (const [shape, engineering] of Object.entries(shapes)) {
+    const before = buildMap(inEngineering(engineering))
+    const original = before.find((n) => n.label === 'Front-End Frameworks')
+    const { nodes, changed } = normalize(before)
+    assert.equal(changed, true, shape)
+    assert.deepEqual(orphansOf(nodes), [], shape)
+    assert.equal(new Set(nodes.map((n) => n.id)).size, nodes.length, shape)
+
+    const copies = nodes.filter((n) => n.label === 'Front-End Frameworks')
+    assert.equal(copies.length, 1, shape)
+    assert.equal(copies[0].id, original.id, shape)
+    assert.equal(pathOf(nodes, copies[0]), `${SOFTWARE_DEVELOPMENT} > Packages > Frameworks > Front-End Frameworks`, shape)
+    assert.deepEqual(copies[0].notes.map((n) => n.id), ['note-fef'], shape)
+    assert.deepEqual(descendantsOf(nodes, original.id), descendantsOf(before, original.id), shape)
+
+    // Each created level holds what expanding it would: its full built-in set.
+    for (const label of ['Software Development/Programming', 'Packages', 'Frameworks']) {
+      assert.deepEqual(childLabelsOf(nodes, nodes.find((n) => n.label === label)), [...TOPIC_SUBDIVISIONS[label]].sort(), `${shape}: ${label}`)
+    }
+    const softwareEngineering = nodes.find((n) => n.label === 'Software Engineering')
+    const createdUnderSE = childLabelsOf(nodes, softwareEngineering)
+    assert.ok(createdUnderSE.includes('Software Development/Programming'), shape)
+
+    const again = normalize(nodes)
+    assert.equal(again.changed, false, shape)
+    assert.deepEqual(again.nodes, nodes, shape)
+  }
+})
+
 test('Front-End Frameworks stays under DApps when the owner deleted a level of its home', () => {
   const dapps = ['DApps (Decentralized Applications)', [
     ['Contract Interaction'],
@@ -462,9 +516,9 @@ test('Front-End Frameworks stays under DApps when the owner deleted a level of i
     const softwareEngineering = excluded === 'Software Engineering'
       ? []
       : [['Software Engineering', [['Software Development/Programming', [['Runtime Environments']], { excludedChildLabels: [excluded] }]]]]
-    return buildMap(['Root', [
+    return buildMap(['Root', [['Applied Sciences', [
       ['Engineering', [['Computer Systems Engineering', [['Blockchain levels', [dapps], { isCustom: true }]]], ...softwareEngineering], { excludedChildLabels: excluded === 'Software Engineering' ? [excluded] : [] }],
-    ]])
+    ]]]])
   }
 
   for (const excluded of ['Packages', 'Software Engineering']) {
@@ -555,7 +609,7 @@ test('migration moves Asynchronous Operations from Solidity to JavaScript > Cont
   assert.equal(solidityControlFlow.summary, 'the set of statements inside a function body')
   assert.deepEqual(childLabelsOf(nodes, solidityControlFlow), ['Conditional Statements', 'Error Handling', 'Loops'])
   const forLoop = nodes.find((n) => n.label === 'for (x i = 0; i < 10; i++) {\ny\n}')
-  assert.equal(pathOf(nodes, forLoop), 'Root > Blockchain levels > Solidity levels > Control Flow > Loops > For Loops > for (x i = 0; i < 10; i++) {\ny\n}')
+  assert.equal(pathOf(nodes, forLoop), 'Root > Applied Sciences > Engineering > Blockchain levels > Solidity levels > Control Flow > Loops > For Loops > for (x i = 0; i < 10; i++) {\ny\n}')
   assert.equal(descendantsOf(nodes, solidityControlFlow.id).filter((n) => n.label === 'Conditional Statements').length, 1)
 })
 

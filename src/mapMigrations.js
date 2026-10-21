@@ -19,7 +19,7 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
     { label: 'Emotional Regulation', homePath: ['Psychology', 'Emotions'] },
   ],
   4: [
-    { label: 'Front-End Frameworks', homePath: ['Software Engineering', 'Software Development/Programming', 'Packages', 'Frameworks'] },
+    { label: 'Front-End Frameworks', homePath: ['Applied Sciences', 'Engineering', 'Software Engineering', 'Software Development/Programming', 'Packages', 'Frameworks'] },
     { label: 'Python', homePath: ['Programming Languages', 'Imperative Languages', 'Object-Oriented'] },
     { label: 'Node.js', homePath: ['Software Development/Programming', 'Runtime Environments'], dropBareCopies: true },
     { label: 'Asynchronous Operations', homePath: ['JavaScript', 'Control Flow'] },
