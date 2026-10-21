@@ -38,6 +38,7 @@ const TRICKSTER_SUMMARY = 'An archetype embodying chaos, disruption, and the cha
 const JUNGIAN_HERO_SUMMARY = 'An archetype representing the ego\'s journey of overcoming obstacles, achieving individuation, and integrating the Self.'
 const JUNGIAN_ARCHETYPES_SUMMARY = 'Universal, inherited patterns of thought and imagery residing in the collective unconscious, influencing human behavior and cultural expressions as described by Carl Jung.'
 const PANAS_RESULTS = ['Positive And Negative Affect Schedule (PANAS)', 'Results|PANAS']
+const RWANDAN_GENOCIDE = 'Rwandan Genocide (1994)'
 
 export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
   3: [
@@ -74,6 +75,10 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
     { rename: [...PANAS_RESULTS, 'Mad Scientist Archetype'], label: 'High affective (Mad Scientist)' },
     { rename: [...PANAS_RESULTS, 'Judge/Surgeon Archetype'], label: 'Low affective (Judge/Surgeon)' },
     { rename: [...PANAS_RESULTS, 'Poet Archetype'], label: 'Self-destructive (Poet)' },
+  ],
+  6: [
+    // 1994 is after the Cold War; the copy under the post-Cold War Rwanda node stays.
+    { remove: ['Rwanda During the Cold War Era', RWANDAN_GENOCIDE], mergeInto: ['Rwanda During the Post-Cold War Era'] },
   ],
 }
 

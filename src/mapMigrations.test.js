@@ -1072,3 +1072,45 @@ test('consolidating a copy with the same summary adds no note', () => {
   assert.equal(emotions[0].summary, 'Same.')
   assert.equal(emotions[0].notes, undefined)
 })
+
+const rwandaMap = (coldWarCopyExtra = {}) => buildMap(['Contemporary Period (1945 - present)', [
+  ['Cold War Era (1947 - 1991)', [
+    ['Rwanda During the Cold War Era', [['Rwandan Genocide (1994)', [], coldWarCopyExtra]], { isCustom: true, summary: 'Cold War Rwanda.' }],
+  ], { isCustom: true }],
+  ['Post-Cold War Era (1991 - 2022)', [
+    ['Rwanda During the Post-Cold War Era', [['Rwandan Genocide (1994)', [], { notes: [{ id: 'note-kept', text: 'kept', level: 0 }] }]], { isCustom: true, summary: 'Post-Cold War Rwanda.' }],
+  ], { isCustom: true }],
+]])
+
+test('the Rwandan Genocide copy under the Cold War era is removed and the post-Cold War copy kept', () => {
+  const before = rwandaMap()
+  const [coldWarCopy, keptCopy] = before.filter((n) => n.label === 'Rwandan Genocide (1994)')
+  const { nodes, changed } = normalize(before, appSummary)
+
+  assert.equal(changed, true)
+  assert.deepEqual(nodes, before.filter((n) => n.id !== coldWarCopy.id))
+  assert.equal(pathOf(nodes, nodes.find((n) => n.id === keptCopy.id)), 'Contemporary Period (1945 - present) > Post-Cold War Era (1991 - 2022) > Rwanda During the Post-Cold War Era > Rwandan Genocide (1994)')
+  assert.ok(nodes.some((n) => n.label === 'Rwanda During the Cold War Era'))
+  assert.equal(normalize(nodes, appSummary).changed, false)
+})
+
+test('notes on the Cold War era Rwandan Genocide copy move to the post-Cold War copy', () => {
+  const before = rwandaMap({ notes: [{ id: 'note-moved', text: 'moved', level: 0 }], summary: 'My own summary.' })
+  const coldWarCopy = before.find((n) => n.label === 'Rwandan Genocide (1994)')
+  const { nodes } = normalize(before, appSummary)
+
+  const copies = nodes.filter((n) => n.label === 'Rwandan Genocide (1994)')
+  assert.equal(copies.length, 1)
+  assert.equal(copies[0].summary, 'My own summary.')
+  assert.deepEqual(copies[0].notes, [
+    { id: 'note-kept', text: 'kept', level: 0 },
+    { id: 'note-moved', text: 'moved', level: 0 },
+  ])
+  assert.ok(!nodes.some((n) => n.id === coldWarCopy.id))
+})
+
+test('the built-in Rwanda (1962 - present) keeps its Rwandan Genocide child', () => {
+  const before = buildMap(builtIn('Rwanda (1962 - present)'))
+  assert.deepEqual([...TOPIC_SUBDIVISIONS['Rwanda (1962 - present)']], ['Rwandan Genocide (1994)'])
+  assert.equal(normalize(before, appSummary).changed, false)
+})
