@@ -30,6 +30,10 @@
 //   for the removed node's retired built-in summary. Without a target, a node holding anything
 //   the owner wrote becomes custom and stays put; a bare one is deleted.
 // A node that lands beside a namesake is merged into it the same way.
+//
+// `rehomeOrphans` reattaches nodes whose parent no longer exists (left behind
+// when an older app version dropped a stale built-in node but not its
+// children); see rehomeOrphans below.
 const PERSONALITY_ARCHETYPES = ['Personality Psychology', 'Archetypes']
 const MARK_PEARSON = [...PERSONALITY_ARCHETYPES, 'Mark & Pearson\'s 12 Archetypes']
 const MARK_PEARSON_FIGURES = [...MARK_PEARSON, 'Universal Archetypal Figures/Patterns']
@@ -90,6 +94,11 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
       as: 'Migration Period (c. 375 - 568)',
       summary: ANCIENT_MIGRATION_PERIOD_SUMMARY,
     },
+  ],
+  7: [
+    // The admin map's old JFK assassination, Church Committee, Dimona and
+    // Aliyahs children lost their parents; put them back in the tree.
+    { rehomeOrphans: true },
   ],
 }
 
@@ -220,9 +229,24 @@ const dropBareCopies = (mapNodes, { label, homePath }) => {
 const maxIdOf = (mapNodes) =>
   mapNodes.reduce((max, node) => (Number.isFinite(node.id) ? Math.max(max, node.id) : max), 0)
 
+// Stores the built-in child `label` under `parent` the way expanding it would:
+// a parent without built-in children gets its full built-in set, otherwise
+// just that child. Returns null when the taxonomy does not list it there.
+const storeBuiltInChild = (mapNodes, parent, label, topicSubdivisions) => {
+  const excluded = parent.excludedChildLabels || []
+  const expected = (topicSubdivisions[parent.label] || []).filter((childLabel) => !excluded.includes(childLabel))
+  if (!expected.includes(label)) return null
+  const children = mapNodes.filter((node) => node.parentId === parent.id)
+  const taken = new Set(children.map((child) => child.label).filter((childLabel) => childLabel !== label))
+  const labels = children.some((child) => !child.isCustom) ? [label] : [...new Set(expected)].filter((l) => !taken.has(l))
+  const hidden = children[0]?.hidden ?? true
+  let maxId = maxIdOf(mapNodes)
+  const created = labels.map((childLabel) => ({ id: ++maxId, label: childLabel, parentId: parent.id, hidden }))
+  return { nodes: [...mapNodes, ...created], child: created.find((node) => node.label === label) }
+}
+
 // Finds the deepest stored node along `homePath` and creates the levels below
-// it the way expanding each one would: a parent without built-in children gets
-// its full built-in set, otherwise just the missing level.
+// it with storeBuiltInChild.
 const ensureHome = (mapNodes, homePath, topicSubdivisions) => {
   const byId = new Map(mapNodes.map((node) => [node.id, node]))
   let depth = homePath.length
@@ -231,18 +255,11 @@ const ensureHome = (mapNodes, homePath, topicSubdivisions) => {
   if (!anchor) return null
 
   let nodes = mapNodes
-  let maxId = maxIdOf(mapNodes)
   for (const label of homePath.slice(depth)) {
-    const excluded = anchor.excludedChildLabels || []
-    const expected = (topicSubdivisions[anchor.label] || []).filter((childLabel) => !excluded.includes(childLabel))
-    if (!expected.includes(label)) return null
-    const children = nodes.filter((node) => node.parentId === anchor.id)
-    const taken = new Set(children.map((child) => child.label).filter((childLabel) => childLabel !== label))
-    const labels = children.some((child) => !child.isCustom) ? [label] : [...new Set(expected)].filter((l) => !taken.has(l))
-    const hidden = children[0]?.hidden ?? true
-    const created = labels.map((childLabel) => ({ id: ++maxId, label: childLabel, parentId: anchor.id, hidden }))
-    nodes = [...nodes, ...created]
-    anchor = created.find((node) => node.label === label)
+    const stored = storeBuiltInChild(nodes, anchor, label, topicSubdivisions)
+    if (!stored) return null
+    nodes = stored.nodes
+    anchor = stored.child
   }
   return { nodes, home: anchor }
 }
@@ -465,7 +482,146 @@ const removeBuiltInNode = (mapNodes, { remove, mergeInto, as, summary: retiredSu
   return { nodes, changed: nodes !== mapNodes }
 }
 
-const runStructuralMigration = (mapNodes, migration, builtInSummary, topicSubdivisions) => {
+export const RECOVERED_NODES_LABEL = 'Recovered Nodes'
+
+const isRoot = (node) => node.parentId === null || node.parentId === undefined
+
+const reachableIds = (mapNodes) => {
+  const childrenByParent = buildChildrenByParent(mapNodes)
+  const ids = new Set()
+  const stack = mapNodes.filter(isRoot).map((node) => node.id)
+  while (stack.length > 0) {
+    const id = stack.pop()
+    if (ids.has(id)) continue
+    ids.add(id)
+    for (const child of childrenByParent.get(id) || []) stack.push(child.id)
+  }
+  return ids
+}
+
+const expectedChildren = (node, topicSubdivisions) => {
+  const excluded = node.excludedChildLabels || []
+  return (topicSubdivisions[node.label] || []).filter((label) => !excluded.includes(label))
+}
+
+const describe = (node) => (node.isPersonal ? `#${node.id} (personal)` : `#${node.id} "${node.label}"`)
+
+// Reattaches each node whose parent no longer exists (an orphan), oldest first:
+// 1. It merges into its one reachable built-in namesake (narrowed to those
+//    whose parent's built-in children list it): the namesake keeps its own
+//    summary or takes the orphan's, notes and children carry over.
+// 2. Otherwise its home is the one reachable node whose built-in children list
+//    it, or else a built-in level that lists it, when exactly one reachable
+//    node lists such a level; that level is stored first, and stored alone
+//    among ordered siblings it takes the lowest free order, the slot its lost
+//    copy left. An orphan holding nothing the owner wrote except summaries
+//    already stored under its home (or under the one parent the owner took
+//    its label out of) is a duplicate and is deleted; any other moves under
+//    its home.
+// 3. Without a home it moves under a custom "Recovered Nodes" node at the
+//    root, so it stays visible, unless it holds nothing the owner wrote.
+// Personal orphans are left untouched. `log`, when given, collects one line
+// per action.
+const rehomeOrphans = (mapNodes, builtInSummary, topicSubdivisions, log) => {
+  const note = (line) => log?.push(line)
+  const pathText = (mapNodesNow, id) => labelPathOf(mapNodesNow, id).join(' > ')
+  let nodes = mapNodes
+  const skipped = new Set()
+  for (;;) {
+    const byId = new Map(nodes.map((node) => [node.id, node]))
+    const orphan = nodes
+      .filter((node) => !isRoot(node) && !byId.has(node.parentId) && !skipped.has(node.id))
+      .sort((a, b) => a.id - b.id)[0]
+    if (!orphan) break
+    skipped.add(orphan.id)
+    if (orphan.isPersonal) {
+      note(`left ${describe(orphan)} untouched: personal orphans are not moved`)
+      continue
+    }
+
+    const childrenByParent = buildChildrenByParent(nodes)
+    const reachable = [...reachableIds(nodes)].map((id) => byId.get(id)).filter((node) => !node.isPersonal)
+    const subtree = subtreeIds(childrenByParent, orphan.id).map((id) => byId.get(id))
+    const listsOrphan = (node) => expectedChildren(node, topicSubdivisions).includes(orphan.label)
+
+    let namesakes = reachable.filter((node) => node.label === orphan.label && !node.isCustom)
+    if (namesakes.length > 1) namesakes = namesakes.filter((node) => listsOrphan(byId.get(node.parentId) || {}))
+    if (namesakes.length === 1) {
+      const [target] = namesakes
+      const summaryNote = orphan.summary && !target.summary ? ', summary copied' : ''
+      nodes = mergeNode(nodes, orphan.id, target.id, builtInSummary, labelPathOf(nodes, orphan.id))
+      note(`merged ${describe(orphan)} into ${describe(target)} at ${pathText(nodes, target.id)}${summaryNote}`)
+      continue
+    }
+
+    const homes = reachable.filter(listsOrphan)
+    let home = homes.length === 1 ? homes[0] : null
+    let level = null
+    if (!home) {
+      const levels = reachable.flatMap((node) => expectedChildren(node, topicSubdivisions)
+        .filter((label) => (topicSubdivisions[label] || []).includes(orphan.label))
+        .filter((label) => !nodes.some((child) => child.parentId === node.id && child.label === label))
+        .map((label) => ({ parent: node, label })))
+      if (levels.length === 1) [level] = levels
+    }
+
+    // A parent the owner took this label out of (excludedChildLabels) does not
+    // take it back, but a copy the owner refiled under it still counts.
+    const refiledFrom = home || level ? [] : reachable.filter((node) =>
+      (topicSubdivisions[node.label] || []).includes(orphan.label) && (node.excludedChildLabels || []).includes(orphan.label))
+    const checkAt = home || (refiledFrom.length === 1 ? refiledFrom[0] : null)
+    const storedThere = new Set(checkAt ? subtreeIds(childrenByParent, checkAt.id).map((id) => byId.get(id).summary).filter(Boolean) : [])
+    const duplicate = subtree.every((node) =>
+      !holdsOwnerContent({ ...node, summary: storedThere.has(node.summary) ? undefined : node.summary }))
+    if (duplicate) {
+      const removed = new Set(subtree.map((node) => node.id))
+      nodes = nodes.filter((node) => !removed.has(node.id))
+      const reason = checkAt ? `its summaries are already stored under ${describe(checkAt)}` : 'it holds nothing the owner wrote'
+      note(`deleted ${describe(orphan)} (${subtree.length} node(s)): ${reason}`)
+      continue
+    }
+
+    if (level) {
+      const stored = storeBuiltInChild(nodes, level.parent, level.label, topicSubdivisions)
+      const created = stored.nodes.slice(nodes.length)
+      const siblings = nodes.filter((node) => node.parentId === level.parent.id)
+      if (created.length === 1 && siblings.length > 0 && siblings.every((node) => Number.isInteger(node.order))) {
+        const used = new Set(siblings.map((node) => node.order))
+        let order = 0
+        while (used.has(order)) order++
+        stored.child.order = order
+      }
+      nodes = stored.nodes
+      home = stored.child
+      note(`created ${describe(home)} under ${describe(level.parent)} at ${pathText(nodes, level.parent.id)}`)
+    }
+    if (!home) {
+      const root = nodes.filter(isRoot).sort((a, b) => a.id - b.id)[0]
+      if (!root) {
+        note(`left ${describe(orphan)} untouched: the map has no root`)
+        continue
+      }
+      home = nodes.find((node) => node.parentId === root.id && node.isCustom && node.label === RECOVERED_NODES_LABEL)
+      if (!home) {
+        const rootChildren = nodes.filter((node) => node.parentId === root.id)
+        home = { id: maxIdOf(nodes) + 1, label: RECOVERED_NODES_LABEL, parentId: root.id, isCustom: true, hidden: rootChildren[0]?.hidden ?? true }
+        nodes = [...nodes, home]
+        note(`created ${describe(home)} under ${describe(root)}`)
+      }
+    }
+
+    const siblings = nodes.filter((node) => node.parentId === home.id)
+    const hidden = siblings[0]?.hidden ?? (home.hidden || orphan.hidden)
+    const sourcePath = labelPathOf(nodes, orphan.id)
+    nodes = nodes.map((node) => (node.id === orphan.id ? withoutOrder({ ...node, parentId: home.id, hidden }) : node))
+    note(`moved ${describe(orphan)} (${subtree.length} node(s)) under ${describe(home)} at ${pathText(nodes, home.id)}`)
+    nodes = settleUnder(nodes, orphan.id, home.id, builtInSummary, sourcePath)
+  }
+  return { nodes, changed: nodes !== mapNodes }
+}
+
+const runStructuralMigration = (mapNodes, migration, builtInSummary, topicSubdivisions, log) => {
+  if (migration.rehomeOrphans) return rehomeOrphans(mapNodes, builtInSummary, topicSubdivisions, log)
   if (migration.rename) return renameBuiltInNode(mapNodes, migration, builtInSummary)
   if (migration.add) return addBuiltInNode(mapNodes, migration)
   if (migration.move) return moveBuiltInNode(mapNodes, migration, builtInSummary)
@@ -476,7 +632,8 @@ const runStructuralMigration = (mapNodes, migration, builtInSummary, topicSubdiv
 // builtInSummary(label) returns the built-in summary text for a label, so a
 // merged copy's displayed summary can be kept on a custom node.
 // topicSubdivisions maps a label to its built-in child labels.
-export const applyStructuralMigrations = (mapNodes, builtInSummary = () => '', topicSubdivisions = {}) => {
+// log, when given, collects a line per orphan rehoming action.
+export const applyStructuralMigrations = (mapNodes, builtInSummary = () => '', topicSubdivisions = {}, log = null) => {
   if (!Array.isArray(mapNodes)) return { nodes: [], changed: false }
 
   const orderedVersions = Object.keys(STRUCTURAL_MIGRATIONS_BY_VERSION)
@@ -492,7 +649,7 @@ export const applyStructuralMigrations = (mapNodes, builtInSummary = () => '', t
         nodes = dropped.nodes
         changed = changed || dropped.changed
       }
-      const result = runStructuralMigration(nodes, migration, builtInSummary, topicSubdivisions)
+      const result = runStructuralMigration(nodes, migration, builtInSummary, topicSubdivisions, log)
       nodes = result.nodes
       changed = changed || result.changed
     }
@@ -521,33 +678,50 @@ export const applySummaryMigrations = (mapNodes) => {
   return { nodes: changed ? nodes : mapNodes, changed }
 }
 
-// Remove stale predefined children: for any node with known subdivisions,
-// drop predefined children whose labels are not in the expected set, along
-// with all their descendants. addChildren recreates correct children on
-// first expand. A copy of a structurally migrated label is never dropped: if
-// its home could not be stored (the owner deleted a level of it), it stays put.
-export const removeStalePredefinedChildren = (mapNodes, topicSubdivisions) => {
+// Drops the stale built-in children `staleIds` together with their subtrees,
+// so no descendant is left behind without a parent. A child whose subtree
+// holds a custom or Personal node or a note becomes custom and stays put
+// instead, keeping the summary it showed, so nothing the owner wrote is lost.
+// Stored summaries alone do not keep it: older app versions stored built-in
+// summaries on built-in nodes.
+export const dropStaleChildren = (mapNodes, staleIds, builtInSummary = () => '') => {
+  const byId = new Map(mapNodes.map((node) => [node.id, node]))
   const childrenByParent = buildChildrenByParent(mapNodes)
-  const migratedLabels = new Set(Object.values(STRUCTURAL_MIGRATIONS_BY_VERSION).flat().map(({ label }) => label))
+  const removed = new Set()
+  const kept = new Set()
+  for (const id of staleIds) {
+    if (!byId.has(id) || removed.has(id)) continue
+    const ids = subtreeIds(childrenByParent, id)
+    if (ids.some((subtreeId) => holdsOwnerContent({ ...byId.get(subtreeId), summary: undefined }))) kept.add(id)
+    else for (const subtreeId of ids) removed.add(subtreeId)
+  }
+  if (removed.size === 0 && kept.size === 0) return { nodes: mapNodes, changed: false }
+  const nodes = mapNodes
+    .filter((node) => !removed.has(node.id))
+    .map((node) => {
+      if (!kept.has(node.id)) return node
+      const summary = node.summary || builtInSummary(node.label)
+      return summary ? { ...node, isCustom: true, summary } : { ...node, isCustom: true }
+    })
+  return { nodes, changed: true }
+}
 
-  const idsToRemove = new Set()
+// Remove stale predefined children: for any node with known subdivisions,
+// drop predefined children whose labels are not in the expected set, with
+// dropStaleChildren. addChildren recreates correct children on first expand.
+// A copy of a structurally migrated label is never dropped: if its home could
+// not be stored (the owner deleted a level of it), it stays put.
+export const removeStalePredefinedChildren = (mapNodes, topicSubdivisions, builtInSummary = () => '') => {
+  const childrenByParent = buildChildrenByParent(mapNodes)
+  const migratedLabels = new Set(Object.values(STRUCTURAL_MIGRATIONS_BY_VERSION).flat().map(({ label }) => label).filter(Boolean))
+
+  const staleIds = []
   for (const node of mapNodes) {
     const expected = topicSubdivisions[node.label]
     if (!expected || expected.length === 0) continue
-    const children = childrenByParent.get(node.id) || []
-    for (const child of children) {
-      if (!child.isCustom && !expected.includes(child.label) && !migratedLabels.has(child.label)) {
-        const stack = [child.id]
-        while (stack.length > 0) {
-          const id = stack.pop()
-          idsToRemove.add(id)
-          const grandchildren = childrenByParent.get(id) || []
-          for (const gc of grandchildren) stack.push(gc.id)
-        }
-      }
+    for (const child of childrenByParent.get(node.id) || []) {
+      if (!child.isCustom && !expected.includes(child.label) && !migratedLabels.has(child.label)) staleIds.push(child.id)
     }
   }
-
-  if (idsToRemove.size === 0) return { nodes: mapNodes, changed: false }
-  return { nodes: mapNodes.filter((n) => !idsToRemove.has(n.id)), changed: true }
+  return dropStaleChildren(mapNodes, staleIds, builtInSummary)
 }

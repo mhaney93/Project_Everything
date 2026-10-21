@@ -3,7 +3,7 @@ import { useMobileHeaderSpacer } from './mobileHeaderSpacer';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import './App.css';
 import { authAPI, mapsAPI, filesAPI, API_BASE_URL } from './api';
-import { applyStructuralMigrations, applySummaryMigrations, removeStalePredefinedChildren } from './mapMigrations';
+import { applyStructuralMigrations, applySummaryMigrations, dropStaleChildren, removeStalePredefinedChildren } from './mapMigrations';
 
 // Node size and layout constants
 const NODE_SIZE_MIN = 0.6;
@@ -1264,7 +1264,7 @@ function App() {
     const normalizeLoadedNodes = (mapNodes) => {
       const { nodes: migratedNodes, changed: migrationChanged } = applyLabelMigrations(mapNodes)
       const { nodes: restructuredNodes, changed: structureChanged } = applyStructuralMigrations(migratedNodes, generateSummary, TOPIC_SUBDIVISIONS)
-      const { nodes: prunedNodes, changed: pruneChanged } = removeStalePredefinedChildren(restructuredNodes, TOPIC_SUBDIVISIONS)
+      const { nodes: prunedNodes, changed: pruneChanged } = removeStalePredefinedChildren(restructuredNodes, TOPIC_SUBDIVISIONS, generateSummary)
       const { nodes: summarizedNodes, changed: summaryChanged } = applySummaryMigrations(prunedNodes)
       return { nodes: summarizedNodes, changed: migrationChanged || structureChanged || pruneChanged || summaryChanged }
     }
@@ -22332,12 +22332,16 @@ function App() {
       setTimeout(() => setForceRecenter(false), 100)
       return { expanded: false }
     } else {
-      // Remove any stale predefined children (visible or hidden) before expanding
-      let updatedNodes = nodes
-        .filter(n => !(n.parentId === parentNodeId && !n.isCustom && (
+      // Remove any stale predefined children (visible or hidden) before expanding,
+      // with their descendants; one holding owner content stays as a custom node.
+      const staleChildIds = nodes
+        .filter(n => n.parentId === parentNodeId && !n.isCustom && (
           visibleAreStale ||
           (expectedLabelsForParent.length > 0 && !expectedLabelsForParent.includes(n.label))
-        )))
+        ))
+        .map(n => n.id)
+      const prunedNodes = dropStaleChildren(nodes, staleChildIds, generateSummary).nodes
+      let updatedNodes = prunedNodes
         .map((node) => {
           if (node.parentId === parentNodeId && node.hidden) {
             return { ...node, hidden: false }
@@ -22350,7 +22354,7 @@ function App() {
             let directChild = null
             while (current && current.parentId) {
               if (current.parentId === parentNodeId) { directChild = current; break }
-              current = nodes.find(n => n.id === current.parentId)
+              current = prunedNodes.find(n => n.id === current.parentId)
             }
             if (directChild && !directChild.isCustom) {
               return { ...node, hidden: true }

@@ -1,0 +1,966 @@
+{
+  "map_id": 7,
+  "note": "Production map 7 (admin map) backup 2026-10-21: the 32 orphaned nodes (parents 515, 516, 1271-1275, 1510 no longer stored), the stored chains to their homes with every stored child of each chain node, and the JFK Presidency and Dimona subtrees. Notes and the Personal branch are left out.",
+  "nodes": [
+    {
+      "id": 2,
+      "label": "Humanities",
+      "order": 0,
+      "hidden": false,
+      "summary": "Disciplines that study human culture, history, language, and values.",
+      "isCustom": true,
+      "parentId": 1
+    },
+    {
+      "id": 5,
+      "label": "Philosophy",
+      "hidden": false,
+      "summary": "The pursuit of wisdom through critical analysis of existence, knowledge, and ethics.",
+      "parentId": 2
+    },
+    {
+      "id": 6,
+      "label": "History",
+      "hidden": false,
+      "summary": "The study of past human events, societies, and civilizations across time.",
+      "parentId": 2
+    },
+    {
+      "id": 8,
+      "label": "Arts",
+      "hidden": false,
+      "summary": "The expression or application of human creativity and imagination, producing works appreciated for their beauty or emotional power.",
+      "parentId": 2
+    },
+    {
+      "id": 10,
+      "label": "Languages",
+      "hidden": false,
+      "summary": "Systems of communication using symbols, sounds, or gestures, fundamental to human interaction and culture.",
+      "parentId": 2
+    },
+    {
+      "id": 23,
+      "label": "Prehistory (3.3 million years ago - 3,200 BC)",
+      "hidden": true,
+      "summary": "The period of human history before the invention of writing, spanning from 3.3 million years ago to 3,200 BC.",
+      "parentId": 6
+    },
+    {
+      "id": 24,
+      "label": "Ancient History (3,200 BC - 476 AD)",
+      "hidden": true,
+      "summary": "The era of the earliest civilizations, from the invention of writing (3,200 BC) to the fall of the Western Roman Empire (476 AD).",
+      "parentId": 6
+    },
+    {
+      "id": 25,
+      "label": "Medieval Period (476 - 1453)",
+      "hidden": true,
+      "summary": "The historical period spanning from 476 to 1453, characterized by feudalism, the dominance of the Church in Europe, and ending with the fall of Constantinople.",
+      "parentId": 6
+    },
+    {
+      "id": 26,
+      "label": "Modern Era (1453 - present)",
+      "hidden": true,
+      "summary": "The period from 1453 to the present, marked by the transition from medieval to contemporary society.",
+      "parentId": 6
+    },
+    {
+      "id": 205,
+      "label": "Early Modern Period (1453 - 1789)",
+      "hidden": true,
+      "summary": "A period of significant cultural, intellectual, and political transformation from 1453 to 1789, including the Renaissance, Reformation, and Enlightenment.",
+      "parentId": 26
+    },
+    {
+      "id": 206,
+      "label": "Late Modern Period (1789 - 1945)",
+      "hidden": true,
+      "summary": "The period from 1789 to 1945, marked by industrialization, imperialism, world wars, and major social upheaval.",
+      "parentId": 26
+    },
+    {
+      "id": 207,
+      "label": "Contemporary Period (1945 - present)",
+      "hidden": true,
+      "summary": "The period from 1945 to the present, shaped by decolonization, the Cold War, technological advancement, and globalization.",
+      "parentId": 26,
+      "excludedChildLabels": [
+        "Post-Cold War Era (1991 - 2001)",
+        "Bangladesh Liberation War (1971)",
+        "Falklands War (1982)",
+        "Late 1990s Global Financial Crises (1994 - 2002)",
+        "Jeffrey Epstein Scandal (2005 - present)",
+        "Global Financial Crisis (2008 - 2009)",
+        "Russo-Ukrainian War (2014 - present)",
+        "European Migrant Crisis (2015)",
+        "MeToo Movement (2017 - 2018)",
+        "COVID-19 Pandemic (2019 - 2023)",
+        "United Kingdom (1945 - present)",
+        "India (1945 - present)",
+        "America (1945 - present)",
+        "COVID-19 Pandemic (2019 - 2023)",
+        "Algerian War of Independence (1954 - 1962)",
+        "Bangladesh Liberation War (1971)",
+        "Falklands War (1982)",
+        "Middle East Conflict (1945 - present)",
+        "Post-Cold War Era (1991 - 2001)",
+        "Late 1990s Global Financial Crises (1994 - 2002)",
+        "Jeffrey Epstein Scandal (2005 - present)",
+        "Global Financial Crisis (2008 - 2009)",
+        "Russo-Ukrainian War (2014 - present)",
+        "European Migrant Crisis (2015)",
+        "MeToo Movement (2017 - 2018)",
+        "India (1945 - present)",
+        "United Kingdom (1945 - present)",
+        "Rwanda (1962 - present)",
+        "America (1945 - present)",
+        "Algerian War of Independence (1954 - 1962)",
+        "Bangladesh Liberation War (1971)",
+        "Falklands War (1982)",
+        "Middle East Conflict (1945 - present)",
+        "Post-Cold War Era (1991 - 2001)",
+        "Jeffrey Epstein Scandal (2005 - present)",
+        "Late 1990s Global Financial Crises (1994 - 2002)",
+        "Global Financial Crisis (2008 - 2009)",
+        "Russo-Ukrainian War (2014 - present)",
+        "European Migrant Crisis (2015)",
+        "MeToo Movement (2017 - 2018)",
+        "COVID-19 Pandemic (2019 - 2023)",
+        "United Kingdom (1945 - present)",
+        "India (1945 - present)",
+        "America (1945 - present)",
+        "Rwanda (1962 - present)",
+        "Industrial Age (1945 - 1980)"
+      ]
+    },
+    {
+      "id": 208,
+      "label": "Cold War Era (1947 - 1991)",
+      "order": 2,
+      "hidden": true,
+      "summary": "The geopolitical tension between the United States and Soviet Union without direct military conflict, while the world underwent the Age of Industrialization of continued rapid industrialization, mass production, and technological innovation that profoundly shaped global economies and societies until 1980.",
+      "parentId": 207,
+      "excludedChildLabels": [
+        "Arms Race (1947 - 1991)",
+        "NATO (1949)",
+        "Church Committee (1975 - 1976)",
+        "Warsaw Pact (1955)",
+        "Vietnam War (1955 - 1975)",
+        "Cuban Revolution (1959)",
+        "Bay of Pigs Invasion (1961)",
+        "Operation Mongoose (1961 - 1962)",
+        "Cuban Missile Crisis (1962)",
+        "Two Germanys (1949 - 1990)",
+        "Arms Race (1947 - 1991)",
+        "NATO (1949)",
+        "Korean War (1950 - 1953)",
+        "Church Committee (1975 - 1976)",
+        "Operation Mongoose (1961 - 1962)",
+        "NATO (1949)",
+        "Two Germanys (1949 - 1990)",
+        "Korean War (1950 - 1953)",
+        "Warsaw Pact (1955)",
+        "Arms Race (1947 - 1991)",
+        "Vietnam War (1955 - 1975)",
+        "Cuban Revolution (1959)",
+        "Bay of Pigs Invasion (1961)",
+        "Cuban Missile Crisis (1962)",
+        "Church Committee (1975 - 1976)"
+      ]
+    },
+    {
+      "id": 217,
+      "label": "Religious Studies",
+      "hidden": false,
+      "parentId": 2
+    },
+    {
+      "id": 1390,
+      "label": "Cuba during the Cold War Era",
+      "order": 4,
+      "hidden": true,
+      "summary": "Cuba transformed from a US-aligned nation into a pivotal socialist state following the 1959 Revolution, leading to intense superpower confrontations like the Cuban Missile Crisis and a long-standing alliance with the Soviet Union.",
+      "isCustom": true,
+      "parentId": 208,
+      "isPersonal": false
+    },
+    {
+      "id": 1240,
+      "label": "Iran during the Cold War Era",
+      "order": 5,
+      "hidden": true,
+      "summary": "Iran transitioned from a strategic Western ally following the 1953 coup to a revolutionary anti-American theocracy in 1979, profoundly shifting the regional balance of power between the superpowers.",
+      "isCustom": true,
+      "parentId": 208,
+      "isPersonal": false
+    },
+    {
+      "id": 1437,
+      "label": "Middle East Conflict During the Cold War Era",
+      "order": 1,
+      "hidden": true,
+      "summary": "The ongoing complex of conflicts, political struggles, and wars in the Middle East and North Africa, centered on the Arab-Israeli conflict, regional power competition, and great-power involvement.",
+      "isCustom": true,
+      "parentId": 208,
+      "excludedChildLabels": [
+        "Palestinian Intifadas (1987 - 2005)",
+        "State of Israel (1948 - present)",
+        "Assassination of Qassem Soleimani (2020)",
+        "Abraham Accords (2020)",
+        "Somali Civil War (1991 - present)",
+        "Oslo Accords (1993)",
+        "Israel-Jordan Peace Treaty (1994)",
+        "Clean Break Report (1996)",
+        "U.S. War on Terror (2001 - 2021)",
+        "Turkey's Moderate Sunni Hanafi-Sufi Network Formed (2002 - present)",
+        "War in Darfur (2003 - 2020)",
+        "Libya Abandons WMDs (2003)",
+        "Second Lebanon War (2006)",
+        "Arab Spring (2010 - 2012)",
+        "Second Libyan Civil War (2014 - 2020)",
+        "Yemeni Civil War (2014 - present)",
+        "JCPOA (2015)",
+        "JCPOA Withdrawal (2018)",
+        "Third Sudanese Civil War (2023 - present)",
+        "Gaza War (2023 - present)"
+      ]
+    },
+    {
+      "id": 1320,
+      "label": "Rwanda During the Cold War Era",
+      "order": 7,
+      "hidden": true,
+      "summary": "Rwanda transitioned from a Belgian-mandated monarchy to an independent republic dominated by Hutu-led politics, while navigating shifting international alliances and escalating ethnic tensions that were often exacerbated by the era's broader geopolitical rivalries.",
+      "isCustom": true,
+      "parentId": 208
+    },
+    {
+      "id": 1391,
+      "label": "The Cold War (1947 - 1991)",
+      "order": 0,
+      "hidden": true,
+      "summary": "a decades-long global struggle for ideological and geopolitical supremacy between the United States and the Soviet Union, characterized by proxy wars, nuclear brinkmanship, and the eventual collapse of the Eastern Bloc in 1991.",
+      "isCustom": true,
+      "parentId": 208,
+      "isPersonal": false
+    },
+    {
+      "id": 1758,
+      "label": "United Kingdom During the Cold War Era",
+      "order": 8,
+      "hidden": true,
+      "isCustom": true,
+      "parentId": 208,
+      "isPersonal": false
+    },
+    {
+      "id": 517,
+      "label": "JFK Motorcade and Shooting (1963)",
+      "hidden": true,
+      "summary": "Kennedy's motorcade through Dallas on November 22, 1963, during which three shots were fired from the Texas School Book Depository, killing the president and wounding Governor Connally.",
+      "parentId": 515
+    },
+    {
+      "id": 518,
+      "label": "Lee Harvey Oswald (1939 - 1963)",
+      "hidden": true,
+      "summary": "The accused assassin of President Kennedy — a former Marine who defected to the Soviet Union, returned to the U.S., and was surveilled by the CIA for years before the assassination.",
+      "parentId": 515
+    },
+    {
+      "id": 519,
+      "label": "Jack Ruby (1911 - 1967)",
+      "hidden": true,
+      "summary": "Dallas nightclub owner Jacob Rubenstein who shot Oswald, with documented connections to organized crime figures including members of the Dallas crime family and associates of Meyer Lansky.",
+      "parentId": 515
+    },
+    {
+      "id": 520,
+      "label": "Warren Commission (1963 - 1964)",
+      "hidden": true,
+      "summary": "The presidential commission led by Chief Justice Earl Warren that investigated Kennedy's assassination and concluded in September 1964 that Oswald acted alone.",
+      "parentId": 515
+    },
+    {
+      "id": 521,
+      "label": "LBJ Becomes President (1963)",
+      "hidden": true,
+      "summary": "Vice President Lyndon B. Johnson was sworn in as the 36th President following Kennedy's assassination, and subsequently adopted a less confrontational stance toward Israel's nuclear program.",
+      "parentId": 515
+    },
+    {
+      "id": 522,
+      "label": "Alternate Theories",
+      "hidden": true,
+      "summary": "Alternative theories challenging the Warren Commission's lone gunman conclusion.",
+      "parentId": 515
+    },
+    {
+      "id": 1268,
+      "label": "CIA Assassination Plots Against Castro",
+      "hidden": true,
+      "summary": "The Church Committee uncovered multiple CIA plots to assassinate Fidel Castro, including operations via the Mob involving Sam Giancana and John Roselli, poisoned cigars, and exploding seashells.",
+      "parentId": 516
+    },
+    {
+      "id": 1269,
+      "label": "James Angleton's Testimony",
+      "hidden": true,
+      "summary": "Angleton's evasive Church Committee testimony, when asked whether Israeli agents had attempted to acquire U.S. nuclear secrets, strongly implied he had facilitated the transfer of nuclear information to Israel, saying only \"that doesn't exclude the Israelis.\"",
+      "parentId": 516
+    },
+    {
+      "id": 1276,
+      "label": "CIA Assassination Plots Against Castro",
+      "hidden": true,
+      "summary": "The Church Committee uncovered multiple CIA plots to assassinate Fidel Castro, including operations via the Mob involving Sam Giancana and John Roselli, poisoned cigars, and exploding seashells.",
+      "parentId": 1275
+    },
+    {
+      "id": 1277,
+      "label": "James Angleton's Testimony",
+      "hidden": true,
+      "summary": "Angleton's evasive Church Committee testimony, when asked whether Israeli agents had attempted to acquire U.S. nuclear secrets, strongly implied he had facilitated the transfer of nuclear information to Israel, saying only \"that doesn't exclude the Israelis.\"",
+      "parentId": 1275
+    },
+    {
+      "id": 1278,
+      "label": "JFK Motorcade and Shooting (1963)",
+      "hidden": true,
+      "summary": "Kennedy's motorcade through Dallas on November 22, 1963, during which three shots were fired from the Texas School Book Depository, killing the president and wounding Governor Connally.",
+      "parentId": 1274
+    },
+    {
+      "id": 1279,
+      "label": "Lee Harvey Oswald (1939 - 1963)",
+      "hidden": true,
+      "summary": "The accused assassin of President Kennedy — a former Marine who defected to the Soviet Union, returned to the U.S., and was surveilled by the CIA for years before the assassination.",
+      "parentId": 1274
+    },
+    {
+      "id": 1280,
+      "label": "Jack Ruby (1911 - 1967)",
+      "hidden": true,
+      "summary": "Dallas nightclub owner Jacob Rubenstein who shot Oswald, with documented connections to organized crime figures including members of the Dallas crime family and associates of Meyer Lansky.",
+      "parentId": 1274
+    },
+    {
+      "id": 1281,
+      "label": "Warren Commission (1963 - 1964)",
+      "hidden": true,
+      "summary": "The presidential commission led by Chief Justice Earl Warren that investigated Kennedy's assassination and concluded in September 1964 that Oswald acted alone.",
+      "parentId": 1274
+    },
+    {
+      "id": 1282,
+      "label": "LBJ Becomes President (1963)",
+      "hidden": true,
+      "summary": "Vice President Lyndon B. Johnson was sworn in as the 36th President following Kennedy's assassination, and subsequently adopted a less confrontational stance toward Israel's nuclear program.",
+      "parentId": 1274
+    },
+    {
+      "id": 1283,
+      "label": "Alternate Theories",
+      "hidden": true,
+      "summary": "Alternative theories challenging the Warren Commission's lone gunman conclusion.",
+      "parentId": 1274
+    },
+    {
+      "id": 1284,
+      "label": "Mossad Killed Kennedy",
+      "hidden": true,
+      "summary": "The theory that Israeli intelligence orchestrated Kennedy's assassination in response to his pressure on Israel to open its Dimona nuclear facility to international inspection.",
+      "parentId": 1283
+    },
+    {
+      "id": 1285,
+      "label": "Oswald Defects to the Soviet Union (1959)",
+      "hidden": true,
+      "summary": "Lee Harvey Oswald resigned from the Marines and defected to the Soviet Union in October 1959, initiating CIA surveillance of his mail under the HTLINGUAL program.",
+      "parentId": 1279
+    },
+    {
+      "id": 1286,
+      "label": "Oswald under Custody (1963)",
+      "hidden": true,
+      "summary": "Oswald was arrested at the Texas Theatre on November 22 after killing Dallas police officer J.D. Tippit, and repeatedly claimed \"I'm just a patsy\" during subsequent interrogation.",
+      "parentId": 1279
+    },
+    {
+      "id": 1287,
+      "label": "Assassination of Lee Harvey Oswald (1963)",
+      "hidden": true,
+      "summary": "Jack Ruby shot and killed Oswald on November 24, 1963, as he was being transferred from Dallas Police Headquarters, preventing any trial.",
+      "parentId": 1279
+    },
+    {
+      "id": 1288,
+      "label": "Inauguration of JFK (1961)",
+      "hidden": true,
+      "summary": "John F. Kennedy was inaugurated as the 35th President of the United States on January 20, 1961.",
+      "parentId": 1272
+    },
+    {
+      "id": 1289,
+      "label": "Allen Dulles Replaced by John McCone (1961)",
+      "hidden": true,
+      "summary": "Following the Bay of Pigs disaster, President Kennedy replaced CIA Director Allen Dulles with John McCone on November 29, 1961, seeking to reform the agency.",
+      "parentId": 1272
+    },
+    {
+      "id": 1290,
+      "label": "CIA Dimona Discovery (1960)",
+      "hidden": true,
+      "summary": "The December 1960 CIA Special National Intelligence Estimate revealing that Israel was building a major nuclear facility in the Negev desert aimed at producing nuclear weapons.",
+      "parentId": 1271
+    },
+    {
+      "id": 1291,
+      "label": "Kennedy-Ben-Gurion Dimona Negotiations (1961 - 1963)",
+      "hidden": true,
+      "summary": "President Kennedy's sustained diplomatic pressure on Israeli leaders for regular U.S. inspections of the Dimona nuclear facility, met with consistent Israeli delays and evasion until Kennedy's assassination ended the effort.",
+      "parentId": 1271
+    },
+    {
+      "id": 1292,
+      "label": "Dimona Reactor Goes Critical (1963)",
+      "hidden": true,
+      "summary": "The Dimona nuclear reactor achieved criticality in late December 1963, one month after President Kennedy's assassination, which had effectively ended firm U.S. pressure for inspections.",
+      "parentId": 1271
+    },
+    {
+      "id": 1293,
+      "label": "Dimona Inspection (1964)",
+      "hidden": true,
+      "summary": "A January 1964 U.S. inspection team visit to Dimona that found evidence the reactor had gone critical, but access remained tightly controlled by Israeli officials.",
+      "parentId": 1271
+    },
+    {
+      "id": 1663,
+      "label": "Post-Cold War Era (1991 - 2022)",
+      "order": 3,
+      "hidden": true,
+      "summary": "Often referred to as the \"unipolar moment,\" this era was characterized by American hegemony, rapid globalization, and the expansion of liberal democracy following the collapse of the USSR.",
+      "isCustom": true,
+      "parentId": 207,
+      "isPersonal": false
+    },
+    {
+      "id": 1304,
+      "label": "Post-World War II Era (1945 - 1947)",
+      "order": 0,
+      "hidden": true,
+      "summary": "The brief transitional period immediately following World War II, marked by the fracturing of the wartime alliance and the beginning of postwar reconstruction and age of industrialization.",
+      "parentId": 207
+    },
+    {
+      "id": 1406,
+      "label": "Brown v. Board of Education (1954)",
+      "order": 1,
+      "hidden": true,
+      "summary": "The 1954 Supreme Court ruling that racial segregation in public schools was unconstitutional, overturning Plessy v. Ferguson and launching the civil rights era.",
+      "isCustom": true,
+      "parentId": 1777
+    },
+    {
+      "id": 1407,
+      "label": "1960 Presidential Election",
+      "order": 2,
+      "hidden": true,
+      "summary": "The closely contested 1960 election in which Democrat John F. Kennedy defeated Republican Richard Nixon, with key Mob-connected support in Illinois and West Virginia.",
+      "isCustom": true,
+      "parentId": 1777
+    },
+    {
+      "id": 1408,
+      "label": "Civil Rights Act of 1964",
+      "order": 7,
+      "hidden": true,
+      "summary": "The landmark July 2, 1964 legislation signed by President Johnson outlawing discrimination based on race, color, religion, sex, or national origin, including the Title VI prohibition on discrimination in federally funded programs.",
+      "isCustom": true,
+      "parentId": 1777
+    },
+    {
+      "id": 1409,
+      "label": "Kent State Shootings (1970)",
+      "order": 8,
+      "hidden": true,
+      "summary": "The May 4, 1970 killing of four unarmed students by the Ohio National Guard during an anti-Vietnam War protest at Kent State University, sparking national outrage.",
+      "isCustom": true,
+      "parentId": 1777
+    },
+    {
+      "id": 1412,
+      "label": "U.S. Bicentennial (1976)",
+      "order": 12,
+      "hidden": true,
+      "summary": "The nationwide 1976 celebration commemorating the 200th anniversary of the Declaration of Independence.",
+      "isCustom": true,
+      "parentId": 1777
+    },
+    {
+      "id": 1410,
+      "label": "Watergate (1972 - 1974)",
+      "order": 9,
+      "hidden": true,
+      "summary": "The political scandal stemming from the June 1972 break-in at Democratic National Committee headquarters that exposed widespread corruption and led to President Nixon's resignation.",
+      "isCustom": true,
+      "parentId": 1777
+    },
+    {
+      "id": 1411,
+      "label": "Roe v. Wade (1973)",
+      "order": 10,
+      "hidden": true,
+      "summary": "The January 22, 1973 Supreme Court decision establishing a woman's constitutional right to an abortion under the Fourteenth Amendment, later overturned in 2022.",
+      "isCustom": true,
+      "parentId": 1777
+    },
+    {
+      "id": 1414,
+      "label": "AIDS Epidemic (1981 - present)",
+      "order": 13,
+      "hidden": true,
+      "summary": "The HIV/AIDS epidemic recognized by the CDC in June 1981, initially devastating gay communities and eventually becoming a global pandemic requiring sustained public health response.",
+      "isCustom": true,
+      "parentId": 1777
+    },
+    {
+      "id": 1429,
+      "label": "Iron Curtain Speech (1946)",
+      "hidden": true,
+      "summary": "Churchill's Fulton, Missouri speech warning that an \"iron curtain\" had descended across Europe, dividing the Western and Soviet blocs and publicly framing the emerging Cold War.",
+      "parentId": 1304
+    },
+    {
+      "id": 1430,
+      "label": "Indian and Pakistani Independence (1947)",
+      "hidden": true,
+      "summary": "The August 14–15 end of British rule over India, simultaneously creating the independent dominions of India and Pakistan in a partition accompanied by massive displacement and communal violence.",
+      "parentId": 1304
+    },
+    {
+      "id": 1436,
+      "label": "Falklands War (1982)",
+      "order": 10,
+      "hidden": true,
+      "isCustom": true,
+      "parentId": 208
+    },
+    {
+      "id": 1438,
+      "label": "Arab League Creation (1945)",
+      "order": 2,
+      "hidden": true,
+      "summary": "The Arab League was founded on March 22, 1945, to promote political, economic, and cultural cooperation among Arab states and coordinate opposition to Zionist immigration and Jewish statehood.",
+      "isCustom": true,
+      "parentId": 1489
+    },
+    {
+      "id": 1489,
+      "label": "The Middle East Conflict During the Post-World War II Era",
+      "order": 0,
+      "hidden": true,
+      "summary": "The ongoing complex of conflicts, political struggles, and wars in the Middle East and North Africa, centered on the Arab-Israeli conflict, regional power competition, and great-power involvement.",
+      "isCustom": true,
+      "parentId": 1304,
+      "isPersonal": false
+    },
+    {
+      "id": 1497,
+      "label": "Aliyahs (1945 - 1947)",
+      "order": 0,
+      "hidden": true,
+      "summary": "The successive waves of Jewish immigration to Mandatory Palestine and then Israel from 1945 onward, continuing to reshape Israel's demographic character into the present.",
+      "isCustom": true,
+      "parentId": 1489,
+      "isPersonal": false
+    },
+    {
+      "id": 1504,
+      "label": "Industrial Revolution (1760 - 1840)",
+      "order": 0,
+      "hidden": true,
+      "parentId": 206
+    },
+    {
+      "id": 1505,
+      "label": "Age of Revolutions (1774 - 1849)",
+      "order": 1,
+      "hidden": true,
+      "parentId": 206
+    },
+    {
+      "id": 1506,
+      "label": "Imperialism (1800 - 1945)",
+      "order": 2,
+      "hidden": true,
+      "parentId": 206
+    },
+    {
+      "id": 1507,
+      "label": "Italy (1800 - 1945)",
+      "order": 3,
+      "hidden": true,
+      "parentId": 206
+    },
+    {
+      "id": 1508,
+      "label": "Middle East Conflict (1882 - 1945)",
+      "order": 4,
+      "hidden": true,
+      "parentId": 206
+    },
+    {
+      "id": 1509,
+      "label": "World Wars Era (1914 - 1945)",
+      "order": 5,
+      "hidden": true,
+      "parentId": 206
+    },
+    {
+      "id": 1556,
+      "label": "1920",
+      "order": 4,
+      "hidden": true,
+      "summary": "",
+      "isCustom": true,
+      "parentId": 1508,
+      "isPersonal": false
+    },
+    {
+      "id": 1511,
+      "label": "Balfour Declaration (1917)",
+      "order": 0,
+      "hidden": true,
+      "parentId": 1508
+    },
+    {
+      "id": 1512,
+      "label": "End of Ottoman Palestine (1918)",
+      "order": 2,
+      "hidden": true,
+      "parentId": 1508
+    },
+    {
+      "id": 1513,
+      "label": "British Military Administration (1918 - 1920)",
+      "order": 3,
+      "hidden": true,
+      "parentId": 1508
+    },
+    {
+      "id": 1516,
+      "label": "British Mandate for Palestine (1923 - 1948)",
+      "order": 5,
+      "hidden": true,
+      "parentId": 1508
+    },
+    {
+      "id": 1517,
+      "label": "Western Wall Uprising (1929)",
+      "order": 6,
+      "hidden": true,
+      "parentId": 1508
+    },
+    {
+      "id": 1518,
+      "label": "Arab Revolt (1936 - 1939)",
+      "order": 7,
+      "hidden": true,
+      "parentId": 1508
+    },
+    {
+      "id": 1519,
+      "label": "Peel Commission (1937)",
+      "order": 8,
+      "hidden": true,
+      "parentId": 1508
+    },
+    {
+      "id": 1520,
+      "label": "British White Paper (1939)",
+      "order": 9,
+      "hidden": true,
+      "parentId": 1508
+    },
+    {
+      "id": 1522,
+      "label": "First Aliyah (1882 - 1903)",
+      "order": 1,
+      "hidden": true,
+      "summary": "The first major wave of Zionist immigration to Ottoman Palestine, primarily from Eastern Europe, establishing early agricultural settlements.",
+      "parentId": 1510
+    },
+    {
+      "id": 1523,
+      "label": "Second Aliyah (1904 - 1914)",
+      "order": 3,
+      "hidden": true,
+      "summary": "The second major wave of Jewish immigration to Palestine, dominated by idealistic socialist pioneers who founded the kibbutz movement.",
+      "parentId": 1510
+    },
+    {
+      "id": 1524,
+      "label": "Third Aliyah (1919 - 1923)",
+      "order": 4,
+      "hidden": true,
+      "summary": "A wave of immigration following World War I and the Balfour Declaration, strengthening Jewish agricultural and labor institutions in Palestine.",
+      "parentId": 1510
+    },
+    {
+      "id": 1525,
+      "label": "Fourth Aliyah (1924 - 1928)",
+      "order": 2,
+      "hidden": true,
+      "summary": "A wave of primarily middle-class Jewish immigrants from Poland fleeing economic hardship, accelerating urbanization in Palestine.",
+      "parentId": 1510
+    },
+    {
+      "id": 1526,
+      "label": "Fifth Aliyah (1929 - 1939)",
+      "order": 0,
+      "hidden": true,
+      "summary": "The largest immigration wave, driven largely by the rise of Nazism in Germany, significantly expanding the Jewish population and economic development of Palestine.",
+      "parentId": 1510
+    },
+    {
+      "id": 1527,
+      "label": "Aliyah Bet (1934 - 1948)",
+      "order": 5,
+      "hidden": true,
+      "summary": "Clandestine Jewish immigration to Palestine carried out in defiance of British restrictions, organized to rescue Jews from persecution in Europe.",
+      "parentId": 1510
+    },
+    {
+      "id": 1499,
+      "label": "Aliyah Bet (1934 - 1947)",
+      "hidden": true,
+      "summary": "Clandestine Jewish immigration to Palestine carried out in defiance of British restrictions, organized to rescue Jews from persecution in Europe.",
+      "isCustom": true,
+      "parentId": 1497
+    },
+    {
+      "id": 1440,
+      "label": "Jewish Insurgency During the Post-World War II Era (1945 - 1948)",
+      "order": 1,
+      "hidden": true,
+      "summary": "Intensified armed resistance by Haganah, Irgun, and Lehi against British rule in Mandatory Palestine, aimed at forcing Britain's withdrawal and establishing a Jewish state.",
+      "isCustom": true,
+      "parentId": 1489
+    },
+    {
+      "id": 1777,
+      "label": "America during the Cold War Era",
+      "order": 2,
+      "hidden": true,
+      "summary": "The United States' role as leader of the Western bloc during the Cold War, encompassing intelligence reform, proxy conflicts, nuclear standoffs, and major domestic political crises.",
+      "isCustom": true,
+      "parentId": 208,
+      "excludedChildLabels": [
+        "Assassination of President John F. Kennedy (1963)"
+      ]
+    },
+    {
+      "id": 1782,
+      "label": "National Security Act of 1947",
+      "order": 0,
+      "hidden": true,
+      "parentId": 1777
+    },
+    {
+      "id": 1783,
+      "label": "American Concerns over Israel's Nuclear Program (1960 - 1964)",
+      "order": 3,
+      "hidden": true,
+      "summary": "A sustained but ultimately unsuccessful U.S. effort from 1960 onward to prevent or monitor Israel's covert nuclear weapons development at the Dimona reactor, hampered by Israeli evasion and internal CIA obstruction.",
+      "isCustom": true,
+      "parentId": 1777
+    },
+    {
+      "id": 1784,
+      "label": "JFK Presidency (1961 - 1963)",
+      "order": 4,
+      "hidden": true,
+      "parentId": 1777,
+      "excludedChildLabels": [
+        "Inauguration of JFK (1961)",
+        "Allen Dulles Replaced by John McCone (1961)"
+      ]
+    },
+    {
+      "id": 1785,
+      "label": "Operation Northwoods (1962)",
+      "order": 6,
+      "hidden": true,
+      "parentId": 1777
+    },
+    {
+      "id": 1810,
+      "label": "1961",
+      "order": 1,
+      "hidden": true,
+      "isCustom": true,
+      "parentId": 1784,
+      "isPersonal": false
+    },
+    {
+      "id": 1786,
+      "label": "Assassination of President John F. Kennedy (1963)",
+      "order": 3,
+      "hidden": true,
+      "isCustom": true,
+      "parentId": 1784
+    },
+    {
+      "id": 1787,
+      "label": "Church Committee (1975 - 1976)",
+      "order": 11,
+      "hidden": true,
+      "parentId": 1777
+    },
+    {
+      "id": 1789,
+      "label": "Israel during the Cold War Era (1948 - 1991)",
+      "order": 6,
+      "hidden": true,
+      "parentId": 208
+    },
+    {
+      "id": 1791,
+      "label": "China during the Cold War Era (1947 - 1991)",
+      "order": 3,
+      "hidden": true,
+      "parentId": 208
+    },
+    {
+      "id": 1788,
+      "label": "USSR during the Cold War",
+      "order": 9,
+      "hidden": true,
+      "summary": "The Soviet Union's role as global superpower competitor to the United States, from its atomic bomb test through de-Stalinization, Gorbachev's reforms, and final dissolution in 1991.",
+      "isCustom": true,
+      "parentId": 208
+    },
+    {
+      "id": 1799,
+      "label": "Operation Mongoose (1961 - 1962)",
+      "order": 5,
+      "hidden": true,
+      "isCustom": true,
+      "parentId": 1777
+    },
+    {
+      "id": 1809,
+      "label": "Allen Dulles Replaced by John McCone (Nov.)",
+      "order": 2,
+      "hidden": true,
+      "summary": "Following the Bay of Pigs disaster, President Kennedy replaced CIA Director Allen Dulles with John McCone on November 29, 1961, seeking to reform the agency.",
+      "isCustom": true,
+      "parentId": 1810
+    },
+    {
+      "id": 1808,
+      "label": "Inauguration of JFK (Jan.)",
+      "order": 0,
+      "hidden": true,
+      "summary": "John F. Kennedy was inaugurated as the 35th President of the United States on January 20, 1961.",
+      "isCustom": true,
+      "parentId": 1810
+    },
+    {
+      "id": 1811,
+      "label": "JFK Motorcade and Shooting (1963)",
+      "hidden": true,
+      "parentId": 1786
+    },
+    {
+      "id": 1812,
+      "label": "Lee Harvey Oswald (1939 - 1963)",
+      "hidden": true,
+      "parentId": 1786
+    },
+    {
+      "id": 1813,
+      "label": "Jack Ruby (1911 - 1967)",
+      "hidden": true,
+      "parentId": 1786
+    },
+    {
+      "id": 1814,
+      "label": "Warren Commission (1963 - 1964)",
+      "hidden": true,
+      "parentId": 1786
+    },
+    {
+      "id": 1815,
+      "label": "LBJ Becomes President (1963)",
+      "hidden": true,
+      "parentId": 1786
+    },
+    {
+      "id": 1816,
+      "label": "Alternate Theories",
+      "hidden": true,
+      "parentId": 1786
+    },
+    {
+      "id": 1864,
+      "label": "The Age of Great Power Competition (2023 - present)",
+      "order": 4,
+      "hidden": true,
+      "summary": "represents a definitive move away from the post-Cold War liberal order toward a fragmented, multipolar landscape where national security dictates global economics and diplomacy.",
+      "isCustom": true,
+      "parentId": 207,
+      "isPersonal": false
+    },
+    {
+      "id": 1871,
+      "label": "CIA Dimona Discovery (1960)",
+      "order": 0,
+      "hidden": true,
+      "parentId": 1783
+    },
+    {
+      "id": 1872,
+      "label": "Kennedy-Ben-Gurion Dimona Negotiations (1961 - 1963)",
+      "order": 1,
+      "hidden": true,
+      "parentId": 1783
+    },
+    {
+      "id": 1873,
+      "label": "Dimona Reactor Goes Critical (1963)",
+      "order": 2,
+      "hidden": true,
+      "parentId": 1783
+    },
+    {
+      "id": 1874,
+      "label": "Dimona Inspection (1964)",
+      "order": 3,
+      "hidden": true,
+      "parentId": 1783
+    },
+    {
+      "id": 1,
+      "label": "Everything",
+      "hidden": false,
+      "summary": "A conceptual map connecting all fields of human knowledge and inquiry.",
+      "isCustom": true,
+      "parentId": null
+    },
+    {
+      "id": 3,
+      "label": "Sciences",
+      "order": 2,
+      "hidden": false,
+      "summary": "Fields that investigate the natural world through observation and experimentation.",
+      "isCustom": true,
+      "parentId": 1
+    }
+  ]
+}
