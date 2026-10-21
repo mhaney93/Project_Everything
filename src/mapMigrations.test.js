@@ -855,6 +855,25 @@ test('a removed Jungian figure carries what the owner wrote into its Jung tree n
   assert.equal(nodes.find((n) => n.id === custom.id).parentId, jungChild.id)
 })
 
+test('a removed Jungian figure with its own summary leaves it as a note on the Jung tree namesake', () => {
+  const before = archetypesMap({ figureExtras: { 'The Child': { summary: 'My Mark & Pearson child words.' } } })
+  const source = before.find((n) => n.label === 'The Child' && !n.isCustom)
+  const { nodes } = normalize(before)
+
+  const children = nodes.filter((n) => n.label === 'The Child')
+  assert.equal(children.length, 1)
+  assert.equal(children[0].summary, 'Jung tree child.')
+  assert.deepEqual(children[0].notes, [{
+    id: `merged-summary-${source.id}`,
+    text: `Merged from Root > Psychology > Personality Psychology > Archetypes > ${MARK_PEARSON} > Universal Archetypal Figures/Patterns > The Child: My Mark & Pearson child words.`,
+    level: 0,
+  }])
+
+  const again = normalize(nodes)
+  assert.equal(again.changed, false)
+  assert.deepEqual(again.nodes, nodes)
+})
+
 test('without a Jung tree a figure holding owner content stays as a custom node', () => {
   const before = archetypesMap({
     withJungTree: false,
@@ -930,4 +949,38 @@ test('PANAS profiles take the Archer & Garcia names and keep their nicknames, no
     assert.ok(BUILT_IN_SUMMARIES[label].startsWith(`${combo} profile:`), label)
   }
   assert.equal(normalize(nodes).changed, false)
+})
+
+test('consolidating a copy with a different summary keeps it as a note on the kept copy', () => {
+  const before = buildMap(['Root', [['Psychology', [
+    ['Emotions', [], { summary: 'Kept summary.', notes: [{ id: 'note-kept', text: 'kept', level: 0 }] }],
+    ['Cognitive Psychology', [['Emotions', [], { summary: 'Copy summary.' }]]],
+  ]]]])
+  const copy = before.find((n) => n.label === 'Emotions' && n.summary === 'Copy summary.')
+  const { nodes, changed } = applyStructuralMigrations(before, () => '', TOPIC_SUBDIVISIONS)
+
+  assert.equal(changed, true)
+  const emotions = nodes.filter((n) => n.label === 'Emotions')
+  assert.equal(emotions.length, 1)
+  assert.equal(emotions[0].summary, 'Kept summary.')
+  assert.deepEqual(emotions[0].notes, [
+    { id: 'note-kept', text: 'kept', level: 0 },
+    { id: `merged-summary-${copy.id}`, text: 'Merged from Root > Psychology > Cognitive Psychology > Emotions: Copy summary.', level: 0 },
+  ])
+
+  const again = applyStructuralMigrations(nodes, () => '', TOPIC_SUBDIVISIONS)
+  assert.equal(again.changed, false)
+  assert.deepEqual(again.nodes, nodes)
+})
+
+test('consolidating a copy with the same summary adds no note', () => {
+  const before = buildMap(['Root', [['Psychology', [
+    ['Emotions', [], { summary: 'Same.' }],
+    ['Cognitive Psychology', [['Emotions', [], { summary: 'Same.' }]]],
+  ]]]])
+  const { nodes } = applyStructuralMigrations(before, () => '', TOPIC_SUBDIVISIONS)
+  const emotions = nodes.filter((n) => n.label === 'Emotions')
+  assert.equal(emotions.length, 1)
+  assert.equal(emotions[0].summary, 'Same.')
+  assert.equal(emotions[0].notes, undefined)
 })

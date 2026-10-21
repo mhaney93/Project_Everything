@@ -6,7 +6,8 @@
 // `homePath` (a chain of labels ending at the new parent). Every other
 // built-in copy is merged into it: matching children merge recursively,
 // anything the home copy lacks (custom nodes, deeper subtrees) is moved
-// across, notes and summaries are carried over, and the copy itself is removed.
+// across, notes and summaries are carried over (a summary that differs from
+// the home copy's becomes a note), and the copy itself is removed.
 // When only the start of `homePath` is stored, the missing levels are created
 // from the built-in taxonomy first, so a copy is never left behind for the
 // stale-child prune to delete.
@@ -23,7 +24,7 @@
 // - `move` reparents the node, with its subtree, under the node at `into`,
 //   creating `into` when only its parent is stored.
 // - `remove` merges the node into its namesake under `mergeInto` (notes,
-//   summary and children carry over). Without one, a node holding anything
+//   children carry over, a differing summary becomes a note). Without one, a node holding anything
 //   the owner wrote becomes custom and stays put; a bare one is deleted.
 // A node that lands beside a namesake is merged into it the same way.
 const PERSONALITY_ARCHETYPES = ['Personality Psychology', 'Archetypes']
@@ -213,7 +214,7 @@ const consolidateBuiltInNode = (mapNodes, { label, homePath }, builtInSummary, t
   }
   if (!home) return { nodes: storedNodes, changed: false }
 
-  let childrenByParent = buildChildrenByParent(mapNodes)
+  const childrenByParent = buildChildrenByParent(mapNodes)
   const homeChildren = childrenByParent.get(home.id) || []
 
   if (copies.length === 0) {
@@ -233,21 +234,12 @@ const consolidateBuiltInNode = (mapNodes, { label, homePath }, builtInSummary, t
   const canonical = copiesAtHome[0] || [...copies].sort(byRichness)[0]
   if (isAncestorOrSelf(byId, canonical.id, home.id)) return { nodes: storedNodes, changed: false }
 
-  let changed = false
-  const updates = new Map()
-  const removed = new Set()
-  const current = (id) => updates.get(id) || byId.get(id)
-  const update = (id, fields) => {
-    updates.set(id, { ...current(id), ...fields })
-    changed = true
-  }
-
+  let nodes = mapNodes
   const created = []
   if (canonical.parentId !== home.id) {
     const moved = { ...canonical, parentId: home.id, hidden: homeChildren[0]?.hidden ?? (home.hidden || canonical.hidden) }
     delete moved.order
-    updates.set(canonical.id, moved)
-    changed = true
+    nodes = nodes.map((node) => (node.id === canonical.id ? moved : node))
 
     // addChildren only generates built-in children for a node that has none,
     // so a home that was never expanded gets its full built-in set here.
@@ -262,44 +254,14 @@ const consolidateBuiltInNode = (mapNodes, { label, homePath }, builtInSummary, t
     }
   }
 
-  const refresh = () => {
-    const live = mapNodes.filter((node) => !removed.has(node.id)).map((node) => current(node.id))
-    byId = new Map(live.map((node) => [node.id, node]))
-    childrenByParent = buildChildrenByParent(live)
-  }
-
-  const mergeInto = (sourceId, targetId) => {
-    refresh()
-    const source = byId.get(sourceId)
-    const target = byId.get(targetId)
-    const notes = mergeNotes(target.notes, source.notes)
-    if (notes !== target.notes) update(targetId, { notes })
-    // A summary written on the copy wins over the built-in text; otherwise keep
-    // whatever the copy displayed when the kept node displays nothing.
-    const displayed = (node) => node.summary || (!node.isCustom ? builtInSummary(node.label) : '')
-    if (!target.summary && source.summary) update(targetId, { summary: source.summary })
-    else if (!displayed(target) && displayed(source)) update(targetId, { summary: displayed(source) })
-
-    for (const child of childrenByParent.get(sourceId) || []) {
-      refresh()
-      const match = (childrenByParent.get(targetId) || []).find((n) => n.label === child.label)
-      if (match) mergeInto(child.id, match.id)
-      else update(child.id, { parentId: targetId })
-    }
-    removed.add(sourceId)
-    changed = true
-  }
-
-  refresh()
   for (const copy of copies) {
-    if (copy.id === canonical.id || removed.has(copy.id) || !byId.has(copy.id)) continue
+    if (copy.id === canonical.id || !nodes.some((node) => node.id === copy.id)) continue
     // Merging an ancestor of the canonical node into it would create a cycle.
-    if (isAncestorOrSelf(byId, copy.id, canonical.id)) continue
-    mergeInto(copy.id, canonical.id)
+    if (isAncestorOrSelf(new Map(nodes.map((node) => [node.id, node])), copy.id, canonical.id)) continue
+    nodes = mergeNode(nodes, copy.id, canonical.id, builtInSummary)
   }
 
-  if (!changed) return { nodes: storedNodes, changed: false }
-  const nodes = mapNodes.filter((node) => !removed.has(node.id)).map((node) => current(node.id))
+  if (nodes === mapNodes) return { nodes: storedNodes, changed: false }
   return { nodes: [...nodes, ...created], changed: true }
 }
 
@@ -309,54 +271,71 @@ const withoutOrder = (node) => {
   return copy
 }
 
-// Merges the node `sourceId` into `targetId` the way consolidation does:
-// notes and summaries carry over, children merge with namesakes or move
-// across, and the source node is removed.
-const mergeNode = (mapNodes, sourceId, targetId, builtInSummary) => {
+const labelPathOf = (mapNodes, nodeId) => {
+  const byId = new Map(mapNodes.map((node) => [node.id, node]))
+  const labels = []
+  const visited = new Set()
+  for (let node = byId.get(nodeId); node && !visited.has(node.id); node = byId.get(node.parentId)) {
+    visited.add(node.id)
+    labels.unshift(node.label)
+  }
+  return labels
+}
+
+// Merges the node `sourceId` into `targetId`: notes carry over, children merge
+// with namesakes or move across, and the source node is removed. The target
+// keeps its summary; a different one shown on the source becomes a note naming
+// `sourcePath`, the source's label path before the migration moved it.
+const mergeNode = (mapNodes, sourceId, targetId, builtInSummary, sourcePath = labelPathOf(mapNodes, sourceId)) => {
   let nodes = mapNodes
-  const merge = (fromId, toId) => {
+  const merge = (fromId, toId, fromPath) => {
     const source = nodes.find((node) => node.id === fromId)
     const target = nodes.find((node) => node.id === toId)
     const fields = {}
-    const notes = mergeNotes(target.notes, source.notes)
-    if (notes !== target.notes) fields.notes = notes
+    let notes = mergeNotes(target.notes, source.notes)
     const displayed = (node) => node.summary || (!node.isCustom ? builtInSummary(node.label) : '')
+    const shown = displayed(source)
     if (!target.summary && source.summary) fields.summary = source.summary
-    else if (!displayed(target) && displayed(source)) fields.summary = displayed(source)
+    else if (!displayed(target) && shown) fields.summary = shown
+    else if (shown && shown !== displayed(target)) {
+      notes = mergeNotes(notes, [{ id: `merged-summary-${fromId}`, text: `Merged from ${fromPath.join(' > ')}: ${shown}`, level: 0 }])
+    }
+    if (notes !== target.notes) fields.notes = notes
     if (Object.keys(fields).length > 0) nodes = nodes.map((node) => (node.id === toId ? { ...node, ...fields } : node))
 
     for (const child of nodes.filter((node) => node.parentId === fromId)) {
       const match = nodes.find((node) => node.parentId === toId && node.label === child.label)
-      if (match) merge(child.id, match.id)
+      if (match) merge(child.id, match.id, [...fromPath, child.label])
       else nodes = nodes.map((node) => (node.id === child.id ? withoutOrder({ ...node, parentId: toId }) : node))
     }
     nodes = nodes.filter((node) => node.id !== fromId)
   }
-  merge(sourceId, targetId)
+  merge(sourceId, targetId, sourcePath)
   return nodes
 }
 
 // Puts `node` (already updated in `mapNodes`) under `parentId`, merging it into
-// a namesake already there.
-const settleUnder = (mapNodes, nodeId, parentId, builtInSummary) => {
+// a namesake already there. `sourcePath` is its label path before the update.
+const settleUnder = (mapNodes, nodeId, parentId, builtInSummary, sourcePath) => {
   const namesake = mapNodes.find((node) => {
     if (node.parentId !== parentId || node.id === nodeId) return false
     return node.label === mapNodes.find((n) => n.id === nodeId).label
   })
-  return namesake ? mergeNode(mapNodes, nodeId, namesake.id, builtInSummary) : mapNodes
+  return namesake ? mergeNode(mapNodes, nodeId, namesake.id, builtInSummary, sourcePath) : mapNodes
 }
 
 const renameBuiltInNode = (mapNodes, { rename, label, dropSummaries = [] }, builtInSummary) => {
   let nodes = mapNodes
   const byId = new Map(mapNodes.map((node) => [node.id, node]))
   for (const match of nodesAtPath(mapNodes, byId, rename)) {
+    const sourcePath = labelPathOf(nodes, match.id)
     nodes = nodes.map((node) => {
       if (node.id !== match.id) return node
       const renamed = { ...node, label }
       if (dropSummaries.includes(node.summary)) delete renamed.summary
       return renamed
     })
-    nodes = settleUnder(nodes, match.id, match.parentId, builtInSummary)
+    nodes = settleUnder(nodes, match.id, match.parentId, builtInSummary, sourcePath)
   }
   return { nodes, changed: nodes !== mapNodes }
 }
@@ -392,8 +371,9 @@ const moveBuiltInNode = (mapNodes, { move, into }, builtInSummary) => {
     if (isAncestorOrSelf(byId, source.id, target.id)) continue
     const targetChildren = nodes.filter((node) => node.parentId === target.id && node.id !== source.id)
     const hidden = targetChildren[0]?.hidden ?? (target.hidden || source.hidden)
+    const sourcePath = labelPathOf(nodes, source.id)
     nodes = nodes.map((node) => (node.id === source.id ? withoutOrder({ ...node, parentId: target.id, hidden }) : node))
-    nodes = settleUnder(nodes, source.id, target.id, builtInSummary)
+    nodes = settleUnder(nodes, source.id, target.id, builtInSummary, sourcePath)
   }
   return { nodes, changed: nodes !== mapNodes }
 }
