@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import './App.css';
 import { authAPI, mapsAPI, filesAPI, API_BASE_URL } from './api';
 import { applyStructuralMigrations, applySummaryMigrations, dropStaleChildren, removeStalePredefinedChildren } from './mapMigrations';
+import { stripLabelSuffix } from './labels';
 
 // Node size and layout constants
 const NODE_SIZE_MIN = 0.6;
@@ -22047,8 +22048,8 @@ function App() {
       const nodeToDelete = nodes.find(n => n.id === nodeId)
       if (!nodeToDelete) return
       confirmMessage = hasChildren
-        ? `Delete "${getDisplayLabel(nodeToDelete.label)}" and all its children?`
-        : `Delete "${getDisplayLabel(nodeToDelete.label)}"?`
+        ? `Delete "${stripLabelSuffix(nodeToDelete.label)}" and all its children?`
+        : `Delete "${stripLabelSuffix(nodeToDelete.label)}"?`
     }
 
     // Show modern confirmation modal instead of window.confirm
@@ -22075,7 +22076,7 @@ function App() {
 
     const removedNodes = nodes.filter((n) => nodeIdsToRemove.has(n.id))
     const deletedLabel = nodeIds.length === 1
-      ? getDisplayLabel(nodes.find(n => n.id === nodeIds[0])?.label || 'Node')
+      ? stripLabelSuffix(nodes.find(n => n.id === nodeIds[0])?.label || 'Node')
       : `${nodeIds.length} nodes`
 
     // Build a map of parentId -> deleted non-custom children labels for excludedChildLabels tracking
@@ -26120,7 +26121,7 @@ function App() {
                     }}
                     title={canEditNode(selectedNode) ? 'Click to edit title' : ''}
                   >
-                    {getDisplayLabel(selectedNode.label)}
+                    {stripLabelSuffix(selectedNode.label)}
                   </h2>
                 )}
                 <button
