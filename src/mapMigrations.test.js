@@ -505,6 +505,44 @@ test('Front-End Frameworks moves when no level below Engineering is stored on th
   }
 })
 
+// The stored chain from production map 1 down to DApps > Front-End Frameworks
+// (pre-merge backup, 2026-10-21), with every stored child of each chain node.
+// Software Engineering is stored but was never expanded.
+test('production map 1 moves Front-End Frameworks under a newly created Packages > Frameworks', () => {
+  const { nodes: before } = JSON.parse(readFileSync(new URL('./fixtures/map1-front-end-frameworks.json', import.meta.url), 'utf8'))
+  const original = before.find((n) => n.label === 'Front-End Frameworks')
+  const { nodes, changed } = normalize(before)
+  assert.equal(changed, true)
+  assert.deepEqual(orphansOf(nodes), [])
+  assert.equal(new Set(nodes.map((n) => n.id)).size, nodes.length)
+  const maxBefore = Math.max(...before.map((n) => n.id))
+  const created = nodes.filter((n) => !before.some((b) => b.id === n.id))
+  assert.ok(created.every((n) => n.id > maxBefore && n.hidden === true && !n.isCustom))
+  // Apart from the move, the map changes only by the stale-child prune it
+  // already gets on main (Blockchain no longer lists Ethereum Virtual Machine).
+  const prunedOnMain = removeStalePredefinedChildren(before, TOPIC_SUBDIVISIONS).nodes
+  assert.deepEqual(
+    nodes.filter((n) => !created.includes(n) && n.id !== original.id),
+    prunedOnMain.filter((n) => n.id !== original.id),
+  )
+
+  const [fef] = nodes.filter((n) => n.label === 'Front-End Frameworks')
+  assert.equal(fef.id, original.id)
+  assert.equal(pathOf(nodes, fef), 'Everything > Sciences > Applied Sciences > Engineering > Software Engineering > Software Development/Programming > Packages > Frameworks > Front-End Frameworks')
+  assert.deepEqual(descendantsOf(nodes, fef.id), descendantsOf(before, original.id))
+  assert.equal(descendantsOf(nodes, fef.id).length, 20)
+
+  for (const label of ['Software Engineering', 'Software Development/Programming', 'Packages', 'Frameworks']) {
+    assert.deepEqual(childLabelsOf(nodes, nodes.find((n) => n.label === label)), [...TOPIC_SUBDIVISIONS[label]].sort(), label)
+  }
+  const dapps = nodes.find((n) => n.label === 'DApps (Decentralized Applications)')
+  assert.deepEqual(childLabelsOf(nodes, dapps), [...TOPIC_SUBDIVISIONS['DApps (Decentralized Applications)']].sort())
+
+  const again = normalize(nodes)
+  assert.equal(again.changed, false)
+  assert.deepEqual(again.nodes, nodes)
+})
+
 test('Front-End Frameworks stays under DApps when the owner deleted a level of its home', () => {
   const dapps = ['DApps (Decentralized Applications)', [
     ['Contract Interaction'],
