@@ -28,7 +28,8 @@
 //   merges into the node labelled `as` there instead, creating the missing
 //   levels of that path from the built-in taxonomy, and `summary` stands in
 //   for the removed node's retired built-in summary. Without a target, a node holding anything
-//   the owner wrote becomes custom and stays put; a bare one is deleted.
+//   the owner wrote becomes custom and stays put; a bare one is deleted (a
+//   stored copy of `summary` on the node itself does not count as the owner's).
 // A node that lands beside a namesake is merged into it the same way.
 //
 // `rehomeOrphans` reattaches nodes whose parent no longer exists (left behind
@@ -46,6 +47,9 @@ const JUNGIAN_HERO_SUMMARY = 'An archetype representing the ego\'s journey of ov
 const JUNGIAN_ARCHETYPES_SUMMARY = 'Universal, inherited patterns of thought and imagery residing in the collective unconscious, influencing human behavior and cultural expressions as described by Carl Jung.'
 const PANAS_RESULTS = ['Positive And Negative Affect Schedule (PANAS)', 'Results|PANAS']
 const RWANDAN_GENOCIDE = 'Rwandan Genocide (1994)'
+const FINE_ARTS = ['Arts', 'Visual Arts', 'Fine Arts']
+const MEDIA_ARTS = ['Arts', 'Media Arts']
+const FINE_ARTS_SUMMARY = 'The visual and performing arts created primarily for aesthetic and expressive purposes, including film, painting, and sculpture.'
 const ANCIENT_MIGRATION_PERIOD_SUMMARY = 'Characterized by significant movements of various peoples, primarily Germanic tribes, leading to widespread upheaval, the decline of the Western Roman Empire, and the emergence of new political entities across Europe.'
 
 // The admin map's hidden Mossad Killed Kennedy summary, archived off-map.
@@ -103,6 +107,16 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
     // Aliyahs children lost their parents; put them back in the tree. The
     // hidden Mossad theory is too speculative to restore (archived off-map).
     { rehomeOrphans: true, dropArchived: [{ label: 'Mossad Killed Kennedy', summary: ARCHIVED_MOSSAD_SUMMARY }] },
+  ],
+  8: [
+    // Film and Video Games are media arts, not visual arts: Fine Arts held only
+    // Film, and Interactive Art is for gallery installations.
+    { add: MEDIA_ARTS.at(-1), under: MEDIA_ARTS.slice(0, -1) },
+    { move: [...FINE_ARTS, 'Film'], into: MEDIA_ARTS },
+    { move: ['Arts', 'Visual Arts', 'Digital Art', 'Interactive Art', 'Video Games'], into: MEDIA_ARTS },
+    { add: 'Film', under: MEDIA_ARTS },
+    { add: 'Video Games', under: MEDIA_ARTS },
+    { remove: FINE_ARTS, summary: FINE_ARTS_SUMMARY },
   ],
 }
 
@@ -480,7 +494,8 @@ const removeBuiltInNode = (mapNodes, { remove, mergeInto, as, summary: retiredSu
       continue
     }
     const ids = subtreeIds(buildChildrenByParent(nodes), source.id)
-    if (ids.some((id) => holdsOwnerContent(byId.get(id)))) {
+    const ownerWrote = (id) => holdsOwnerContentBesides(byId.get(id), id === source.id && retiredSummary ? [retiredSummary] : [])
+    if (ids.some(ownerWrote)) {
       const summary = source.summary || sourceSummary(source.label) || undefined
       nodes = nodes.map((node) => (node.id === source.id ? { ...node, isCustom: true, summary } : node))
     } else {
