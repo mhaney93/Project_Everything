@@ -7,10 +7,35 @@
 // built-in copy is merged into it: matching children merge recursively,
 // anything the home copy lacks (custom nodes, deeper subtrees) is moved
 // across, notes and summaries are carried over, and the copy itself is removed.
+// When only the start of `homePath` is stored, the missing levels are created
+// from the built-in taxonomy first, so a copy is never left behind for the
+// stale-child prune to delete.
+// With `dropBareCopies`, copies outside the home that hold nothing the owner
+// wrote (no custom node, note or stored summary in their subtree) are deleted
+// outright instead.
 export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
   3: [
     { label: 'Emotions', homePath: ['Psychology'] },
     { label: 'Emotional Regulation', homePath: ['Psychology', 'Emotions'] },
+  ],
+  4: [
+    { label: 'Front-End Frameworks', homePath: ['Applied Sciences', 'Engineering', 'Software Engineering', 'Software Development/Programming', 'Packages', 'Frameworks'] },
+    { label: 'Python', homePath: ['Programming Languages', 'Imperative Languages', 'Object-Oriented'] },
+    { label: 'Node.js', homePath: ['Software Development/Programming', 'Runtime Environments'], dropBareCopies: true },
+    { label: 'Asynchronous Operations', homePath: ['JavaScript', 'Control Flow'] },
+  ],
+}
+
+// Each entry rewrites a stored summary on a node with `label` only while it
+// still reads exactly `from`, so a summary the owner edited is left alone.
+// Change the built-in summary in App.jsx to `to` in the same change.
+export const SUMMARY_MIGRATIONS_BY_VERSION = {
+  4: [
+    {
+      label: 'Memory Tricks',
+      from: 'Mnemonics for the V of each key: Car→Gas, Data→Analysis, Eyes→Blink, Fire→Coal, Garden→Dirt, Artist→Easel, Bitch→Fuck.',
+      to: 'Mnemonics for the V of each key: Car→Gas, Data→Analysis, Eyes→Blink, Fire→Coal, Garden→Dirt, Artist→Easel, Bitch→Fuck (sharp!).',
+    },
   ],
 }
 
@@ -60,6 +85,63 @@ const findHome = (mapNodes, byId, homePath) => {
   return matches[0] || null
 }
 
+const subtreeIds = (childrenByParent, nodeId) => {
+  const ids = [nodeId]
+  for (let i = 0; i < ids.length; i++) {
+    for (const child of childrenByParent.get(ids[i]) || []) ids.push(child.id)
+  }
+  return ids
+}
+
+const holdsOwnerContent = (node) =>
+  Boolean(node.isCustom || node.isPersonal || node.summary || (Array.isArray(node.notes) && node.notes.length > 0))
+
+const dropBareCopies = (mapNodes, { label, homePath }) => {
+  const byId = new Map(mapNodes.map((node) => [node.id, node]))
+  const home = findHome(mapNodes, byId, homePath)
+  const childrenByParent = buildChildrenByParent(mapNodes)
+  const removed = new Set()
+  for (const node of mapNodes) {
+    if (node.label !== label || node.isCustom || node.isPersonal || removed.has(node.id)) continue
+    if (home && node.parentId === home.id) continue
+    const ids = subtreeIds(childrenByParent, node.id)
+    if (ids.some((id) => holdsOwnerContent(byId.get(id)))) continue
+    for (const id of ids) removed.add(id)
+  }
+  if (removed.size === 0) return { nodes: mapNodes, changed: false }
+  return { nodes: mapNodes.filter((node) => !removed.has(node.id)), changed: true }
+}
+
+const maxIdOf = (mapNodes) =>
+  mapNodes.reduce((max, node) => (Number.isFinite(node.id) ? Math.max(max, node.id) : max), 0)
+
+// Finds the deepest stored node along `homePath` and creates the levels below
+// it the way expanding each one would: a parent without built-in children gets
+// its full built-in set, otherwise just the missing level.
+const ensureHome = (mapNodes, homePath, topicSubdivisions) => {
+  const byId = new Map(mapNodes.map((node) => [node.id, node]))
+  let depth = homePath.length
+  let anchor = findHome(mapNodes, byId, homePath)
+  while (!anchor && depth > 1) anchor = findHome(mapNodes, byId, homePath.slice(0, --depth))
+  if (!anchor) return null
+
+  let nodes = mapNodes
+  let maxId = maxIdOf(mapNodes)
+  for (const label of homePath.slice(depth)) {
+    const excluded = anchor.excludedChildLabels || []
+    const expected = (topicSubdivisions[anchor.label] || []).filter((childLabel) => !excluded.includes(childLabel))
+    if (!expected.includes(label)) return null
+    const children = nodes.filter((node) => node.parentId === anchor.id)
+    const taken = new Set(children.map((child) => child.label).filter((childLabel) => childLabel !== label))
+    const labels = children.some((child) => !child.isCustom) ? [label] : [...new Set(expected)].filter((l) => !taken.has(l))
+    const hidden = children[0]?.hidden ?? true
+    const created = labels.map((childLabel) => ({ id: ++maxId, label: childLabel, parentId: anchor.id, hidden }))
+    nodes = [...nodes, ...created]
+    anchor = created.find((node) => node.label === label)
+  }
+  return { nodes, home: anchor }
+}
+
 const mergeNotes = (targetNotes, sourceNotes) => {
   if (!Array.isArray(sourceNotes) || sourceNotes.length === 0) return targetNotes
   const existing = Array.isArray(targetNotes) ? targetNotes : []
@@ -69,12 +151,21 @@ const mergeNotes = (targetNotes, sourceNotes) => {
 }
 
 const consolidateBuiltInNode = (mapNodes, { label, homePath }, builtInSummary, topicSubdivisions) => {
+  const storedNodes = mapNodes
   let byId = new Map(mapNodes.map((node) => [node.id, node]))
-  const home = findHome(mapNodes, byId, homePath)
-  if (!home) return { nodes: mapNodes, changed: false }
+  let home = findHome(mapNodes, byId, homePath)
+  const copies = mapNodes.filter((node) => node.label === label && !node.isCustom && !node.isPersonal)
+  if (!home && copies.length > 0) {
+    const ensured = ensureHome(mapNodes, homePath, topicSubdivisions)
+    if (ensured) {
+      mapNodes = ensured.nodes
+      home = ensured.home
+      byId = new Map(mapNodes.map((node) => [node.id, node]))
+    }
+  }
+  if (!home) return { nodes: storedNodes, changed: false }
 
   let childrenByParent = buildChildrenByParent(mapNodes)
-  const copies = mapNodes.filter((node) => node.label === label && !node.isCustom && !node.isPersonal)
   const homeChildren = childrenByParent.get(home.id) || []
 
   if (copies.length === 0) {
@@ -83,7 +174,7 @@ const consolidateBuiltInNode = (mapNodes, { label, homePath }, builtInSummary, t
     const homeHasPredefined = homeChildren.some((child) => !child.isCustom)
     const excluded = (home.excludedChildLabels || []).includes(label)
     if (!homeHasPredefined || excluded) return { nodes: mapNodes, changed: false }
-    const maxId = mapNodes.reduce((max, node) => (Number.isFinite(node.id) ? Math.max(max, node.id) : max), 0)
+    const maxId = maxIdOf(mapNodes)
     const created = { id: maxId + 1, label, parentId: home.id, hidden: homeChildren[0]?.hidden ?? true }
     return { nodes: [...mapNodes, created], changed: true }
   }
@@ -92,7 +183,7 @@ const consolidateBuiltInNode = (mapNodes, { label, homePath }, builtInSummary, t
     countDescendants(childrenByParent, b.id) - countDescendants(childrenByParent, a.id) || a.id - b.id
   const copiesAtHome = copies.filter((node) => node.parentId === home.id).sort(byRichness)
   const canonical = copiesAtHome[0] || [...copies].sort(byRichness)[0]
-  if (isAncestorOrSelf(byId, canonical.id, home.id)) return { nodes: mapNodes, changed: false }
+  if (isAncestorOrSelf(byId, canonical.id, home.id)) return { nodes: storedNodes, changed: false }
 
   let changed = false
   const updates = new Map()
@@ -105,7 +196,7 @@ const consolidateBuiltInNode = (mapNodes, { label, homePath }, builtInSummary, t
 
   const created = []
   if (canonical.parentId !== home.id) {
-    const moved = { ...canonical, parentId: home.id, hidden: homeChildren[0]?.hidden ?? canonical.hidden }
+    const moved = { ...canonical, parentId: home.id, hidden: homeChildren[0]?.hidden ?? (home.hidden || canonical.hidden) }
     delete moved.order
     updates.set(canonical.id, moved)
     changed = true
@@ -114,7 +205,7 @@ const consolidateBuiltInNode = (mapNodes, { label, homePath }, builtInSummary, t
     // so a home that was never expanded gets its full built-in set here.
     if (!homeChildren.some((child) => !child.isCustom)) {
       const skip = new Set([label, ...(home.excludedChildLabels || []), ...homeChildren.map((child) => child.label)])
-      const maxId = mapNodes.reduce((max, node) => (Number.isFinite(node.id) ? Math.max(max, node.id) : max), 0)
+      const maxId = maxIdOf(mapNodes)
       for (const childLabel of topicSubdivisions[home.label] || []) {
         if (skip.has(childLabel)) continue
         skip.add(childLabel)
@@ -159,7 +250,7 @@ const consolidateBuiltInNode = (mapNodes, { label, homePath }, builtInSummary, t
     mergeInto(copy.id, canonical.id)
   }
 
-  if (!changed) return { nodes: mapNodes, changed: false }
+  if (!changed) return { nodes: storedNodes, changed: false }
   const nodes = mapNodes.filter((node) => !removed.has(node.id)).map((node) => current(node.id))
   return { nodes: [...nodes, ...created], changed: true }
 }
@@ -178,6 +269,11 @@ export const applyStructuralMigrations = (mapNodes, builtInSummary = () => '', t
   let changed = false
   for (const version of orderedVersions) {
     for (const migration of STRUCTURAL_MIGRATIONS_BY_VERSION[version]) {
+      if (migration.dropBareCopies) {
+        const dropped = dropBareCopies(nodes, migration)
+        nodes = dropped.nodes
+        changed = changed || dropped.changed
+      }
       const result = consolidateBuiltInNode(nodes, migration, builtInSummary, topicSubdivisions)
       nodes = result.nodes
       changed = changed || result.changed
@@ -186,12 +282,35 @@ export const applyStructuralMigrations = (mapNodes, builtInSummary = () => '', t
   return { nodes, changed }
 }
 
+export const applySummaryMigrations = (mapNodes) => {
+  if (!Array.isArray(mapNodes)) return { nodes: [], changed: false }
+
+  const migrations = Object.keys(SUMMARY_MIGRATIONS_BY_VERSION)
+    .map((version) => Number(version))
+    .sort((a, b) => a - b)
+    .flatMap((version) => SUMMARY_MIGRATIONS_BY_VERSION[version])
+
+  let changed = false
+  const nodes = mapNodes.map((node) => {
+    let summary = node.summary
+    for (const { label, from, to } of migrations) {
+      if (node.label === label && summary === from) summary = to
+    }
+    if (summary === node.summary) return node
+    changed = true
+    return { ...node, summary }
+  })
+  return { nodes: changed ? nodes : mapNodes, changed }
+}
+
 // Remove stale predefined children: for any node with known subdivisions,
 // drop predefined children whose labels are not in the expected set, along
 // with all their descendants. addChildren recreates correct children on
-// first expand.
+// first expand. A copy of a structurally migrated label is never dropped: if
+// its home could not be stored (the owner deleted a level of it), it stays put.
 export const removeStalePredefinedChildren = (mapNodes, topicSubdivisions) => {
   const childrenByParent = buildChildrenByParent(mapNodes)
+  const migratedLabels = new Set(Object.values(STRUCTURAL_MIGRATIONS_BY_VERSION).flat().map(({ label }) => label))
 
   const idsToRemove = new Set()
   for (const node of mapNodes) {
@@ -199,7 +318,7 @@ export const removeStalePredefinedChildren = (mapNodes, topicSubdivisions) => {
     if (!expected || expected.length === 0) continue
     const children = childrenByParent.get(node.id) || []
     for (const child of children) {
-      if (!child.isCustom && !expected.includes(child.label)) {
+      if (!child.isCustom && !expected.includes(child.label) && !migratedLabels.has(child.label)) {
         const stack = [child.id]
         while (stack.length > 0) {
           const id = stack.pop()

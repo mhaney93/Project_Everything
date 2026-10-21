@@ -1,0 +1,391 @@
+{
+  "map_id": 1,
+  "chain_labels": [
+    "Everything",
+    "Sciences",
+    "Applied Sciences",
+    "Engineering",
+    "Computer Systems Engineering",
+    "Distributed Systems",
+    "Distributed Ledger Technology (DLT)",
+    "Blockchain",
+    "Blockchain Development",
+    "DApps (Decentralized Applications)",
+    "Front-End Frameworks"
+  ],
+  "nodes": [
+    {
+      "id": 1,
+      "label": "Everything",
+      "hidden": false,
+      "parentId": null
+    },
+    {
+      "id": 2,
+      "label": "Humanities",
+      "order": 0,
+      "hidden": false,
+      "summary": "Disciplines that study human culture, history, language, and values.",
+      "parentId": 1
+    },
+    {
+      "id": 3,
+      "label": "Sciences",
+      "order": 2,
+      "hidden": false,
+      "summary": "Fields that investigate the natural world through observation and experimentation.",
+      "parentId": 1
+    },
+    {
+      "id": 335,
+      "label": "Personal",
+      "order": 1,
+      "hidden": false,
+      "summary": "",
+      "isCustom": true,
+      "parentId": 1
+    },
+    {
+      "id": 568,
+      "label": "Applied Sciences",
+      "hidden": true,
+      "parentId": 3
+    },
+    {
+      "id": 569,
+      "label": "Formal Sciences",
+      "hidden": true,
+      "parentId": 3
+    },
+    {
+      "id": 570,
+      "label": "Natural Sciences",
+      "hidden": true,
+      "parentId": 3
+    },
+    {
+      "id": 571,
+      "label": "Social Sciences",
+      "hidden": true,
+      "parentId": 3
+    },
+    {
+      "id": 597,
+      "label": "Agriculture",
+      "hidden": true,
+      "parentId": 568
+    },
+    {
+      "id": 598,
+      "label": "Built Environment",
+      "hidden": true,
+      "parentId": 568
+    },
+    {
+      "id": 599,
+      "label": "Engineering",
+      "hidden": true,
+      "parentId": 568
+    },
+    {
+      "id": 600,
+      "label": "Environmental Science",
+      "hidden": true,
+      "parentId": 568
+    },
+    {
+      "id": 601,
+      "label": "Food Science",
+      "hidden": true,
+      "parentId": 568
+    },
+    {
+      "id": 602,
+      "label": "Health Sciences",
+      "hidden": true,
+      "parentId": 568
+    },
+    {
+      "id": 603,
+      "label": "Product Design",
+      "hidden": true,
+      "parentId": 568
+    },
+    {
+      "id": 604,
+      "label": "Chemical Engineering",
+      "hidden": true,
+      "parentId": 599
+    },
+    {
+      "id": 605,
+      "label": "Civil Engineering",
+      "hidden": true,
+      "parentId": 599
+    },
+    {
+      "id": 606,
+      "label": "Computer Systems Engineering",
+      "hidden": true,
+      "parentId": 599
+    },
+    {
+      "id": 607,
+      "label": "Electrical Engineering",
+      "hidden": true,
+      "parentId": 599
+    },
+    {
+      "id": 608,
+      "label": "Mechanical Engineering",
+      "hidden": true,
+      "parentId": 599
+    },
+    {
+      "id": 609,
+      "label": "Software Engineering",
+      "hidden": true,
+      "parentId": 599
+    },
+    {
+      "id": 652,
+      "label": "Cloud Computing",
+      "hidden": true,
+      "parentId": 606
+    },
+    {
+      "id": 653,
+      "label": "Distributed Systems",
+      "hidden": true,
+      "parentId": 606
+    },
+    {
+      "id": 654,
+      "label": "Consensus Mechanisms",
+      "hidden": true,
+      "parentId": 653
+    },
+    {
+      "id": 655,
+      "label": "Decentralization",
+      "hidden": true,
+      "parentId": 653
+    },
+    {
+      "id": 656,
+      "label": "Distributed Ledger Technology (DLT)",
+      "hidden": true,
+      "parentId": 653
+    },
+    {
+      "id": 657,
+      "label": "Nodes",
+      "hidden": true,
+      "parentId": 653
+    },
+    {
+      "id": 658,
+      "label": "Blockchain",
+      "hidden": true,
+      "parentId": 656
+    },
+    {
+      "id": 659,
+      "label": "Trustless Environments",
+      "hidden": true,
+      "parentId": 656
+    },
+    {
+      "id": 660,
+      "label": "Blockchain Development",
+      "hidden": true,
+      "parentId": 658
+    },
+    {
+      "id": 661,
+      "label": "Blocks",
+      "hidden": true,
+      "parentId": 658
+    },
+    {
+      "id": 662,
+      "label": "Ethereum Virtual Machine (EVM)",
+      "hidden": true,
+      "parentId": 658
+    },
+    {
+      "id": 663,
+      "label": "Transactions",
+      "hidden": true,
+      "parentId": 658
+    },
+    {
+      "id": 664,
+      "label": "DApps (Decentralized Applications)",
+      "hidden": true,
+      "parentId": 660
+    },
+    {
+      "id": 665,
+      "label": "Smart Contracts",
+      "hidden": true,
+      "parentId": 660
+    },
+    {
+      "id": 666,
+      "label": "Contract Interaction",
+      "hidden": true,
+      "parentId": 664
+    },
+    {
+      "id": 667,
+      "label": "Deployment and Maintenance",
+      "hidden": true,
+      "parentId": 664
+    },
+    {
+      "id": 668,
+      "label": "Front-End Frameworks",
+      "hidden": true,
+      "parentId": 664
+    },
+    {
+      "id": 669,
+      "label": "UI/UX Considerations",
+      "hidden": true,
+      "parentId": 664
+    },
+    {
+      "id": 670,
+      "label": "Wallet Integration",
+      "hidden": true,
+      "parentId": 664
+    },
+    {
+      "id": 671,
+      "label": "Web3 Libraries",
+      "hidden": true,
+      "parentId": 664
+    },
+    {
+      "id": 672,
+      "label": "Angular",
+      "hidden": true,
+      "parentId": 668
+    },
+    {
+      "id": 673,
+      "label": "Bootstrap",
+      "hidden": true,
+      "parentId": 668
+    },
+    {
+      "id": 674,
+      "label": "React",
+      "hidden": true,
+      "parentId": 668
+    },
+    {
+      "id": 675,
+      "label": "Svelte",
+      "hidden": true,
+      "parentId": 668
+    },
+    {
+      "id": 676,
+      "label": "Tailwind CSS",
+      "hidden": true,
+      "parentId": 668
+    },
+    {
+      "id": 677,
+      "label": "Vue.js",
+      "hidden": true,
+      "parentId": 668
+    },
+    {
+      "id": 678,
+      "label": "Syntax|React",
+      "hidden": true,
+      "parentId": 674
+    },
+    {
+      "id": 679,
+      "label": "Folder Structure|React",
+      "hidden": true,
+      "parentId": 674
+    },
+    {
+      "id": 680,
+      "label": "react|pkg",
+      "hidden": true,
+      "parentId": 674
+    },
+    {
+      "id": 681,
+      "label": "Components|React",
+      "hidden": true,
+      "parentId": 674
+    },
+    {
+      "id": 682,
+      "label": "React-related Packages",
+      "hidden": true,
+      "parentId": 674
+    },
+    {
+      "id": 683,
+      "label": "import React, { useState } from 'react';\nfunction Counter() {\n  const [count, setCount] = useState(0);\n  const increment = () => {\n    setCount(count + 1);\n  };\n  return (\n    <div>\n      <p>You clicked {count} times</p>\n      <button onClick={increment}>\n        Click me\n      </button>\n    </div>\n  );\n}",
+      "hidden": true,
+      "parentId": 678
+    },
+    {
+      "id": 684,
+      "label": ".jsx",
+      "hidden": true,
+      "parentId": 678
+    },
+    {
+      "id": 685,
+      "label": ".TSX|React",
+      "hidden": true,
+      "parentId": 678
+    },
+    {
+      "id": 686,
+      "label": "@babel/preset-react|jsx",
+      "hidden": true,
+      "parentId": 684
+    },
+    {
+      "id": 687,
+      "label": "JSX",
+      "hidden": true,
+      "parentId": 684
+    },
+    {
+      "id": 688,
+      "label": "Comments|JSX",
+      "hidden": true,
+      "parentId": 687
+    },
+    {
+      "id": 689,
+      "label": "CSS|JSX",
+      "hidden": true,
+      "parentId": 687
+    },
+    {
+      "id": 690,
+      "label": "Chaining Operator|JSX",
+      "hidden": true,
+      "parentId": 687
+    },
+    {
+      "id": 691,
+      "label": "Attributes|JSX",
+      "hidden": true,
+      "parentId": 687
+    }
+  ]
+}

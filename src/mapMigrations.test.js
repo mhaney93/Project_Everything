@@ -2,17 +2,20 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
-import { applyStructuralMigrations, removeStalePredefinedChildren } from './mapMigrations.js'
+import { applyStructuralMigrations, applySummaryMigrations, SUMMARY_MIGRATIONS_BY_VERSION, removeStalePredefinedChildren } from './mapMigrations.js'
 
-// TOPIC_SUBDIVISIONS lives inside the App component, so read it from the source.
-const loadTopicSubdivisions = () => {
+// TOPIC_SUBDIVISIONS and generateSummary's summaries live inside the App
+// component, so evaluate the object literals from the source.
+const loadAppObject = (declaration, indent) => {
   const source = readFileSync(new URL('./App.jsx', import.meta.url), 'utf8')
-  const start = source.indexOf('{', source.indexOf('const TOPIC_SUBDIVISIONS = {'))
-  const end = source.indexOf('\n  }\n', start)
-  return vm.runInNewContext(`(${source.slice(start, end + 4)})`)
+  const start = source.indexOf('{', source.indexOf(declaration))
+  const close = `\n${indent}}\n`
+  const end = source.indexOf(close, start)
+  return vm.runInNewContext(`(${source.slice(start, end + close.length)})`)
 }
 
-const TOPIC_SUBDIVISIONS = loadTopicSubdivisions()
+const TOPIC_SUBDIVISIONS = loadAppObject('const TOPIC_SUBDIVISIONS = {', '  ')
+const BUILT_IN_SUMMARIES = loadAppObject('const summaries = {', '    ')
 
 const normalize = (mapNodes) => {
   const structural = applyStructuralMigrations(mapNodes, () => '', TOPIC_SUBDIVISIONS)
@@ -276,4 +279,413 @@ test('migration keeps Psychology > Emotions as the only Emotions and merges the 
 
   const again = applyStructuralMigrations(nodes, fakeSummary)
   assert.equal(again.changed, false)
+})
+
+const childLabelsOf = (mapNodes, node) => mapNodes.filter((n) => n.parentId === node.id).map((n) => n.label).sort()
+
+test('the taxonomy lists the moved engineering branches only in their new homes', () => {
+  const parentsOf = (label) => Object.entries(TOPIC_SUBDIVISIONS)
+    .filter(([, children]) => children.includes(label))
+    .map(([parent]) => parent)
+  assert.deepEqual(parentsOf('Front-End Frameworks'), ['Frameworks'])
+  assert.deepEqual(parentsOf('Python'), ['Object-Oriented'])
+  assert.deepEqual(parentsOf('Node.js'), ['Runtime Environments'])
+  assert.deepEqual(parentsOf('Asynchronous Operations'), ['Control Flow'])
+  assert.equal(TOPIC_SUBDIVISIONS.PowerShell.length, 0)
+  assert.ok(TOPIC_SUBDIVISIONS.JavaScript.includes('Control Flow'))
+})
+
+// The live map's misplaced engineering branches (2026-10-21 review): the
+// front-end frameworks under Blockchain > DApps, Python and Node.js under
+// PowerShell, and JavaScript's Asynchronous Operations under Solidity's custom
+// Control Flow. Their homes are stored but empty. The custom wrappers stand in
+// for the levels in between.
+const inEngineering = (children) => ['Root', [['Applied Sciences', [['Engineering', children]]]]]
+
+const engineeringMap = () => buildMap(
+  inEngineering([
+    ['Blockchain levels', [
+      ['DApps (Decentralized Applications)', [
+        ['Contract Interaction'],
+        ['Deployment and Maintenance'],
+        ['Front-End Frameworks', [
+          ['Angular'],
+          ['Bootstrap'],
+          ['React', [
+            ['Components|React'],
+            ['Folder Structure|React'],
+            ['React-related Packages'],
+            ['react|pkg'],
+            ['Syntax|React', [builtIn('.jsx'), ['.TSX|React']]],
+            ['My React Hooks', [], { isCustom: true, summary: 'custom react summary' }],
+          ], { notes: [{ id: 'note-react', text: 'react note', level: 0 }] }],
+          ['Svelte'],
+          ['Tailwind CSS'],
+          ['Vue.js'],
+        ], { notes: [{ id: 'note-fef', text: 'front-end note', level: 0 }] }],
+        ['UI/UX Considerations'],
+        ['Wallet Integration'],
+        ['Web3 Libraries', [['ethers.js', [], { summary: 'stored ethers summary' }], ['web3.js']]],
+      ]],
+      ['Solidity levels', [
+        ['Control Flow', [
+          builtIn('Conditional Statements'),
+          ['Loops', [
+            ['For Loops', [['for (x i = 0; i < 10; i++) {\ny\n}', [['x', [], { isCustom: true, summary: 'loop variable' }]], { isCustom: true }]]],
+            ['While Loops'],
+            ['Do...While Loops'],
+          ]],
+          ['Error Handling', [['require', [], { isCustom: true }]], { isCustom: true, summary: 'solidity errors' }],
+          ['Asynchronous Operations', [
+            ['AJAX (Asynchronous JavaScript And XML)', [], { notes: [{ id: 'note-ajax', text: 'ajax note', level: 0 }] }],
+            builtIn('Event Loop'),
+            ['Promises', [], { isCustom: true }],
+          ], { summary: 'stored async summary' }],
+        ], { isCustom: true, summary: 'the set of statements inside a function body' }],
+      ], { isCustom: true }],
+    ], { isCustom: true }],
+    ['Software Engineering', [
+      ['Operating System (OS)', [
+        ['Shells levels', [
+          ['PowerShell', [
+            ['Node.js'],
+            ['Python', [
+              ...TOPIC_SUBDIVISIONS.Python.filter((l) => l !== 'Loops (Python)|py').map((l) => [l]),
+              builtIn('Loops (Python)|py'),
+              ['Virtual Environments|py-notes', [], { isCustom: true, notes: [{ id: 'note-venv', text: 'venv note', level: 0 }] }],
+            ], { summary: 'stored python summary', notes: [{ id: 'note-python', text: 'python note', level: 0 }] }],
+          ]],
+        ], { isCustom: true }],
+      ]],
+      ['Software Development/Programming', [
+        ['Programming Languages', [
+          ['Imperative Languages', [
+            ['Object-Oriented', [
+              ['Emojicode'],
+              ['JavaScript', [['JS Keywords'], ['Control Flow'], ['Scope']]],
+              ['Python'],
+            ]],
+          ]],
+        ]],
+        ['Packages', [['CLI Tools'], ['Frameworks'], ['HTTP'], ['Libraries'], ['Middleware'], ['View Engines']]],
+        ['Runtime Environments'],
+      ]],
+    ]],
+  ]),
+)
+
+const SOFTWARE_DEVELOPMENT = 'Root > Applied Sciences > Engineering > Software Engineering > Software Development/Programming'
+const JAVASCRIPT = `${SOFTWARE_DEVELOPMENT} > Programming Languages > Imperative Languages > Object-Oriented > JavaScript`
+
+test('migration moves Front-End Frameworks from DApps to Packages > Frameworks', () => {
+  const before = engineeringMap()
+  const original = before.find((n) => n.label === 'Front-End Frameworks')
+  const { nodes, changed } = normalize(before)
+  assert.equal(changed, true)
+  assert.deepEqual(orphansOf(nodes), [])
+  assert.equal(new Set(nodes.map((n) => n.id)).size, nodes.length)
+
+  const copies = nodes.filter((n) => n.label === 'Front-End Frameworks')
+  assert.equal(copies.length, 1)
+  const [fef] = copies
+  assert.equal(fef.id, original.id)
+  assert.equal(pathOf(nodes, fef), `${SOFTWARE_DEVELOPMENT} > Packages > Frameworks > Front-End Frameworks`)
+  assert.deepEqual(fef.notes.map((n) => n.id), ['note-fef'])
+  assert.deepEqual(childLabelsOf(nodes, fef), [...TOPIC_SUBDIVISIONS['Front-End Frameworks']].sort())
+
+  // Only the moved node's place changes: every stored field of it and of each
+  // descendant (labels, summaries, notes, custom flags) is kept as it was.
+  const placement = (node) => Object.fromEntries(Object.entries(node).filter(([key]) => !['parentId', 'hidden', 'order'].includes(key)))
+  assert.deepEqual(placement(fef), placement(original))
+  assert.deepEqual(descendantsOf(nodes, fef.id), descendantsOf(before, original.id))
+
+  // The whole React subtree, its note and its custom child came along.
+  const originalReact = before.find((n) => n.label === 'React')
+  const react = nodes.find((n) => n.label === 'React')
+  assert.equal(react.parentId, fef.id)
+  assert.deepEqual(react.notes.map((n) => n.id), ['note-react'])
+  assert.equal(descendantsOf(nodes, react.id).length, descendantsOf(before, originalReact.id).length)
+  assert.equal(nodes.find((n) => n.label === 'My React Hooks').summary, 'custom react summary')
+
+  // Frameworks was never expanded, so it gains its other built-in children.
+  const frameworks = nodes.find((n) => n.label === 'Frameworks')
+  assert.deepEqual(childLabelsOf(nodes, frameworks), [...TOPIC_SUBDIVISIONS.Frameworks].sort())
+
+  const dapps = nodes.find((n) => n.label === 'DApps (Decentralized Applications)')
+  assert.deepEqual(childLabelsOf(nodes, dapps), [...TOPIC_SUBDIVISIONS['DApps (Decentralized Applications)']].sort())
+  assert.equal(nodes.find((n) => n.label === 'ethers.js').summary, 'stored ethers summary')
+})
+
+test('Front-End Frameworks moves into Packages > Frameworks even when Packages was never expanded', () => {
+  const before = buildMap(inEngineering([
+    ['Blockchain levels', [
+      ['DApps (Decentralized Applications)', [
+        ['Contract Interaction'],
+        ['Front-End Frameworks', [
+          ['React', [['My React Hooks', [], { isCustom: true, summary: 'custom react summary' }]], { notes: [{ id: 'note-react', text: 'react note', level: 0 }] }],
+          ['Vue.js'],
+        ], { summary: 'stored fef summary', notes: [{ id: 'note-fef', text: 'front-end note', level: 0 }] }],
+      ]],
+    ], { isCustom: true }],
+    ['Software Engineering', [
+      ['Software Development/Programming', [['Packages'], ['Runtime Environments']]],
+    ]],
+  ]))
+  const original = before.find((n) => n.label === 'Front-End Frameworks')
+  const { nodes, changed } = normalize(before)
+  assert.equal(changed, true)
+  assert.deepEqual(orphansOf(nodes), [])
+  assert.equal(new Set(nodes.map((n) => n.id)).size, nodes.length)
+  assert.ok(nodes.filter((n) => !before.some((b) => b.id === n.id)).every((n) => n.id > Math.max(...before.map((b) => b.id))))
+
+  const [fef] = nodes.filter((n) => n.label === 'Front-End Frameworks')
+  assert.equal(fef.id, original.id)
+  assert.equal(pathOf(nodes, fef), `${SOFTWARE_DEVELOPMENT} > Packages > Frameworks > Front-End Frameworks`)
+  assert.equal(fef.summary, 'stored fef summary')
+  assert.deepEqual(fef.notes.map((n) => n.id), ['note-fef'])
+  assert.deepEqual(descendantsOf(nodes, fef.id).map((n) => n.id).sort(), descendantsOf(before, original.id).map((n) => n.id).sort())
+  assert.deepEqual(nodes.find((n) => n.label === 'React').notes.map((n) => n.id), ['note-react'])
+  assert.equal(nodes.find((n) => n.label === 'My React Hooks').summary, 'custom react summary')
+
+  const packages = nodes.find((n) => n.label === 'Packages')
+  assert.deepEqual(childLabelsOf(nodes, packages), [...TOPIC_SUBDIVISIONS.Packages].sort())
+  assert.ok(nodes.filter((n) => n.parentId === packages.id).every((n) => n.hidden === true))
+  const frameworks = nodes.find((n) => n.label === 'Frameworks')
+  assert.deepEqual(childLabelsOf(nodes, frameworks), [...TOPIC_SUBDIVISIONS.Frameworks].sort())
+  assert.ok(nodes.filter((n) => n.parentId === frameworks.id).every((n) => n.hidden === true))
+
+  const again = normalize(nodes)
+  assert.equal(again.changed, false)
+  assert.deepEqual(again.nodes, nodes)
+})
+
+// Production map 1 (2026-10-21): DApps > Front-End Frameworks is stored under
+// Computer Systems Engineering, but no Frameworks node exists, because Software
+// Engineering was never expanded (or never stored at all).
+test('Front-End Frameworks moves when no level below Engineering is stored on the Software Engineering side', () => {
+  const dapps = ['DApps (Decentralized Applications)', [
+    ['Contract Interaction'],
+    ['Front-End Frameworks', [
+      ['React', [['My React Hooks', [], { isCustom: true, summary: 'custom react summary' }]], { notes: [{ id: 'note-react', text: 'react note', level: 0 }] }],
+      ['Vue.js'],
+    ], { notes: [{ id: 'note-fef', text: 'front-end note', level: 0 }] }],
+  ]]
+  const computerSystems = ['Computer Systems Engineering', [['Blockchain levels', [dapps], { isCustom: true }]]]
+  const shapes = {
+    'Software Engineering unexpanded': [computerSystems, ['Software Engineering']],
+    'Software Engineering not stored': [computerSystems, ['Civil Engineering']],
+  }
+
+  for (const [shape, engineering] of Object.entries(shapes)) {
+    const before = buildMap(inEngineering(engineering))
+    const original = before.find((n) => n.label === 'Front-End Frameworks')
+    const { nodes, changed } = normalize(before)
+    assert.equal(changed, true, shape)
+    assert.deepEqual(orphansOf(nodes), [], shape)
+    assert.equal(new Set(nodes.map((n) => n.id)).size, nodes.length, shape)
+
+    const copies = nodes.filter((n) => n.label === 'Front-End Frameworks')
+    assert.equal(copies.length, 1, shape)
+    assert.equal(copies[0].id, original.id, shape)
+    assert.equal(pathOf(nodes, copies[0]), `${SOFTWARE_DEVELOPMENT} > Packages > Frameworks > Front-End Frameworks`, shape)
+    assert.deepEqual(copies[0].notes.map((n) => n.id), ['note-fef'], shape)
+    assert.deepEqual(descendantsOf(nodes, original.id), descendantsOf(before, original.id), shape)
+
+    // Each created level holds what expanding it would: its full built-in set.
+    for (const label of ['Software Development/Programming', 'Packages', 'Frameworks']) {
+      assert.deepEqual(childLabelsOf(nodes, nodes.find((n) => n.label === label)), [...TOPIC_SUBDIVISIONS[label]].sort(), `${shape}: ${label}`)
+    }
+    const softwareEngineering = nodes.find((n) => n.label === 'Software Engineering')
+    const createdUnderSE = childLabelsOf(nodes, softwareEngineering)
+    assert.ok(createdUnderSE.includes('Software Development/Programming'), shape)
+
+    const again = normalize(nodes)
+    assert.equal(again.changed, false, shape)
+    assert.deepEqual(again.nodes, nodes, shape)
+  }
+})
+
+// The stored chain from production map 1 down to DApps > Front-End Frameworks
+// (pre-merge backup, 2026-10-21), with every stored child of each chain node.
+// Software Engineering is stored but was never expanded.
+test('production map 1 moves Front-End Frameworks under a newly created Packages > Frameworks', () => {
+  const { nodes: before } = JSON.parse(readFileSync(new URL('./fixtures/map1-front-end-frameworks.json', import.meta.url), 'utf8'))
+  const original = before.find((n) => n.label === 'Front-End Frameworks')
+  const { nodes, changed } = normalize(before)
+  assert.equal(changed, true)
+  assert.deepEqual(orphansOf(nodes), [])
+  assert.equal(new Set(nodes.map((n) => n.id)).size, nodes.length)
+  const maxBefore = Math.max(...before.map((n) => n.id))
+  const created = nodes.filter((n) => !before.some((b) => b.id === n.id))
+  assert.ok(created.every((n) => n.id > maxBefore && n.hidden === true && !n.isCustom))
+  // Apart from the move, the map changes only by the stale-child prune it
+  // already gets on main (Blockchain no longer lists Ethereum Virtual Machine).
+  const prunedOnMain = removeStalePredefinedChildren(before, TOPIC_SUBDIVISIONS).nodes
+  assert.deepEqual(
+    nodes.filter((n) => !created.includes(n) && n.id !== original.id),
+    prunedOnMain.filter((n) => n.id !== original.id),
+  )
+
+  const [fef] = nodes.filter((n) => n.label === 'Front-End Frameworks')
+  assert.equal(fef.id, original.id)
+  assert.equal(pathOf(nodes, fef), 'Everything > Sciences > Applied Sciences > Engineering > Software Engineering > Software Development/Programming > Packages > Frameworks > Front-End Frameworks')
+  assert.deepEqual(descendantsOf(nodes, fef.id), descendantsOf(before, original.id))
+  assert.equal(descendantsOf(nodes, fef.id).length, 20)
+
+  for (const label of ['Software Engineering', 'Software Development/Programming', 'Packages', 'Frameworks']) {
+    assert.deepEqual(childLabelsOf(nodes, nodes.find((n) => n.label === label)), [...TOPIC_SUBDIVISIONS[label]].sort(), label)
+  }
+  const dapps = nodes.find((n) => n.label === 'DApps (Decentralized Applications)')
+  assert.deepEqual(childLabelsOf(nodes, dapps), [...TOPIC_SUBDIVISIONS['DApps (Decentralized Applications)']].sort())
+
+  const again = normalize(nodes)
+  assert.equal(again.changed, false)
+  assert.deepEqual(again.nodes, nodes)
+})
+
+test('Front-End Frameworks stays under DApps when the owner deleted a level of its home', () => {
+  const dapps = ['DApps (Decentralized Applications)', [
+    ['Contract Interaction'],
+    ['Front-End Frameworks', [
+      ['React', [['My React Hooks', [], { isCustom: true, summary: 'custom react summary' }]], { notes: [{ id: 'note-react', text: 'react note', level: 0 }] }],
+    ], { summary: 'stored fef summary', notes: [{ id: 'note-fef', text: 'front-end note', level: 0 }] }],
+  ]]
+  const engineeringWithout = (excluded) => {
+    const softwareEngineering = excluded === 'Software Engineering'
+      ? []
+      : [['Software Engineering', [['Software Development/Programming', [['Runtime Environments']], { excludedChildLabels: [excluded] }]]]]
+    return buildMap(['Root', [['Applied Sciences', [
+      ['Engineering', [['Computer Systems Engineering', [['Blockchain levels', [dapps], { isCustom: true }]]], ...softwareEngineering], { excludedChildLabels: excluded === 'Software Engineering' ? [excluded] : [] }],
+    ]]]])
+  }
+
+  for (const excluded of ['Packages', 'Software Engineering']) {
+    const before = engineeringWithout(excluded)
+    const original = before.find((n) => n.label === 'Front-End Frameworks')
+    const { nodes } = normalize(before)
+    assert.deepEqual(orphansOf(nodes), [])
+    const fef = nodes.find((n) => n.id === original.id)
+    assert.equal(pathOf(nodes, fef), pathOf(before, original))
+    assert.equal(fef.summary, 'stored fef summary')
+    assert.deepEqual(fef.notes.map((n) => n.id), ['note-fef'])
+    assert.deepEqual(descendantsOf(nodes, fef.id), descendantsOf(before, original.id))
+    assert.equal(nodes.some((n) => n.label === excluded), false)
+
+    const again = normalize(nodes)
+    assert.equal(again.changed, false)
+  }
+})
+
+test('migration merges PowerShell > Python into Object-Oriented > Python and deletes PowerShell > Node.js', () => {
+  const before = engineeringMap()
+  const home = before.find((n) => n.label === 'Python' && before.find((p) => p.id === n.parentId).label === 'Object-Oriented')
+  const misplaced = before.find((n) => n.label === 'Python' && n.id !== home.id)
+  const { nodes } = normalize(before)
+  assert.deepEqual(orphansOf(nodes), [])
+
+  const copies = nodes.filter((n) => n.label === 'Python')
+  assert.equal(copies.length, 1)
+  const [python] = copies
+  assert.equal(python.id, home.id)
+  assert.equal(pathOf(nodes, python), `${SOFTWARE_DEVELOPMENT} > Programming Languages > Imperative Languages > Object-Oriented > Python`)
+  assert.equal(python.summary, 'stored python summary')
+  assert.deepEqual(python.notes.map((n) => n.id), ['note-python'])
+  assert.deepEqual(childLabelsOf(nodes, python), [...TOPIC_SUBDIVISIONS.Python, 'Virtual Environments|py-notes'].sort())
+  assert.equal(descendantsOf(nodes, python.id).length, descendantsOf(before, misplaced.id).length)
+  assert.deepEqual(nodes.find((n) => n.label === 'Virtual Environments|py-notes').notes.map((n) => n.id), ['note-venv'])
+
+  const powerShell = nodes.find((n) => n.label === 'PowerShell')
+  assert.deepEqual(childLabelsOf(nodes, powerShell), [])
+  assert.equal(nodes.filter((n) => n.label === 'Node.js').length, 0)
+  const runtimes = nodes.find((n) => n.label === 'Runtime Environments')
+  assert.deepEqual(childLabelsOf(nodes, runtimes), [])
+})
+
+test('a PowerShell > Node.js holding owner content moves to Runtime Environments instead', () => {
+  const before = buildMap(['Root', [
+    ['Shells levels', [
+      ['PowerShell', [
+        ['Node.js', [['Flow|Node.js'], ['My Node Script', [], { isCustom: true }]], { notes: [{ id: 'note-node', text: 'node note', level: 0 }] }],
+      ]],
+    ], { isCustom: true }],
+    ['Software Development/Programming', [['Runtime Environments', [['Web Browsers']]]]],
+  ]])
+  const { nodes, changed } = normalize(before)
+  assert.equal(changed, true)
+  assert.deepEqual(orphansOf(nodes), [])
+  const copies = nodes.filter((n) => n.label === 'Node.js')
+  assert.equal(copies.length, 1)
+  assert.equal(pathOf(nodes, copies[0]), 'Root > Software Development/Programming > Runtime Environments > Node.js')
+  assert.deepEqual(copies[0].notes.map((n) => n.id), ['note-node'])
+  assert.ok(childLabelsOf(nodes, copies[0]).includes('My Node Script'))
+  assert.deepEqual(childLabelsOf(nodes, nodes.find((n) => n.label === 'PowerShell')), [])
+})
+
+test('migration moves Asynchronous Operations from Solidity to JavaScript > Control Flow', () => {
+  const before = engineeringMap()
+  const original = before.find((n) => n.label === 'Asynchronous Operations')
+  const { nodes } = normalize(before)
+  assert.deepEqual(orphansOf(nodes), [])
+
+  const copies = nodes.filter((n) => n.label === 'Asynchronous Operations')
+  assert.equal(copies.length, 1)
+  const [async] = copies
+  assert.equal(async.id, original.id)
+  assert.equal(pathOf(nodes, async), `${JAVASCRIPT} > Control Flow > Asynchronous Operations`)
+  assert.equal(async.summary, 'stored async summary')
+  assert.deepEqual(childLabelsOf(nodes, async), ['AJAX (Asynchronous JavaScript And XML)', 'Event Loop', 'Promises'])
+  assert.deepEqual(nodes.find((n) => n.label === 'AJAX (Asynchronous JavaScript And XML)').notes.map((n) => n.id), ['note-ajax'])
+  const eventLoop = nodes.find((n) => n.label === 'Event Loop')
+  assert.deepEqual(childLabelsOf(nodes, eventLoop), [...TOPIC_SUBDIVISIONS['Event Loop']].sort())
+
+  // JavaScript's Control Flow was never expanded, so it gains its other built-in children.
+  const jsControlFlow = nodes.find((n) => n.id === async.parentId)
+  assert.deepEqual(childLabelsOf(nodes, jsControlFlow), [...TOPIC_SUBDIVISIONS['Control Flow']].sort())
+
+  // Solidity's Control Flow keeps its conditionals, loops and custom content.
+  const solidityControlFlow = nodes.find((n) => n.label === 'Control Flow' && n.isCustom)
+  assert.equal(solidityControlFlow.summary, 'the set of statements inside a function body')
+  assert.deepEqual(childLabelsOf(nodes, solidityControlFlow), ['Conditional Statements', 'Error Handling', 'Loops'])
+  const forLoop = nodes.find((n) => n.label === 'for (x i = 0; i < 10; i++) {\ny\n}')
+  assert.equal(pathOf(nodes, forLoop), 'Root > Applied Sciences > Engineering > Blockchain levels > Solidity levels > Control Flow > Loops > For Loops > for (x i = 0; i < 10; i++) {\ny\n}')
+  assert.equal(descendantsOf(nodes, solidityControlFlow.id).filter((n) => n.label === 'Conditional Statements').length, 1)
+})
+
+test('the engineering moves are idempotent', () => {
+  const once = normalize(engineeringMap()).nodes
+  const twice = normalize(once)
+  assert.equal(twice.changed, false)
+  assert.deepEqual(twice.nodes, once)
+})
+
+test('the built-in Memory Tricks summary matches the stored-summary fix', () => {
+  const [{ label, from, to }] = SUMMARY_MIGRATIONS_BY_VERSION[4]
+  assert.equal(label, 'Memory Tricks')
+  assert.equal(BUILT_IN_SUMMARIES['Memory Tricks'], to)
+  assert.equal(to, from.replace(/\.$/, ' (sharp!).'))
+})
+
+test('summary migration fixes only the stored Memory Tricks summary that still has the old text', () => {
+  const oldText = 'Mnemonics for the V of each key: Car→Gas, Data→Analysis, Eyes→Blink, Fire→Coal, Garden→Dirt, Artist→Easel, Bitch→Fuck.'
+  const notes = [{ id: 'note-music', text: 'music note', level: 0 }]
+  const before = buildMap(['Root', [
+    ['Tension', [
+      ['Memory Tricks', [], { summary: oldText, notes }],
+      ['Dominant Chords by Key', [], { summary: oldText }],
+    ]],
+    ['Other Tension', [['Memory Tricks', [], { summary: 'my own mnemonic' }], ['Memory Tricks']], { isCustom: true }],
+  ]])
+  const { nodes, changed } = applySummaryMigrations(before)
+  assert.equal(changed, true)
+  const [fixed, edited, unset] = nodes.filter((n) => n.label === 'Memory Tricks')
+  assert.equal(fixed.summary, 'Mnemonics for the V of each key: Car→Gas, Data→Analysis, Eyes→Blink, Fire→Coal, Garden→Dirt, Artist→Easel, Bitch→Fuck (sharp!).')
+  assert.equal(fixed.notes, notes)
+  assert.equal(edited.summary, 'my own mnemonic')
+  assert.equal('summary' in unset, false)
+  assert.equal(nodes.find((n) => n.label === 'Dominant Chords by Key').summary, oldText)
+  assert.deepEqual(nodes.filter((n) => n.label !== 'Memory Tricks'), before.filter((n) => n.label !== 'Memory Tricks'))
+
+  const again = applySummaryMigrations(nodes)
+  assert.equal(again.changed, false)
+  assert.equal(again.nodes, nodes)
 })
