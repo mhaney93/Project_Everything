@@ -22,6 +22,12 @@ npm run dev
 npm run build
 ```
 
+## Test
+
+```bash
+npm test
+```
+
 ## Data Migrations
 
 Node label migrations are handled in `src/App.jsx` through a versioned map:
@@ -50,3 +56,7 @@ const LABEL_MIGRATIONS_BY_VERSION = {
 	},
 }
 ```
+
+### Move or merge a built-in node
+
+Structural migrations live in `src/mapMigrations.js` (`STRUCTURAL_MIGRATIONS_BY_VERSION`) and run on every load after the label migrations, before stale built-in children are pruned. Each entry names a built-in label and the `homePath` of labels it belongs under: the richest stored copy moves there, and every other copy is merged into it (notes and custom children are kept) and removed with all its descendants. Remove the label from its old parents in `TOPIC_SUBDIVISIONS` and add it under the new one in the same change. Migrations must be idempotent.

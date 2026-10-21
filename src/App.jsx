@@ -3,6 +3,7 @@ import { useMobileHeaderSpacer } from './mobileHeaderSpacer';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import './App.css';
 import { authAPI, mapsAPI, filesAPI, API_BASE_URL } from './api';
+import { applyStructuralMigrations, removeStalePredefinedChildren } from './mapMigrations';
 
 // Node size and layout constants
 const NODE_SIZE_MIN = 0.6;
@@ -1257,39 +1258,9 @@ function App() {
 
     const normalizeLoadedNodes = (mapNodes) => {
       const { nodes: migratedNodes, changed: migrationChanged } = applyLabelMigrations(mapNodes)
-
-      // Remove stale predefined children: for any node with known subdivisions,
-      // drop predefined children whose labels are not in the expected set.
-      // addChildren will recreate correct children on first expand.
-      const childrenByParent = new Map()
-      for (const node of migratedNodes) {
-        if (node.parentId !== null && node.parentId !== undefined) {
-          if (!childrenByParent.has(node.parentId)) childrenByParent.set(node.parentId, [])
-          childrenByParent.get(node.parentId).push(node)
-        }
-      }
-
-      const idsToRemove = new Set()
-      for (const node of migratedNodes) {
-        const expected = TOPIC_SUBDIVISIONS[node.label]
-        if (!expected || expected.length === 0) continue
-        const children = childrenByParent.get(node.id) || []
-        for (const child of children) {
-          if (!child.isCustom && !expected.includes(child.label)) {
-            // Stale predefined child — remove it and all its descendants
-            const stack = [child.id]
-            while (stack.length > 0) {
-              const id = stack.pop()
-              idsToRemove.add(id)
-              const grandchildren = childrenByParent.get(id) || []
-              for (const gc of grandchildren) stack.push(gc.id)
-            }
-          }
-        }
-      }
-
-      if (idsToRemove.size === 0) return { nodes: migratedNodes, changed: migrationChanged }
-      return { nodes: migratedNodes.filter(n => !idsToRemove.has(n.id)), changed: true }
+      const { nodes: restructuredNodes, changed: structureChanged } = applyStructuralMigrations(migratedNodes)
+      const { nodes: prunedNodes, changed: pruneChanged } = removeStalePredefinedChildren(restructuredNodes, TOPIC_SUBDIVISIONS)
+      return { nodes: prunedNodes, changed: migrationChanged || structureChanged || pruneChanged }
     }
 
     const collapseNodesToRoot = (mapNodes) => {
@@ -9713,7 +9684,7 @@ function App() {
     'Posterior Parietal Cortex': [],
     'Other Prefrontal Cortex Regions|PFC': ['Orbitofrontal Cortex (OFC)', 'Medial Prefrontal Cortex (mPFC)', 'Lateral Prefrontal Cortex (LPFC)'],
     'Prefrontal-Limbic Circuitry': ['Functional Roles|PFC-Limbic', 'Key Brain Regions|PFC-Limbic'],
-    'Functional Roles|PFC-Limbic': ['Emotional Regulation', 'Decision-Making', 'Impulse Control', 'Goal-Directed Behavior', 'Motivation Modulation'],
+    'Functional Roles|PFC-Limbic': ['Decision-Making', 'Impulse Control', 'Goal-Directed Behavior', 'Motivation Modulation'],
     'Emotional Regulation': ['Emotional Awareness and Identification', 'Mindfulness', 'Cognitive Behavioral Therapy (CBT)', 'Strong Healthy Relationships'],
     'Decision-Making': [],
     'Impulse Control': [],
@@ -9725,7 +9696,7 @@ function App() {
     'Ventral Hippocampus to Medial Prefrontal Cortex (vHPC-mPFC)': [],
     'Dorsal Hippocampus to Lateral Prefrontal Cortex (dHPC-lPFC)': [],
     'Indirect Pathways': [],
-    'Functional Interactions|PFC-Hippocampal': ['Memory Retrieval and Working Memory', 'Emotional Regulation', 'Spatial Navigation and Planning', 'Contextual Memory'],
+    'Functional Interactions|PFC-Hippocampal': ['Memory Retrieval and Working Memory', 'Spatial Navigation and Planning', 'Contextual Memory'],
     'Memory Retrieval and Working Memory': [],
     'Spatial Navigation and Planning': [],
     'Contextual Memory': [],
@@ -9783,7 +9754,7 @@ function App() {
     'The Problem of Subjectivity (Self)': [],
     'The Binding Problem': ['Neural Correlates of Consciousness'],
     'Neural Correlates of Consciousness': [],
-    'Cognition': ['Intelligence', 'Emotional Regulation'],
+    'Cognition': ['Intelligence'],
     'Intelligence': ['Fluid Intelligence', 'Crystallized Intelligence'],
     'Fluid Intelligence': [],
     'Crystallized Intelligence': [],
@@ -10220,7 +10191,7 @@ function App() {
     'Developmental Psychology': ['Cognitive Development', 'Socio-Emotional Development', 'Theories of Development'],
     'Cognitive Development': ['Adolescence (10-20)'],
     'Adolescence (10-20)': ['Cortical Maturation/Cerebral Cortex Maturation'],
-    'Cortical Maturation/Cerebral Cortex Maturation': ['PFC Development', 'Synaptic Pruning', 'Myelination', 'Risk-Taking and Impulsivity', 'Emotional Regulation'],
+    'Cortical Maturation/Cerebral Cortex Maturation': ['PFC Development', 'Synaptic Pruning', 'Myelination', 'Risk-Taking and Impulsivity'],
     'PFC Development': [],
     'Synaptic Pruning': [],
     'Myelination': [],
@@ -10323,7 +10294,7 @@ function App() {
     'Practicing Assertive Communication of Needs': [],
     'Internal Working Models of Relationships': [],
     'Attachment Styles': ['Secure|Attachment', 'Insecure|Attachment'],
-    'Secure|Attachment': ['Intimacy', 'Independence|Attachment', 'Trust|Attachment', 'Open and Honest Communication', 'Emotional Regulation', 'Constructive Conflict Resolution', 'Support|Attachment'],
+    'Secure|Attachment': ['Intimacy', 'Independence|Attachment', 'Trust|Attachment', 'Open and Honest Communication', 'Constructive Conflict Resolution', 'Support|Attachment'],
     'Intimacy': [],
     'Independence|Attachment': [],
     'Trust|Attachment': [],
@@ -10439,7 +10410,7 @@ function App() {
     'Developing Emotional Regulation': [],
     'Challenging Contradictory Internal Models': [],
     'Creating Safe Relationships': [],
-    'Emotions': ['Components of Emotions', 'Types of Emotions', 'Pleasant', 'Neutral', 'Unpleasant'],
+    'Emotions': ['Components of Emotions', 'Types of Emotions', 'Emotional Regulation', 'Pleasant', 'Neutral', 'Unpleasant'],
     'Personality Psychology': ['Personality Theory', 'Archetypes'],
     'Positive Psychology': ['Emotional Well-Being', 'Happiness'],
     'Senses': [],
@@ -10897,7 +10868,7 @@ function App() {
     'The Surgeon': [],
 
     // Positive Psychology
-    'Emotional Well-Being': ['Negativity Bias', 'Emotional Regulation'],
+    'Emotional Well-Being': ['Negativity Bias'],
     'Negativity Bias': ['Evolutionary Origin|Negativity Bias', 'Workaround|Negativity Bias'],
     'Evolutionary Origin|Negativity Bias': [],
     'Workaround|Negativity Bias': ['Gratitude', 'Forgiveness/Grace', 'Humility'],
