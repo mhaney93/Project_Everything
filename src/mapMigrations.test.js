@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
-import { applyNodeEdits, applyStructuralMigrations, applySummaryMigrations, dropStaleChildren, NODE_EDITS_BY_VERSION, SUMMARY_MIGRATIONS_BY_VERSION, removeStalePredefinedChildren } from './mapMigrations.js'
+import { applyLabelMigrations, applyNodeEdits, applyStructuralMigrations, applySummaryMigrations, dropStaleChildren, LATEST_LABEL_MIGRATION_VERSION, NODE_EDITS_BY_VERSION, SUMMARY_MIGRATIONS_BY_VERSION, removeStalePredefinedChildren } from './mapMigrations.js'
 
 // TOPIC_SUBDIVISIONS and generateSummary's summaries live inside the App
 // component, so evaluate the object literals from the source.
@@ -1115,19 +1115,7 @@ test('the built-in Rwanda (1962 - present) keeps its Rwandan Genocide child', ()
   assert.equal(normalize(before, appSummary).changed, false)
 })
 
-// LABEL_MIGRATIONS_BY_VERSION ends with `};`, so loadAppObject cannot find it.
-const LABEL_MIGRATIONS = (() => {
-  const source = readFileSync(new URL('./App.jsx', import.meta.url), 'utf8')
-  const start = source.indexOf('{', source.indexOf('const LABEL_MIGRATIONS_BY_VERSION = {'))
-  return vm.runInNewContext(`(${source.slice(start, source.indexOf('\n};\n', start) + 2)})`)
-})()
-
-// Mirrors applyLabelMigrations in App.jsx, which runs before the structural migrations.
-const relabel = (mapNodes) => mapNodes.map((node) => {
-  let label = node.label
-  for (const version of Object.keys(LABEL_MIGRATIONS).map(Number).sort((a, b) => a - b)) label = LABEL_MIGRATIONS[version][label] || label
-  return label === node.label ? node : { ...node, label }
-})
+const relabel = (mapNodes) => applyLabelMigrations(mapNodes, appSummary, TOPIC_SUBDIVISIONS)
 
 test('history labels take corrected dates and keep their summaries, notes and children', () => {
   const notes = [{ id: 'note-trump', text: 'mine', level: 0 }]
@@ -1149,10 +1137,10 @@ test('history labels take corrected dates and keep their summaries, notes and ch
     'Migration Period (500 - 750)': 'Migration Period (c. 375 - 568)',
     'Migration Period (750 - 800)': 'Rise of the Carolingians (750 - 800)',
   }
-  const { nodes } = normalize(relabel(before), appSummary)
+  const { nodes } = normalize(relabel(before).nodes, appSummary)
 
   assert.equal(nodes.length, before.length)
-  for (const node of before) assert.deepEqual(nodes.find((n) => n.id === node.id), { ...node, label: renames[node.label] || node.label })
+  for (const node of before.slice(1)) assert.deepEqual(nodes.find((n) => n.id === node.id), { ...node, label: renames[node.label] || node.label })
   assert.deepEqual([...TOPIC_SUBDIVISIONS['Early Middle Ages (476 - 1000)']], ['Late Antiquity (500 - 750)', 'Rise of the Carolingians (750 - 800)', 'Carolingian Era (800 - 887)', 'Post-Carolingian Era (887 - 1000)'])
   assert.deepEqual([...TOPIC_SUBDIVISIONS['Late Antiquity (500 - 750)']], ['Migration Period (c. 375 - 568)'])
   assert.equal(BUILT_IN_SUMMARIES['Migration Period (c. 375 - 568)'], lateAntiquitySummary)
@@ -1161,7 +1149,7 @@ test('history labels take corrected dates and keep their summaries, notes and ch
     assert.equal(label in TOPIC_SUBDIVISIONS, false)
     assert.equal(label in BUILT_IN_SUMMARIES, false)
   }
-  assert.deepEqual(relabel(nodes), nodes)
+  assert.equal(relabel(nodes).changed, false)
 })
 
 test('Operation Northwoods credits the Joint Chiefs and rewrites only an unedited stored summary', () => {
@@ -1755,4 +1743,88 @@ test('node edits leave nodes the owner has edited, and other maps\' nodes, alone
   const builtIn = applyNodeEdits([builtInArrays])
   assert.equal(builtIn.changed, false)
   assert.deepEqual(builtIn.nodes, [builtInArrays])
+})
+
+const labelsOf = (mapNodes) => mapNodes.map((n) => n.label)
+
+test('a custom node with an old built-in label is never renamed', () => {
+  const before = buildMap(['Everything', [
+    ['Humanities', [['Art', [], { isCustom: true }], ['Philosophy', [['Ethics', [], { isCustom: true }]]]]],
+    ['Personal', [['Free Will', [], { isPersonal: true }]], { isPersonal: true }],
+  ]])
+  const { nodes } = relabel(before)
+  assert.deepEqual(labelsOf(nodes), labelsOf(before))
+})
+
+test('a built-in node with an old label is renamed only under its built-in parent', () => {
+  const before = buildMap(['Everything', [
+    ['Humanities', [
+      ['Art'],
+      ['Philosophy', [['Ethics'], ['Metaphysics', [['Free Will vs. Determinism', [['Free Will']]]]]]],
+      ['Sociology', [['Ethics']]],
+    ]],
+  ]])
+  const { nodes, changed } = relabel(before)
+  assert.equal(changed, true)
+  assert.deepEqual(labelsOf(nodes), [
+    'Everything', 'Humanities', 'Arts', 'Philosophy', 'Ethics/Moral Philosophy', 'Metaphysics',
+    'Free Will vs. Determinism', 'Free Will', 'Sociology', 'Ethics',
+  ])
+  assert.equal(nodes[0].labelMigrationVersion, LATEST_LABEL_MIGRATION_VERSION)
+})
+
+test('renames run once: a second load changes nothing, even a node given an old label since', () => {
+  const first = relabel(buildMap(['Everything', [['Humanities', [['Art']]]]])).nodes
+  assert.deepEqual(relabel(first), { nodes: first, changed: false })
+
+  const later = first.map((n) => (n.label === 'Arts' ? { ...n, label: 'Art' } : n))
+  assert.deepEqual(relabel(later), { nodes: later, changed: false })
+})
+
+test('a map that already carries the new labels keeps them, gaining only the version', () => {
+  const before = buildMap(['Everything', [
+    ['Humanities', [['Arts'], ['History', [['Modern Era (1453 - present)', [['Early Modern Period (1453 - 1789)']]]]]]],
+  ]])
+  const { nodes, changed } = relabel(before)
+  assert.equal(changed, true)
+  assert.deepEqual(nodes.slice(1), before.slice(1))
+  assert.deepEqual(nodes[0], { ...before[0], labelMigrationVersion: LATEST_LABEL_MIGRATION_VERSION })
+  assert.equal(relabel(nodes).changed, false)
+})
+
+test('a renamed parent is known when its children are judged', () => {
+  const { nodes } = relabel(buildMap(['Everything', [
+    ['Humanities', [['History', [['1453 - present Modern Era', [['1453 - 1789 Early Modern Period', [['1300 - 1600 Renaissance']]]]]]]]],
+  ]]))
+  assert.deepEqual(labelsOf(nodes).slice(3), ['Modern Era (1453 - present)', 'Early Modern Period (1453 - 1789)', 'Renaissance (1300 - 1600)'])
+})
+
+test('a map at an older version runs only the newer renames', () => {
+  const medieval = ['Medieval Period (476 - 1453)', [['Early Middle Ages (476 - 1000)', [['Migration Period (750 - 800)']]]]]
+  const before = buildMap(['Everything', [['Humanities', [['Art'], ['History', [medieval]]]]], { labelMigrationVersion: 2 }])
+  const { nodes } = relabel(before)
+  assert.deepEqual(labelsOf(nodes).slice(2), ['Art', 'History', 'Medieval Period (476 - 1453)', 'Early Middle Ages (476 - 1000)', 'Rise of the Carolingians (750 - 800)'])
+})
+
+test('the owner-requested Trump presidency fix reaches the custom node only under its parent', () => {
+  const custom = { isCustom: true }
+  const before = buildMap(['Everything', [
+    ['America During the Post-Cold War Era', [['First Trump Presidency (2016 - 2020)', [], custom]], custom],
+    ['My Notes', [['First Trump Presidency (2016 - 2020)', [], custom]], custom],
+  ]])
+  const { nodes } = relabel(before)
+  assert.deepEqual(labelsOf(nodes).slice(2), ['First Trump Presidency (2017 - 2021)', 'My Notes', 'First Trump Presidency (2016 - 2020)'])
+  assert.equal(nodes[2].isCustom, true)
+})
+
+test('a renamed node beside its new namesake merges into it', () => {
+  const before = buildMap(['Everything', [['Humanities', [
+    ['Art', [['Painting Notes', [], { isCustom: true }]], { notes: [{ id: 'n1', text: 'kept', level: 0 }] }],
+    ['Arts'],
+  ]]]])
+  const { nodes } = relabel(before)
+  const arts = nodes.filter((n) => n.label === 'Arts')
+  assert.equal(arts.length, 1)
+  assert.deepEqual(arts[0].notes.map((n) => n.id), ['n1'])
+  assert.equal(nodes.find((n) => n.label === 'Painting Notes').parentId, arts[0].id)
 })

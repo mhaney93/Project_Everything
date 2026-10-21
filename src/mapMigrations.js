@@ -1,6 +1,5 @@
-// Structural map migrations. Like LABEL_MIGRATIONS_BY_VERSION in App.jsx these
-// run on every load, so each one must be idempotent: a map that is already
-// migrated comes back unchanged.
+// Structural map migrations run on every load, so each one must be
+// idempotent: a map that is already migrated comes back unchanged.
 
 // Each entry keeps exactly one built-in node with `label`, under the node at
 // `homePath` (a chain of labels ending at the new parent). Every other
@@ -55,6 +54,98 @@ const ANCIENT_MIGRATION_PERIOD_SUMMARY = 'Characterized by significant movements
 
 // The admin map's hidden Mossad Killed Kennedy summary, archived off-map.
 const ARCHIVED_MOSSAD_SUMMARY = "The theory that Israeli intelligence orchestrated Kennedy's assassination in response to his pressure on Israel to open its Dimona nuclear facility to international inspection."
+
+// Label renames, old label to new. Unlike the migrations below they run once
+// per map: the map's root records the last version applied
+// (labelMigrationVersion), so a node the owner later gives an old label keeps
+// it. A built-in node is renamed only under a parent whose built-in children
+// list the new label (or the parent named in LABEL_MIGRATION_PARENTS), so a
+// namesake elsewhere in the map is left alone; custom and Personal nodes are
+// never renamed unless their entry there allows it.
+export const LABEL_MIGRATIONS_BY_VERSION = {
+  1: {
+    Art: 'Arts',
+  },
+  2: {
+    '3.3 million years ago - 3,200 BC Prehistory': 'Prehistory (3.3 million years ago - 3,200 BC)',
+    '3,200 BC - 476 AD Ancient History': 'Ancient History (3,200 BC - 476 AD)',
+    '476 - 1453 Medieval Period': 'Medieval Period (476 - 1453)',
+    '1453 - present Modern Era': 'Modern Era (1453 - present)',
+    '3.3 million years ago - 3,300 BC Stone Age': 'Stone Age (3.3 million years ago - 3,300 BC)',
+    '3,300 BC - 3,200 BC Early Bronze Age (Prehistoric)': 'Early Bronze Age (3,300 BC - 3,200 BC)',
+    '3.3 million years ago - 10,000 BC Paleolithic Era': 'Paleolithic Era (3.3 million years ago - 10,000 BC)',
+    '10,000 BC - 8,000 BC Mesolithic Era': 'Mesolithic Era (10,000 BC - 8,000 BC)',
+    '8,000 BC - 4,500 BC Neolithic Era': 'Neolithic Era (8,000 BC - 4,500 BC)',
+    '4,500 BC - 3,300 BC Copper Age': 'Copper Age (4,500 BC - 3,300 BC)',
+    '3.3 million years ago - 300,000 years ago Lower Paleolithic': 'Lower Paleolithic (3.3 million years ago - 300,000 years ago)',
+    '300,000 years ago - 40,000 years ago Middle Paleolithic': 'Middle Paleolithic (300,000 years ago - 40,000 years ago)',
+    '40,000 years ago - 10,000 BC Upper Paleolithic': 'Upper Paleolithic (40,000 years ago - 10,000 BC)',
+    '300,000 years ago - 120,000 years ago Early Middle Paleolithic': 'Early Middle Paleolithic (300,000 years ago - 120,000 years ago)',
+    '120,000 years ago - 40,000 years ago Last Glacial Period (Middle Paleolithic)': 'Last Glacial Period, Middle Paleolithic (120,000 years ago - 40,000 years ago)',
+    '40,000 years ago - 10,000 BC Last Glacial Period (Upper Paleolithic)': 'Last Glacial Period, Upper Paleolithic (40,000 years ago - 10,000 BC)',
+    '10,875 BC - 10,000 BC Younger Dryas Event (Upper Paleolithic)': 'Younger Dryas Event, Upper Paleolithic (10,875 BC - 10,000 BC)',
+    '10,000 BC - 9,675 BC Last Glacial Period End (Mesolithic)': 'Last Glacial Period End, Mesolithic (10,000 BC - 9,675 BC)',
+    '10,000 BC - 9,675 BC Younger Dryas Event (Mesolithic)': 'Younger Dryas Event, Mesolithic (10,000 BC - 9,675 BC)',
+    '9,675 BC - 9,575 BC Younger Dryas End (Late Mesolithic)': 'Younger Dryas End, Late Mesolithic (9,675 BC - 9,575 BC)',
+    '9,675 BC - 8,000 BC Late Mesolithic': 'Late Mesolithic (9,675 BC - 8,000 BC)',
+    '4,100 BC - 3,300 BC Sumerian Civilization (Copper Age)': 'Sumerian Civilization (4,100 BC - 3,300 BC)',
+    '4,100 BC - 3,300 BC Uruk Period': 'Uruk Period (4,100 BC - 3,300 BC)',
+    '4,100 BC - 3,300 BC Predynastic Egypt (Copper Age)': 'Predynastic Egypt (4,100 BC - 3,300 BC)',
+    '3,500 BC - 3,300 BC Ebla Civilization (Copper Age)': 'Ebla Civilization (3,500 BC - 3,300 BC)',
+    '3,300 BC - 3,200 BC Indus Valley Civilization (Prehistoric)': 'Indus Valley Civilization (3,300 BC - 3,200 BC)',
+    '3,300 BC - 3,200 BC Cycladic Civilization (Prehistoric)': 'Cycladic Civilization (3,300 BC - 3,200 BC)',
+    '3,200 BC - 1,200 BC Bronze Age (Ancient)': 'Bronze Age (3,200 BC - 1,200 BC)',
+    '1,200 BC - 600 BC Iron Age': 'Iron Age (1,200 BC - 600 BC)',
+    '3,100 BC - 30 BC Ancient Egypt': 'Ancient Egypt (3,100 BC - 30 BC)',
+    '3,500 BC - 539 BC Ancient Mesopotamia': 'Ancient Mesopotamia (3,500 BC - 539 BC)',
+    '3,300 BC - 600 AD Ancient India': 'Ancient India (3,300 BC - 600 AD)',
+    '2,070 BC - 220 AD Ancient China': 'Ancient China (2,070 BC - 220 AD)',
+    '800 BC - 146 BC Ancient Greece': 'Ancient Greece (800 BC - 146 BC)',
+    '753 BC - 476 AD Ancient Rome': 'Ancient Rome (753 BC - 476 AD)',
+    '476 - 1000 Early Middle Ages': 'Early Middle Ages (476 - 1000)',
+    '1000 - 1250 High Middle Ages': 'High Middle Ages (1000 - 1250)',
+    '1250 - 1453 Late Middle Ages': 'Late Middle Ages (1250 - 1453)',
+    '330 - 1453 Byzantine Empire': 'Byzantine Empire (330 - 1453)',
+    '750 - 1258 Islamic Golden Age': 'Islamic Golden Age (750 - 1258)',
+    '1453 - 1789 Early Modern Period': 'Early Modern Period (1453 - 1789)',
+    '1789 - 1945 Late Modern Period': 'Late Modern Period (1789 - 1945)',
+    '1945 - present Contemporary Period': 'Contemporary Period (1945 - present)',
+    '1300 - 1600 Renaissance': 'Renaissance (1300 - 1600)',
+    '1400 - 1800 Age of Discovery': 'Age of Discovery (1400 - 1800)',
+    '1517 - 1648 Reformation': 'Reformation (1517 - 1648)',
+    '1637 - 1800 Enlightenment': 'Enlightenment (1637 - 1800)',
+    '1543 - 1687 Scientific Revolution': 'Scientific Revolution (1543 - 1687)',
+    '1760 - 1840 Industrial Revolution': 'Industrial Revolution (1760 - 1840)',
+    '1774 - 1849 Age of Revolutions': 'Age of Revolutions (1774 - 1849)',
+    '1800 - 1945 Imperialism': 'Imperialism (1800 - 1945)',
+    '1914 - 1918 World War I': 'World War I (1914 - 1918)',
+    '1918 - 1939 Interwar Period': 'Interwar Period (1918 - 1939)',
+    '1939 - 1945 World War II': 'World War II (1939 - 1945)',
+    'Ethics': 'Ethics/Moral Philosophy',
+    'Gettier Problem': 'The Gettier Problem',
+    'Virtue Ethics': 'Aristotle\'s Virtue Ethics',
+    'Deontology': 'Kant\'s Deontology',
+    'Alternate Theory: Israel Killed Kennedy': 'Alternate Theories',
+    'Ockham\'s Radical Nominalism': 'Ockham\'s Conceptualism',
+    'Free Will': 'Free Will vs. Determinism',
+    '1947 - 1991 Cold War': 'Cold War Era (1947 - 1991)',
+    'Cold War (1947 - 1991)': 'Cold War Era (1947 - 1991)',
+    '1991 - 2001 Post-Cold War Era': 'Post-Cold War Era (1991 - 2001)',
+    '2001 - present 21st Century': '21st Century (2001 - present)',
+  },
+  3: {
+    'First Trump Presidency (2016 - 2020)': 'First Trump Presidency (2017 - 2021)',
+    'Migration Period (500 - 750)': 'Migration Period (c. 375 - 568)',
+    'Migration Period (750 - 800)': 'Rise of the Carolingians (750 - 800)',
+  },
+}
+
+// The parent of a renamed label that its built-in parent no longer lists.
+// `custom` lets the rename reach the owner's own node, for a fix the owner asked for.
+const LABEL_MIGRATION_PARENTS = {
+  '21st Century (2001 - present)': { parent: 'Contemporary Period (1945 - present)' },
+  'First Trump Presidency (2017 - 2021)': { parent: 'America During the Post-Cold War Era', custom: true },
+}
 
 export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
   3: [
@@ -801,6 +892,57 @@ export const applyStructuralMigrations = (mapNodes, builtInSummary = () => '', t
     }
   }
   return { nodes, changed }
+}
+
+export const LATEST_LABEL_MIGRATION_VERSION = Math.max(...Object.keys(LABEL_MIGRATIONS_BY_VERSION).map(Number))
+
+// builtInSummary and topicSubdivisions are as for applyStructuralMigrations.
+export const applyLabelMigrations = (mapNodes, builtInSummary = () => '', topicSubdivisions = {}) => {
+  if (!Array.isArray(mapNodes)) return { nodes: [], changed: false }
+  const roots = mapNodes.filter(isRoot)
+  const applied = Math.max(0, ...roots.map((root) => Number(root.labelMigrationVersion) || 0))
+  if (roots.length === 0 || applied >= LATEST_LABEL_MIGRATION_VERSION) return { nodes: mapNodes, changed: false }
+
+  const pending = Object.keys(LABEL_MIGRATIONS_BY_VERSION)
+    .map(Number)
+    .filter((version) => version > applied)
+    .sort((a, b) => a - b)
+    .map((version) => LABEL_MIGRATIONS_BY_VERSION[version])
+  const migrate = (label) => pending.reduce((current, renames) => renames[current] || current, label)
+  const belongsUnder = (label, parentLabel) => {
+    const home = LABEL_MIGRATION_PARENTS[label]
+    return home ? home.parent === parentLabel : (topicSubdivisions[parentLabel] || []).includes(label)
+  }
+
+  // Walk down from the roots, so a parent's new label is known before its children.
+  const childrenByParent = buildChildrenByParent(mapNodes)
+  const labelAfter = new Map()
+  const renames = []
+  const queue = [...roots]
+  const seen = new Set()
+  while (queue.length > 0) {
+    const node = queue.shift()
+    if (seen.has(node.id)) continue
+    seen.add(node.id)
+    labelAfter.set(node.id, node.label)
+    const label = migrate(node.label)
+    const parentLabel = labelAfter.get(node.parentId)
+    const allowed = isBuiltIn(node) || (LABEL_MIGRATION_PARENTS[label]?.custom && !node.isPersonal)
+    if (label !== node.label && allowed && parentLabel !== undefined && belongsUnder(label, parentLabel)) {
+      labelAfter.set(node.id, label)
+      renames.push({ id: node.id, label })
+    }
+    queue.push(...(childrenByParent.get(node.id) || []))
+  }
+
+  let nodes = mapNodes.map((node) => (isRoot(node) ? { ...node, labelMigrationVersion: LATEST_LABEL_MIGRATION_VERSION } : node))
+  for (const { id, label } of renames) {
+    if (!nodes.some((node) => node.id === id)) continue
+    const sourcePath = labelPathOf(nodes, id)
+    nodes = nodes.map((node) => (node.id === id ? { ...node, label } : node))
+    nodes = settleUnder(nodes, id, nodes.find((node) => node.id === id).parentId, builtInSummary, sourcePath)
+  }
+  return { nodes, changed: true }
 }
 
 export const applySummaryMigrations = (mapNodes) => {
