@@ -97,8 +97,9 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
   ],
   7: [
     // The admin map's old JFK assassination, Church Committee, Dimona and
-    // Aliyahs children lost their parents; put them back in the tree.
-    { rehomeOrphans: true },
+    // Aliyahs children lost their parents; put them back in the tree. The
+    // hidden Mossad theory is too speculative to restore (archived off-map).
+    { rehomeOrphans: true, dropLabels: ['Mossad Killed Kennedy'] },
   ],
 }
 
@@ -520,12 +521,25 @@ const describe = (node) => (node.isPersonal ? `#${node.id} (personal)` : `#${nod
 //    its home.
 // 3. Without a home it moves under a custom "Recovered Nodes" node at the
 //    root, so it stays visible, unless it holds nothing the owner wrote.
-// Personal orphans are left untouched. `log`, when given, collects one line
-// per action.
-const rehomeOrphans = (mapNodes, builtInSummary, topicSubdivisions, log) => {
+// Personal orphans are left untouched. Before any of this, unreachable
+// non-Personal nodes labelled one of `dropLabels` are deleted with their
+// subtrees. `log`, when given, collects one line per action.
+const rehomeOrphans = (mapNodes, { dropLabels = [] }, builtInSummary, topicSubdivisions, log) => {
   const note = (line) => log?.push(line)
   const pathText = (mapNodesNow, id) => labelPathOf(mapNodesNow, id).join(' > ')
   let nodes = mapNodes
+  const reachableAtStart = reachableIds(nodes)
+  const dropped = nodes.filter((node) => !reachableAtStart.has(node.id) && !node.isPersonal && dropLabels.includes(node.label))
+  if (dropped.length > 0) {
+    const childrenByParent = buildChildrenByParent(nodes)
+    const removed = new Set()
+    for (const node of dropped) {
+      const ids = subtreeIds(childrenByParent, node.id)
+      for (const id of ids) removed.add(id)
+      note(`deleted ${describe(node)} (${ids.length} node(s)): not restored to the map`)
+    }
+    nodes = nodes.filter((node) => !removed.has(node.id))
+  }
   const skipped = new Set()
   for (;;) {
     const byId = new Map(nodes.map((node) => [node.id, node]))
@@ -621,7 +635,7 @@ const rehomeOrphans = (mapNodes, builtInSummary, topicSubdivisions, log) => {
 }
 
 const runStructuralMigration = (mapNodes, migration, builtInSummary, topicSubdivisions, log) => {
-  if (migration.rehomeOrphans) return rehomeOrphans(mapNodes, builtInSummary, topicSubdivisions, log)
+  if (migration.rehomeOrphans) return rehomeOrphans(mapNodes, migration, builtInSummary, topicSubdivisions, log)
   if (migration.rename) return renameBuiltInNode(mapNodes, migration, builtInSummary)
   if (migration.add) return addBuiltInNode(mapNodes, migration)
   if (migration.move) return moveBuiltInNode(mapNodes, migration, builtInSummary)

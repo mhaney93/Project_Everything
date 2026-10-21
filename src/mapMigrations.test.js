@@ -1290,14 +1290,16 @@ test('production map 7 puts every orphan back in the tree without losing a summa
     assert.equal(node(visible).summary, byId.get(hidden).summary, byId.get(hidden).label)
     assert.equal(node(visible).notes, undefined)
   }
-  for (const id of [517, 518, 519, 520, 521, 522, 1276, 1277, 1278, 1279, 1280, 1281, 1282, 1283, 1288, 1289, 1290, 1291, 1292, 1293]) {
+  for (const id of [517, 518, 519, 520, 521, 522, 1276, 1284, 1277, 1278, 1279, 1280, 1281, 1282, 1283, 1288, 1289, 1290, 1291, 1292, 1293]) {
     assert.equal(node(id), undefined, byId.get(id).label)
   }
 
   // Unique content moves under its built-in parent, keeping its summary.
   assert.deepEqual(childrenOf(1787), [1268, 1269])
   assert.deepEqual(childrenOf(1812), [1285, 1286, 1287])
-  assert.deepEqual(childrenOf(1816), [1284])
+  // The hidden Mossad theory is not restored.
+  assert.deepEqual(childrenOf(1816), [])
+  assert.equal(nodes.some((n) => n.label === 'Mossad Killed Kennedy'), false)
   const aliyahs = nodes.filter((n) => n.label === 'Aliyahs (1882 - 1948)')
   assert.equal(aliyahs.length, 1)
   assert.equal(aliyahs[0].parentId, 1508)
@@ -1305,7 +1307,7 @@ test('production map 7 puts every orphan back in the tree without losing a summa
   // The slot between Balfour Declaration (0) and End of Ottoman Palestine (2).
   assert.equal(aliyahs[0].order, 1)
   assert.deepEqual(childrenOf(aliyahs[0].id), [1522, 1523, 1524, 1525, 1526, 1527])
-  for (const id of [1268, 1269, 1284, 1285, 1286, 1287, 1522, 1523, 1524, 1525, 1526, 1527]) {
+  for (const id of [1268, 1269, 1285, 1286, 1287, 1522, 1523, 1524, 1525, 1526, 1527]) {
     assert.equal(node(id).summary, byId.get(id).summary)
     assert.equal(node(id).hidden, true)
     assert.equal(node(id).order, undefined)
@@ -1319,10 +1321,10 @@ test('production map 7 puts every orphan back in the tree without losing a summa
 
   // No hidden summary is lost, and nothing else changes.
   const shown = new Set(reachableFrom(nodes).map((n) => n.summary))
-  for (const id of before.filter((n) => !reachableFrom(before).includes(n)).map((n) => n.id)) {
+  for (const id of before.filter((n) => !reachableFrom(before).includes(n) && n.id !== 1284).map((n) => n.id)) {
     assert.ok(shown.has(byId.get(id).summary), byId.get(id).label)
   }
-  const touched = new Set([1268, 1269, 1284, 1285, 1286, 1287, 1522, 1523, 1524, 1525, 1526, 1527, 1811, 1812, 1813, 1814, 1815, 1816, 1871, 1872, 1873, 1874])
+  const touched = new Set([1268, 1269, 1285, 1286, 1287, 1522, 1523, 1524, 1525, 1526, 1527, 1811, 1812, 1813, 1814, 1815, 1816, 1871, 1872, 1873, 1874])
   for (const n of reachableFrom(before)) {
     if (!touched.has(n.id)) assert.deepEqual(node(n.id), n, n.label)
   }
@@ -1424,4 +1426,14 @@ test('the stale-child prune keeps a retired branch the owner wrote under, as a c
   assert.equal(nodes.find((n) => n.label === 'Mechanics').notes[0].id, 'note-m')
   assert.ok(!nodes.some((n) => n.label === 'Chemistry' || n.label === 'Organic Chemistry'))
   assert.equal(removeStalePredefinedChildren(nodes, TOPIC_SUBDIVISIONS).changed, false)
+})
+
+test('only a hidden Mossad Killed Kennedy is deleted; a visible one stays', () => {
+  const before = [
+    ...buildMap(['Everything', [['Alternate Theories', [['Mossad Killed Kennedy', [], { summary: 'Visible.' }]]]]]),
+    { id: 90, label: 'Mossad Killed Kennedy', parentId: 89, hidden: true, summary: 'Hidden.' },
+  ]
+  const { nodes } = applyStructuralMigrations(before, appSummary, TOPIC_SUBDIVISIONS)
+  assert.deepEqual(nodes.filter((n) => n.label === 'Mossad Killed Kennedy').map((n) => n.summary), ['Visible.'])
+  assert.deepEqual(orphansOf(nodes), [])
 })
