@@ -34,6 +34,7 @@ const ARCHETYPE_COMBINATIONS = [...PERSONALITY_ARCHETYPES, 'My Archetype Combina
 const JUNG_ARCHETYPAL_FIGURES = ['Collective Unconscious', 'Jungian Archetypes', 'Situational Archetypes/Motifs', 'Archetypal Figures']
 const UNIVERSAL_FIGURES_SUMMARY = 'The recurring character types and narrative patterns that appear universally across myth, religion, and storytelling as expressions of the collective unconscious.'
 const WISE_OLD_MAN_SUMMARY = 'An archetype representing wisdom, guidance, and spiritual insight, often appearing as a mentor or advisor figure.'
+const TRICKSTER_SUMMARY = 'An archetype embodying chaos, disruption, and the challenging of norms, often bringing about change through unconventional or subversive means.'
 const JUNGIAN_HERO_SUMMARY = 'An archetype representing the ego\'s journey of overcoming obstacles, achieving individuation, and integrating the Self.'
 const JUNGIAN_ARCHETYPES_SUMMARY = 'Universal, inherited patterns of thought and imagery residing in the collective unconscious, influencing human behavior and cultural expressions as described by Carl Jung.'
 const PANAS_RESULTS = ['Positive And Negative Affect Schedule (PANAS)', 'Results|PANAS']
@@ -60,7 +61,7 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
     { move: [...MARK_PEARSON, 'Combinations of Combinations'], into: ARCHETYPE_COMBINATIONS },
     { move: [...MARK_PEARSON_FIGURES, 'The Healer'], into: ARCHETYPE_COMBINATIONS },
     { remove: [...MARK_PEARSON, 'The Archetypes of Orientation'] },
-    { rename: [...MARK_PEARSON_FIGURES, 'The Trickster'], label: 'The Jester' },
+    { rename: [...MARK_PEARSON_FIGURES, 'The Trickster'], label: 'The Jester', dropSummaries: [TRICKSTER_SUMMARY] },
     { rename: [...MARK_PEARSON_FIGURES, 'The Wise Old Man/Sage'], label: 'The Sage', dropSummaries: [WISE_OLD_MAN_SUMMARY] },
     { rename: MARK_PEARSON_FIGURES, label: MARK_PEARSON_FIGURES.at(-1), dropSummaries: [UNIVERSAL_FIGURES_SUMMARY] },
     { rename: [...MARK_PEARSON_FIGURES, 'The Hero'], label: 'The Hero|Mark & Pearson', dropSummaries: [JUNGIAN_HERO_SUMMARY] },
@@ -85,6 +86,33 @@ export const SUMMARY_MIGRATIONS_BY_VERSION = {
       label: 'Memory Tricks',
       from: 'Mnemonics for the V of each key: Car→Gas, Data→Analysis, Eyes→Blink, Fire→Coal, Garden→Dirt, Artist→Easel, Bitch→Fuck.',
       to: 'Mnemonics for the V of each key: Car→Gas, Data→Analysis, Eyes→Blink, Fire→Coal, Garden→Dirt, Artist→Easel, Bitch→Fuck (sharp!).',
+    },
+  ],
+  5: [
+    {
+      label: 'Pharmacology|DMT',
+      from: 'The mechanisms by which DMT produces its effects, hypothesized to involve ordering of neuronal microtubules.',
+      to: 'Acts mainly as a serotonin 5-HT2A receptor agonist (also sigma-1 and trace-amine receptors). Speculative hypotheses also propose effects on neuronal microtubule order.',
+    },
+    {
+      label: 'Pharmacology|5-MeO-DMT',
+      from: 'The hypothesized mechanism of 5-MeO-DMT involving a scrambling of liquid crystal order in neuronal microtubules.',
+      to: 'Acts mainly on serotonin 5-HT1A receptors, with 5-HT2A activity. A speculative hypothesis proposes it scrambles microtubule liquid-crystal order.',
+    },
+    {
+      label: 'Results|PANAS',
+      from: 'The four PANAS profile archetypes defined by combinations of high/low positive and negative affect scores.',
+      to: 'Archer & Garcia\'s four affective profiles, built from PANAS\'s two scores: high or low positive affect (PA) combined with high or low negative affect (NA).',
+    },
+    {
+      label: 'Combinations|Jungian',
+      from: 'Jungian archetypes that emerge from the interaction or blending of two or more core archetypal patterns.',
+      to: 'My own combinations of two or more archetypes, blended into one pattern.',
+    },
+    {
+      label: 'Combinations of Combinations',
+      from: 'Higher-order Jungian archetypes that emerge from combining already-blended archetypal patterns.',
+      to: 'My own higher-order combinations, built by combining archetypes that are already blends.',
     },
   ],
 }
