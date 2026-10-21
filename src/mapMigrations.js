@@ -48,6 +48,9 @@ const PANAS_RESULTS = ['Positive And Negative Affect Schedule (PANAS)', 'Results
 const RWANDAN_GENOCIDE = 'Rwandan Genocide (1994)'
 const ANCIENT_MIGRATION_PERIOD_SUMMARY = 'Characterized by significant movements of various peoples, primarily Germanic tribes, leading to widespread upheaval, the decline of the Western Roman Empire, and the emergence of new political entities across Europe.'
 
+// The admin map's hidden Mossad Killed Kennedy summary, archived off-map.
+const ARCHIVED_MOSSAD_SUMMARY = "The theory that Israeli intelligence orchestrated Kennedy's assassination in response to his pressure on Israel to open its Dimona nuclear facility to international inspection."
+
 export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
   3: [
     { label: 'Emotions', homePath: ['Psychology'] },
@@ -99,7 +102,7 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
     // The admin map's old JFK assassination, Church Committee, Dimona and
     // Aliyahs children lost their parents; put them back in the tree. The
     // hidden Mossad theory is too speculative to restore (archived off-map).
-    { rehomeOrphans: true, dropLabels: ['Mossad Killed Kennedy'] },
+    { rehomeOrphans: true, dropArchived: [{ label: 'Mossad Killed Kennedy', summary: ARCHIVED_MOSSAD_SUMMARY }] },
   ],
 }
 
@@ -210,6 +213,11 @@ const subtreeIds = (childrenByParent, nodeId) => {
 
 const holdsOwnerContent = (node) =>
   Boolean(node.isCustom || node.isPersonal || node.summary || (Array.isArray(node.notes) && node.notes.length > 0))
+
+// Like holdsOwnerContent, but a stored summary equal to one of `knownSummaries`
+// is not the owner's.
+const holdsOwnerContentBesides = (node, knownSummaries) =>
+  holdsOwnerContent({ ...node, summary: knownSummaries.includes(node.summary) ? undefined : node.summary })
 
 const dropBareCopies = (mapNodes, { label, homePath }) => {
   const byId = new Map(mapNodes.map((node) => [node.id, node]))
@@ -483,8 +491,6 @@ const removeBuiltInNode = (mapNodes, { remove, mergeInto, as, summary: retiredSu
   return { nodes, changed: nodes !== mapNodes }
 }
 
-export const RECOVERED_NODES_LABEL = 'Recovered Nodes'
-
 const isRoot = (node) => node.parentId === null || node.parentId === undefined
 
 const reachableIds = (mapNodes) => {
@@ -519,27 +525,30 @@ const describe = (node) => (node.isPersonal ? `#${node.id} (personal)` : `#${nod
 //    already stored under its home (or under the one parent the owner took
 //    its label out of) is a duplicate and is deleted; any other moves under
 //    its home.
-// 3. Without a home it moves under a custom "Recovered Nodes" node at the
-//    root, so it stays visible, unless it holds nothing the owner wrote.
-// Personal orphans are left untouched. Before any of this, unreachable
-// non-Personal nodes labelled one of `dropLabels` are deleted with their
-// subtrees. `log`, when given, collects one line per action.
-const rehomeOrphans = (mapNodes, { dropLabels = [] }, builtInSummary, topicSubdivisions, log) => {
+// 3. Without a home it is deleted if it holds nothing the owner wrote, and
+//    otherwise left untouched.
+// Personal orphans are left untouched. Before any of this, an unreachable node
+// labelled as one of `dropArchived` is deleted with its subtree when that
+// holds nothing the owner wrote beyond the built-in or archived summary.
+// `log`, when given, collects one line per action.
+const rehomeOrphans = (mapNodes, { dropArchived = [] }, builtInSummary, topicSubdivisions, log) => {
   const note = (line) => log?.push(line)
   const pathText = (mapNodesNow, id) => labelPathOf(mapNodesNow, id).join(' > ')
   let nodes = mapNodes
   const reachableAtStart = reachableIds(nodes)
-  const dropped = nodes.filter((node) => !reachableAtStart.has(node.id) && !node.isPersonal && dropLabels.includes(node.label))
-  if (dropped.length > 0) {
-    const childrenByParent = buildChildrenByParent(nodes)
-    const removed = new Set()
-    for (const node of dropped) {
-      const ids = subtreeIds(childrenByParent, node.id)
-      for (const id of ids) removed.add(id)
-      note(`deleted ${describe(node)} (${ids.length} node(s)): not restored to the map`)
-    }
-    nodes = nodes.filter((node) => !removed.has(node.id))
+  const byIdAtStart = new Map(nodes.map((node) => [node.id, node]))
+  const childrenAtStart = buildChildrenByParent(nodes)
+  const removed = new Set()
+  for (const node of nodes) {
+    const archived = dropArchived.find(({ label }) => label === node.label)
+    if (!archived || reachableAtStart.has(node.id) || removed.has(node.id)) continue
+    const ids = subtreeIds(childrenAtStart, node.id)
+    const subtree = ids.map((id) => byIdAtStart.get(id))
+    if (subtree.some((member) => holdsOwnerContentBesides(member, [builtInSummary(member.label), archived.summary]))) continue
+    for (const id of ids) removed.add(id)
+    note(`deleted ${describe(node)} (${ids.length} node(s)): archived off-map`)
   }
+  if (removed.size > 0) nodes = nodes.filter((node) => !removed.has(node.id))
   const skipped = new Set()
   for (;;) {
     const byId = new Map(nodes.map((node) => [node.id, node]))
@@ -610,18 +619,8 @@ const rehomeOrphans = (mapNodes, { dropLabels = [] }, builtInSummary, topicSubdi
       note(`created ${describe(home)} under ${describe(level.parent)} at ${pathText(nodes, level.parent.id)}`)
     }
     if (!home) {
-      const root = nodes.filter(isRoot).sort((a, b) => a.id - b.id)[0]
-      if (!root) {
-        note(`left ${describe(orphan)} untouched: the map has no root`)
-        continue
-      }
-      home = nodes.find((node) => node.parentId === root.id && node.isCustom && node.label === RECOVERED_NODES_LABEL)
-      if (!home) {
-        const rootChildren = nodes.filter((node) => node.parentId === root.id)
-        home = { id: maxIdOf(nodes) + 1, label: RECOVERED_NODES_LABEL, parentId: root.id, isCustom: true, hidden: rootChildren[0]?.hidden ?? true }
-        nodes = [...nodes, home]
-        note(`created ${describe(home)} under ${describe(root)}`)
-      }
+      note(`left ${describe(orphan)} untouched: it has no home`)
+      continue
     }
 
     const siblings = nodes.filter((node) => node.parentId === home.id)
@@ -696,8 +695,8 @@ export const applySummaryMigrations = (mapNodes) => {
 // so no descendant is left behind without a parent. A child whose subtree
 // holds a custom or Personal node or a note becomes custom and stays put
 // instead, keeping the summary it showed, so nothing the owner wrote is lost.
-// Stored summaries alone do not keep it: older app versions stored built-in
-// summaries on built-in nodes.
+// So does a stored summary that differs from the built-in one (the owner wrote
+// or edited it); a stored copy of the built-in summary does not keep it.
 export const dropStaleChildren = (mapNodes, staleIds, builtInSummary = () => '') => {
   const byId = new Map(mapNodes.map((node) => [node.id, node]))
   const childrenByParent = buildChildrenByParent(mapNodes)
@@ -706,7 +705,8 @@ export const dropStaleChildren = (mapNodes, staleIds, builtInSummary = () => '')
   for (const id of staleIds) {
     if (!byId.has(id) || removed.has(id)) continue
     const ids = subtreeIds(childrenByParent, id)
-    if (ids.some((subtreeId) => holdsOwnerContent({ ...byId.get(subtreeId), summary: undefined }))) kept.add(id)
+    const nodesInSubtree = ids.map((subtreeId) => byId.get(subtreeId))
+    if (nodesInSubtree.some((node) => holdsOwnerContentBesides(node, [builtInSummary(node.label)]))) kept.add(id)
     else for (const subtreeId of ids) removed.add(subtreeId)
   }
   if (removed.size === 0 && kept.size === 0) return { nodes: mapNodes, changed: false }

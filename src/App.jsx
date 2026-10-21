@@ -2702,7 +2702,7 @@ function App() {
     'Jack Ruby (1911 - 1967)': [],
     'Warren Commission (1963 - 1964)': [],
     'LBJ Becomes President (1963)': [],
-    'Alternate Theories': ['Mossad Killed Kennedy'],
+    'Alternate Theories': [],
     'Mossad Killed Kennedy': [],
     'Church Committee (1975 - 1976)': ['CIA Assassination Plots Against Castro', "James Angleton's Testimony"],
     'CIA Assassination Plots Against Castro': [],
