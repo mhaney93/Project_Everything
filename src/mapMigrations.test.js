@@ -1494,3 +1494,155 @@ test('a reachable Mossad Killed Kennedy survives the full normalize', () => {
     assert.deepEqual(nodes, before)
   }
 })
+
+const FINE_ARTS_SUMMARY = 'The visual and performing arts created primarily for aesthetic and expressive purposes, including film, painting, and sculpture.'
+
+// Arts as stored in the live map (2026-10-21): Arts and Visual Arts expanded,
+// Film under the Fine Arts wrapper and Video Games under Interactive Art, all
+// collapsed. `fineArtsExtra` and `film` let a test vary those two nodes.
+const artsMap = ({ fineArtsExtra = {}, film = builtIn('Film', { hidden: true }), videoGames = true } = {}) => {
+  const hidden = (label, children = [], extra = {}) => [label, children, { hidden: true, ...extra }]
+  return buildMap(['Root', [
+    ['Humanities', [
+      ['Arts', [
+        ['Literature'],
+        ['Visual Arts', [
+          ...['Painting', 'Sculpture', 'Architecture', 'Photography', 'Installation Art'].map((label) => hidden(label)),
+          hidden('Fine Arts', film ? [film] : [], fineArtsExtra),
+          hidden('Digital Art', [
+            ...['Digital Painting', 'Digital Sculpture', 'Virtual Reality Art', 'Generative Art'].map((label) => hidden(label)),
+            hidden('Interactive Art', videoGames ? [builtIn('Video Games', { hidden: true })] : []),
+          ]),
+          ...['Graphic Design', 'Printmaking', 'Design Principles'].map((label) => hidden(label)),
+        ]],
+        ['Performing Arts'],
+        ['Music'],
+        ['Design'],
+      ]],
+    ]],
+  ], { isCustom: true }])
+}
+
+const withHidden = (tuple) => [tuple[0], tuple[1].map(withHidden), { hidden: true, ...tuple[2] }]
+
+test('the taxonomy files Film and Video Games under Arts > Media Arts', () => {
+  assert.ok(TOPIC_SUBDIVISIONS.Arts.includes('Media Arts'))
+  assert.deepEqual([...TOPIC_SUBDIVISIONS['Media Arts']], ['Film', 'Video Games'])
+  assert.ok(!TOPIC_SUBDIVISIONS['Visual Arts'].includes('Fine Arts'))
+  assert.equal(TOPIC_SUBDIVISIONS['Fine Arts'], undefined)
+  assert.ok(!(TOPIC_SUBDIVISIONS['Interactive Art'] || []).includes('Video Games'))
+  assert.ok(TOPIC_SUBDIVISIONS['Digital Art'].includes('Interactive Art'))
+  assert.ok(appSummary('Media Arts'))
+  assert.equal(appSummary('Fine Arts'), '')
+})
+
+test('Film and Video Games move under a new Media Arts with their whole subtrees, and Fine Arts goes', () => {
+  const film = withHidden(builtIn('Film'))
+  const movies = film[1].find(([label]) => label === 'Movies')
+  movies[1].push(['My Watchlist', [], { isCustom: true, hidden: true, order: 0 }])
+  movies[2].notes = [{ id: 'note-movies', text: 'mine', level: 0 }]
+  film[2].summary = 'My own film summary.'
+  const before = artsMap({ film })
+  const byLabel = (mapNodes, label) => mapNodes.filter((n) => n.label === label)
+  const [filmBefore] = byLabel(before, 'Film')
+  const [gamesBefore] = byLabel(before, 'Video Games')
+  const filmSubtree = descendantsOf(before, filmBefore.id)
+  const gamesSubtree = descendantsOf(before, gamesBefore.id)
+  assert.ok(filmSubtree.length > 50)
+  assert.ok(gamesSubtree.length > 0)
+
+  const { nodes, changed } = normalize(before, appSummary)
+
+  assert.equal(changed, true)
+  assert.deepEqual(orphansOf(nodes), [])
+  assert.equal(nodes.length, before.length)
+  const [mediaArts] = byLabel(nodes, 'Media Arts')
+  assert.equal(pathOf(nodes, mediaArts), 'Root > Humanities > Arts > Media Arts')
+  assert.equal(mediaArts.hidden, false)
+  assert.ok(!mediaArts.isCustom)
+  assert.deepEqual(byLabel(nodes, 'Fine Arts'), [])
+
+  for (const [moved, subtree] of [[filmBefore, filmSubtree], [gamesBefore, gamesSubtree]]) {
+    const after = nodes.find((n) => n.id === moved.id)
+    assert.equal(pathOf(nodes, after), `Root > Humanities > Arts > Media Arts > ${moved.label}`)
+    assert.equal(after.hidden, true)
+    assert.equal(after.summary, moved.summary)
+    assert.deepEqual(descendantsOf(nodes, moved.id), subtree)
+  }
+
+  const interactiveArt = byLabel(nodes, 'Interactive Art')
+  assert.equal(interactiveArt.length, 1)
+  assert.equal(pathOf(nodes, interactiveArt[0]), 'Root > Humanities > Arts > Visual Arts > Digital Art > Interactive Art')
+  assert.deepEqual(descendantsOf(nodes, interactiveArt[0].id), [])
+  assert.equal(normalize(nodes, appSummary).changed, false)
+})
+
+test('a Fine Arts the owner wrote on stays under Visual Arts as a custom node', () => {
+  const extras = [
+    { notes: [{ id: 'note-fine', text: 'mine', level: 0 }] },
+    { summary: 'My own fine arts summary.' },
+  ]
+  for (const fineArtsExtra of extras) {
+    const before = artsMap({ fineArtsExtra })
+    const fineArts = before.find((n) => n.label === 'Fine Arts')
+    const { nodes } = normalize(before, appSummary)
+
+    const kept = nodes.find((n) => n.id === fineArts.id)
+    assert.equal(pathOf(nodes, kept), 'Root > Humanities > Arts > Visual Arts > Fine Arts')
+    assert.equal(kept.isCustom, true)
+    assert.equal(kept.summary, fineArtsExtra.summary || FINE_ARTS_SUMMARY)
+    assert.deepEqual(kept.notes, fineArtsExtra.notes)
+    assert.deepEqual(descendantsOf(nodes, fineArts.id), [])
+    assert.equal(pathOf(nodes, nodes.find((n) => n.label === 'Film')), 'Root > Humanities > Arts > Media Arts > Film')
+    assert.equal(normalize(nodes, appSummary).changed, false)
+  }
+})
+
+test('a Fine Arts holding only a stored copy of its retired summary is removed', () => {
+  const { nodes } = normalize(artsMap({ fineArtsExtra: { summary: FINE_ARTS_SUMMARY } }), appSummary)
+  assert.deepEqual(nodes.filter((n) => n.label === 'Fine Arts'), [])
+})
+
+test('a Fine Arts the owner added a custom child to stays with it', () => {
+  const before = artsMap({ film: null, fineArtsExtra: {} })
+  const fineArts = before.find((n) => n.label === 'Fine Arts')
+  before.push({ id: 9999, label: 'My Sketches', parentId: fineArts.id, hidden: true, isCustom: true })
+  const { nodes } = normalize(before, appSummary)
+  assert.equal(nodes.find((n) => n.id === fineArts.id).isCustom, true)
+  assert.equal(nodes.find((n) => n.id === 9999).parentId, fineArts.id)
+})
+
+test('Media Arts gets the built-in children that were not stored yet', () => {
+  const { nodes } = normalize(artsMap({ videoGames: false }), appSummary)
+  const mediaArts = nodes.find((n) => n.label === 'Media Arts')
+  const children = nodes.filter((n) => n.parentId === mediaArts.id)
+  assert.deepEqual(children.map((n) => n.label).sort(), ['Film', 'Video Games'])
+  assert.ok(children.every((n) => n.hidden))
+  assert.equal(normalize(nodes, appSummary).changed, false)
+
+  // An unexpanded Fine Arts leaves Media Arts unexpanded, to generate both on expand.
+  const unexpanded = normalize(artsMap({ film: null, videoGames: false }), appSummary).nodes
+  const bare = unexpanded.find((n) => n.label === 'Media Arts')
+  assert.deepEqual(unexpanded.filter((n) => n.parentId === bare.id), [])
+  assert.deepEqual(unexpanded.filter((n) => n.label === 'Fine Arts'), [])
+})
+
+test('the Media Arts move leaves maps without those nodes, and Personal or custom copies, alone', () => {
+  const unexpanded = buildMap(['Root', [['Humanities', [['Arts']]]], { isCustom: true }])
+  assert.equal(normalize(unexpanded, appSummary).changed, false)
+
+  const before = buildMap(['Root', [
+    ['Arts', [
+      ['Literature', [['Film', [['Notes on Film', [], { isCustom: true }]], { isCustom: true }]]],
+      ['Visual Arts'], ['Performing Arts'], ['Music'], ['Design'],
+    ]],
+    ['Personal', [['Fine Arts', [['Film']], { isPersonal: true }]], { isPersonal: true }],
+  ], { isCustom: true }])
+  const { nodes } = normalize(before, appSummary)
+  for (const node of before.filter((n) => n.label === 'Film' || n.label === 'Fine Arts')) {
+    assert.deepEqual(nodes.find((n) => n.id === node.id), node)
+  }
+  const mediaArts = nodes.filter((n) => n.label === 'Media Arts')
+  assert.equal(mediaArts.length, 1)
+  assert.deepEqual(nodes.filter((n) => n.parentId === mediaArts[0].id), [])
+})

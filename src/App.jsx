@@ -4786,7 +4786,8 @@ function App() {
     'Egyptian Mythology': [],
     
     // Arts
-    'Arts': ['Literature', 'Visual Arts', 'Performing Arts', 'Music', 'Design'],
+    'Arts': ['Literature', 'Visual Arts', 'Performing Arts', 'Media Arts', 'Music', 'Design'],
+    'Media Arts': ['Film', 'Video Games'],
     
     // Literature
     'Literature': ['Fiction', 'Poetry', 'Drama', 'Literary Theory', 'World Literature', 'Classics', 'Essays', 'Narrative Forms', 'Books', 'Pamphlets'],
@@ -4920,8 +4921,7 @@ function App() {
     'Shadow of the Hegemon': [],
 
     // Visual Arts
-    'Visual Arts': ['Painting', 'Sculpture', 'Architecture', 'Photography', 'Fine Arts', 'Installation Art', 'Digital Art', 'Graphic Design', 'Printmaking', 'Design Principles'],
-    'Fine Arts': ['Film'],
+    'Visual Arts': ['Painting', 'Sculpture', 'Architecture', 'Photography', 'Installation Art', 'Digital Art', 'Graphic Design', 'Printmaking', 'Design Principles'],
     'Painting': ['Renaissance Painting', 'Baroque Painting', 'Impressionism', 'Modernism', 'Abstract Art', 'Contemporary Painting', 'Technique'],
     'Renaissance Painting': [],
     'Baroque Painting': [],
@@ -5096,7 +5096,6 @@ function App() {
     'Digital Sculpture': [],
     'Virtual Reality Art': [],
     'Generative Art': [],
-    'Interactive Art': ['Video Games'],
     'Video Games': ['The Game Awards'],
     'The Game Awards': ['TGA 2014', 'TGA 2015', 'TGA 2016', 'TGA 2017', 'TGA 2018', 'TGA 2019', 'TGA 2020', 'TGA 2021', 'TGA 2022', 'TGA 2023', 'TGA 2024'],
 
@@ -15422,7 +15421,6 @@ function App() {
       'Documentary Photography': 'Photography that records real events and conditions, often advocating for social issues.',
       'Fine Art Photography': 'Photography created primarily for aesthetic and conceptual merit rather than commercial use.',
       'Photojournalism': 'The practice of telling news stories through photographs, presenting factual visual documentation.',
-      'Fine Arts': 'The visual and performing arts created primarily for aesthetic and expressive purposes, including film, painting, and sculpture.',
       'Film': 'The art and industry of moving images and sound, a powerful medium for narrative and expression.',
       'Movies': 'Top-ranked films on IMDb, representing the best of cinema across genres, eras, and cultures.',
       'The Shawshank Redemption': 'Shows how hope and perseverance can liberate the human spirit even in the darkest and most oppressive circumstances.',
@@ -15634,6 +15632,7 @@ function App() {
       'Layout Design': 'The arrangement of visual and textual elements in space to create organized, attractive compositions.',
       'Printmaking': 'The artistic technique of creating images through inking, pressing, and transferring onto paper or fabric.',
       // Performing Arts
+      'Media Arts': 'Art forms built on recorded, broadcast or interactive electronic media, such as film and video games.',
       'Performing Arts': 'The branches of art involving live performance including theatre, dance, and performance art.',
       'Theatre': 'The dramatic art of storytelling and character portrayal through live performance on stage.',
       'Classical Theatre': 'Theatre from ancient Greece and Rome, including works by Aeschylus, Sophocles, Euripides, and Plautus.',
