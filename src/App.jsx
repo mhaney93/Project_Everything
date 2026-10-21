@@ -22047,8 +22047,8 @@ function App() {
       const nodeToDelete = nodes.find(n => n.id === nodeId)
       if (!nodeToDelete) return
       confirmMessage = hasChildren
-        ? `Delete "${nodeToDelete.label}" and all its children?`
-        : `Delete "${nodeToDelete.label}"?`
+        ? `Delete "${getDisplayLabel(nodeToDelete.label)}" and all its children?`
+        : `Delete "${getDisplayLabel(nodeToDelete.label)}"?`
     }
 
     // Show modern confirmation modal instead of window.confirm
@@ -22075,7 +22075,7 @@ function App() {
 
     const removedNodes = nodes.filter((n) => nodeIdsToRemove.has(n.id))
     const deletedLabel = nodeIds.length === 1
-      ? (nodes.find(n => n.id === nodeIds[0])?.label || 'Node')
+      ? getDisplayLabel(nodes.find(n => n.id === nodeIds[0])?.label || 'Node')
       : `${nodeIds.length} nodes`
 
     // Build a map of parentId -> deleted non-custom children labels for excludedChildLabels tracking
@@ -26120,7 +26120,7 @@ function App() {
                     }}
                     title={canEditNode(selectedNode) ? 'Click to edit title' : ''}
                   >
-                    {selectedNode.label}
+                    {getDisplayLabel(selectedNode.label)}
                   </h2>
                 )}
                 <button
