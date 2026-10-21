@@ -144,6 +144,8 @@ export const LABEL_MIGRATIONS_BY_VERSION = {
 // `custom` lets the rename reach the owner's own node, for a fix the owner asked for.
 const LABEL_MIGRATION_PARENTS = {
   '21st Century (2001 - present)': { parent: 'Contemporary Period (1945 - present)' },
+  // Owner-requested date correction from PR #8: terms run inauguration to inauguration, so 2017 - 2021.
+  // The one deliberate rename of an owner-made node, limited to this parent and run once per map.
   'First Trump Presidency (2017 - 2021)': { parent: 'America During the Post-Cold War Era', custom: true },
 }
 
