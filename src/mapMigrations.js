@@ -22,7 +22,8 @@
 // - `add` creates a built-in child `add` under the node at `under`, when that
 //   node's built-in children are already stored (expanding never adds more).
 // - `move` reparents the node, with its subtree, under the node at `into`,
-//   creating `into` when only its parent is stored.
+//   creating `into` when only its parent is stored. With `id`, it moves the
+//   node with that id at the path instead, custom or not.
 // - `remove` merges the node into its namesake under `mergeInto` (notes,
 //   children carry over, a differing summary becomes a note). With `as`, it
 //   merges into the node labelled `as` there instead, creating the missing
@@ -49,6 +50,9 @@ const PANAS_RESULTS = ['Positive And Negative Affect Schedule (PANAS)', 'Results
 const RWANDAN_GENOCIDE = 'Rwandan Genocide (1994)'
 const FINE_ARTS = ['Arts', 'Visual Arts', 'Fine Arts']
 const MEDIA_ARTS = ['Arts', 'Media Arts']
+const ISAIAH_ORACLES = ['Isaiah', '1–35 (Judgment and Promise)', '13:1–23:18 (Oracles Against the Nations)']
+const GALILEAN_MINISTRY = ['Matthew', '4:12–9:35 (The Galilean Ministry Begins)']
+const PETERS_DENIALS_SUMMARY = 'Peter follows into the high priest\'s courtyard and denies Jesus twice at the gate; meanwhile Jesus is questioned about his teaching and struck by a guard.'
 const FINE_ARTS_SUMMARY = 'The visual and performing arts created primarily for aesthetic and expressive purposes, including film, painting, and sculpture.'
 const KECCAK256_SUMMARY = 'Computes the Keccak-256 hash (a bytes32) of a bytes input, often built with abi.encode or abi.encodePacked, e.g. keccak256(abi.encodePacked("x")).'
 const ANCIENT_MIGRATION_PERIOD_SUMMARY = 'Characterized by significant movements of various peoples, primarily Germanic tribes, leading to widespread upheaval, the decline of the Western Roman Empire, and the emergence of new political entities across Europe.'
@@ -118,6 +122,23 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
     { add: 'Film', under: MEDIA_ARTS },
     { add: 'Video Games', under: MEDIA_ARTS },
     { remove: FINE_ARTS, summary: FINE_ARTS_SUMMARY },
+  ],
+  10: [
+    // Isaiah 14:29 warns the Philistines; the admin map's custom verse node sat
+    // under the Assyria oracle.
+    { move: [...ISAIAH_ORACLES, '14:24–27 (The Oracle Against Assyria)', '29'], id: 5076, into: [...ISAIAH_ORACLES, '14:28–32 (The Oracle Against Philistia)'] },
+    // Job's replies are 6–7, 9–10, 12–14, 16–17, 19, 21 and then 23–24.
+    { rename: ['22–27 (The Third Cycle of Speeches)', '23–24 (Job\'s Sixth Response)'], label: '23–24 (Job\'s Seventh Response)' },
+    // John 18:15-27 holds all three denials, only the first of them at the gate.
+    {
+      rename: ['John', '18:15-27 (Peter\'s First Denial and High Priest Questioning)'],
+      label: '18:15-27 (Peter\'s Denials and Jesus Before Annas)',
+      dropSummaries: [PETERS_DENIALS_SUMMARY],
+    },
+    { add: '21 (The King\'s Joy in God\'s Strength)', under: ['1–41 (Book I: Genesis Comparison)', '19–24 (God\'s Glory, Law, and Kingship)'] },
+    // The Sermon on the Mount is Matthew 5–7 and opens with the Beatitudes.
+    { rename: [...GALILEAN_MINISTRY, '5:13–7:27 (The Sermon on the Mount)'], label: '5–7 (The Sermon on the Mount)' },
+    { label: '5:1–12 (The Beatitudes)', homePath: [...GALILEAN_MINISTRY, '5–7 (The Sermon on the Mount)'] },
   ],
 }
 
@@ -571,9 +592,10 @@ const addBuiltInNode = (mapNodes, { add, under }) => {
   return { nodes: [...mapNodes, ...created], changed: true }
 }
 
-const moveBuiltInNode = (mapNodes, { move, into }, builtInSummary) => {
+const moveBuiltInNode = (mapNodes, { move, id, into }, builtInSummary) => {
   let nodes = mapNodes
-  for (const source of nodesAtPath(mapNodes, new Map(mapNodes.map((node) => [node.id, node])), move)) {
+  const accepts = id === undefined ? isBuiltIn : (node) => node.id === id
+  for (const source of nodesAtPath(mapNodes, new Map(mapNodes.map((node) => [node.id, node])), move, accepts)) {
     let byId = new Map(nodes.map((node) => [node.id, node]))
     let target = findHome(nodes, byId, into)
     if (!target) {
