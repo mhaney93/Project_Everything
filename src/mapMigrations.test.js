@@ -2,17 +2,20 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
-import { applyStructuralMigrations, applySummaryMigrations, removeStalePredefinedChildren } from './mapMigrations.js'
+import { applyStructuralMigrations, applySummaryMigrations, SUMMARY_MIGRATIONS_BY_VERSION, removeStalePredefinedChildren } from './mapMigrations.js'
 
-// TOPIC_SUBDIVISIONS lives inside the App component, so read it from the source.
-const loadTopicSubdivisions = () => {
+// TOPIC_SUBDIVISIONS and generateSummary's summaries live inside the App
+// component, so evaluate the object literals from the source.
+const loadAppObject = (declaration, indent) => {
   const source = readFileSync(new URL('./App.jsx', import.meta.url), 'utf8')
-  const start = source.indexOf('{', source.indexOf('const TOPIC_SUBDIVISIONS = {'))
-  const end = source.indexOf('\n  }\n', start)
-  return vm.runInNewContext(`(${source.slice(start, end + 4)})`)
+  const start = source.indexOf('{', source.indexOf(declaration))
+  const close = `\n${indent}}\n`
+  const end = source.indexOf(close, start)
+  return vm.runInNewContext(`(${source.slice(start, end + close.length)})`)
 }
 
-const TOPIC_SUBDIVISIONS = loadTopicSubdivisions()
+const TOPIC_SUBDIVISIONS = loadAppObject('const TOPIC_SUBDIVISIONS = {', '  ')
+const BUILT_IN_SUMMARIES = loadAppObject('const summaries = {', '    ')
 
 const normalize = (mapNodes) => {
   const structural = applyStructuralMigrations(mapNodes, () => '', TOPIC_SUBDIVISIONS)
@@ -405,6 +408,49 @@ test('migration moves Front-End Frameworks from DApps to Packages > Frameworks',
   assert.equal(nodes.find((n) => n.label === 'ethers.js').summary, 'stored ethers summary')
 })
 
+test('Front-End Frameworks moves into Packages > Frameworks even when Packages was never expanded', () => {
+  const before = buildMap(['Root', [
+    ['Blockchain levels', [
+      ['DApps (Decentralized Applications)', [
+        ['Contract Interaction'],
+        ['Front-End Frameworks', [
+          ['React', [['My React Hooks', [], { isCustom: true, summary: 'custom react summary' }]], { notes: [{ id: 'note-react', text: 'react note', level: 0 }] }],
+          ['Vue.js'],
+        ], { summary: 'stored fef summary', notes: [{ id: 'note-fef', text: 'front-end note', level: 0 }] }],
+      ]],
+    ], { isCustom: true }],
+    ['Software Engineering', [
+      ['Software Development/Programming', [['Packages'], ['Runtime Environments']]],
+    ]],
+  ]])
+  const original = before.find((n) => n.label === 'Front-End Frameworks')
+  const { nodes, changed } = normalize(before)
+  assert.equal(changed, true)
+  assert.deepEqual(orphansOf(nodes), [])
+  assert.equal(new Set(nodes.map((n) => n.id)).size, nodes.length)
+  assert.ok(nodes.filter((n) => !before.some((b) => b.id === n.id)).every((n) => n.id > Math.max(...before.map((b) => b.id))))
+
+  const [fef] = nodes.filter((n) => n.label === 'Front-End Frameworks')
+  assert.equal(fef.id, original.id)
+  assert.equal(pathOf(nodes, fef), `${SOFTWARE_DEVELOPMENT} > Packages > Frameworks > Front-End Frameworks`)
+  assert.equal(fef.summary, 'stored fef summary')
+  assert.deepEqual(fef.notes.map((n) => n.id), ['note-fef'])
+  assert.deepEqual(descendantsOf(nodes, fef.id).map((n) => n.id).sort(), descendantsOf(before, original.id).map((n) => n.id).sort())
+  assert.deepEqual(nodes.find((n) => n.label === 'React').notes.map((n) => n.id), ['note-react'])
+  assert.equal(nodes.find((n) => n.label === 'My React Hooks').summary, 'custom react summary')
+
+  const packages = nodes.find((n) => n.label === 'Packages')
+  assert.deepEqual(childLabelsOf(nodes, packages), [...TOPIC_SUBDIVISIONS.Packages].sort())
+  assert.ok(nodes.filter((n) => n.parentId === packages.id).every((n) => n.hidden === true))
+  const frameworks = nodes.find((n) => n.label === 'Frameworks')
+  assert.deepEqual(childLabelsOf(nodes, frameworks), [...TOPIC_SUBDIVISIONS.Frameworks].sort())
+  assert.ok(nodes.filter((n) => n.parentId === frameworks.id).every((n) => n.hidden === true))
+
+  const again = normalize(nodes)
+  assert.equal(again.changed, false)
+  assert.deepEqual(again.nodes, nodes)
+})
+
 test('migration merges PowerShell > Python into Object-Oriented > Python and deletes PowerShell > Node.js', () => {
   const before = engineeringMap()
   const home = before.find((n) => n.label === 'Python' && before.find((p) => p.id === n.parentId).label === 'Object-Oriented')
@@ -487,12 +533,11 @@ test('the engineering moves are idempotent', () => {
   assert.deepEqual(twice.nodes, once)
 })
 
-test('the built-in Memory Tricks summary names F sharp as the V of B', () => {
-  const source = readFileSync(new URL('./App.jsx', import.meta.url), 'utf8')
-  const lines = source.split('\n').filter((line) => line.trim().startsWith("'Memory Tricks': '"))
-  assert.deepEqual(lines.map((line) => line.trim()), [
-    "'Memory Tricks': 'Mnemonics for the V of each key: Car→Gas, Data→Analysis, Eyes→Blink, Fire→Coal, Garden→Dirt, Artist→Easel, Bitch→Fuck (sharp!).',",
-  ])
+test('the built-in Memory Tricks summary matches the stored-summary fix', () => {
+  const [{ label, from, to }] = SUMMARY_MIGRATIONS_BY_VERSION[4]
+  assert.equal(label, 'Memory Tricks')
+  assert.equal(BUILT_IN_SUMMARIES['Memory Tricks'], to)
+  assert.equal(to, from.replace(/\.$/, ' (sharp!).'))
 })
 
 test('summary migration fixes only the stored Memory Tricks summary that still has the old text', () => {
