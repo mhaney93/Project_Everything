@@ -30,24 +30,27 @@ npm test
 
 ## Data Migrations
 
-Node label migrations are handled in `src/App.jsx` through a versioned map:
+Node label migrations live in `src/mapMigrations.js`:
 
 - `LABEL_MIGRATIONS_BY_VERSION`
 - `applyLabelMigrations(...)`
 
 When a user map loads from the backend, migrations are applied to loaded nodes before rendering. If any migration changes the map, the app automatically saves the migrated nodes back to the backend so the fix is permanent.
 
+Label renames run once per map: the map's root records the last version applied (`labelMigrationVersion`), so only newer versions run on later loads, and a label the owner sets afterwards is kept. A built-in node is renamed only where its parent's built-in children in `TOPIC_SUBDIVISIONS` list the new label (or under the parent named in `LABEL_MIGRATION_PARENTS`), so a namesake elsewhere in the map is left alone. A renamed node keeps its place, id, notes and children, even beside a sibling that already has the new label. Personal nodes are never renamed, and custom nodes only where their `LABEL_MIGRATION_PARENTS` entry sets `custom`.
+
 ### Add a new label rename
 
-1. Open `src/App.jsx`.
+1. Open `src/mapMigrations.js`.
 2. Add a new numeric version entry in `LABEL_MIGRATIONS_BY_VERSION`.
 3. Put `oldLabel: 'New Label'` pairs in that version map.
 4. Keep existing versions unchanged.
+5. If the new label is not listed under its parent in `TOPIC_SUBDIVISIONS`, add a `LABEL_MIGRATION_PARENTS` entry naming the parent.
 
 Example:
 
 ```js
-const LABEL_MIGRATIONS_BY_VERSION = {
+export const LABEL_MIGRATIONS_BY_VERSION = {
 	1: {
 		Art: 'Arts',
 	},
@@ -71,7 +74,7 @@ Custom nodes have no built-in text to correct, so give a `NODE_EDITS_BY_VERSION`
 
 ### Rename, add, move or remove one built-in node
 
-To change a single place in the tree rather than every copy of a label, give a `STRUCTURAL_MIGRATIONS_BY_VERSION` entry a path: a chain of labels ending at the built-in node itself (the first label can sit at any depth). `rename` relabels the node (a stored summary is dropped only when it is listed in `dropSummaries`); `add` creates a built-in child under a node whose built-in children are already stored, since expanding never adds more; `move` reparents the node and its subtree under `into`, creating that node if only its parent is stored (with `id`, it moves the node with that id at the path, custom or not) (a renamed or moved node that lands next to a namesake is merged into it the same way); `remove` merges the node into its namesake under `mergeInto` (with `as`, into the node labelled `as` there instead, creating the missing levels of that path from `TOPIC_SUBDIVISIONS`, and with `summary` standing in for the removed node's retired built-in summary), or, with no target, keeps a node holding anything the owner wrote as a custom node and deletes a bare one (a stored copy of `summary` on the node itself does not count as the owner's). Global label renames belong in `LABEL_MIGRATIONS_BY_VERSION` instead. Update `TOPIC_SUBDIVISIONS` and the built-in summaries in the same change.
+To change a single place in the tree rather than every copy of a label, give a `STRUCTURAL_MIGRATIONS_BY_VERSION` entry a path: a chain of labels ending at the built-in node itself (the first label can sit at any depth). `rename` relabels the node (a stored summary is dropped only when it is listed in `dropSummaries`); `add` creates a built-in child under a node whose built-in children are already stored, since expanding never adds more; `move` reparents the node and its subtree under `into`, creating that node if only its parent is stored (with `id`, it moves the node with that id at the path, custom or not) (a renamed or moved node that lands next to a namesake is merged into it the same way); `remove` merges the node into its namesake under `mergeInto` (with `as`, into the node labelled `as` there instead, creating the missing levels of that path from `TOPIC_SUBDIVISIONS`, and with `summary` standing in for the removed node's retired built-in summary), or, with no target, keeps a node holding anything the owner wrote as a custom node and deletes a bare one (a stored copy of `summary` on the node itself does not count as the owner's). Renames of a label wherever its built-in parent lists the new one belong in `LABEL_MIGRATIONS_BY_VERSION` instead. Update `TOPIC_SUBDIVISIONS` and the built-in summaries in the same change.
 
 ### Reattach orphaned nodes
 

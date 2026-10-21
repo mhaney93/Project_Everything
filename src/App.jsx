@@ -3,7 +3,7 @@ import { useMobileHeaderSpacer } from './mobileHeaderSpacer';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import './App.css';
 import { authAPI, mapsAPI, filesAPI, API_BASE_URL } from './api';
-import { applyNodeEdits, applyStructuralMigrations, applySummaryMigrations, dropStaleChildren, removeStalePredefinedChildren } from './mapMigrations';
+import { applyLabelMigrations, applyNodeEdits, applyStructuralMigrations, applySummaryMigrations, dropStaleChildren, removeStalePredefinedChildren } from './mapMigrations';
 import { stripLabelSuffix } from './labels';
 
 // Node size and layout constants
@@ -152,84 +152,6 @@ async function addChildren({ existingPredefined, parentNodeId, parent, updatedNo
   const leftmostChildId = getLeftmostChildId(updatedNodes, parentNodeId);
   return { expanded: true, firstChildId: leftmostChildId };
 }
-
-const LABEL_MIGRATIONS_BY_VERSION = {
-  1: {
-    Art: 'Arts',
-  },
-  2: {
-    '3.3 million years ago - 3,200 BC Prehistory': 'Prehistory (3.3 million years ago - 3,200 BC)',
-    '3,200 BC - 476 AD Ancient History': 'Ancient History (3,200 BC - 476 AD)',
-    '476 - 1453 Medieval Period': 'Medieval Period (476 - 1453)',
-    '1453 - present Modern Era': 'Modern Era (1453 - present)',
-    '3.3 million years ago - 3,300 BC Stone Age': 'Stone Age (3.3 million years ago - 3,300 BC)',
-    '3,300 BC - 3,200 BC Early Bronze Age (Prehistoric)': 'Early Bronze Age (3,300 BC - 3,200 BC)',
-    '3.3 million years ago - 10,000 BC Paleolithic Era': 'Paleolithic Era (3.3 million years ago - 10,000 BC)',
-    '10,000 BC - 8,000 BC Mesolithic Era': 'Mesolithic Era (10,000 BC - 8,000 BC)',
-    '8,000 BC - 4,500 BC Neolithic Era': 'Neolithic Era (8,000 BC - 4,500 BC)',
-    '4,500 BC - 3,300 BC Copper Age': 'Copper Age (4,500 BC - 3,300 BC)',
-    '3.3 million years ago - 300,000 years ago Lower Paleolithic': 'Lower Paleolithic (3.3 million years ago - 300,000 years ago)',
-    '300,000 years ago - 40,000 years ago Middle Paleolithic': 'Middle Paleolithic (300,000 years ago - 40,000 years ago)',
-    '40,000 years ago - 10,000 BC Upper Paleolithic': 'Upper Paleolithic (40,000 years ago - 10,000 BC)',
-    '300,000 years ago - 120,000 years ago Early Middle Paleolithic': 'Early Middle Paleolithic (300,000 years ago - 120,000 years ago)',
-    '120,000 years ago - 40,000 years ago Last Glacial Period (Middle Paleolithic)': 'Last Glacial Period, Middle Paleolithic (120,000 years ago - 40,000 years ago)',
-    '40,000 years ago - 10,000 BC Last Glacial Period (Upper Paleolithic)': 'Last Glacial Period, Upper Paleolithic (40,000 years ago - 10,000 BC)',
-    '10,875 BC - 10,000 BC Younger Dryas Event (Upper Paleolithic)': 'Younger Dryas Event, Upper Paleolithic (10,875 BC - 10,000 BC)',
-    '10,000 BC - 9,675 BC Last Glacial Period End (Mesolithic)': 'Last Glacial Period End, Mesolithic (10,000 BC - 9,675 BC)',
-    '10,000 BC - 9,675 BC Younger Dryas Event (Mesolithic)': 'Younger Dryas Event, Mesolithic (10,000 BC - 9,675 BC)',
-    '9,675 BC - 9,575 BC Younger Dryas End (Late Mesolithic)': 'Younger Dryas End, Late Mesolithic (9,675 BC - 9,575 BC)',
-    '9,675 BC - 8,000 BC Late Mesolithic': 'Late Mesolithic (9,675 BC - 8,000 BC)',
-    '4,100 BC - 3,300 BC Sumerian Civilization (Copper Age)': 'Sumerian Civilization (4,100 BC - 3,300 BC)',
-    '4,100 BC - 3,300 BC Uruk Period': 'Uruk Period (4,100 BC - 3,300 BC)',
-    '4,100 BC - 3,300 BC Predynastic Egypt (Copper Age)': 'Predynastic Egypt (4,100 BC - 3,300 BC)',
-    '3,500 BC - 3,300 BC Ebla Civilization (Copper Age)': 'Ebla Civilization (3,500 BC - 3,300 BC)',
-    '3,300 BC - 3,200 BC Indus Valley Civilization (Prehistoric)': 'Indus Valley Civilization (3,300 BC - 3,200 BC)',
-    '3,300 BC - 3,200 BC Cycladic Civilization (Prehistoric)': 'Cycladic Civilization (3,300 BC - 3,200 BC)',
-    '3,200 BC - 1,200 BC Bronze Age (Ancient)': 'Bronze Age (3,200 BC - 1,200 BC)',
-    '1,200 BC - 600 BC Iron Age': 'Iron Age (1,200 BC - 600 BC)',
-    '3,100 BC - 30 BC Ancient Egypt': 'Ancient Egypt (3,100 BC - 30 BC)',
-    '3,500 BC - 539 BC Ancient Mesopotamia': 'Ancient Mesopotamia (3,500 BC - 539 BC)',
-    '3,300 BC - 600 AD Ancient India': 'Ancient India (3,300 BC - 600 AD)',
-    '2,070 BC - 220 AD Ancient China': 'Ancient China (2,070 BC - 220 AD)',
-    '800 BC - 146 BC Ancient Greece': 'Ancient Greece (800 BC - 146 BC)',
-    '753 BC - 476 AD Ancient Rome': 'Ancient Rome (753 BC - 476 AD)',
-    '476 - 1000 Early Middle Ages': 'Early Middle Ages (476 - 1000)',
-    '1000 - 1250 High Middle Ages': 'High Middle Ages (1000 - 1250)',
-    '1250 - 1453 Late Middle Ages': 'Late Middle Ages (1250 - 1453)',
-    '330 - 1453 Byzantine Empire': 'Byzantine Empire (330 - 1453)',
-    '750 - 1258 Islamic Golden Age': 'Islamic Golden Age (750 - 1258)',
-    '1453 - 1789 Early Modern Period': 'Early Modern Period (1453 - 1789)',
-    '1789 - 1945 Late Modern Period': 'Late Modern Period (1789 - 1945)',
-    '1945 - present Contemporary Period': 'Contemporary Period (1945 - present)',
-    '1300 - 1600 Renaissance': 'Renaissance (1300 - 1600)',
-    '1400 - 1800 Age of Discovery': 'Age of Discovery (1400 - 1800)',
-    '1517 - 1648 Reformation': 'Reformation (1517 - 1648)',
-    '1637 - 1800 Enlightenment': 'Enlightenment (1637 - 1800)',
-    '1543 - 1687 Scientific Revolution': 'Scientific Revolution (1543 - 1687)',
-    '1760 - 1840 Industrial Revolution': 'Industrial Revolution (1760 - 1840)',
-    '1774 - 1849 Age of Revolutions': 'Age of Revolutions (1774 - 1849)',
-    '1800 - 1945 Imperialism': 'Imperialism (1800 - 1945)',
-    '1914 - 1918 World War I': 'World War I (1914 - 1918)',
-    '1918 - 1939 Interwar Period': 'Interwar Period (1918 - 1939)',
-    '1939 - 1945 World War II': 'World War II (1939 - 1945)',
-    'Ethics': 'Ethics/Moral Philosophy',
-    'Gettier Problem': 'The Gettier Problem',
-    'Virtue Ethics': 'Aristotle\'s Virtue Ethics',
-    'Deontology': 'Kant\'s Deontology',
-    'Alternate Theory: Israel Killed Kennedy': 'Alternate Theories',
-    'Ockham\'s Radical Nominalism': 'Ockham\'s Conceptualism',
-    'Free Will': 'Free Will vs. Determinism',
-    '1947 - 1991 Cold War': 'Cold War Era (1947 - 1991)',
-    'Cold War (1947 - 1991)': 'Cold War Era (1947 - 1991)',
-    '1991 - 2001 Post-Cold War Era': 'Post-Cold War Era (1991 - 2001)',
-    '2001 - present 21st Century': '21st Century (2001 - present)',
-  },
-  3: {
-    'First Trump Presidency (2016 - 2020)': 'First Trump Presidency (2017 - 2021)',
-    'Migration Period (500 - 750)': 'Migration Period (c. 375 - 568)',
-    'Migration Period (750 - 800)': 'Rise of the Carolingians (750 - 800)',
-  },
-};
 
 // Parents whose children should use TOPIC_SUBDIVISIONS defined order (e.g., chronological)
 // All other parents will be alphabetized by default
@@ -1064,34 +986,6 @@ const TOPIC_KEYWORDS = {
   'Statistics': ['data', 'probability', 'distribution', 'variance', 'mean', 'regression', 'sampling', 'hypothesis', 'correlation', 'statistical analysis', 'data analysis', 'probability theory'],
 }
 
-const applyLabelMigrations = (mapNodes) => {
-  if (!Array.isArray(mapNodes)) return { nodes: [], changed: false }
-
-  const orderedVersions = Object.keys(LABEL_MIGRATIONS_BY_VERSION)
-    .map((version) => Number(version))
-    .sort((a, b) => a - b)
-
-  let changed = false
-  const migratedNodes = mapNodes.map((node) => {
-    let nextLabel = node.label
-
-    orderedVersions.forEach((version) => {
-      const versionMap = LABEL_MIGRATIONS_BY_VERSION[version]
-      nextLabel = versionMap[nextLabel] || nextLabel
-    })
-
-    if (nextLabel === node.label) return node
-
-    changed = true
-    return {
-      ...node,
-      label: nextLabel,
-    }
-  })
-
-  return { nodes: migratedNodes, changed }
-}
-
 const getDisplayLabelRaw = (label) => {
   const m = label.match(/\s\d+:(\d+)$/)
   if (m) return m[1]
@@ -1263,7 +1157,7 @@ function App() {
     };
 
     const normalizeLoadedNodes = (mapNodes) => {
-      const { nodes: migratedNodes, changed: migrationChanged } = applyLabelMigrations(mapNodes)
+      const { nodes: migratedNodes, changed: migrationChanged } = applyLabelMigrations(mapNodes, TOPIC_SUBDIVISIONS)
       const { nodes: restructuredNodes, changed: structureChanged } = applyStructuralMigrations(migratedNodes, generateSummary, TOPIC_SUBDIVISIONS)
       const { nodes: prunedNodes, changed: pruneChanged } = removeStalePredefinedChildren(restructuredNodes, TOPIC_SUBDIVISIONS, generateSummary)
       const { nodes: summarizedNodes, changed: summaryChanged } = applySummaryMigrations(prunedNodes)

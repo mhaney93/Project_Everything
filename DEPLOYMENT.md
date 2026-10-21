@@ -97,7 +97,7 @@ psql "$DATABASE_URL"                       # DATABASE_URL is in .env.local after
 
 Schema lives in `server/db/schema.sql`; migrations in `server/db/*.sql`. Apply against Neon
 manually (`psql "$DATABASE_URL" -f server/db/<file>.sql`) — there is no automated migration step.
-Node **label** migrations are separate and run client-side (see [SETUP.md](SETUP.md#data-migrations)).
+Node **label** migrations are separate and run client-side (see [README.md](README.md#data-migrations)).
 
 ---
 
