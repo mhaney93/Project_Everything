@@ -2675,6 +2675,34 @@ test('the built-in taxonomy lists each deduplicated node once', () => {
   assert.equal(TOPIC_SUBDIVISIONS['Emotional Intimacy'].includes('Esteem'), false)
   assert.equal(TOPIC_SUBDIVISIONS['Gratitude'].includes('Admiration'), false)
   assert.equal(TOPIC_SUBDIVISIONS['Workaround|Negativity Bias'].includes('Gratitude'), false)
+  assert.equal(TOPIC_SUBDIVISIONS['Positive Emotions|Complex'].includes('Gratitude'), false)
+  assert.equal(TOPIC_SUBDIVISIONS['Respecting'].includes('Appreciation'), false)
+  assert.deepEqual(parentsListing('Appreciation'), ['Gratitude'])
+  assert.deepEqual(parentsListing('Esteem'), ['Appreciation'])
+  assert.deepEqual(parentsListing('Admiration'), ['Esteem'])
+})
+
+test('stored built-in copies of Gratitude and Appreciation drop from their unlisted parents', () => {
+  const before = buildMap(['Root', [
+    ['Respect', [['Respecting', [...builtIn('Respecting')[1], builtIn('Appreciation')]]]],
+    ['Positive Emotions|Complex', [...builtIn('Positive Emotions|Complex')[1], builtIn('Gratitude')]],
+  ]])
+  const { nodes, changed } = normalize(before)
+  assert.equal(changed, true)
+  const respecting = nodes.find((n) => n.label === 'Respecting')
+  assert.deepEqual(childLabelsOf(nodes, respecting), [...TOPIC_SUBDIVISIONS['Respecting']].sort())
+  const positive = nodes.find((n) => n.label === 'Positive Emotions|Complex')
+  assert.deepEqual(childLabelsOf(nodes, positive), [...TOPIC_SUBDIVISIONS['Positive Emotions|Complex']].sort())
+  const ids = new Set(nodes.map((n) => n.id))
+  assert.ok(nodes.every((n) => n.parentId === null || ids.has(n.parentId)))
+  const byId = new Map(nodes.map((n) => [n.id, n]))
+  for (const [label, parent] of [['Gratitude', 'Happiness'], ['Appreciation', 'Gratitude'], ['Esteem', 'Appreciation'], ['Admiration', 'Esteem']]) {
+    assert.deepEqual(nodes.filter((n) => n.label === label).map((n) => byId.get(n.parentId).label), [parent], label)
+  }
+
+  const again = normalize(nodes)
+  assert.equal(again.changed, false)
+  assert.deepEqual(again.nodes, nodes)
 })
 
 test('a remove with exclude keeps the label out of that parent only', () => {
