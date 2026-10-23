@@ -123,17 +123,21 @@ test('the taxonomy lists Emotional Regulation only under Emotions', () => {
 
 test('the built-in Emotional Regulation subtree keeps the richest copy', () => {
   const nodes = buildMap(builtIn('Emotional Regulation'))
-  assert.equal(nodes.length - 1, 16)
+  assert.equal(nodes.length - 1, 12)
   const labels = nodes.map((n) => n.label)
-  for (const label of ['Cognitive Behavioral Therapy (CBT)', 'Dialectical Behavior Therapy (DBT)', 'Mindfulness', 'Equanimity Cultivation', 'Cold Plunge', 'Strong Healthy Relationships']) {
+  for (const label of ['Mindfulness', 'Equanimity Cultivation', 'Cold Plunge', 'Strong Healthy Relationships']) {
     assert.ok(labels.includes(label), label)
   }
+  // CBT is filed under Clinical Psychology > Psychotherapy > Behavioral Therapy.
+  assert.ok(!labels.includes('Cognitive Behavioral Therapy (CBT)'))
   assert.equal(new Set(labels).size, labels.length)
 })
 
 test('migration leaves one Emotional Regulation under Psychology > Emotions with no orphans', () => {
   const before = liveShapedMap()
-  const positiveCopy = before.find((n) => n.label === 'Emotional Regulation' && n.notes)
+  // Without CBT the built-in positive-psychology copy has 12 nodes, so the
+  // neuroscience copy (13) is the richest and is kept.
+  const neuroscienceCopy = before.find((n) => n.label === 'Emotional Regulation' && pathOf(before, n).includes('PFC-Limbic'))
   const { nodes, changed } = normalize(before)
 
   assert.equal(changed, true)
@@ -142,12 +146,13 @@ test('migration leaves one Emotional Regulation under Psychology > Emotions with
   assert.equal(copies.length, 1)
   const [home] = copies
   assert.equal(pathOf(nodes, home), 'Root > Psychology > Emotions > Emotional Regulation')
-  assert.equal(home.id, positiveCopy.id)
+  assert.equal(home.id, neuroscienceCopy.id)
   assert.deepEqual(home.notes.map((n) => n.id), ['note-b'])
 
   const subtree = descendantsOf(nodes, home.id)
+  // 12 built-in nodes plus CBT, which stays while no Behavioral Therapy home is stored.
   const builtInSubtree = subtree.filter((n) => !n.isCustom)
-  assert.equal(builtInSubtree.length, 16)
+  assert.equal(builtInSubtree.length, 13)
   assert.equal(new Set(subtree.map((n) => pathOf(nodes, n))).size, subtree.length)
 
   const custom = subtree.find((n) => n.label === 'My Own Practice')
@@ -1206,7 +1211,9 @@ test('the ancient Migration Period merges into the medieval one, keeping its sum
     mergedSummaryNote(before, ancientSummary),
   ])
   assert.equal(pathOf(nodes, nodes.find((n) => n.label === 'Goths')), `${MEDIEVAL_MIGRATION_PERIOD} > Goths`)
-  for (const label of ['Late Antiquity (250 - 500 AD)', 'Late Antiquity (500 - 750)']) assert.equal(nodes.filter((n) => n.label === label).length, 1)
+  // The emptied ancient Late Antiquity goes too (map migration 14).
+  assert.equal(nodes.filter((n) => n.label === 'Late Antiquity (250 - 500 AD)').length, 0)
+  assert.equal(nodes.filter((n) => n.label === 'Late Antiquity (500 - 750)').length, 1)
   assert.deepEqual(orphansOf(nodes), [])
   assert.equal(normalize(nodes, appSummary).changed, false)
 })
@@ -1218,9 +1225,9 @@ test('a bare ancient Migration Period leaves its retired built-in summary as a n
 
   assert.equal(changed, true)
   assert.deepEqual(nodes, before
-    .filter((n) => n.label !== 'Migration Period (300 - 500 AD)')
+    .filter((n) => !['Migration Period (300 - 500 AD)', 'Late Antiquity (250 - 500 AD)'].includes(n.label))
     .map((n) => (n.id === kept.id ? { ...n, notes: [mergedSummaryNote(before, ANCIENT_MIGRATION_PERIOD_SUMMARY)] } : n)))
-  assert.deepEqual([...TOPIC_SUBDIVISIONS['Late Antiquity (250 - 500 AD)']], [])
+  assert.equal('Late Antiquity (250 - 500 AD)' in TOPIC_SUBDIVISIONS, false)
   assert.equal('Migration Period (300 - 500 AD)' in TOPIC_SUBDIVISIONS, false)
   assert.equal('Migration Period (300 - 500 AD)' in BUILT_IN_SUMMARIES, false)
   assert.equal(normalize(nodes, appSummary).changed, false)
@@ -1237,7 +1244,7 @@ test('the ancient Migration Period merges into a medieval branch that is not sto
     assert.equal(kept.length, 1)
     assert.equal(pathOf(nodes, kept[0]), MEDIEVAL_MIGRATION_PERIOD)
     assert.deepEqual(kept[0].notes, [...(extra.notes || []), mergedSummaryNote(before, ANCIENT_MIGRATION_PERIOD_SUMMARY)])
-    assert.ok(nodes.some((n) => n.label === 'Late Antiquity (250 - 500 AD)'))
+    assert.ok(!nodes.some((n) => n.label === 'Late Antiquity (250 - 500 AD)'))
     assert.deepEqual(orphansOf(nodes), [])
     assert.equal(normalize(nodes, appSummary).changed, false)
   }
@@ -2565,4 +2572,169 @@ test('migration 13 adds the Pre-Socratics under schools a stored map already exp
   assert.ok(changed)
   for (const [parent, add] of PRE_SOCRATIC_ADDS) assert.ok(labelsUnder(nodes, parent).includes(add), `${parent} > ${add}`)
   assert.deepEqual(normalize(nodes, appSummary), { nodes, changed: false })
+})
+
+const map7Dedupe = () => JSON.parse(readFileSync(new URL('./fixtures/map7-dedupe.json', import.meta.url), 'utf8')).nodes
+
+const loadWithNodeEdits = (mapNodes) => {
+  const { nodes, changed } = normalize(mapNodes, appSummary)
+  const summaries = applySummaryMigrations(nodes)
+  const edits = applyNodeEdits(summaries.nodes)
+  return { nodes: edits.nodes, changed: changed || summaries.changed || edits.changed }
+}
+
+// The copies migration 14 removes from production map 7 (2026-10-23 review),
+// with the subtrees that go with them.
+const DEDUPE_REMOVED = [
+  213, 296, 595, 871, 874, 993, 1009, 1010, 1012, 1026, 1391, 1455, 1496, 1499, 1574, 2104, 2213, 2351, 2355,
+  3133, 3143, 3144, 3145, 3146, 3147, 3747, 4062, 4095, 4119, 4120, 4267, 4306, 4308, 4309, 4310, 4322, 4483, 4485, 4486, 5153,
+]
+const DEDUPE_KEPT = [
+  574, 2714, 2712, 2106, 4477, 257, 2736, 4271, 4273, 4609, 4616, 859, 869, 5132, 2362, 2322, 161, 5241,
+  1377, 1527, 1252, 208, 1544, 3748, 2102, 701, 2632, 1044, 1045, 750, 1207, 3647,
+]
+
+test('production map 7 keeps one copy of each duplicated node', () => {
+  const before = map7Dedupe()
+  const byId = new Map(before.map((n) => [n.id, n]))
+  const { nodes, changed } = loadWithNodeEdits(before)
+  assert.equal(changed, true)
+  const node = (id) => nodes.find((n) => n.id === id)
+  const childrenOf = (id) => nodes.filter((n) => n.parentId === id).map((n) => n.id).sort((a, b) => a - b)
+
+  for (const id of DEDUPE_REMOVED) assert.equal(node(id), undefined, byId.get(id).label)
+  assert.equal(nodes.length, before.length - DEDUPE_REMOVED.length)
+  for (const id of DEDUPE_KEPT) assert.ok(node(id), byId.get(id).label)
+  assert.deepEqual(orphansOf(nodes), [])
+
+  // The removed copies' children join the kept homes.
+  assert.deepEqual(childrenOf(574).filter((id) => byId.get(id).parentId === 595), [3585, 3586, 3587, 3588, 3589, 3590])
+  for (const id of [2217, 2218, 2219, 2220, 2221, 2222]) assert.equal(node(id).parentId, 2714)
+  assert.equal(node(2106).parentId, 2712)
+  for (const id of [2108, 2109]) assert.equal(node(id).summary, appSummary(node(id).label))
+  assert.equal(node(161).parentId, byId.get(213).parentId)
+  assert.equal(node(2102).parentId, byId.get(1574).parentId)
+  assert.deepEqual([297, 298].map((id) => [node(id).parentId, node(id).label]), [
+    [3748, 'Indus Valley Civilization (3,300 BC - 2,000 BC)'],
+    [3748, 'Cycladic Civilization (3,300 BC - 2,000 BC)'],
+  ])
+  assert.deepEqual(node(3128).excludedChildLabels, ['switch statements', 'Conditional Operator/Ternary Operator'])
+  assert.equal(node(3647).label, 'keccak256|opcode')
+  assert.equal(node(3647).parentId, byId.get(3647).parentId)
+
+  // The Cold War events move up into Cold War Era, in their own order, ahead
+  // of the country branches; Cold War Era shows the fuller summary.
+  const coldWar = nodes.filter((n) => n.parentId === 208).sort((a, b) => a.order - b.order)
+  assert.deepEqual(coldWar.map((n) => n.id), [496, 498, 499, 500, 501, 503, 505, 507, 1307, 1437, 1777, 1791, 1390, 1240, 1789, 1320, 1758, 1788, 1436])
+  assert.deepEqual(coldWar.map((n) => n.order), coldWar.map((_, index) => index))
+  assert.equal(node(208).summary, byId.get(1391).summary)
+  assert.deepEqual(node(208).notes, [{ id: 'replaced-summary-208', text: `Earlier summary: ${byId.get(208).summary}`, level: 0 }])
+  assert.equal(node(1252).summary, byId.get(1252).summary)
+  assert.equal(node(1252).notes.length, 1)
+  assert.ok(node(1252).notes[0].text.endsWith(`: ${byId.get(1455).summary}`))
+  for (const id of [1377, 1527]) assert.deepEqual(node(id), byId.get(id))
+
+  // No See: pointers, and every other custom node keeps its label and summary.
+  assert.equal(nodes.some((n) => (n.summary || '').includes('See:')), before.some((n) => (n.summary || '').includes('See:')))
+  for (const n of before.filter((n) => n.isCustom && ![1391, 1455, 1496, 1499, 2108, 2109].includes(n.id))) {
+    const after = node(n.id)
+    assert.equal(after.label, n.label)
+    assert.equal(after.summary, n.summary)
+  }
+
+  const again = loadWithNodeEdits(nodes)
+  assert.equal(again.changed, false)
+  assert.deepEqual(again.nodes, nodes)
+})
+
+const parentsListing = (label) => Object.keys(TOPIC_SUBDIVISIONS).filter((parent) => TOPIC_SUBDIVISIONS[parent].includes(label))
+
+test('the built-in taxonomy lists each deduplicated node once', () => {
+  for (const [label, parent] of [
+    ['Statistics', 'Formal Sciences'],
+    ['Executive Functions', 'Cognitive Psychology'],
+    ['Cognition', 'Cognitive Psychology'],
+    ['Cognitive Behavioral Therapy (CBT)', 'Behavioral Therapy'],
+    ['Qualia', 'Philosophy of Mind'],
+    ['Expression Theory', 'Art Theory'],
+    ['Cognitive Neuroscience', 'Neuroscience'],
+    ['Indus Valley Civilization (3,300 BC - 2,000 BC)', 'Early Bronze Age (3,200 BC - 2,000 BC)'],
+    ['Cycladic Civilization (3,300 BC - 2,000 BC)', 'Early Bronze Age (3,200 BC - 2,000 BC)'],
+    ['keccak256|opcode', 'opcodes (operation codes)'],
+  ]) assert.deepEqual(parentsListing(label), [parent], label)
+  for (const label of [
+    'Aristotelian Ethics', 'Practical Wisdom', 'Expressionism', 'Jewish Philosophy', 'TypeScript|cli', 'Local Storage|auth',
+    'Session Storage|auth', 'Emotional Appeals', 'Projection', 'Scapegoating', 'Ask a Deep Question', 'Intelligence',
+    'Late Antiquity (250 - 500 AD)', 'Early Bronze Age (3,300 BC - 3,200 BC)', 'Systems/Cognitive Neuroscience',
+  ]) {
+    assert.deepEqual(parentsListing(label), [], label)
+    assert.equal(label in TOPIC_SUBDIVISIONS, false, label)
+  }
+  assert.equal(TOPIC_SUBDIVISIONS['Smart Contract Development'].includes('Security'), false)
+  assert.equal(TOPIC_SUBDIVISIONS['Loop for Understanding'].includes('Ask Follow-Up Questions'), false)
+  assert.equal(TOPIC_SUBDIVISIONS['Emotional Intimacy'].includes('Esteem'), false)
+  assert.equal(TOPIC_SUBDIVISIONS['Gratitude'].includes('Admiration'), false)
+  assert.equal(TOPIC_SUBDIVISIONS['Workaround|Negativity Bias'].includes('Gratitude'), false)
+})
+
+test('a remove with exclude keeps the label out of that parent only', () => {
+  const ternary = 'Conditional Operator/Ternary Operator'
+  const conditionals = (extra) => ['Conditional Statements', [builtIn(ternary)], extra]
+  const before = buildMap(['Root', [
+    // On map 7 the owner filed Control Flow under Data Types > Functions.
+    ['Solidity', [['Data Types', [['Functions', [['Control Flow', [conditionals({ excludedChildLabels: ['switch statements'] })], { isCustom: true }]], { isCustom: true }]]]]],
+    ['JavaScript', [['Control Flow', [conditionals()]]]],
+  ]])
+  const { nodes } = normalize(before)
+  const [solidity, javascript] = nodes.filter((n) => n.label === 'Conditional Statements')
+  assert.deepEqual(solidity.excludedChildLabels, ['switch statements', ternary])
+  assert.deepEqual(childLabelsOf(nodes, solidity), [])
+  assert.equal(javascript.excludedChildLabels, undefined)
+  assert.deepEqual(childLabelsOf(nodes, javascript), [ternary])
+  assert.deepEqual(normalize(nodes), { nodes, changed: false })
+})
+
+const COLD_WAR = NODE_EDITS_BY_VERSION[14].find((edit) => edit.id === 1391)
+const HOREV = NODE_EDITS_BY_VERSION[14].find((edit) => edit.id === 1496)
+
+const coldWarNodes = () => [
+  { id: 208, label: COLD_WAR.mergeInto.label, parentId: 1, hidden: false, summary: 'Old summary.' },
+  { id: 10, label: 'Middle East', parentId: 208, hidden: false, isCustom: true, order: 0 },
+  { id: 1391, label: COLD_WAR.label, parentId: 208, hidden: false, isCustom: true, summary: COLD_WAR.summary, order: 1 },
+  { id: 11, label: 'Arms Race', parentId: 1391, hidden: false, isCustom: true, order: 0 },
+  { id: 12, label: 'NATO', parentId: 1391, hidden: false, isCustom: true, order: 1 },
+  { id: 13, label: 'America', parentId: 208, hidden: false, isCustom: true, order: 2 },
+]
+
+test('a mergeInto node edit puts the merged children in the duplicate\'s place', () => {
+  const { nodes, changed } = applyNodeEdits(coldWarNodes())
+  assert.equal(changed, true)
+  assert.equal(nodes.some((n) => n.id === 1391), false)
+  const children = nodes.filter((n) => n.parentId === 208).sort((a, b) => a.order - b.order)
+  assert.deepEqual(children.map((n) => [n.label, n.order]), [['Middle East', 0], ['Arms Race', 1], ['NATO', 2], ['America', 3]])
+  const coldWarEra = nodes.find((n) => n.id === 208)
+  assert.equal(coldWarEra.summary, COLD_WAR.summary)
+  assert.deepEqual(coldWarEra.notes, [{ id: 'replaced-summary-208', text: 'Earlier summary: Old summary.', level: 0 }])
+  assert.equal(applyNodeEdits(nodes).changed, false)
+})
+
+test('a mergeInto node edit leaves sibling order alone when no child moves', () => {
+  const before = [
+    { id: 1377, label: HOREV.mergeInto.label, parentId: 1, hidden: false, isCustom: true, summary: HOREV.summary, order: 0 },
+    { id: 2, label: 'Operation Ayin', parentId: 1, hidden: false, isCustom: true, order: 1 },
+    { id: 1496, label: HOREV.label, parentId: 3, hidden: false, isCustom: true, summary: HOREV.summary, order: 1 },
+    { id: 4, label: 'Operation Yoav', parentId: 3, hidden: false, isCustom: true, order: 0 },
+    { id: 5, label: 'Operation Hiram', parentId: 3, hidden: false, isCustom: true, order: 2 },
+  ]
+  const { nodes } = applyNodeEdits(before)
+  assert.deepEqual(nodes, before.filter((n) => n.id !== 1496))
+})
+
+test('a mergeInto node edit skips an edited duplicate or a missing target', () => {
+  const edited = coldWarNodes().map((n) => (n.id === 1391 ? { ...n, summary: 'Rewritten.' } : n))
+  assert.equal(applyNodeEdits(edited).changed, false)
+  const builtInCopy = coldWarNodes().map((n) => (n.id === 1391 ? { ...n, isCustom: undefined } : n))
+  assert.equal(applyNodeEdits(builtInCopy).changed, false)
+  const renamedTarget = coldWarNodes().map((n) => (n.id === 208 ? { ...n, label: 'Cold War' } : n))
+  assert.equal(applyNodeEdits(renamedTarget).changed, false)
 })

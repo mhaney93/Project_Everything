@@ -1,0 +1,5508 @@
+{
+  "map_id": 7,
+  "note": "Production map 7 (admin map) 2026-10-23: every node the duplicate merges of map migration 14 remove, move, relabel or edit, with their subtrees, the kept copies, the stored chains to all of them with every stored child of each chain node. Notes and the Personal branch are left out.",
+  "nodes": [
+    {
+      "id": 1,
+      "label": "Everything",
+      "hidden": false,
+      "summary": "A conceptual map connecting all fields of human knowledge and inquiry.",
+      "isCustom": true,
+      "parentId": null,
+      "labelMigrationVersion": 4
+    },
+    {
+      "id": 2,
+      "label": "Humanities",
+      "order": 0,
+      "hidden": false,
+      "summary": "Disciplines that study human culture, history, language, and values.",
+      "isCustom": true,
+      "parentId": 1
+    },
+    {
+      "id": 3,
+      "label": "Sciences",
+      "order": 2,
+      "hidden": false,
+      "summary": "Fields that investigate the natural world through observation and experimentation.",
+      "isCustom": true,
+      "parentId": 1
+    },
+    {
+      "id": 5,
+      "label": "Philosophy",
+      "hidden": false,
+      "summary": "The pursuit of wisdom through critical analysis of existence, knowledge, and ethics.",
+      "parentId": 2
+    },
+    {
+      "id": 6,
+      "label": "History",
+      "hidden": false,
+      "summary": "The study of past human events, societies, and civilizations across time.",
+      "parentId": 2
+    },
+    {
+      "id": 8,
+      "label": "Arts",
+      "hidden": false,
+      "summary": "The expression or application of human creativity and imagination, producing works appreciated for their beauty or emotional power.",
+      "parentId": 2
+    },
+    {
+      "id": 10,
+      "label": "Languages",
+      "hidden": false,
+      "summary": "Systems of communication using symbols, sounds, or gestures, fundamental to human interaction and culture.",
+      "parentId": 2
+    },
+    {
+      "id": 23,
+      "label": "Prehistory (3.3 million years ago - 3,200 BC)",
+      "hidden": true,
+      "summary": "The period of human history before the invention of writing, spanning from 3.3 million years ago to 3,200 BC.",
+      "parentId": 6
+    },
+    {
+      "id": 24,
+      "label": "Ancient History (3,200 BC - 476 AD)",
+      "hidden": true,
+      "summary": "The era of the earliest civilizations, from the invention of writing (3,200 BC) to the fall of the Western Roman Empire (476 AD).",
+      "parentId": 6
+    },
+    {
+      "id": 25,
+      "label": "Medieval Period (476 - 1453)",
+      "hidden": true,
+      "summary": "The historical period spanning from 476 to 1453, characterized by feudalism, the dominance of the Church in Europe, and ending with the fall of Constantinople.",
+      "parentId": 6
+    },
+    {
+      "id": 26,
+      "label": "Modern Era (1453 - present)",
+      "hidden": true,
+      "summary": "The period from 1453 to the present, marked by the transition from medieval to contemporary society.",
+      "parentId": 6
+    },
+    {
+      "id": 27,
+      "label": "Stone Age (3.3 million years ago - 3,300 BC)",
+      "hidden": true,
+      "summary": "The prehistoric period when stone tools were predominantly used, spanning from 3.3 million years ago to 3,300 BC.",
+      "parentId": 23
+    },
+    {
+      "id": 30,
+      "label": "Ancient Egypt (3,100 BC - 30 BC)",
+      "hidden": true,
+      "summary": "The civilization along the Nile River known for pyramids, pharaohs, and hieroglyphic writing, from 3,100 BC to 30 BC.",
+      "parentId": 24
+    },
+    {
+      "id": 31,
+      "label": "Ancient Mesopotamia (3,500 BC - 539 BC)",
+      "hidden": true,
+      "summary": "The region between the Tigris and Euphrates rivers, cradle of civilization with Sumerians, Babylonians, and Assyrians, from 3,500 BC to 539 BC.",
+      "parentId": 24
+    },
+    {
+      "id": 32,
+      "label": "Ancient India (3,300 BC - 600 AD)",
+      "hidden": true,
+      "summary": "The early civilizations of the Indian subcontinent including the Indus Valley and Vedic periods, from 3,300 BC to 600 AD.",
+      "parentId": 24
+    },
+    {
+      "id": 33,
+      "label": "Ancient China (2,070 BC - 220 AD)",
+      "hidden": true,
+      "summary": "Early Chinese civilization including the Shang, Zhou, Qin, and Han dynasties, from 2,070 BC to 220 AD.",
+      "parentId": 24
+    },
+    {
+      "id": 34,
+      "label": "Ancient Greece (800 BC - 146 BC)",
+      "hidden": true,
+      "summary": "The civilization that developed philosophy, democracy, and classical art, from 800 BC to 146 BC.",
+      "parentId": 24
+    },
+    {
+      "id": 35,
+      "label": "Ancient Rome (753 BC - 476 AD)",
+      "hidden": true,
+      "summary": "The civilization that grew from a city-state to an empire dominating the Mediterranean world, from 753 BC to 476 AD.",
+      "parentId": 24
+    },
+    {
+      "id": 36,
+      "label": "Ethics/Moral Philosophy",
+      "hidden": false,
+      "parentId": 5
+    },
+    {
+      "id": 37,
+      "label": "Metaphysics",
+      "hidden": false,
+      "parentId": 5
+    },
+    {
+      "id": 38,
+      "label": "Epistemology",
+      "hidden": false,
+      "parentId": 5
+    },
+    {
+      "id": 40,
+      "label": "Aesthetics",
+      "hidden": false,
+      "parentId": 5
+    },
+    {
+      "id": 41,
+      "label": "Political Philosophy",
+      "hidden": false,
+      "parentId": 5
+    },
+    {
+      "id": 81,
+      "label": "Applied Ethics",
+      "order": 0,
+      "hidden": true,
+      "parentId": 36
+    },
+    {
+      "id": 157,
+      "label": "Beauty",
+      "hidden": true,
+      "summary": "The quality of being aesthetically pleasing or possessing qualities that give pleasure to the senses or mind.",
+      "parentId": 40
+    },
+    {
+      "id": 158,
+      "label": "Art Theory",
+      "hidden": true,
+      "summary": "Philosophical inquiry into the nature, purpose, and value of art.",
+      "parentId": 40
+    },
+    {
+      "id": 159,
+      "label": "Taste",
+      "hidden": true,
+      "summary": "The capacity to make discerning judgments about aesthetic qualities.",
+      "parentId": 40
+    },
+    {
+      "id": 160,
+      "label": "Sublime",
+      "hidden": true,
+      "summary": "An aesthetic quality involving awe, grandeur, or overwhelming beauty that transcends ordinary experience.",
+      "parentId": 40
+    },
+    {
+      "id": 161,
+      "label": "Expression Theory",
+      "hidden": true,
+      "summary": "The view that art is valuable because it expresses human emotions and experiences.",
+      "parentId": 40
+    },
+    {
+      "id": 205,
+      "label": "Early Modern Period (1453 - 1789)",
+      "hidden": true,
+      "summary": "A period of significant cultural, intellectual, and political transformation from 1453 to 1789, including the Renaissance, Reformation, and Enlightenment.",
+      "parentId": 26
+    },
+    {
+      "id": 206,
+      "label": "Late Modern Period (1789 - 1945)",
+      "hidden": true,
+      "summary": "The period from 1789 to 1945, marked by industrialization, imperialism, world wars, and major social upheaval.",
+      "parentId": 26
+    },
+    {
+      "id": 207,
+      "label": "Contemporary Period (1945 - present)",
+      "hidden": true,
+      "summary": "The period from 1945 to the present, shaped by decolonization, the Cold War, technological advancement, and globalization.",
+      "parentId": 26,
+      "excludedChildLabels": [
+        "Post-Cold War Era (1991 - 2001)",
+        "Bangladesh Liberation War (1971)",
+        "Falklands War (1982)",
+        "Late 1990s Global Financial Crises (1994 - 2002)",
+        "Jeffrey Epstein Scandal (2005 - present)",
+        "Global Financial Crisis (2008 - 2009)",
+        "Russo-Ukrainian War (2014 - present)",
+        "European Migrant Crisis (2015)",
+        "MeToo Movement (2017 - 2018)",
+        "COVID-19 Pandemic (2019 - 2023)",
+        "United Kingdom (1945 - present)",
+        "India (1945 - present)",
+        "America (1945 - present)",
+        "COVID-19 Pandemic (2019 - 2023)",
+        "Algerian War of Independence (1954 - 1962)",
+        "Bangladesh Liberation War (1971)",
+        "Falklands War (1982)",
+        "Middle East Conflict (1945 - present)",
+        "Post-Cold War Era (1991 - 2001)",
+        "Late 1990s Global Financial Crises (1994 - 2002)",
+        "Jeffrey Epstein Scandal (2005 - present)",
+        "Global Financial Crisis (2008 - 2009)",
+        "Russo-Ukrainian War (2014 - present)",
+        "European Migrant Crisis (2015)",
+        "MeToo Movement (2017 - 2018)",
+        "India (1945 - present)",
+        "United Kingdom (1945 - present)",
+        "Rwanda (1962 - present)",
+        "America (1945 - present)",
+        "Algerian War of Independence (1954 - 1962)",
+        "Bangladesh Liberation War (1971)",
+        "Falklands War (1982)",
+        "Middle East Conflict (1945 - present)",
+        "Post-Cold War Era (1991 - 2001)",
+        "Jeffrey Epstein Scandal (2005 - present)",
+        "Late 1990s Global Financial Crises (1994 - 2002)",
+        "Global Financial Crisis (2008 - 2009)",
+        "Russo-Ukrainian War (2014 - present)",
+        "European Migrant Crisis (2015)",
+        "MeToo Movement (2017 - 2018)",
+        "COVID-19 Pandemic (2019 - 2023)",
+        "United Kingdom (1945 - present)",
+        "India (1945 - present)",
+        "America (1945 - present)",
+        "Rwanda (1962 - present)",
+        "Industrial Age (1945 - 1980)"
+      ]
+    },
+    {
+      "id": 208,
+      "label": "Cold War Era (1947 - 1991)",
+      "order": 2,
+      "hidden": true,
+      "summary": "The geopolitical tension between the United States and Soviet Union without direct military conflict, while the world underwent the Age of Industrialization of continued rapid industrialization, mass production, and technological innovation that profoundly shaped global economies and societies until 1980.",
+      "parentId": 207,
+      "excludedChildLabels": [
+        "Arms Race (1947 - 1991)",
+        "NATO (1949)",
+        "Church Committee (1975 - 1976)",
+        "Warsaw Pact (1955)",
+        "Vietnam War (1955 - 1975)",
+        "Cuban Revolution (1959)",
+        "Bay of Pigs Invasion (1961)",
+        "Operation Mongoose (1961 - 1962)",
+        "Cuban Missile Crisis (1962)",
+        "Two Germanys (1949 - 1990)",
+        "Arms Race (1947 - 1991)",
+        "NATO (1949)",
+        "Korean War (1950 - 1953)",
+        "Church Committee (1975 - 1976)",
+        "Operation Mongoose (1961 - 1962)",
+        "NATO (1949)",
+        "Two Germanys (1949 - 1990)",
+        "Korean War (1950 - 1953)",
+        "Warsaw Pact (1955)",
+        "Arms Race (1947 - 1991)",
+        "Vietnam War (1955 - 1975)",
+        "Cuban Revolution (1959)",
+        "Bay of Pigs Invasion (1961)",
+        "Cuban Missile Crisis (1962)",
+        "Church Committee (1975 - 1976)"
+      ]
+    },
+    {
+      "id": 211,
+      "label": "Representationalism",
+      "hidden": true,
+      "summary": "The view that art represents or depicts objects, scenes, or ideas from reality.",
+      "parentId": 158
+    },
+    {
+      "id": 212,
+      "label": "Formalism",
+      "hidden": true,
+      "summary": "The view that the value of art lies in its formal elements such as line, color, and composition.",
+      "parentId": 158
+    },
+    {
+      "id": 213,
+      "label": "Expressionism",
+      "hidden": true,
+      "summary": "The view that art expresses the emotions, feelings, or inner states of the artist.",
+      "parentId": 158
+    },
+    {
+      "id": 214,
+      "label": "Conceptual Art",
+      "hidden": true,
+      "summary": "Art in which the concept or idea is more important than the physical form or execution.",
+      "parentId": 158
+    },
+    {
+      "id": 215,
+      "label": "Aestheticism",
+      "hidden": true,
+      "summary": "The view that art has intrinsic value and should be appreciated for its beauty alone.",
+      "parentId": 158
+    },
+    {
+      "id": 216,
+      "label": "Institutional Theory",
+      "hidden": true,
+      "summary": "The view that art is defined by the practices and conventions of the art world.",
+      "parentId": 158
+    },
+    {
+      "id": 217,
+      "label": "Religious Studies",
+      "hidden": false,
+      "parentId": 2
+    },
+    {
+      "id": 218,
+      "label": "Western Religions",
+      "hidden": true,
+      "parentId": 217
+    },
+    {
+      "id": 219,
+      "label": "Eastern Religions",
+      "hidden": true,
+      "parentId": 217
+    },
+    {
+      "id": 220,
+      "label": "Biblical Studies",
+      "hidden": true,
+      "parentId": 217
+    },
+    {
+      "id": 221,
+      "label": "Comparative Religion",
+      "hidden": true,
+      "parentId": 217
+    },
+    {
+      "id": 222,
+      "label": "Religious Philosophy",
+      "hidden": true,
+      "parentId": 217
+    },
+    {
+      "id": 223,
+      "label": "Mythology",
+      "hidden": true,
+      "parentId": 217
+    },
+    {
+      "id": 224,
+      "label": "Christianity",
+      "hidden": true,
+      "parentId": 218
+    },
+    {
+      "id": 225,
+      "label": "Judaism",
+      "hidden": true,
+      "parentId": 218
+    },
+    {
+      "id": 226,
+      "label": "Islam",
+      "hidden": true,
+      "parentId": 218
+    },
+    {
+      "id": 249,
+      "label": "Ontology",
+      "hidden": true,
+      "summary": "A subfield of metaphysics concerned with the categories and nature of being.",
+      "parentId": 37
+    },
+    {
+      "id": 250,
+      "label": "Free Will vs. Determinism",
+      "hidden": true,
+      "summary": "The capacity of agents to choose and act independently of external causes.",
+      "parentId": 37
+    },
+    {
+      "id": 251,
+      "label": "Causality",
+      "hidden": true,
+      "summary": "The relationship between cause and effect, or how one event brings about another.",
+      "parentId": 37
+    },
+    {
+      "id": 252,
+      "label": "Substance Theory",
+      "hidden": true,
+      "summary": "The metaphysical view that objects are composed of an underlying substance and its properties.",
+      "parentId": 37
+    },
+    {
+      "id": 253,
+      "label": "Time",
+      "hidden": true,
+      "summary": "The dimension along which events occur in sequence, from past through present to future.",
+      "parentId": 37
+    },
+    {
+      "id": 254,
+      "label": "Philosophy of Mind",
+      "hidden": true,
+      "summary": "The philosophical study of consciousness, mental states, perception, and their relationship to the physical world.",
+      "parentId": 37
+    },
+    {
+      "id": 255,
+      "label": "Consciousness",
+      "hidden": true,
+      "summary": "The subjective experience of awareness, perception, sensation, and thought.",
+      "parentId": 254
+    },
+    {
+      "id": 256,
+      "label": "Intentionality",
+      "hidden": true,
+      "summary": "The phenomenological property of mental states being directed toward objects or content.",
+      "parentId": 254
+    },
+    {
+      "id": 257,
+      "label": "Qualia",
+      "hidden": true,
+      "summary": "The subjective quality of experiences, such as the redness of red or painfulness of pain.",
+      "parentId": 254
+    },
+    {
+      "id": 258,
+      "label": "Personal Identity",
+      "hidden": true,
+      "summary": "The philosophical question of what makes an individual the same person over time.",
+      "parentId": 254
+    },
+    {
+      "id": 259,
+      "label": "Artificial Intelligence",
+      "hidden": true,
+      "summary": "The creation of intelligent machines and the philosophical questions about machine consciousness and understanding.",
+      "parentId": 254
+    },
+    {
+      "id": 296,
+      "label": "Early Bronze Age (3,300 BC - 3,200 BC)",
+      "hidden": true,
+      "parentId": 23
+    },
+    {
+      "id": 297,
+      "label": "Indus Valley Civilization (3,300 BC - 3,200 BC)",
+      "hidden": true,
+      "parentId": 296
+    },
+    {
+      "id": 298,
+      "label": "Cycladic Civilization (3,300 BC - 3,200 BC)",
+      "hidden": true,
+      "parentId": 296
+    },
+    {
+      "id": 496,
+      "label": "Arms Race During the Cold War",
+      "order": 0,
+      "hidden": true,
+      "summary": "a decades-long competition for military supremacy between the United States and the Soviet Union, characterized by the massive accumulation of nuclear weapons and the doctrine of Mutually Assured Destruction.",
+      "isCustom": true,
+      "parentId": 1391
+    },
+    {
+      "id": 498,
+      "label": "Establishment of NATO (1949)",
+      "order": 2,
+      "hidden": true,
+      "isCustom": true,
+      "parentId": 1391
+    },
+    {
+      "id": 499,
+      "label": "Two Germanys (1949 - 1990)",
+      "order": 3,
+      "hidden": true,
+      "isCustom": true,
+      "parentId": 1391
+    },
+    {
+      "id": 500,
+      "label": "The Korean War (1950 - 1953)",
+      "order": 4,
+      "hidden": true,
+      "summary": "The conflict triggered by North Korea's invasion of South Korea, drawing in UN forces led by the United States and resulting in an armistice that left Korea divided.",
+      "isCustom": true,
+      "parentId": 1391
+    },
+    {
+      "id": 501,
+      "label": "Establishment of the Warsaw Pact (1955)",
+      "order": 6,
+      "hidden": true,
+      "isCustom": true,
+      "parentId": 1391
+    },
+    {
+      "id": 503,
+      "label": "Vietnam War (1955 - 1975)",
+      "order": 7,
+      "hidden": true,
+      "isCustom": true,
+      "parentId": 1391
+    },
+    {
+      "id": 505,
+      "label": "Bay of Pigs Invasion (1961)",
+      "order": 8,
+      "hidden": true,
+      "isCustom": true,
+      "parentId": 1391
+    },
+    {
+      "id": 507,
+      "label": "Cuban Missile Crisis (1962)",
+      "order": 9,
+      "hidden": true,
+      "isCustom": true,
+      "parentId": 1391
+    },
+    {
+      "id": 568,
+      "label": "Applied Sciences",
+      "order": 0,
+      "hidden": false,
+      "parentId": 3
+    },
+    {
+      "id": 569,
+      "label": "Formal Sciences",
+      "order": 1,
+      "hidden": false,
+      "parentId": 3
+    },
+    {
+      "id": 570,
+      "label": "Natural Sciences",
+      "order": 2,
+      "hidden": false,
+      "parentId": 3
+    },
+    {
+      "id": 571,
+      "label": "Social Sciences",
+      "order": 4,
+      "hidden": false,
+      "parentId": 3
+    },
+    {
+      "id": 572,
+      "label": "Logic",
+      "hidden": true,
+      "parentId": 569
+    },
+    {
+      "id": 573,
+      "label": "Mathematics",
+      "hidden": true,
+      "parentId": 569
+    },
+    {
+      "id": 574,
+      "label": "Statistics",
+      "hidden": true,
+      "parentId": 569
+    },
+    {
+      "id": 575,
+      "label": "Computer Science",
+      "hidden": true,
+      "parentId": 569
+    },
+    {
+      "id": 592,
+      "label": "Algebra",
+      "hidden": true,
+      "summary": "The branch of mathematics dealing with symbols and rules for manipulating them.",
+      "parentId": 573
+    },
+    {
+      "id": 593,
+      "label": "Geometry",
+      "hidden": true,
+      "summary": "The branch of mathematics concerned with properties of space, shapes, and figures.",
+      "parentId": 573
+    },
+    {
+      "id": 594,
+      "label": "Calculus",
+      "hidden": true,
+      "summary": "The mathematical study of continuous change involving derivatives and integrals.",
+      "parentId": 573
+    },
+    {
+      "id": 595,
+      "label": "Statistics",
+      "hidden": true,
+      "summary": "The science of collecting, analyzing, interpreting, and presenting data.",
+      "parentId": 573
+    },
+    {
+      "id": 596,
+      "label": "Number Theory",
+      "hidden": true,
+      "summary": "The branch of mathematics devoted to the study of integers and their properties.",
+      "parentId": 573
+    },
+    {
+      "id": 597,
+      "label": "Agriculture",
+      "hidden": true,
+      "parentId": 568
+    },
+    {
+      "id": 598,
+      "label": "Built Environment",
+      "hidden": true,
+      "parentId": 568
+    },
+    {
+      "id": 599,
+      "label": "Engineering",
+      "hidden": true,
+      "parentId": 568
+    },
+    {
+      "id": 600,
+      "label": "Environmental Science",
+      "hidden": true,
+      "parentId": 568
+    },
+    {
+      "id": 601,
+      "label": "Food Science",
+      "hidden": true,
+      "parentId": 568
+    },
+    {
+      "id": 602,
+      "label": "Health Sciences",
+      "hidden": true,
+      "parentId": 568
+    },
+    {
+      "id": 603,
+      "label": "Product Design",
+      "hidden": true,
+      "parentId": 568
+    },
+    {
+      "id": 604,
+      "label": "Chemical Engineering",
+      "hidden": true,
+      "parentId": 599
+    },
+    {
+      "id": 605,
+      "label": "Civil Engineering",
+      "hidden": true,
+      "parentId": 599
+    },
+    {
+      "id": 606,
+      "label": "Computer Systems Engineering",
+      "hidden": true,
+      "parentId": 599
+    },
+    {
+      "id": 607,
+      "label": "Electrical Engineering",
+      "hidden": true,
+      "parentId": 599
+    },
+    {
+      "id": 608,
+      "label": "Mechanical Engineering",
+      "hidden": true,
+      "parentId": 599
+    },
+    {
+      "id": 609,
+      "label": "Software Engineering",
+      "hidden": true,
+      "parentId": 599
+    },
+    {
+      "id": 610,
+      "label": "Artificial Intelligence (AI)",
+      "hidden": true,
+      "parentId": 609
+    },
+    {
+      "id": 611,
+      "label": "Operating System (OS)",
+      "hidden": true,
+      "parentId": 609
+    },
+    {
+      "id": 612,
+      "label": "Software Development/Programming",
+      "hidden": true,
+      "parentId": 609
+    },
+    {
+      "id": 652,
+      "label": "Cloud Computing",
+      "hidden": true,
+      "parentId": 606
+    },
+    {
+      "id": 653,
+      "label": "Distributed Systems",
+      "hidden": true,
+      "parentId": 606
+    },
+    {
+      "id": 654,
+      "label": "Consensus Mechanisms",
+      "hidden": true,
+      "parentId": 653
+    },
+    {
+      "id": 655,
+      "label": "Decentralization",
+      "hidden": true,
+      "parentId": 653
+    },
+    {
+      "id": 656,
+      "label": "Distributed Ledger Technology (DLT)",
+      "hidden": true,
+      "parentId": 653
+    },
+    {
+      "id": 657,
+      "label": "Nodes",
+      "hidden": true,
+      "parentId": 653
+    },
+    {
+      "id": 658,
+      "label": "Blockchain",
+      "hidden": true,
+      "parentId": 656
+    },
+    {
+      "id": 659,
+      "label": "Trustless Environments",
+      "hidden": true,
+      "parentId": 656
+    },
+    {
+      "id": 660,
+      "label": "Blockchain Development",
+      "hidden": true,
+      "parentId": 658
+    },
+    {
+      "id": 661,
+      "label": "Blocks",
+      "hidden": true,
+      "parentId": 658
+    },
+    {
+      "id": 663,
+      "label": "Transactions",
+      "hidden": true,
+      "parentId": 658
+    },
+    {
+      "id": 664,
+      "label": "DApps (Decentralized Applications)",
+      "hidden": true,
+      "parentId": 660
+    },
+    {
+      "id": 665,
+      "label": "Smart Contracts",
+      "hidden": true,
+      "parentId": 660
+    },
+    {
+      "id": 692,
+      "label": "Compiling",
+      "hidden": true,
+      "parentId": 612
+    },
+    {
+      "id": 693,
+      "label": "Database Systems",
+      "hidden": true,
+      "parentId": 612
+    },
+    {
+      "id": 694,
+      "label": "Development Tools",
+      "hidden": true,
+      "parentId": 612
+    },
+    {
+      "id": 695,
+      "label": "Containerization",
+      "hidden": true,
+      "parentId": 612
+    },
+    {
+      "id": 696,
+      "label": "Programming Languages",
+      "hidden": true,
+      "parentId": 612
+    },
+    {
+      "id": 697,
+      "label": "Packages",
+      "hidden": true,
+      "parentId": 612
+    },
+    {
+      "id": 698,
+      "label": "Process Managers",
+      "hidden": true,
+      "parentId": 612
+    },
+    {
+      "id": 699,
+      "label": "Productivity Tools",
+      "hidden": true,
+      "parentId": 612
+    },
+    {
+      "id": 700,
+      "label": "Runtime Environments",
+      "hidden": true,
+      "parentId": 612
+    },
+    {
+      "id": 701,
+      "label": "Security",
+      "hidden": true,
+      "parentId": 612
+    },
+    {
+      "id": 702,
+      "label": "Software Architecture",
+      "hidden": true,
+      "parentId": 612
+    },
+    {
+      "id": 703,
+      "label": "Software Documentation",
+      "hidden": true,
+      "parentId": 612
+    },
+    {
+      "id": 704,
+      "label": "State Management",
+      "hidden": true,
+      "parentId": 612
+    },
+    {
+      "id": 705,
+      "label": "Version Control",
+      "hidden": true,
+      "parentId": 612
+    },
+    {
+      "id": 706,
+      "label": "Web Servers",
+      "hidden": true,
+      "parentId": 612
+    },
+    {
+      "id": 707,
+      "label": "Declarative Languages",
+      "hidden": true,
+      "parentId": 696
+    },
+    {
+      "id": 708,
+      "label": "Imperative Languages",
+      "hidden": true,
+      "parentId": 696
+    },
+    {
+      "id": 737,
+      "label": "Object-Oriented",
+      "hidden": true,
+      "parentId": 708
+    },
+    {
+      "id": 738,
+      "label": "Emojicode",
+      "hidden": true,
+      "parentId": 737
+    },
+    {
+      "id": 739,
+      "label": "JavaScript",
+      "hidden": true,
+      "parentId": 737
+    },
+    {
+      "id": 740,
+      "label": "Python",
+      "hidden": true,
+      "parentId": 737
+    },
+    {
+      "id": 741,
+      "label": "JS Keywords",
+      "hidden": true,
+      "parentId": 739
+    },
+    {
+      "id": 742,
+      "label": "JS Operators",
+      "hidden": true,
+      "parentId": 739
+    },
+    {
+      "id": 743,
+      "label": "Literals",
+      "hidden": true,
+      "parentId": 739
+    },
+    {
+      "id": 744,
+      "label": "Variables",
+      "hidden": true,
+      "parentId": 739
+    },
+    {
+      "id": 745,
+      "label": "JS Data Types",
+      "hidden": true,
+      "parentId": 739
+    },
+    {
+      "id": 746,
+      "label": "Scope",
+      "hidden": true,
+      "parentId": 739
+    },
+    {
+      "id": 747,
+      "label": "Control Flow",
+      "hidden": true,
+      "parentId": 739
+    },
+    {
+      "id": 748,
+      "label": "Error Handling/Exception Management",
+      "hidden": true,
+      "parentId": 739
+    },
+    {
+      "id": 749,
+      "label": "Destructuring",
+      "hidden": true,
+      "parentId": 739
+    },
+    {
+      "id": 750,
+      "label": "TypeScript",
+      "hidden": true,
+      "parentId": 739
+    },
+    {
+      "id": 751,
+      "label": "Packages (JavaScript)|js",
+      "hidden": true,
+      "parentId": 739
+    },
+    {
+      "id": 768,
+      "label": "Arguments for God's Existence",
+      "hidden": true,
+      "parentId": 37
+    },
+    {
+      "id": 769,
+      "label": "Cosmology",
+      "hidden": true,
+      "parentId": 37
+    },
+    {
+      "id": 770,
+      "label": "Metaphysics of Modality",
+      "hidden": true,
+      "parentId": 37
+    },
+    {
+      "id": 846,
+      "label": "Anthropology",
+      "order": 0,
+      "hidden": false,
+      "summary": "The study of human societies, cultures, biological characteristics, and evolution across time and space.",
+      "parentId": 571
+    },
+    {
+      "id": 847,
+      "label": "Behavioral Science",
+      "order": 1,
+      "hidden": false,
+      "summary": "Scientific disciplines studying the behavior of humans and animals using experimental and observational methods.",
+      "parentId": 571
+    },
+    {
+      "id": 848,
+      "label": "Business",
+      "order": 2,
+      "hidden": false,
+      "summary": "The activity of producing, buying, and selling goods and services within economic and organizational structures.",
+      "parentId": 571
+    },
+    {
+      "id": 849,
+      "label": "Communication Studies",
+      "order": 4,
+      "hidden": false,
+      "summary": "The academic discipline examining how humans communicate across interpersonal, group, organizational, mass media, and cultural contexts.",
+      "parentId": 571
+    },
+    {
+      "id": 850,
+      "label": "Economics",
+      "order": 5,
+      "hidden": false,
+      "summary": "The social science studying the production, distribution, consumption, and allocation of goods and services.",
+      "parentId": 571
+    },
+    {
+      "id": 851,
+      "label": "Education",
+      "order": 6,
+      "hidden": false,
+      "summary": "The systematic process of facilitating learning, knowledge acquisition, skill development, and intellectual growth.",
+      "parentId": 571
+    },
+    {
+      "id": 852,
+      "label": "Law Enforcement",
+      "order": 7,
+      "hidden": false,
+      "summary": "The activity and agencies responsible for enforcing laws, maintaining public order, and preventing crime.",
+      "parentId": 571
+    },
+    {
+      "id": 853,
+      "label": "Political Science",
+      "order": 8,
+      "hidden": false,
+      "summary": "The study of political systems, government institutions, political behavior, and the theory and practice of governance.",
+      "parentId": 571
+    },
+    {
+      "id": 854,
+      "label": "Sociology",
+      "order": 9,
+      "hidden": false,
+      "summary": "The study of social groups, institutions, networks, and the forces that shape human social life and organization.",
+      "parentId": 571
+    },
+    {
+      "id": 855,
+      "label": "Conversations",
+      "hidden": true,
+      "summary": "The interactive exchange of meaning between two or more people, classified by purpose, emotional register, and structural dynamics.",
+      "parentId": 849
+    },
+    {
+      "id": 856,
+      "label": "Types of Conversations",
+      "hidden": true,
+      "summary": "A taxonomy of conversations organized by their primary function—practical, emotional, or social.",
+      "parentId": 855
+    },
+    {
+      "id": 857,
+      "label": "Conversation Dynamics",
+      "hidden": true,
+      "summary": "The patterns, forces, and structures that shape how a conversation unfolds, either constructively or destructively.",
+      "parentId": 855
+    },
+    {
+      "id": 858,
+      "label": "Supercommunicators",
+      "hidden": true,
+      "summary": "People who are exceptionally skilled at connecting with others through deep questioning, active listening, vulnerability, and adaptive conversational awareness.",
+      "parentId": 855
+    },
+    {
+      "id": 859,
+      "label": "Asking Deep Questions",
+      "hidden": true,
+      "summary": "A supercommunicator practice of posing questions that invite genuine self-expression, moving beyond surface topics to values, beliefs, and experiences.",
+      "parentId": 858
+    },
+    {
+      "id": 860,
+      "label": "Demonstrating Active Listening",
+      "hidden": true,
+      "summary": "A supercommunicator practice of visibly proving to one's conversational partner that they are being heard and understood.",
+      "parentId": 858
+    },
+    {
+      "id": 861,
+      "label": "Responding with Authentic Vulnerability",
+      "hidden": true,
+      "summary": "A supercommunicator practice: when someone shares something that could be judged, responding with genuine openness rather than evaluation, meeting vulnerability with vulnerability.",
+      "parentId": 858
+    },
+    {
+      "id": 862,
+      "label": "Matching Conversation Type",
+      "hidden": true,
+      "summary": "A supercommunicator skill: recognizing what kind of conversation the other person is having—practical, emotional, or social—and calibrating one's own responses to match that register.",
+      "parentId": 858
+    },
+    {
+      "id": 863,
+      "label": "Embracing Conversational Messiness",
+      "hidden": true,
+      "summary": "The practice of allowing conversations to be nonlinear, associative, and digressive rather than forcing a tidy progression, which tends to produce more authentic and engaging exchanges.",
+      "parentId": 858
+    },
+    {
+      "id": 864,
+      "label": "Inviting Authentic Self-Expression",
+      "hidden": true,
+      "summary": "The practice of asking conversational partners about who they are—their values, beliefs, and experiences—inviting them to speak as the foremost expert on themselves.",
+      "parentId": 859
+    },
+    {
+      "id": 868,
+      "label": "Loop for Understanding",
+      "hidden": true,
+      "summary": "A structured listening technique: ask a deep question, listen without interrupting, reflect back what was heard in your own words, and seek acknowledgment that you understood correctly.",
+      "parentId": 860
+    },
+    {
+      "id": 869,
+      "label": "Ask Follow-Up Questions",
+      "hidden": true,
+      "summary": "Questions that dig deeper into what the speaker has shared, signaling genuine curiosity and inviting fuller elaboration.",
+      "parentId": 860
+    },
+    {
+      "id": 870,
+      "label": "Sharing Similar Experiences",
+      "hidden": true,
+      "summary": "Reciprocating by briefly sharing a parallel experience of your own, building connection and demonstrating that you understand from the inside.",
+      "parentId": 860
+    },
+    {
+      "id": 871,
+      "label": "Ask a Deep Question",
+      "hidden": true,
+      "summary": "The first step in the Loop for Understanding: posing a meaningful question that invites the partner to share something real about themselves.",
+      "parentId": 868
+    },
+    {
+      "id": 872,
+      "label": "Being a Good Listener",
+      "hidden": true,
+      "summary": "The practice of giving full, undivided attention to a speaker without interrupting or planning one's own response.",
+      "parentId": 868
+    },
+    {
+      "id": 873,
+      "label": "Reflecting Back",
+      "hidden": true,
+      "summary": "Paraphrasing what you heard the speaker say—in your own words, not mimicry—to demonstrate that you were genuinely processing rather than waiting for your turn to speak.",
+      "parentId": 868
+    },
+    {
+      "id": 874,
+      "label": "Ask Follow-Up Questions",
+      "hidden": true,
+      "summary": "Questions that dig deeper into what the speaker has shared, signaling genuine curiosity and inviting fuller elaboration.",
+      "parentId": 868
+    },
+    {
+      "id": 990,
+      "label": "Contract Lifecycle",
+      "hidden": true,
+      "parentId": 665
+    },
+    {
+      "id": 991,
+      "label": "Smart Contract Development",
+      "hidden": true,
+      "parentId": 665
+    },
+    {
+      "id": 992,
+      "label": "Token Standards",
+      "hidden": true,
+      "parentId": 665
+    },
+    {
+      "id": 993,
+      "label": "Security",
+      "hidden": true,
+      "parentId": 991
+    },
+    {
+      "id": 994,
+      "label": "Smart Contract Development Tools",
+      "hidden": true,
+      "summary": "Software and platforms that assist in writing, testing, and deploying smart contracts.",
+      "isCustom": true,
+      "parentId": 991
+    },
+    {
+      "id": 995,
+      "label": "Solidity",
+      "hidden": true,
+      "parentId": 991,
+      "excludedChildLabels": [
+        "Functions",
+        "Operators"
+      ]
+    },
+    {
+      "id": 996,
+      "label": "Testing/Debugging",
+      "hidden": true,
+      "parentId": 991
+    },
+    {
+      "id": 997,
+      "label": "Access Control",
+      "hidden": true,
+      "parentId": 701
+    },
+    {
+      "id": 998,
+      "label": "Checks-Effects-Interactions",
+      "hidden": true,
+      "parentId": 701
+    },
+    {
+      "id": 999,
+      "label": "Reentrancy Guards",
+      "hidden": true,
+      "parentId": 701
+    },
+    {
+      "id": 1000,
+      "label": "SSH (Secure Shell)",
+      "hidden": true,
+      "parentId": 701
+    },
+    {
+      "id": 1001,
+      "label": "SSL/TLS (Secure Sockets Layer/Transport Layer Security)",
+      "hidden": true,
+      "parentId": 701
+    },
+    {
+      "id": 1002,
+      "label": "Authorization|access",
+      "hidden": true,
+      "parentId": 997
+    },
+    {
+      "id": 1003,
+      "label": "Authentication|access",
+      "hidden": true,
+      "parentId": 997
+    },
+    {
+      "id": 1004,
+      "label": "Methods|auth",
+      "hidden": true,
+      "parentId": 1003
+    },
+    {
+      "id": 1005,
+      "label": "Storage|auth",
+      "hidden": true,
+      "parentId": 1003
+    },
+    {
+      "id": 1006,
+      "label": "Passing Methods|auth",
+      "hidden": true,
+      "parentId": 1003
+    },
+    {
+      "id": 1007,
+      "label": "Browser Environment|auth",
+      "hidden": true,
+      "parentId": 1005
+    },
+    {
+      "id": 1008,
+      "label": "Cookies|auth-storage",
+      "hidden": true,
+      "parentId": 1007
+    },
+    {
+      "id": 1009,
+      "label": "Local Storage|auth",
+      "hidden": true,
+      "parentId": 1007
+    },
+    {
+      "id": 1010,
+      "label": "Session Storage|auth",
+      "hidden": true,
+      "parentId": 1007
+    },
+    {
+      "id": 1011,
+      "label": "Jewish Law",
+      "hidden": true,
+      "summary": "The system of religious and civil law in Judaism, derived from the Torah and rabbinic interpretation.",
+      "parentId": 225
+    },
+    {
+      "id": 1012,
+      "label": "Jewish Philosophy",
+      "hidden": true,
+      "summary": "The philosophical thought developing from Jewish theological and ethical traditions.",
+      "parentId": 225
+    },
+    {
+      "id": 1013,
+      "label": "Jewish History",
+      "hidden": true,
+      "summary": "The history of the Jewish people, their migrations, persecution, and cultural developments.",
+      "parentId": 225
+    },
+    {
+      "id": 1014,
+      "label": "Kabbalah",
+      "hidden": true,
+      "summary": "The esoteric tradition within Judaism focusing on hidden divine knowledge and mystical interpretation.",
+      "parentId": 225
+    },
+    {
+      "id": 1016,
+      "label": "CLI Tools",
+      "hidden": true,
+      "parentId": 697
+    },
+    {
+      "id": 1017,
+      "label": "Frameworks",
+      "hidden": true,
+      "parentId": 697
+    },
+    {
+      "id": 1018,
+      "label": "HTTP",
+      "hidden": true,
+      "parentId": 697
+    },
+    {
+      "id": 1019,
+      "label": "Libraries",
+      "hidden": true,
+      "parentId": 697
+    },
+    {
+      "id": 1020,
+      "label": "Middleware",
+      "hidden": true,
+      "parentId": 697
+    },
+    {
+      "id": 1021,
+      "label": "View Engines",
+      "hidden": true,
+      "parentId": 697
+    },
+    {
+      "id": 1022,
+      "label": "Concurrently",
+      "hidden": true,
+      "parentId": 1016
+    },
+    {
+      "id": 1023,
+      "label": "ESLint",
+      "hidden": true,
+      "parentId": 1016
+    },
+    {
+      "id": 1024,
+      "label": "GitHub CLI",
+      "hidden": true,
+      "parentId": 1016
+    },
+    {
+      "id": 1025,
+      "label": "nodemon",
+      "hidden": true,
+      "parentId": 1016
+    },
+    {
+      "id": 1026,
+      "label": "TypeScript|cli",
+      "hidden": true,
+      "parentId": 1016
+    },
+    {
+      "id": 1027,
+      "label": "Primitive/Value",
+      "hidden": true,
+      "parentId": 745
+    },
+    {
+      "id": 1028,
+      "label": "Objects/Non-Primitives/Reference Types",
+      "hidden": true,
+      "parentId": 745
+    },
+    {
+      "id": 1029,
+      "label": "Defining an object",
+      "hidden": true,
+      "parentId": 1028
+    },
+    {
+      "id": 1030,
+      "label": "Creating Objects",
+      "hidden": true,
+      "parentId": 1028
+    },
+    {
+      "id": 1031,
+      "label": "Adding key-value pairs to an existing object",
+      "hidden": true,
+      "parentId": 1028
+    },
+    {
+      "id": 1032,
+      "label": "Object Interface",
+      "hidden": true,
+      "parentId": 1028
+    },
+    {
+      "id": 1033,
+      "label": "Global Objects",
+      "hidden": true,
+      "parentId": 1028
+    },
+    {
+      "id": 1034,
+      "label": "JS Functions",
+      "hidden": true,
+      "parentId": 1028
+    },
+    {
+      "id": 1035,
+      "label": "window",
+      "hidden": true,
+      "parentId": 1033
+    },
+    {
+      "id": 1036,
+      "label": "Window Interface",
+      "hidden": true,
+      "parentId": 1035
+    },
+    {
+      "id": 1037,
+      "label": "Storage Objects",
+      "hidden": true,
+      "parentId": 1036
+    },
+    {
+      "id": 1038,
+      "label": "Host Objects",
+      "hidden": true,
+      "parentId": 1036
+    },
+    {
+      "id": 1039,
+      "label": "console",
+      "hidden": true,
+      "parentId": 1036
+    },
+    {
+      "id": 1040,
+      "label": "Math",
+      "hidden": true,
+      "parentId": 1036
+    },
+    {
+      "id": 1041,
+      "label": "Navigator",
+      "hidden": true,
+      "parentId": 1036
+    },
+    {
+      "id": 1042,
+      "label": "JSON",
+      "hidden": true,
+      "parentId": 1036
+    },
+    {
+      "id": 1043,
+      "label": "JS Global Functions",
+      "hidden": true,
+      "parentId": 1036
+    },
+    {
+      "id": 1044,
+      "label": "localStorage",
+      "hidden": true,
+      "parentId": 1037
+    },
+    {
+      "id": 1045,
+      "label": "sessionStorage",
+      "hidden": true,
+      "parentId": 1037
+    },
+    {
+      "id": 1046,
+      "label": "localStorage Instance Methods",
+      "hidden": true,
+      "summary": "The four instance methods for reading, writing, and clearing localStorage entries.",
+      "parentId": 1044
+    },
+    {
+      "id": 1090,
+      "label": "Single-Purpose Blockchain",
+      "hidden": true,
+      "parentId": 658
+    },
+    {
+      "id": 1092,
+      "label": "General-Purpose Blockchain",
+      "hidden": true,
+      "parentId": 658
+    },
+    {
+      "id": 1093,
+      "label": "Ethereum",
+      "hidden": true,
+      "parentId": 1092
+    },
+    {
+      "id": 1094,
+      "label": "Accounts",
+      "hidden": true,
+      "summary": "The two fundamental participant types on Ethereum — externally owned accounts controlled by private keys, and contract accounts controlled by code — both with equal privileges on the network.",
+      "parentId": 1093
+    },
+    {
+      "id": 1095,
+      "label": "Ethash (PoW)",
+      "hidden": true,
+      "summary": "Ethereum's original memory-hard, ASIC-resistant proof-of-work mining algorithm, designed to favor GPU miners over centralized mining farms by requiring large amounts of memory. Retired at The Merge (September 2022), when Ethereum moved to proof-of-stake.",
+      "parentId": 1093
+    },
+    {
+      "id": 1096,
+      "label": "Ethereum Virtual Machine (EVM)",
+      "hidden": true,
+      "summary": "The core runtime environment that executes smart contract code on the Ethereum blockchain.",
+      "parentId": 1093
+    },
+    {
+      "id": 1097,
+      "label": "Gas",
+      "hidden": true,
+      "summary": "A metering system that assigns a computational cost to every EVM operation, preventing abuse of Turing-completeness and compensating validators — consumed even by failed transactions.",
+      "parentId": 1093
+    },
+    {
+      "id": 1098,
+      "label": "Merkle Patricia Tries",
+      "hidden": true,
+      "summary": "The cryptographic data structure Ethereum uses to efficiently store and verify state, storage, and transaction data, enabling lightweight clients to validate blockchain data without downloading the full chain.",
+      "parentId": 1093
+    },
+    {
+      "id": 1099,
+      "label": "Transaction Receipts",
+      "hidden": true,
+      "summary": "Records generated after a transaction executes, logging its outcome, gas used, status, and any events emitted by smart contracts during execution.",
+      "parentId": 1093
+    },
+    {
+      "id": 1100,
+      "label": "Uncles",
+      "hidden": true,
+      "summary": "Under proof-of-work Ethereum (before The Merge, September 2022): valid but non-canonical blocks that narrowly lost the race to be included in the main chain, rewarded to reduce centralization pressure from its fast ~13-second block times. Proof-of-stake Ethereum has no uncles.",
+      "parentId": 1093
+    },
+    {
+      "id": 1103,
+      "label": "EVM Execution Primitives",
+      "hidden": true,
+      "summary": "The fundamental mechanisms by which the EVM carries out operations and processes data — primarily opcodes and precompiled contracts.",
+      "parentId": 1096
+    },
+    {
+      "id": 1115,
+      "label": "History of Philosophy",
+      "hidden": false,
+      "parentId": 5
+    },
+    {
+      "id": 1116,
+      "label": "Metaphilosophy",
+      "hidden": false,
+      "parentId": 5
+    },
+    {
+      "id": 1117,
+      "label": "Vedic Indian Philosophy (16th c BC - 6th c BC)",
+      "hidden": false,
+      "parentId": 1115
+    },
+    {
+      "id": 1118,
+      "label": "Classical Chinese Philosophy (6th c BC - 3rd c BC)",
+      "hidden": false,
+      "parentId": 1115
+    },
+    {
+      "id": 1119,
+      "label": "Ancient Western Philosophy (6th c BC - 5th c AD)",
+      "hidden": false,
+      "parentId": 1115
+    },
+    {
+      "id": 1120,
+      "label": "Classical Indian Philosophy (6th c BC - 11th c AD)",
+      "hidden": false,
+      "parentId": 1115
+    },
+    {
+      "id": 1121,
+      "label": "Imperial Chinese Philosophy (3rd c BC - 20th c AD)",
+      "hidden": false,
+      "parentId": 1115
+    },
+    {
+      "id": 1122,
+      "label": "Medieval Western Philosophy (5th c - 15th c)",
+      "hidden": false,
+      "parentId": 1115
+    },
+    {
+      "id": 1123,
+      "label": "Golden Age Islamic Philosophy (8th c - 13th c)",
+      "hidden": false,
+      "parentId": 1115
+    },
+    {
+      "id": 1124,
+      "label": "Medieval Indian Philosophy (8th c - 18th c)",
+      "hidden": false,
+      "parentId": 1115
+    },
+    {
+      "id": 1125,
+      "label": "Post-Classical Islamic Philosophy (13th c - 19th c)",
+      "hidden": false,
+      "parentId": 1115
+    },
+    {
+      "id": 1126,
+      "label": "Western Renaissance Philosophy (15th c - 16th c)",
+      "hidden": false,
+      "parentId": 1115
+    },
+    {
+      "id": 1127,
+      "label": "Early Modern Western Philosophy (17th c - 18th c)",
+      "hidden": false,
+      "parentId": 1115
+    },
+    {
+      "id": 1128,
+      "label": "Edo Japanese Philosophy (1603-1868)",
+      "hidden": false,
+      "parentId": 1115
+    },
+    {
+      "id": 1129,
+      "label": "Late Modern Western Philosophy (19th c)",
+      "hidden": false,
+      "parentId": 1115
+    },
+    {
+      "id": 1130,
+      "label": "Modern Indian Philosophy (19th c - 21st c)",
+      "hidden": false,
+      "parentId": 1115
+    },
+    {
+      "id": 1131,
+      "label": "Modern Japanese Philosophy (19th c - 21st c)",
+      "hidden": false,
+      "parentId": 1115
+    },
+    {
+      "id": 1132,
+      "label": "Modern Chinese Philosophy (20th c - 21st c)",
+      "hidden": false,
+      "parentId": 1115
+    },
+    {
+      "id": 1133,
+      "label": "Modern Islamic Philosophy (20th c - 21st c)",
+      "hidden": false,
+      "parentId": 1115
+    },
+    {
+      "id": 1134,
+      "label": "Modern African Philosophy (20th c - 21st c)",
+      "hidden": false,
+      "parentId": 1115
+    },
+    {
+      "id": 1135,
+      "label": "Contemporary Western Philosophy (19th c - 21st c)",
+      "hidden": false,
+      "parentId": 1115
+    },
+    {
+      "id": 1155,
+      "label": "Comments",
+      "order": 0,
+      "hidden": true,
+      "summary": "Single-line comments use // and are ignored by the compiler, serving as inline documentation within Solidity source code.",
+      "parentId": 995
+    },
+    {
+      "id": 1156,
+      "label": "Contracts",
+      "order": 8,
+      "hidden": true,
+      "summary": "A contract is a collection of state variables and functions stored at a specific blockchain address, serving as a self-executing agreement or application.  saved as .sol files",
+      "parentId": 995
+    },
+    {
+      "id": 1157,
+      "label": "Data Types",
+      "order": 6,
+      "hidden": true,
+      "summary": "Solidity's value types, copied whenever they are assigned or passed, and reference types (arrays, structs, mappings), which refer to data in storage, memory or calldata.",
+      "parentId": 995
+    },
+    {
+      "id": 1158,
+      "label": "Events",
+      "order": 10,
+      "hidden": true,
+      "summary": "A gas-efficient mechanism for logging immutable information to transaction receipts, enabling external applications to monitor and react to contract activity.",
+      "parentId": 995,
+      "excludedChildLabels": [
+        "Define an Event",
+        "Declare that an Event has Occurred"
+      ]
+    },
+    {
+      "id": 1159,
+      "label": "Functions",
+      "order": 6,
+      "hidden": true,
+      "summary": "a reusable block of code defined inside a contract that can read or modify state, accept parameters, and return values.",
+      "isCustom": true,
+      "parentId": 1157
+    },
+    {
+      "id": 1160,
+      "label": "Licensing",
+      "order": 1,
+      "hidden": true,
+      "summary": "Declared at the top of a Solidity file using // SPDX-License-Identifier: <license> to specify the license governing the source code's distribution and use.",
+      "parentId": 995,
+      "excludedChildLabels": [
+        "MIT",
+        "UNLICENSED"
+      ]
+    },
+    {
+      "id": 1162,
+      "label": "State Variables",
+      "order": 7,
+      "hidden": true,
+      "summary": "Values permanently stored in a contract's on-chain storage, declared at the contract level.",
+      "parentId": 995
+    },
+    {
+      "id": 1163,
+      "label": "Version Pragma",
+      "order": 2,
+      "hidden": true,
+      "summary": "A declaration at the top of a Solidity file specifying which compiler version(s) the code is compatible with",
+      "parentId": 995
+    },
+    {
+      "id": 1192,
+      "label": "Reference Types/Complex Data Types",
+      "order": 1,
+      "hidden": true,
+      "summary": "Types whose size may be unknown at compile time or may change at runtime — stored in memory, calldata, or storage — including dynamic types, structs, and mappings.",
+      "parentId": 1157,
+      "excludedChildLabels": [
+        "Dynamic Types"
+      ]
+    },
+    {
+      "id": 1193,
+      "label": "Value Types/Static Types/Fixed-Size Data Types",
+      "order": 0,
+      "hidden": true,
+      "summary": "Types whose size is fixed at compile time and whose values are copied whenever they are assigned or passed — includes booleans, integers, addresses, and fixed-size byte arrays.",
+      "parentId": 1157,
+      "excludedChildLabels": [
+        "Fixed Array"
+      ]
+    },
+    {
+      "id": 1204,
+      "label": "Built-in Functions",
+      "order": 2,
+      "hidden": true,
+      "summary": "Native functions provided by Solidity and the EVM, such as keccak256, that are available without importing any library.",
+      "parentId": 1159
+    },
+    {
+      "id": 1205,
+      "label": "Calling a Function",
+      "order": 4,
+      "hidden": true,
+      "summary": "Invoking a function by its name with arguments: x(y, z); where x is the function name and y, z are the parameter values.",
+      "parentId": 1159
+    },
+    {
+      "id": 1206,
+      "label": "Methods",
+      "order": 5,
+      "hidden": true,
+      "summary": "Solidity has no separate method kind: a \"method\" is a function called on a value with dot syntax, such as array.push(x) or a library function attached with using A for B.",
+      "parentId": 1159
+    },
+    {
+      "id": 1207,
+      "label": "keccak256",
+      "order": 0,
+      "hidden": true,
+      "summary": "Computes the Keccak-256 hash (a bytes32) of a bytes input, often built with abi.encode or abi.encodePacked, e.g. keccak256(abi.encodePacked(\"x\")).",
+      "parentId": 1204
+    },
+    {
+      "id": 1208,
+      "label": "function x(y z) a b c d e f (g h) {\n    i j = k;\n    l (m);\n}",
+      "order": 0,
+      "hidden": true,
+      "isCustom": true,
+      "parentId": 1159,
+      "isPersonal": false
+    },
+    {
+      "id": 1215,
+      "label": "opcodes (operation codes)",
+      "hidden": true,
+      "summary": "The basic low-level instructions that the EVM executes to run smart contract bytecode.",
+      "parentId": 1103
+    },
+    {
+      "id": 1216,
+      "label": "precompiled contracts",
+      "hidden": true,
+      "summary": "Specialized, highly optimized functions for complex or computationally intensive tasks that are pre-built into the EVM's underlying client software rather than deployed as Solidity code.",
+      "parentId": 1103
+    },
+    {
+      "id": 1218,
+      "label": "Proof of Stake (PoS)",
+      "hidden": true,
+      "parentId": 1093
+    },
+    {
+      "id": 1219,
+      "label": "Rollups",
+      "hidden": true,
+      "parentId": 1093
+    },
+    {
+      "id": 1220,
+      "label": "Web 3",
+      "hidden": true,
+      "parentId": 1093
+    },
+    {
+      "id": 1221,
+      "label": "World Computer",
+      "hidden": true,
+      "parentId": 1093
+    },
+    {
+      "id": 1222,
+      "label": "Zero-Trust Computing",
+      "hidden": true,
+      "parentId": 1093
+    },
+    {
+      "id": 1226,
+      "label": "Construction of the Berlin Wall (1961)",
+      "hidden": true,
+      "summary": "East Germany erected barriers beginning August 13, 1961, to halt the exodus of its citizens to West Berlin, reinforced into a concrete wall that stood until 1989.",
+      "parentId": 499
+    },
+    {
+      "id": 1227,
+      "label": "Fall of the Berlin Wall (1989)",
+      "hidden": true,
+      "summary": "On November 9, 1989, East Germany opened its border crossings, and crowds tore down the Berlin Wall, symbolizing the collapse of communist regimes across Eastern Europe.",
+      "parentId": 499
+    },
+    {
+      "id": 1228,
+      "label": "Reunification of Germany (1990)",
+      "hidden": true,
+      "summary": "East and West Germany officially reunified on October 3, 1990, ending four decades of division and symbolizing the conclusion of the Cold War in Europe.",
+      "parentId": 499
+    },
+    {
+      "id": 1233,
+      "label": "Space Race (1957 - 1975)",
+      "order": 0,
+      "hidden": true,
+      "summary": "The competition between the United States and Soviet Union for spaceflight superiority, from Sputnik in 1957 through the Apollo moon landings to the joint Apollo-Soyuz mission in 1975.",
+      "parentId": 496
+    },
+    {
+      "id": 1234,
+      "label": "Nuclear Non-Proliferation Treaty (1968)",
+      "order": 1,
+      "hidden": true,
+      "summary": "The 1968 international treaty signed by 189 countries aimed at preventing the spread of nuclear weapons and weapons technology, promoting disarmament, and enabling peaceful nuclear energy use.",
+      "parentId": 496
+    },
+    {
+      "id": 1235,
+      "label": "INF Treaty (1987)",
+      "order": 2,
+      "hidden": true,
+      "summary": "The December 1987 Intermediate-Range Nuclear Forces Treaty in which the U.S. and Soviet Union agreed to eliminate their intermediate-range nuclear missiles, a landmark Cold War arms reduction.",
+      "parentId": 496
+    },
+    {
+      "id": 1236,
+      "label": "Sputnik 1 (1957)",
+      "hidden": true,
+      "summary": "The Soviet Union's October 1957 launch of the world's first artificial satellite, marking the beginning of the Space Age and escalating Cold War competition.",
+      "parentId": 1233
+    },
+    {
+      "id": 1237,
+      "label": "Apollo Program (1961 - 1972)",
+      "hidden": true,
+      "summary": "The U.S. program that successfully landed humans on the Moon, achieving a defining Cold War victory and one of the greatest technological feats in history.",
+      "parentId": 1233
+    },
+    {
+      "id": 1238,
+      "label": "Strategic Defense Initiative (1983)",
+      "hidden": true,
+      "summary": "President Reagan's March 1983 proposal for a space-based missile defense system (nicknamed \"Star Wars\") that heightened Cold War tensions by threatening to neutralize Soviet nuclear deterrence.",
+      "parentId": 1233
+    },
+    {
+      "id": 1239,
+      "label": "Apollo 11 Moon Landing (1969)",
+      "hidden": true,
+      "summary": "The July 20, 1969 landing of astronauts Neil Armstrong and Buzz Aldrin on the Moon, fulfilling Kennedy's 1961 challenge and marking the climax of the Space Race.",
+      "parentId": 1237
+    },
+    {
+      "id": 1240,
+      "label": "Iran during the Cold War Era",
+      "order": 5,
+      "hidden": true,
+      "summary": "Iran transitioned from a strategic Western ally following the 1953 coup to a revolutionary anti-American theocracy in 1979, profoundly shifting the regional balance of power between the superpowers.",
+      "isCustom": true,
+      "parentId": 208,
+      "isPersonal": false
+    },
+    {
+      "id": 1241,
+      "label": "Iranian Coup D'état (1953)",
+      "order": 2,
+      "hidden": true,
+      "summary": "the United States and United Kingdom orchestrated a coup d'état, known as Operation Ajax, to overthrow Iran's democratically elected Prime Minister Mohammad Mosaddegh after he moved to nationalize the country's oil industry.",
+      "isCustom": true,
+      "parentId": 1240,
+      "isPersonal": false
+    },
+    {
+      "id": 1246,
+      "label": "The Nationalization of the Iranian Oil Industry (1951)",
+      "order": 0,
+      "hidden": true,
+      "summary": "In 1951, the Iranian Parliament, led by Mohammad Mosaddegh, voted to nationalize the British-controlled oil industry to reclaim sovereignty over the nation's natural resources.",
+      "isCustom": true,
+      "parentId": 1240,
+      "isPersonal": false
+    },
+    {
+      "id": 1247,
+      "label": "The 30th of Tir Uprising (1952)",
+      "order": 1,
+      "hidden": true,
+      "summary": "a massive popular revolt in July 1952 that forced the Shah to reinstate Mohammad Mosaddegh as Prime Minister after he had briefly resigned due to a power struggle over military control.",
+      "isCustom": true,
+      "parentId": 1240,
+      "isPersonal": false
+    },
+    {
+      "id": 1248,
+      "label": "Establishment of SAVAK (1957)",
+      "order": 3,
+      "hidden": true,
+      "summary": "a secret police force notorious for the systemic torture and execution of political opponents.",
+      "isCustom": true,
+      "parentId": 1240,
+      "isPersonal": false
+    },
+    {
+      "id": 1249,
+      "label": "The White Revolution (1963)",
+      "order": 4,
+      "hidden": true,
+      "summary": "a series of forced modernization reforms that sparked massive civil unrest and clerical opposition.",
+      "isCustom": true,
+      "parentId": 1240,
+      "isPersonal": false
+    },
+    {
+      "id": 1250,
+      "label": "2,500-year celebration of the Persian Empire (1971)",
+      "order": 5,
+      "hidden": true,
+      "summary": "an incredibly lavish party that highlighted extreme wealth inequality.",
+      "isCustom": true,
+      "parentId": 1240,
+      "isPersonal": false
+    },
+    {
+      "id": 1251,
+      "label": "Declared a one-party state (1975)",
+      "order": 6,
+      "hidden": true,
+      "summary": "Abolished the multi-party system and criminalized all dissent of the Resurgence Party.",
+      "isCustom": true,
+      "parentId": 1240,
+      "isPersonal": false
+    },
+    {
+      "id": 1252,
+      "label": "Iranian Revolution of 1979",
+      "order": 7,
+      "hidden": true,
+      "summary": "a transformative popular uprising that toppled the Western-backed monarchy of Shah Mohammad Reza Pahlavi and replaced it with a fundamentalist Islamic theocracy led by Ayatollah Ruhollah Khomeini.",
+      "isCustom": true,
+      "parentId": 1240,
+      "isPersonal": false
+    },
+    {
+      "id": 1254,
+      "label": "1978",
+      "order": 1,
+      "hidden": true,
+      "summary": "",
+      "isCustom": true,
+      "parentId": 1252,
+      "isPersonal": false
+    },
+    {
+      "id": 1255,
+      "label": "1979",
+      "order": 2,
+      "hidden": true,
+      "summary": "",
+      "isCustom": true,
+      "parentId": 1252,
+      "isPersonal": false
+    },
+    {
+      "id": 1304,
+      "label": "Post-World War II Era (1945 - 1947)",
+      "order": 0,
+      "hidden": true,
+      "summary": "The brief transitional period immediately following World War II, marked by the fracturing of the wartime alliance and the beginning of postwar reconstruction and age of industrialization.",
+      "parentId": 207
+    },
+    {
+      "id": 1306,
+      "label": "Algerian War of Independence (1954 - 1962)",
+      "order": 7,
+      "hidden": true,
+      "summary": "a decolonization conflict between France and the Algerian National Liberation Front (FLN), ultimately leading to Algeria's sovereignty through the Évian Accords.",
+      "isCustom": true,
+      "parentId": 1437
+    },
+    {
+      "id": 1307,
+      "label": "Bangladesh Liberation War (1971)",
+      "order": 10,
+      "hidden": true,
+      "isCustom": true,
+      "parentId": 1391
+    },
+    {
+      "id": 1320,
+      "label": "Rwanda During the Cold War Era",
+      "order": 7,
+      "hidden": true,
+      "summary": "Rwanda transitioned from a Belgian-mandated monarchy to an independent republic dominated by Hutu-led politics, while navigating shifting international alliances and escalating ethnic tensions that were often exacerbated by the era's broader geopolitical rivalries.",
+      "isCustom": true,
+      "parentId": 208
+    },
+    {
+      "id": 1322,
+      "label": "Aliyahs (1947 - 1991)",
+      "order": 1,
+      "hidden": true,
+      "summary": "The successive waves of Jewish immigration to Mandatory Palestine and then Israel from 1945 onward, continuing to reshape Israel's demographic character into the present.",
+      "isCustom": true,
+      "parentId": 1437
+    },
+    {
+      "id": 1326,
+      "label": "Arab-Israeli War (1948 - 1949)",
+      "order": 3,
+      "hidden": true,
+      "summary": "began following the end of the British Mandate and the Israeli Declaration of Independence, resulting in a conflict between the newly formed State of Israel and a coalition of Arab states that reshaped the borders of the region and created a lasting refugee crisis.",
+      "isCustom": true,
+      "parentId": 1437
+    },
+    {
+      "id": 1369,
+      "label": "Declaration of Israeli Independence (May 14)",
+      "order": 0,
+      "hidden": true,
+      "summary": "David Ben-Gurion publicly read the Declaration of Independence in Tel Aviv, officially proclaiming the establishment of the State of Israel and becoming its first prime minister.",
+      "isCustom": true,
+      "parentId": 1490
+    },
+    {
+      "id": 1370,
+      "label": "Arab Coalition Invasion (May 15)",
+      "order": 1,
+      "hidden": true,
+      "summary": "Following the Israeli Declaration of Independence, a coalition of Arab states including Egypt, Jordan, Iraq, and Syria invaded the former Mandatory Palestine, marking the start of the first Arab-Israeli War.",
+      "isCustom": true,
+      "parentId": 1490
+    },
+    {
+      "id": 1371,
+      "label": "Nakba",
+      "order": 3,
+      "hidden": true,
+      "summary": "The \"catastrophe\" — the mass displacement and dispossession of approximately 700,000 Palestinians during the war, creating a refugee crisis that persists to the present.",
+      "isCustom": true,
+      "parentId": 1490
+    },
+    {
+      "id": 1372,
+      "label": "Israeli Military Operations (July - Dec.)",
+      "order": 2,
+      "hidden": true,
+      "summary": "A series of Israeli offensives including Operations Dani, Yoav, Hiram, and Horev that secured control of key territories and forced Egyptian forces to seek an armistice.",
+      "isCustom": true,
+      "parentId": 1490
+    },
+    {
+      "id": 1373,
+      "label": "Armistice Agreements (Feb. - July)",
+      "order": 2,
+      "hidden": true,
+      "summary": "A series of armistice agreements signed between Israel and Egypt (Feb), Lebanon (Mar), Transjordan (Apr), and Syria (Jul), ending the war and establishing the Green Line borders.",
+      "isCustom": true,
+      "parentId": 1491
+    },
+    {
+      "id": 1374,
+      "label": "Operation Dani (July)",
+      "order": 0,
+      "hidden": true,
+      "summary": "The Israeli offensive capturing Lydda and Ramle, securing the road to Jerusalem.",
+      "parentId": 1372
+    },
+    {
+      "id": 1375,
+      "label": "Operation Yoav (Oct.)",
+      "order": 1,
+      "hidden": true,
+      "summary": "The Israeli offensive in the Negev driving a wedge between Egyptian forces and securing Beersheba.",
+      "parentId": 1372
+    },
+    {
+      "id": 1376,
+      "label": "Operation Hiram (Oct.)",
+      "order": 2,
+      "hidden": true,
+      "summary": "The swift Israeli offensive capturing the Upper Galilee from the Arab Liberation Army.",
+      "parentId": 1372
+    },
+    {
+      "id": 1377,
+      "label": "Operation Horev (Dec. - Jan.)",
+      "order": 3,
+      "hidden": true,
+      "summary": "The large-scale Israeli offensive against Egyptian forces in the Western Negev, pushing into the Sinai and forcing Egypt to seek an armistice.",
+      "parentId": 1372
+    },
+    {
+      "id": 1390,
+      "label": "Cuba during the Cold War Era",
+      "order": 4,
+      "hidden": true,
+      "summary": "Cuba transformed from a US-aligned nation into a pivotal socialist state following the 1959 Revolution, leading to intense superpower confrontations like the Cuban Missile Crisis and a long-standing alliance with the Soviet Union.",
+      "isCustom": true,
+      "parentId": 208,
+      "isPersonal": false
+    },
+    {
+      "id": 1391,
+      "label": "The Cold War (1947 - 1991)",
+      "order": 0,
+      "hidden": true,
+      "summary": "a decades-long global struggle for ideological and geopolitical supremacy between the United States and the Soviet Union, characterized by proxy wars, nuclear brinkmanship, and the eventual collapse of the Eastern Bloc in 1991.",
+      "isCustom": true,
+      "parentId": 208,
+      "isPersonal": false
+    },
+    {
+      "id": 1392,
+      "label": "Gulf of Tonkin Incident (1964)",
+      "hidden": true,
+      "summary": "The August 2–4, 1964 alleged attacks on U.S. naval vessels by North Vietnamese forces that provided the justification for escalating U.S. military involvement.",
+      "parentId": 503
+    },
+    {
+      "id": 1393,
+      "label": "Gulf of Tonkin Resolution (1964)",
+      "hidden": true,
+      "summary": "The August 7, 1964 congressional resolution granting President Johnson broad authority to escalate military involvement in Vietnam without a formal declaration of war.",
+      "parentId": 503
+    },
+    {
+      "id": 1394,
+      "label": "Escalation of the Vietnam War (1965 - 1966)",
+      "hidden": true,
+      "summary": "The dramatic increase in U.S. military involvement in 1965–1966 including deployment of combat troops, intensified bombing campaigns, and deepening commitment to the conflict.",
+      "parentId": 503
+    },
+    {
+      "id": 1395,
+      "label": "Tet Offensive (1968)",
+      "hidden": true,
+      "summary": "The January 1968 series of coordinated surprise attacks by North Vietnamese and Viet Cong forces across South Vietnam that fundamentally shifted American public opinion against the war.",
+      "parentId": 503
+    },
+    {
+      "id": 1396,
+      "label": "Fall of Saigon (1975)",
+      "hidden": true,
+      "summary": "The April 30, 1975 capture of the South Vietnamese capital by North Vietnamese forces, ending the Vietnam War with communist unification of Vietnam.",
+      "parentId": 503
+    },
+    {
+      "id": 1401,
+      "label": "U-2 Spy Plane Discovery (1962)",
+      "hidden": true,
+      "summary": "The October 14, 1962 U-2 reconnaissance photographs revealing Soviet nuclear missile sites under construction in Cuba, triggering the Cuban Missile Crisis.",
+      "parentId": 507
+    },
+    {
+      "id": 1402,
+      "label": "ExComm Deliberations (1962)",
+      "hidden": true,
+      "summary": "President Kennedy's Executive Committee of the National Security Council debated responses to the Cuban missiles from October 16–22, 1962, before recommending a naval quarantine.",
+      "parentId": 507
+    },
+    {
+      "id": 1403,
+      "label": "Naval Quarantine of Cuba (1962)",
+      "hidden": true,
+      "summary": "President Kennedy's October 22 announcement of a naval \"quarantine\" of Cuba to prevent Soviet missiles reaching the island, followed by tense days as Soviet ships approached the blockade line.",
+      "parentId": 507
+    },
+    {
+      "id": 1404,
+      "label": "Resolution of the Cuban Missile Crisis (1962)",
+      "hidden": true,
+      "summary": "Khrushchev announced Soviet missile withdrawal on October 28 following secret U.S. pledges not to invade Cuba and to remove Jupiter missiles from Turkey, ending the crisis on November 20.",
+      "parentId": 507
+    },
+    {
+      "id": 1429,
+      "label": "Iron Curtain Speech (1946)",
+      "hidden": true,
+      "summary": "Churchill's Fulton, Missouri speech warning that an \"iron curtain\" had descended across Europe, dividing the Western and Soviet blocs and publicly framing the emerging Cold War.",
+      "parentId": 1304
+    },
+    {
+      "id": 1430,
+      "label": "Indian and Pakistani Independence (1947)",
+      "hidden": true,
+      "summary": "The August 14–15 end of British rule over India, simultaneously creating the independent dominions of India and Pakistan in a partition accompanied by massive displacement and communal violence.",
+      "parentId": 1304
+    },
+    {
+      "id": 1436,
+      "label": "Falklands War (1982)",
+      "order": 10,
+      "hidden": true,
+      "isCustom": true,
+      "parentId": 208
+    },
+    {
+      "id": 1437,
+      "label": "Middle East Conflict During the Cold War Era",
+      "order": 1,
+      "hidden": true,
+      "summary": "The ongoing complex of conflicts, political struggles, and wars in the Middle East and North Africa, centered on the Arab-Israeli conflict, regional power competition, and great-power involvement.",
+      "isCustom": true,
+      "parentId": 208,
+      "excludedChildLabels": [
+        "Palestinian Intifadas (1987 - 2005)",
+        "State of Israel (1948 - present)",
+        "Assassination of Qassem Soleimani (2020)",
+        "Abraham Accords (2020)",
+        "Somali Civil War (1991 - present)",
+        "Oslo Accords (1993)",
+        "Israel-Jordan Peace Treaty (1994)",
+        "Clean Break Report (1996)",
+        "U.S. War on Terror (2001 - 2021)",
+        "Turkey's Moderate Sunni Hanafi-Sufi Network Formed (2002 - present)",
+        "War in Darfur (2003 - 2020)",
+        "Libya Abandons WMDs (2003)",
+        "Second Lebanon War (2006)",
+        "Arab Spring (2010 - 2012)",
+        "Second Libyan Civil War (2014 - 2020)",
+        "Yemeni Civil War (2014 - present)",
+        "JCPOA (2015)",
+        "JCPOA Withdrawal (2018)",
+        "Third Sudanese Civil War (2023 - present)",
+        "Gaza War (2023 - present)"
+      ]
+    },
+    {
+      "id": 1438,
+      "label": "Arab League Creation (1945)",
+      "order": 2,
+      "hidden": true,
+      "summary": "The Arab League was founded on March 22, 1945, to promote political, economic, and cultural cooperation among Arab states and coordinate opposition to Zionist immigration and Jewish statehood.",
+      "isCustom": true,
+      "parentId": 1489
+    },
+    {
+      "id": 1440,
+      "label": "Jewish Insurgency During the Post-World War II Era (1945 - 1948)",
+      "order": 1,
+      "hidden": true,
+      "summary": "Intensified armed resistance by Haganah, Irgun, and Lehi against British rule in Mandatory Palestine, aimed at forcing Britain's withdrawal and establishing a Jewish state.",
+      "isCustom": true,
+      "parentId": 1489
+    },
+    {
+      "id": 1441,
+      "label": "UN Partition Plan for Palestine (1947)",
+      "order": 0,
+      "hidden": true,
+      "summary": "The November 29, 1947 UN General Assembly resolution recommending division of the British Mandate into separate Arab and Jewish states, accepted by Jewish leadership but rejected by the Arab League.",
+      "parentId": 1437
+    },
+    {
+      "id": 1442,
+      "label": "Civil War in Mandatory Palestine (1947 - 1948)",
+      "order": 2,
+      "hidden": true,
+      "summary": "The escalating communal violence between Jewish and Arab communities following the UN Partition Plan, beginning with an Arab bus ambush in November 1947 and leading to full-scale war.",
+      "parentId": 1437
+    },
+    {
+      "id": 1445,
+      "label": "Jordan Annexes the West Bank (1950)",
+      "order": 4,
+      "hidden": true,
+      "summary": "Following its occupation during the 1948 war, Jordan formally annexed the West Bank in 1950, a move not widely recognized internationally.",
+      "parentId": 1437
+    },
+    {
+      "id": 1446,
+      "label": "Palestinian Fedayeen Attacks (1951 - 1982)",
+      "order": 5,
+      "hidden": true,
+      "summary": "Cross-border raids by Palestinian militants primarily from refugee communities targeting Israeli civilians, beginning after the 1948 war and often provoking major Israeli retaliation.",
+      "parentId": 1437
+    },
+    {
+      "id": 1447,
+      "label": "First Sudanese Civil War (1955 - 1972)",
+      "order": 8,
+      "hidden": true,
+      "summary": "A protracted conflict between Sudan's Arab-Muslim north and the diverse Christian/animist south, arising from ethnic, religious, and cultural divisions following Sudanese independence.",
+      "parentId": 1437
+    },
+    {
+      "id": 1448,
+      "label": "Suez Crisis (1956 - 1957)",
+      "order": 9,
+      "hidden": true,
+      "summary": "The international incident triggered by Egypt's nationalization of the Suez Canal, leading to a secretly coordinated invasion by Israel, Britain, and France, reversed under U.S. and Soviet pressure.",
+      "parentId": 1437,
+      "excludedChildLabels": [
+        "International Pressure and Withdrawal (1956 - 1957)",
+        "Nationalization of the Suez Canal (1956)",
+        "Protocol of Sèvres (1956)",
+        "Suez Military Operations (1956)"
+      ]
+    },
+    {
+      "id": 1449,
+      "label": "Palestine Liberation Organization Founded (1964)",
+      "order": 10,
+      "hidden": true,
+      "summary": "Founded in 1964 at the directive of the Arab League to represent Palestinian people and advocate for self-determination, the PLO became the dominant Palestinian political body.",
+      "parentId": 1437
+    },
+    {
+      "id": 1450,
+      "label": "Six-Day War (1967)",
+      "order": 11,
+      "hidden": true,
+      "summary": "Israel's June 5–10 pre-emptive strike against Egypt, Jordan, and Syria, resulting in Israel's occupation of the Sinai, Gaza Strip, West Bank, East Jerusalem, and Golan Heights.",
+      "parentId": 1437
+    },
+    {
+      "id": 1451,
+      "label": "Yom Kippur War (1973)",
+      "order": 12,
+      "hidden": true,
+      "summary": "The October 1973 surprise attack by Egypt and Syria aimed at reclaiming territories lost in 1967, ending in a UN-brokered ceasefire with both sides claiming partial success.",
+      "parentId": 1437
+    },
+    {
+      "id": 1455,
+      "label": "Iranian Revolution (Jan. - Apr.)",
+      "order": 0,
+      "hidden": true,
+      "summary": "The overthrow of the Shah's regime and establishment of an Islamic Republic under Ayatollah Khomeini, fundamentally reshaping the Middle East.",
+      "isCustom": true,
+      "parentId": 1621
+    },
+    {
+      "id": 1456,
+      "label": "Egypt-Israel Peace Treaty (Mar.)",
+      "order": 1,
+      "hidden": true,
+      "summary": "The treaty formally ending the state of war between Egypt and Israel following the Camp David Accords, including Israel's full withdrawal from the Sinai Peninsula.",
+      "isCustom": true,
+      "parentId": 1621
+    },
+    {
+      "id": 1457,
+      "label": "Soviet-Afghan War (1979 - 1989)",
+      "order": 17,
+      "hidden": true,
+      "summary": "The decade-long conflict in which the Soviet Union intervened to support the Afghan communist government against mujahideen rebels backed by the U.S., Pakistan, and Saudi Arabia.",
+      "parentId": 1437
+    },
+    {
+      "id": 1458,
+      "label": "Iran's Axis of Resistance Formed (1979 - present)",
+      "order": 15,
+      "hidden": true,
+      "summary": "The network of state and non-state allies Iran began building after the 1979 Islamic Revolution, including Hezbollah, Hamas, Palestinian Islamic Jihad, the Houthis, and Iraqi Shia militias, aimed at countering Israeli and U.S. influence.",
+      "parentId": 1437
+    },
+    {
+      "id": 1459,
+      "label": "Saudi Arabia's Conservative Sunni Wahabi Network Formed (1979)",
+      "order": 16,
+      "hidden": true,
+      "summary": "Saudi Arabia's strategic alliances and financial influence aimed at counterbalancing Iran's Axis of Resistance through support for Sunni political and paramilitary groups across the Middle East.",
+      "parentId": 1437
+    },
+    {
+      "id": 1460,
+      "label": "Pakistan's Deobandi Network Formed (1980 - present)",
+      "order": 18,
+      "hidden": true,
+      "summary": "An expansive system of Pakistani madrasas and religious institutions that have profoundly shaped the country's political landscape and served as a source for various armed groups including the Taliban.",
+      "parentId": 1437
+    },
+    {
+      "id": 1461,
+      "label": "Iran-Iraq War (1980 - 1988)",
+      "order": 19,
+      "hidden": true,
+      "summary": "The devastating eight-year conflict initiated by Iraq's 1980 invasion of Iran, stemming from historical grievances and the threat of the Islamic Revolution, ending in a bloody stalemate.",
+      "parentId": 1437
+    },
+    {
+      "id": 1462,
+      "label": "Second Israeli Invasion of Lebanon (1982)",
+      "order": 20,
+      "hidden": true,
+      "summary": "Israel's invasion of Lebanon aimed at expelling the PLO from Beirut, which led to a prolonged occupation and the rise of Hezbollah as a resistance movement.",
+      "parentId": 1437
+    },
+    {
+      "id": 1463,
+      "label": "Second Sudanese Civil War (1983 - 2005)",
+      "order": 21,
+      "hidden": true,
+      "summary": "A devastating resumption of conflict when Sudan's northern government imposed Islamic law, displacing millions and ultimately resulting in South Sudan's independence in 2011.",
+      "parentId": 1437
+    },
+    {
+      "id": 1464,
+      "label": "South Lebanon Conflict (1985 - 2000)",
+      "order": 22,
+      "hidden": true,
+      "summary": "An 18-year war of attrition between Israeli forces and Hezbollah in southern Lebanon, concluding with Israel's unilateral withdrawal in May 2000.",
+      "parentId": 1437
+    },
+    {
+      "id": 1466,
+      "label": "Non-State Salafi-jihadist Extremist Groups Formed (1988 - present)",
+      "order": 24,
+      "hidden": true,
+      "summary": "A transnational constellation of Salafi-jihadist organizations sharing a radical ideology aiming to establish a global Islamic caliphate through armed struggle.",
+      "parentId": 1437
+    },
+    {
+      "id": 1467,
+      "label": "First Gulf War (1990 - 1991)",
+      "order": 25,
+      "hidden": true,
+      "summary": "The international conflict triggered by Iraq's invasion of Kuwait, resolved by a U.S.-led coalition's military campaign that liberated Kuwait.",
+      "parentId": 1437
+    },
+    {
+      "id": 1489,
+      "label": "The Middle East Conflict During the Post-World War II Era",
+      "order": 0,
+      "hidden": true,
+      "summary": "The ongoing complex of conflicts, political struggles, and wars in the Middle East and North Africa, centered on the Arab-Israeli conflict, regional power competition, and great-power involvement.",
+      "isCustom": true,
+      "parentId": 1304,
+      "isPersonal": false
+    },
+    {
+      "id": 1490,
+      "label": "1948",
+      "order": 0,
+      "hidden": true,
+      "summary": "",
+      "isCustom": true,
+      "parentId": 1326,
+      "isPersonal": false
+    },
+    {
+      "id": 1491,
+      "label": "1949",
+      "order": 1,
+      "hidden": true,
+      "summary": "",
+      "isCustom": true,
+      "parentId": 1326,
+      "isPersonal": false
+    },
+    {
+      "id": 1495,
+      "label": "Israeli Military Operations (Jan.)",
+      "order": 0,
+      "hidden": true,
+      "summary": "The continuation of Israeli offensives that secured control of key territories and forced Egyptian forces to seek an armistice.",
+      "isCustom": true,
+      "parentId": 1491,
+      "isPersonal": false
+    },
+    {
+      "id": 1496,
+      "label": "Operation Horev (Dec. - Jan.)",
+      "order": 0,
+      "hidden": true,
+      "summary": "The large-scale Israeli offensive against Egyptian forces in the Western Negev, pushing into the Sinai and forcing Egypt to seek an armistice.",
+      "isCustom": true,
+      "parentId": 1495,
+      "isPersonal": false
+    },
+    {
+      "id": 1497,
+      "label": "Aliyahs (1945 - 1947)",
+      "order": 0,
+      "hidden": true,
+      "summary": "The successive waves of Jewish immigration to Mandatory Palestine and then Israel from 1945 onward, continuing to reshape Israel's demographic character into the present.",
+      "isCustom": true,
+      "parentId": 1489,
+      "isPersonal": false
+    },
+    {
+      "id": 1499,
+      "label": "Aliyah Bet (1934 - 1947)",
+      "hidden": true,
+      "summary": "Clandestine Jewish immigration to Palestine carried out in defiance of British restrictions, organized to rescue Jews from persecution in Europe.",
+      "isCustom": true,
+      "parentId": 1497
+    },
+    {
+      "id": 1504,
+      "label": "Industrial Revolution (1760 - 1840)",
+      "order": 0,
+      "hidden": true,
+      "parentId": 206
+    },
+    {
+      "id": 1505,
+      "label": "Age of Revolutions (1774 - 1849)",
+      "order": 1,
+      "hidden": true,
+      "parentId": 206
+    },
+    {
+      "id": 1506,
+      "label": "Imperialism (1800 - 1945)",
+      "order": 2,
+      "hidden": true,
+      "parentId": 206
+    },
+    {
+      "id": 1507,
+      "label": "Italy (1800 - 1945)",
+      "order": 3,
+      "hidden": true,
+      "parentId": 206
+    },
+    {
+      "id": 1508,
+      "label": "Middle East Conflict (1882 - 1945)",
+      "order": 4,
+      "hidden": true,
+      "parentId": 206
+    },
+    {
+      "id": 1509,
+      "label": "World Wars Era (1914 - 1945)",
+      "order": 5,
+      "hidden": true,
+      "parentId": 206
+    },
+    {
+      "id": 1511,
+      "label": "Balfour Declaration (1917)",
+      "order": 0,
+      "hidden": true,
+      "parentId": 1508
+    },
+    {
+      "id": 1512,
+      "label": "End of Ottoman Palestine (1918)",
+      "order": 2,
+      "hidden": true,
+      "parentId": 1508
+    },
+    {
+      "id": 1513,
+      "label": "British Military Administration (1918 - 1920)",
+      "order": 3,
+      "hidden": true,
+      "parentId": 1508
+    },
+    {
+      "id": 1516,
+      "label": "British Mandate for Palestine (1923 - 1948)",
+      "order": 5,
+      "hidden": true,
+      "parentId": 1508
+    },
+    {
+      "id": 1517,
+      "label": "Western Wall Uprising (1929)",
+      "order": 6,
+      "hidden": true,
+      "parentId": 1508
+    },
+    {
+      "id": 1518,
+      "label": "Arab Revolt (1936 - 1939)",
+      "order": 7,
+      "hidden": true,
+      "parentId": 1508
+    },
+    {
+      "id": 1519,
+      "label": "Peel Commission (1937)",
+      "order": 8,
+      "hidden": true,
+      "parentId": 1508
+    },
+    {
+      "id": 1520,
+      "label": "British White Paper (1939)",
+      "order": 9,
+      "hidden": true,
+      "parentId": 1508
+    },
+    {
+      "id": 1522,
+      "label": "First Aliyah (1882 - 1903)",
+      "hidden": true,
+      "summary": "The first major wave of Zionist immigration to Ottoman Palestine, primarily from Eastern Europe, establishing early agricultural settlements.",
+      "parentId": 5223
+    },
+    {
+      "id": 1523,
+      "label": "Second Aliyah (1904 - 1914)",
+      "hidden": true,
+      "summary": "The second major wave of Jewish immigration to Palestine, dominated by idealistic socialist pioneers who founded the kibbutz movement.",
+      "parentId": 5223
+    },
+    {
+      "id": 1524,
+      "label": "Third Aliyah (1919 - 1923)",
+      "hidden": true,
+      "summary": "A wave of immigration following World War I and the Balfour Declaration, strengthening Jewish agricultural and labor institutions in Palestine.",
+      "parentId": 5223
+    },
+    {
+      "id": 1525,
+      "label": "Fourth Aliyah (1924 - 1928)",
+      "hidden": true,
+      "summary": "A wave of primarily middle-class Jewish immigrants from Poland fleeing economic hardship, accelerating urbanization in Palestine.",
+      "parentId": 5223
+    },
+    {
+      "id": 1526,
+      "label": "Fifth Aliyah (1929 - 1939)",
+      "hidden": true,
+      "summary": "The largest immigration wave, driven largely by the rise of Nazism in Germany, significantly expanding the Jewish population and economic development of Palestine.",
+      "parentId": 5223
+    },
+    {
+      "id": 1527,
+      "label": "Aliyah Bet (1934 - 1948)",
+      "hidden": true,
+      "summary": "Clandestine Jewish immigration to Palestine carried out in defiance of British restrictions, organized to rescue Jews from persecution in Europe.",
+      "parentId": 5223
+    },
+    {
+      "id": 1539,
+      "label": "Early Middle Ages (476 - 1000)",
+      "order": 1,
+      "hidden": true,
+      "summary": "The period following the fall of Rome marked by the rise of Christianity and formation of new kingdoms.",
+      "parentId": 25
+    },
+    {
+      "id": 1540,
+      "label": "High Middle Ages (1000 - 1250)",
+      "order": 3,
+      "hidden": true,
+      "summary": "The period of population growth, urbanization, and cultural flourishing including Gothic architecture and scholasticism.",
+      "parentId": 25
+    },
+    {
+      "id": 1541,
+      "label": "Late Middle Ages (1250 - 1453)",
+      "order": 4,
+      "hidden": true,
+      "summary": "A tumultuous period marked by significant challenges such as the Black Death, the Hundred Years' War, and the Western Schism, yet it also laid the groundwork for the Renaissance and the Age of Exploration.",
+      "parentId": 25
+    },
+    {
+      "id": 1542,
+      "label": "Byzantine Empire (330 - 1453)",
+      "order": 0,
+      "hidden": true,
+      "summary": "The continuation of the Eastern Roman Empire preserving classical knowledge and Christian Orthodoxy, from 330 to 1453.",
+      "parentId": 25
+    },
+    {
+      "id": 1543,
+      "label": "Islamic Golden Age (750 - 1258)",
+      "order": 2,
+      "hidden": true,
+      "summary": "The period of scientific, cultural, and economic flourishing in the Islamic world, from 750 to 1258.",
+      "parentId": 25
+    },
+    {
+      "id": 1544,
+      "label": "Late Antiquity (500 - 750)",
+      "hidden": true,
+      "summary": "A transitional era within the Early Middle Ages characterized by the continued decline of Roman structures, the establishment of barbarian kingdoms, and the emergence of early Christian and Islamic societies.",
+      "parentId": 1539
+    },
+    {
+      "id": 1545,
+      "label": "Rise of the Carolingians (750 - 800)",
+      "hidden": true,
+      "summary": "Reflects the consolidation of previously established Germanic kingdoms and the foundational developments leading to the Carolingian Empire.",
+      "parentId": 1539
+    },
+    {
+      "id": 1546,
+      "label": "Carolingian Era (800 - 887)",
+      "hidden": true,
+      "summary": "A pivotal period in early medieval European history marked by the unified rule of the Carolingian Empire under Charlemagne and his successors, fostering a significant cultural and intellectual revival known as the Carolingian Renaissance.",
+      "parentId": 1539
+    },
+    {
+      "id": 1547,
+      "label": "Post-Carolingian Era (887 - 1000)",
+      "hidden": true,
+      "summary": "A turbulent period characterized by the fragmentation of the Carolingian Empire, the rise of powerful regional lords, and intensified external invasions by Vikings, Magyars, and Saracens, leading to significant political and social reorganization across Western Europe.",
+      "parentId": 1539
+    },
+    {
+      "id": 1548,
+      "label": "Migration Period (c. 375 - 568)",
+      "hidden": true,
+      "summary": "Significantly shaped post-Roman Europe through the consolidation and development of Germanic kingdoms during the late antique period.",
+      "parentId": 1544
+    },
+    {
+      "id": 1556,
+      "label": "1920",
+      "order": 4,
+      "hidden": true,
+      "summary": "",
+      "isCustom": true,
+      "parentId": 1508,
+      "isPersonal": false
+    },
+    {
+      "id": 1562,
+      "label": "Astronomy",
+      "hidden": true,
+      "parentId": 570
+    },
+    {
+      "id": 1563,
+      "label": "Biology",
+      "hidden": true,
+      "parentId": 570
+    },
+    {
+      "id": 1564,
+      "label": "Chemistry",
+      "hidden": true,
+      "parentId": 570
+    },
+    {
+      "id": 1565,
+      "label": "Earth Sciences",
+      "hidden": true,
+      "parentId": 570
+    },
+    {
+      "id": 1566,
+      "label": "Materials Science",
+      "hidden": true,
+      "parentId": 570
+    },
+    {
+      "id": 1567,
+      "label": "Physics",
+      "hidden": true,
+      "parentId": 570
+    },
+    {
+      "id": 1568,
+      "label": "Cell Biology",
+      "order": 0,
+      "hidden": true,
+      "parentId": 1563
+    },
+    {
+      "id": 1569,
+      "label": "Neuroscience",
+      "order": 2,
+      "hidden": true,
+      "parentId": 1563
+    },
+    {
+      "id": 1570,
+      "label": "Pharmacology",
+      "order": 3,
+      "hidden": true,
+      "parentId": 1563
+    },
+    {
+      "id": 1571,
+      "label": "Cellular/Molecular Neuroscience",
+      "hidden": true,
+      "parentId": 1569
+    },
+    {
+      "id": 1572,
+      "label": "Systems Neuroscience",
+      "hidden": true,
+      "parentId": 1569
+    },
+    {
+      "id": 1573,
+      "label": "Memory Systems",
+      "hidden": true,
+      "parentId": 1569
+    },
+    {
+      "id": 1574,
+      "label": "Systems/Cognitive Neuroscience",
+      "hidden": true,
+      "parentId": 1569
+    },
+    {
+      "id": 1575,
+      "label": "Neurophysiology",
+      "hidden": true,
+      "parentId": 1569
+    },
+    {
+      "id": 1576,
+      "label": "Neural Networks and Brain Connectivity",
+      "hidden": true,
+      "parentId": 1572
+    },
+    {
+      "id": 1577,
+      "label": "Neuroanatomy",
+      "hidden": true,
+      "parentId": 1572
+    },
+    {
+      "id": 1578,
+      "label": "Macro Networks/Global Networks",
+      "hidden": true,
+      "parentId": 1576
+    },
+    {
+      "id": 1579,
+      "label": "Large Networks",
+      "hidden": true,
+      "parentId": 1576
+    },
+    {
+      "id": 1580,
+      "label": "Small Networks",
+      "hidden": true,
+      "parentId": 1576
+    },
+    {
+      "id": 1581,
+      "label": "Default Mode Network (DMN)",
+      "hidden": true,
+      "summary": "A large-scale brain network active during rest, mind-wandering, and self-referential thought —  \n  the brain's variation engine, generating the combinatorial space of associations, simulations,\n  and connections that the Task-Positive Network then culls; deactivates during focused external   \n  tasks.",
+      "parentId": 1579
+    },
+    {
+      "id": 1582,
+      "label": "Task-Positive Networks",
+      "hidden": true,
+      "summary": "Brain networks that activate during externally focused, goal-directed tasks — broadly\n  antagonistic to the Default Mode Network, acting as the selection pressure that culls the\n  variations DMN generates, allowing only a few connections to survive into conscious integration.",
+      "parentId": 1579
+    },
+    {
+      "id": 1583,
+      "label": "Limbic System",
+      "hidden": true,
+      "parentId": 1579
+    },
+    {
+      "id": 1584,
+      "label": "Prefrontal Cortex (PFC)",
+      "hidden": true,
+      "parentId": 1579
+    },
+    {
+      "id": 1585,
+      "label": "Prefrontal-Limbic Circuitry",
+      "hidden": true,
+      "parentId": 1579
+    },
+    {
+      "id": 1586,
+      "label": "Prefrontal-Hippocampal Circuitry",
+      "hidden": true,
+      "parentId": 1579
+    },
+    {
+      "id": 1619,
+      "label": "1978",
+      "order": 13,
+      "hidden": true,
+      "summary": "",
+      "isCustom": true,
+      "parentId": 1437,
+      "isPersonal": false
+    },
+    {
+      "id": 1621,
+      "label": "1979",
+      "order": 14,
+      "hidden": true,
+      "isCustom": true,
+      "parentId": 1437,
+      "isPersonal": false
+    },
+    {
+      "id": 1647,
+      "label": "The Lavon Affair (1954)",
+      "order": 6,
+      "hidden": true,
+      "summary": "An Israeli covert operation (Operation Susannah) in which Israeli agents recruited Egyptian Jews to bomb Western targets in Egypt and frame Egyptian nationalists, ending in exposure and political scandal.",
+      "isCustom": true,
+      "parentId": 1437
+    },
+    {
+      "id": 1655,
+      "label": "The First Palestinian Intifada (1987 - 1993)",
+      "order": 23,
+      "hidden": true,
+      "summary": "A largely spontaneous Palestinian uprising marked by protests, civil disobedience, and stone-throwing that eventually led to the Oslo Peace Accords.",
+      "isCustom": true,
+      "parentId": 1437,
+      "isPersonal": false
+    },
+    {
+      "id": 1663,
+      "label": "Post-Cold War Era (1991 - 2022)",
+      "order": 3,
+      "hidden": true,
+      "summary": "Often referred to as the \"unipolar moment,\" this era was characterized by American hegemony, rapid globalization, and the expansion of liberal democracy following the collapse of the USSR.",
+      "isCustom": true,
+      "parentId": 207,
+      "isPersonal": false
+    },
+    {
+      "id": 1758,
+      "label": "United Kingdom During the Cold War Era",
+      "order": 8,
+      "hidden": true,
+      "isCustom": true,
+      "parentId": 208,
+      "isPersonal": false
+    },
+    {
+      "id": 1777,
+      "label": "America during the Cold War Era",
+      "order": 2,
+      "hidden": true,
+      "summary": "The United States' role as leader of the Western bloc during the Cold War, encompassing intelligence reform, proxy conflicts, nuclear standoffs, and major domestic political crises.",
+      "isCustom": true,
+      "parentId": 208,
+      "excludedChildLabels": [
+        "Assassination of President John F. Kennedy (1963)"
+      ]
+    },
+    {
+      "id": 1788,
+      "label": "USSR during the Cold War",
+      "order": 9,
+      "hidden": true,
+      "summary": "The Soviet Union's role as global superpower competitor to the United States, from its atomic bomb test through de-Stalinization, Gorbachev's reforms, and final dissolution in 1991.",
+      "isCustom": true,
+      "parentId": 208
+    },
+    {
+      "id": 1789,
+      "label": "Israel during the Cold War Era (1948 - 1991)",
+      "order": 6,
+      "hidden": true,
+      "parentId": 208
+    },
+    {
+      "id": 1791,
+      "label": "China during the Cold War Era (1947 - 1991)",
+      "order": 3,
+      "hidden": true,
+      "parentId": 208
+    },
+    {
+      "id": 1864,
+      "label": "The Age of Great Power Competition (2023 - present)",
+      "order": 4,
+      "hidden": true,
+      "summary": "represents a definitive move away from the post-Cold War liberal order toward a fragmented, multipolar landscape where national security dictates global economics and diplomacy.",
+      "isCustom": true,
+      "parentId": 207,
+      "isPersonal": false
+    },
+    {
+      "id": 2102,
+      "label": "Cognitive Neuroscience",
+      "hidden": true,
+      "parentId": 1574
+    },
+    {
+      "id": 2103,
+      "label": "Consciousness Science",
+      "hidden": true,
+      "parentId": 2102
+    },
+    {
+      "id": 2104,
+      "label": "Cognition",
+      "hidden": true,
+      "parentId": 2102
+    },
+    {
+      "id": 2105,
+      "label": "Hemispheric Differences",
+      "hidden": true,
+      "parentId": 2102
+    },
+    {
+      "id": 2106,
+      "label": "General Intelligence (g)",
+      "order": 1,
+      "hidden": true,
+      "summary": "The capacity to adaptively reason and solve problems across diverse domains, underlying both the cognitive factors (fluid and crystallized intelligence) and the structural demands (anticipation and relevance realization) that any generally intelligent system must meet.",
+      "isCustom": true,
+      "parentId": 2104,
+      "excludedChildLabels": [
+        "Crystallized Intelligence",
+        "Fluid Intelligence"
+      ]
+    },
+    {
+      "id": 2108,
+      "label": "Fluid Intelligence",
+      "order": 1,
+      "hidden": true,
+      "isCustom": true,
+      "parentId": 2110
+    },
+    {
+      "id": 2109,
+      "label": "Crystallized Intelligence",
+      "order": 0,
+      "hidden": true,
+      "isCustom": true,
+      "parentId": 2110
+    },
+    {
+      "id": 2110,
+      "label": "Types of Intelligence",
+      "order": 0,
+      "hidden": true,
+      "isCustom": true,
+      "parentId": 2106,
+      "isPersonal": false
+    },
+    {
+      "id": 2111,
+      "label": "Metaproblems g Solves",
+      "order": 1,
+      "hidden": true,
+      "isCustom": true,
+      "parentId": 2106,
+      "isPersonal": false
+    },
+    {
+      "id": 2112,
+      "label": "Anticipation",
+      "order": 0,
+      "hidden": true,
+      "summary": "The capacity to model and prepare for future states before they arrive - an evolutionarily adaptive trait that allows organisms to act prospectively rather than merely react.",
+      "isCustom": true,
+      "parentId": 2111,
+      "isPersonal": false
+    },
+    {
+      "id": 2113,
+      "label": "Relevance Realization",
+      "order": 1,
+      "hidden": true,
+      "summary": "The capacity to dynamically determine what information matters — to care about some things and not others because we are autopoietic systems, not merely self-organizing but constantly self-making from and within our environment, whose existence depends on it; a metaproblem because it must be solved before any specific problem can be addressed, and because the space of potentially relevant information is combinatorially explosive - and what counts as relevant is always indexed to your niche: the environment you have partly constructed defines what can figure as foreground at all.",
+      "isCustom": true,
+      "parentId": 2111,
+      "isPersonal": false
+    },
+    {
+      "id": 2114,
+      "label": "Cognitive Lightcone",
+      "order": 0,
+      "hidden": true,
+      "summary": "The bounded horizon of future states an agent can perceive, model, and act upon, defining the limits of its anticipatory reach.",
+      "isCustom": true,
+      "parentId": 2112,
+      "isPersonal": false
+    },
+    {
+      "id": 2115,
+      "label": "Predictive Processing",
+      "order": 1,
+      "hidden": true,
+      "summary": "The neuroscientific framework proposing that the brain continuously generates top-down predictions about sensory input and updates its models based on prediction error, rather than passively receiving stimuli.",
+      "isCustom": true,
+      "parentId": 2112,
+      "isPersonal": false
+    },
+    {
+      "id": 2116,
+      "label": "Silo Problem",
+      "order": 0,
+      "hidden": true,
+      "summary": "The tendency for isolated groups or systems to optimize locally within their own domain while failing to recognize or integrate information relevant to the broader whole.",
+      "isCustom": true,
+      "parentId": 2113,
+      "isPersonal": false
+    },
+    {
+      "id": 2117,
+      "label": "Frame Problem",
+      "order": 1,
+      "hidden": true,
+      "summary": "The challenge of determining which facts and possibilities can be ignored when reasoning about a situation, given that the space of potentially relevant information is combinatorially explosive.",
+      "isCustom": true,
+      "parentId": 2113,
+      "isPersonal": false
+    },
+    {
+      "id": 2119,
+      "label": "Anticipation-Relevance Coupling",
+      "order": 2,
+      "hidden": true,
+      "summary": "As anticipatory reach expands, the space of potentially relevant information grows combinatorially, meaning advances in anticipation directly amplify the difficulty of relevance realization — the two metaproblems scale together.",
+      "isCustom": true,
+      "parentId": 2111,
+      "isPersonal": false
+    },
+    {
+      "id": 2120,
+      "label": "Foreground/Background",
+      "order": 4,
+      "hidden": true,
+      "summary": "The cognitive act of selectively attending to certain information while suppressing the rest, the moment-to-moment expression of relevance realization in perception and thought.",
+      "isCustom": true,
+      "parentId": 2113,
+      "isPersonal": false
+    },
+    {
+      "id": 2121,
+      "label": "Salience Landscape",
+      "order": 3,
+      "hidden": true,
+      "summary": "The dynamic structure of relative importance across a field of possible attention, shaping which\n   features get foregrounded and which recede into background — neurally implemented by the\n  salience network, which toggles between the Default Mode Network and the Task-Positive Network to\n   determine what deserves attention at any moment.",
+      "isCustom": true,
+      "parentId": 2113,
+      "isPersonal": false
+    },
+    {
+      "id": 2122,
+      "label": "Stroop Effect",
+      "order": 0,
+      "hidden": true,
+      "summary": "The interference that occurs when automatic processing of an irrelevant feature competes with deliberate attention to a relevant one, revealing the involuntary nature of salience-driven foregrounding.",
+      "isCustom": true,
+      "parentId": 2120,
+      "isPersonal": false
+    },
+    {
+      "id": 2123,
+      "label": "Language and Relevance",
+      "order": 2,
+      "hidden": true,
+      "summary": "Language both reflects and shapes relevance realization — vocabulary and grammar encode culturally sedimented salience judgements while simultaneously constraining what individuals can readily foreground — and meaning requires shared niche: even if a lion could talk, we wouldn't understand him,     because language comprehension presupposes a shared form of life, not just shared grammar.",
+      "isCustom": true,
+      "parentId": 2113,
+      "isPersonal": false
+    },
+    {
+      "id": 2124,
+      "label": "Literacy",
+      "order": 0,
+      "hidden": true,
+      "summary": "An artificial symbolic system layered onto language that externalizes and persists relevance judgements, restructuring cognition by allowing salience structures to be examined, critiqued, and transmitted across time.",
+      "isCustom": true,
+      "parentId": 2123,
+      "isPersonal": false
+    },
+    {
+      "id": 2125,
+      "label": "Large Language Models (LLMs)",
+      "order": 1,
+      "hidden": true,
+      "summary": "Systems trained to anticipate human linguistic patterns, implicitly inheriting the relevance structures sedimented into language — second-order anticipation that mimics relevance realization without the embodied stakes that may be necessary for the genuine article.",
+      "isCustom": true,
+      "parentId": 2123,
+      "isPersonal": false
+    },
+    {
+      "id": 2126,
+      "label": "LLM Limitations for AGI Research",
+      "order": 0,
+      "hidden": true,
+      "summary": "Because LLMs inherit relevance structure from linguistic training data rather than dynamically realizing relevance as embodied agents, they are poor scientific models of general intelligence — studying them reveals the sediment of human cognition, not the underlying machinery.",
+      "isCustom": true,
+      "parentId": 2125,
+      "isPersonal": false
+    },
+    {
+      "id": 2127,
+      "label": "Kinds of Knowing",
+      "order": 2,
+      "hidden": true,
+      "summary": "The four irreducible modes of cognitive engagement with the world, each necessary for general intelligence and none reducible to the others.",
+      "isCustom": true,
+      "parentId": 2106,
+      "isPersonal": false
+    },
+    {
+      "id": 2128,
+      "label": "Propositional Knowing",
+      "order": 0,
+      "hidden": true,
+      "summary": "Knowing that — explicit, declarative knowledge expressible as true or false statements, stored in semantic memory, forming the basis of belief and the form of knowing that classical epistemology built its accounts of justified true belief around; its normative sense is a sense of truth.",
+      "isCustom": true,
+      "parentId": 2127,
+      "isPersonal": false
+    },
+    {
+      "id": 2129,
+      "label": "Procedural Knowing",
+      "order": 1,
+      "hidden": true,
+      "summary": "Knowing how — embodied skill and competence acquired through sensorimotor   interaction with the world, stored in procedural memory, resistant to full articulation in propositional terms, and evaluated by whether it empowers you to make a causal difference in the world; its normative sense is a sense of power.",
+      "isCustom": true,
+      "parentId": 2127,
+      "isPersonal": false
+    },
+    {
+      "id": 2130,
+      "label": "Perspectival Knowing",
+      "order": 2,
+      "hidden": true,
+      "summary": "Knowing from — the situated, first-person awareness of what it is like to be here, right now, in this particular context; stored in episodic memory, the quintessential feature of consciousness and irreducible to any amount of propositional, procedural, or participatory knowing; its normative sense is a sense of presence, its distinctive form of anticipation is mental time travel, and it is the basis of temporal extension — the capacity to cohere as a self across time.",
+      "isCustom": true,
+      "parentId": 2127,
+      "isPersonal": false
+    },
+    {
+      "id": 2131,
+      "label": "Participatory Knowing",
+      "order": 3,
+      "hidden": true,
+      "summary": "Knowing-with — the mode of knowing constituted by the transjective co-shaping of agent and environment; not knowledge about the world or skill within it, but the active fitting of yourself into a situation as you find it relevant, generating a sense of belonging; its memory form is the self — the binding unity of all the roles you inhabit across situations, each role a specific shaping of agency to fit an arena, and the self is what holds them all together.",
+      "isCustom": true,
+      "parentId": 2127,
+      "isPersonal": false
+    },
+    {
+      "id": 2133,
+      "label": "Animal Behavior",
+      "hidden": true,
+      "parentId": 847
+    },
+    {
+      "id": 2134,
+      "label": "Psychology",
+      "hidden": true,
+      "parentId": 847
+    },
+    {
+      "id": 2135,
+      "label": "Cognitive Science",
+      "order": 3,
+      "hidden": false,
+      "summary": "The interdisciplinary study of mind and intelligence spanning psychology, neuroscience, linguistics, philosophy, and computer science, seeking to understand how cognitive processes arise and operate.",
+      "isCustom": true,
+      "parentId": 571,
+      "isPersonal": false
+    },
+    {
+      "id": 2179,
+      "label": "Scientific Theories of Consciousness",
+      "hidden": true,
+      "parentId": 2103
+    },
+    {
+      "id": 2180,
+      "label": "The Hard Problem of Consciousness",
+      "hidden": true,
+      "parentId": 2103
+    },
+    {
+      "id": 2181,
+      "label": "The Boundary/Demarcation Problem",
+      "hidden": true,
+      "parentId": 2103
+    },
+    {
+      "id": 2182,
+      "label": "The Function of Consciousness",
+      "hidden": true,
+      "parentId": 2103
+    },
+    {
+      "id": 2183,
+      "label": "The Problem of Subjectivity (Self)",
+      "hidden": true,
+      "parentId": 2103
+    },
+    {
+      "id": 2184,
+      "label": "The Binding Problem",
+      "hidden": true,
+      "parentId": 2103
+    },
+    {
+      "id": 2185,
+      "label": "The Palette/Inverted Spectrum Problem",
+      "hidden": true,
+      "parentId": 2180
+    },
+    {
+      "id": 2186,
+      "label": "Kastrup's Theory of Dissociative Alters",
+      "hidden": true,
+      "parentId": 2181
+    },
+    {
+      "id": 2187,
+      "label": "Consciousness Divides via Dissociation",
+      "hidden": true,
+      "parentId": 2186
+    },
+    {
+      "id": 2188,
+      "label": "Neural Correlates of Consciousness",
+      "hidden": true,
+      "parentId": 2184
+    },
+    {
+      "id": 2189,
+      "label": "Orchestrated Objective Reduction (Orch OR)",
+      "hidden": true,
+      "parentId": 2179
+    },
+    {
+      "id": 2190,
+      "label": "Quantum Processes in Microtubules",
+      "hidden": true,
+      "parentId": 2189
+    },
+    {
+      "id": 2191,
+      "label": "Penrose's Objective Reduction",
+      "hidden": true,
+      "parentId": 2189
+    },
+    {
+      "id": 2192,
+      "label": "Hameroff's Orchestration",
+      "hidden": true,
+      "parentId": 2189
+    },
+    {
+      "id": 2193,
+      "label": "Consciousness as Quantum Events",
+      "hidden": true,
+      "parentId": 2189
+    },
+    {
+      "id": 2194,
+      "label": "The \"Hard Problem\" of Consciousness (Orch OR)",
+      "hidden": true,
+      "parentId": 2189
+    },
+    {
+      "id": 2195,
+      "label": "Challenges/Criticisms|Orch OR",
+      "hidden": true,
+      "parentId": 2189
+    },
+    {
+      "id": 2196,
+      "label": "The \"Warm, Wet Brain\" Challenge",
+      "hidden": true,
+      "parentId": 2195
+    },
+    {
+      "id": 2197,
+      "label": "Proponents' Response|Orch OR",
+      "hidden": true,
+      "parentId": 2196
+    },
+    {
+      "id": 2198,
+      "label": "Hydrophobic Pockets",
+      "hidden": true,
+      "parentId": 2197
+    },
+    {
+      "id": 2199,
+      "label": "Quantum Entanglement via Electron Arrangement",
+      "hidden": true,
+      "parentId": 2197
+    },
+    {
+      "id": 2200,
+      "label": "Microtubule Structural Shielding",
+      "hidden": true,
+      "parentId": 2197
+    },
+    {
+      "id": 2210,
+      "label": "Functional Roles|PFC",
+      "hidden": true,
+      "parentId": 1584
+    },
+    {
+      "id": 2211,
+      "label": "Key Brain Regions|PFC",
+      "hidden": true,
+      "parentId": 1584
+    },
+    {
+      "id": 2212,
+      "label": "PFC Connectivity",
+      "hidden": true,
+      "parentId": 1584
+    },
+    {
+      "id": 2213,
+      "label": "Executive Functions",
+      "hidden": true,
+      "parentId": 2210
+    },
+    {
+      "id": 2214,
+      "label": "Social Cognition",
+      "hidden": true,
+      "parentId": 2210
+    },
+    {
+      "id": 2215,
+      "label": "Personality and Emotional Regulation",
+      "hidden": true,
+      "parentId": 2210
+    },
+    {
+      "id": 2216,
+      "label": "Goal-Oriented Behavior",
+      "hidden": true,
+      "parentId": 2210
+    },
+    {
+      "id": 2217,
+      "label": "Working Memory",
+      "hidden": true,
+      "parentId": 2213
+    },
+    {
+      "id": 2218,
+      "label": "Inhibitory Control",
+      "hidden": true,
+      "parentId": 2213
+    },
+    {
+      "id": 2219,
+      "label": "Cognitive Flexibility (Shifting)",
+      "hidden": true,
+      "parentId": 2213
+    },
+    {
+      "id": 2220,
+      "label": "Planning and Problem-Solving",
+      "hidden": true,
+      "parentId": 2213
+    },
+    {
+      "id": 2221,
+      "label": "Monitoring and Evaluation",
+      "hidden": true,
+      "parentId": 2213
+    },
+    {
+      "id": 2222,
+      "label": "Effort",
+      "hidden": true,
+      "parentId": 2213
+    },
+    {
+      "id": 2223,
+      "label": "Verbal Working Memory",
+      "hidden": true,
+      "parentId": 2217
+    },
+    {
+      "id": 2224,
+      "label": "Visual-Spatial Working Memory",
+      "hidden": true,
+      "parentId": 2217
+    },
+    {
+      "id": 2225,
+      "label": "Central Executive Function",
+      "hidden": true,
+      "parentId": 2217
+    },
+    {
+      "id": 2229,
+      "label": "Person Formation",
+      "order": 1,
+      "hidden": true,
+      "summary": "The process by which narrative binds past, present, and future moments of perspectival experience into a coherent autobiographical self, achieving temporal extension and genuine agency across time.",
+      "isCustom": true,
+      "parentId": 2130,
+      "isPersonal": false
+    },
+    {
+      "id": 2230,
+      "label": "Autopoiesis",
+      "order": 5,
+      "hidden": true,
+      "summary": "The property of living systems by which they continuously produce and maintain the\n  very components and organization that constitute them — not merely self-organizing, but\n  self-making; the reason organisms have a stake in the world at all.",
+      "isCustom": true,
+      "parentId": 2113,
+      "isPersonal": false
+    },
+    {
+      "id": 2231,
+      "label": "Niche Construction",
+      "order": 0,
+      "hidden": true,
+      "summary": "We shape the environment that shapes us — and this isn't optional. By\n  actively modifying the selective pressures and affordances of their environment, organisms\n  pre-structure the salience landscape within which relevance realization can operate, making niche\n   construction a necessary condition for relevance realization, not merely a byproduct of being alive — and culture is niche construction at scale: the accumulated, transgenerational\n  modification of the symbolic, institutional, and technological environment that reshapes the\n  salience landscape for every generation born into it.",
+      "isCustom": true,
+      "parentId": 2230,
+      "isPersonal": false
+    },
+    {
+      "id": 2239,
+      "label": "Transjective",
+      "order": 0,
+      "hidden": true,
+      "summary": "Neither subjective nor objective but in the fittedness between organism and\n  environment — adaptation isn't a property of the organism or the environment alone but of the\n  relationship between them; the same holds for relevance, affordances, and meaning.",
+      "isCustom": true,
+      "parentId": 2231,
+      "isPersonal": false
+    },
+    {
+      "id": 2241,
+      "label": "Rationality",
+      "order": 6,
+      "hidden": true,
+      "summary": "The capacity to systematically and reliably overcome self-deception — not by\n  eliminating bias, which would require attending to everything everywhere all at once and destroy\n  the adaptivity that RR provides, but by ameliorating it: pushing back on the frames that blind\n  you without abandoning the frames that let you act — and this requires second-order caring: you must take a perspective on\n  your own perspective-taking, caring about how you care, aligning yourself with\n  self-correction as a value in itself — to be rational is to align yourself with normative standards:\n   making your beliefs more true, your actions more good, and your experience more\n   beautiful.",
+      "isCustom": true,
+      "parentId": 2113,
+      "isPersonal": false
+    },
+    {
+      "id": 2243,
+      "label": "Left Hemisphere",
+      "hidden": true,
+      "parentId": 2105
+    },
+    {
+      "id": 2244,
+      "label": "Right Hemisphere",
+      "hidden": true,
+      "parentId": 2105
+    },
+    {
+      "id": 2245,
+      "label": "Perception|Left Hemisphere",
+      "hidden": true,
+      "parentId": 2243
+    },
+    {
+      "id": 2246,
+      "label": "Interaction|Left Hemisphere",
+      "hidden": true,
+      "parentId": 2243
+    },
+    {
+      "id": 2247,
+      "label": "Strongly Influenced by Prior Experience",
+      "hidden": true,
+      "parentId": 2243
+    },
+    {
+      "id": 2248,
+      "label": "Sequential Processing",
+      "hidden": true,
+      "parentId": 2246
+    },
+    {
+      "id": 2249,
+      "label": "Categorization and Abstraction",
+      "hidden": true,
+      "parentId": 2246
+    },
+    {
+      "id": 2250,
+      "label": "Language and Logic",
+      "hidden": true,
+      "parentId": 2246
+    },
+    {
+      "id": 2251,
+      "label": "Habit and Routine",
+      "hidden": true,
+      "parentId": 2246
+    },
+    {
+      "id": 2252,
+      "label": "Established Neural Pathways",
+      "hidden": true,
+      "parentId": 2246
+    },
+    {
+      "id": 2253,
+      "label": "Consequences|Left Hemisphere",
+      "hidden": true,
+      "parentId": 2246
+    },
+    {
+      "id": 2254,
+      "label": "Efficiency",
+      "hidden": true,
+      "parentId": 2253
+    },
+    {
+      "id": 2255,
+      "label": "Rigidity and Confirmation Bias",
+      "hidden": true,
+      "parentId": 2253
+    },
+    {
+      "id": 2256,
+      "label": "Confirmation Bias",
+      "order": 0,
+      "hidden": true,
+      "summary": "the epistemic problem: the\n  tendency to foreground confirming evidence and background disconfirming\n  evidence, making rational self-correction hard",
+      "isCustom": true,
+      "parentId": 2241,
+      "isPersonal": false
+    },
+    {
+      "id": 2259,
+      "label": "Replication Crisis",
+      "order": 3,
+      "hidden": false,
+      "summary": "The widespread failure of published scientific findings to  \n  replicate, revealing systemic problems with incentive structures, statistical   \n  practices, and publication bias — a crisis not just of methodology but of the   \n  relevance realization embedded in how science selects what counts as a finding\n  worth publishing.",
+      "isCustom": true,
+      "parentId": 3,
+      "isPersonal": false
+    },
+    {
+      "id": 2260,
+      "label": "Rationality Quotient (RQ)",
+      "order": 3,
+      "hidden": true,
+      "summary": "A measure of rational thinking capacity distinct from IQ — where g captures the ability to reason, RQ captures whether that ability is actually deployed well: avoiding cognitive biases, thinking probabilistically, updating on evidence, and overcoming self-deception; Stanovich's argument that intelligence and rationality can come apart, and often do — the correlation between IQ and RQ is only .3, meaning high intelligence is no guarantee of rational thinking.",
+      "isCustom": true,
+      "parentId": 2106,
+      "isPersonal": false
+    },
+    {
+      "id": 2282,
+      "label": "Tripartite Soul",
+      "order": 1,
+      "hidden": true,
+      "summary": "Plato's image of the soul as three creatures — a many-headed\n  monster (appetites), a lion (spirit/thumos), and a man (reason/logos); justice\n  and rationality require the man to govern the lion and tame the monster, not\n  suppress them but order them rightly.",
+      "isCustom": true,
+      "parentId": 36,
+      "isPersonal": false
+    },
+    {
+      "id": 2320,
+      "label": "Metaethics",
+      "hidden": true,
+      "parentId": 36
+    },
+    {
+      "id": 2321,
+      "label": "Normative Ethics",
+      "hidden": true,
+      "parentId": 36
+    },
+    {
+      "id": 2322,
+      "label": "Aristotle's Virtue Ethics",
+      "hidden": true,
+      "parentId": 2321
+    },
+    {
+      "id": 2323,
+      "label": "Basic Moral Dilemmas",
+      "hidden": true,
+      "parentId": 2321
+    },
+    {
+      "id": 2324,
+      "label": "Consequentialism",
+      "hidden": true,
+      "parentId": 2321
+    },
+    {
+      "id": 2325,
+      "label": "Kant's Deontology",
+      "hidden": true,
+      "parentId": 2321
+    },
+    {
+      "id": 2351,
+      "label": "Aristotelian Ethics",
+      "hidden": true,
+      "parentId": 2322
+    },
+    {
+      "id": 2352,
+      "label": "Character Development",
+      "hidden": true,
+      "parentId": 2322
+    },
+    {
+      "id": 2353,
+      "label": "Flourishing",
+      "hidden": true,
+      "parentId": 2322
+    },
+    {
+      "id": 2354,
+      "label": "Moral Exemplars",
+      "hidden": true,
+      "parentId": 2322
+    },
+    {
+      "id": 2355,
+      "label": "Practical Wisdom",
+      "hidden": true,
+      "parentId": 2322
+    },
+    {
+      "id": 2356,
+      "label": "Virtues",
+      "hidden": true,
+      "parentId": 2322
+    },
+    {
+      "id": 2357,
+      "label": "Compassion",
+      "hidden": true,
+      "parentId": 2356
+    },
+    {
+      "id": 2358,
+      "label": "Courage",
+      "hidden": true,
+      "parentId": 2356
+    },
+    {
+      "id": 2359,
+      "label": "Honesty",
+      "hidden": true,
+      "parentId": 2356
+    },
+    {
+      "id": 2360,
+      "label": "Justice",
+      "hidden": true,
+      "parentId": 2356
+    },
+    {
+      "id": 2361,
+      "label": "Temperance",
+      "hidden": true,
+      "parentId": 2356
+    },
+    {
+      "id": 2362,
+      "label": "Phronesis/Wisdom",
+      "hidden": true,
+      "summary": "The virtue of sound judgment, insight, and understanding in practical and theoretical matters.",
+      "isCustom": true,
+      "parentId": 2356
+    },
+    {
+      "id": 2363,
+      "label": "Wisdom",
+      "order": 4,
+      "hidden": true,
+      "summary": "The reliable coordination of all four kinds of knowing — propositional, procedural, perspectival, and participatory — oriented toward what is true, good, and beautiful; not a fifth kind of knowing but the capacity to integrate the others in service of what matters most.",
+      "isCustom": true,
+      "parentId": 2106,
+      "isPersonal": false
+    },
+    {
+      "id": 2586,
+      "label": "keccak256(abi.encodePacked(\"x\"))",
+      "order": 0,
+      "hidden": true,
+      "isCustom": true,
+      "parentId": 1207,
+      "isPersonal": false
+    },
+    {
+      "id": 2602,
+      "label": "Compiler",
+      "order": 9,
+      "hidden": true,
+      "summary": "the Solidity compiler (solc) converts Solidity code into bytecode — a low level binary representation that the Ethereum Virtual Machine (EVM) can understand and execute, since the EVM cannot read Solidity directly.",
+      "isCustom": true,
+      "parentId": 995,
+      "isPersonal": false
+    },
+    {
+      "id": 2618,
+      "label": "Syntax",
+      "order": 3,
+      "hidden": true,
+      "summary": "the set of rules and keywords that define how smart contracts must be written so the Solidity compiler can correctly parse and compile them into EVM bytecode.",
+      "isCustom": true,
+      "parentId": 995,
+      "isPersonal": false
+    },
+    {
+      "id": 2619,
+      "label": "Keywords",
+      "order": 0,
+      "hidden": true,
+      "summary": "reserved words with predefined meanings that form the building blocks of the language's syntax",
+      "isCustom": true,
+      "parentId": 2618,
+      "isPersonal": false
+    },
+    {
+      "id": 2620,
+      "label": "Operators",
+      "order": 1,
+      "hidden": true,
+      "summary": "symbols or built-in constructs that perform operations on values",
+      "isCustom": true,
+      "parentId": 2618,
+      "isPersonal": false,
+      "excludedChildLabels": [
+        "Subtraction",
+        "Multiplication",
+        "Modulus/Remainder",
+        "Exponent",
+        "Division",
+        "Addition"
+      ]
+    },
+    {
+      "id": 2627,
+      "label": "Arithmetic",
+      "order": 0,
+      "hidden": true,
+      "summary": "perform basic math operations on numbers",
+      "isCustom": true,
+      "parentId": 2620,
+      "isPersonal": false,
+      "excludedChildLabels": [
+        "+",
+        "++"
+      ]
+    },
+    {
+      "id": 2628,
+      "label": "Comparison",
+      "order": 1,
+      "hidden": true,
+      "summary": "compare two values and return a boolean",
+      "isCustom": true,
+      "parentId": 2620,
+      "isPersonal": false
+    },
+    {
+      "id": 2629,
+      "label": "Logical",
+      "order": 2,
+      "hidden": true,
+      "summary": "combine or negate boolean values",
+      "isCustom": true,
+      "parentId": 2620,
+      "isPersonal": false
+    },
+    {
+      "id": 2630,
+      "label": "Bitwise",
+      "order": 3,
+      "hidden": true,
+      "summary": "perform operations directly on the binary representation of numbers",
+      "isCustom": true,
+      "parentId": 2620,
+      "isPersonal": false
+    },
+    {
+      "id": 2631,
+      "label": "Assignment",
+      "order": 4,
+      "hidden": true,
+      "summary": "assign or update the value of a variable",
+      "isCustom": true,
+      "parentId": 2620,
+      "isPersonal": false,
+      "excludedChildLabels": [
+        "+="
+      ]
+    },
+    {
+      "id": 2632,
+      "label": "Ternary",
+      "order": 5,
+      "hidden": true,
+      "summary": "a shorthand if/else that returns one of two values based on a condition",
+      "isCustom": true,
+      "parentId": 2620,
+      "isPersonal": false
+    },
+    {
+      "id": 2633,
+      "label": "Delete",
+      "order": 6,
+      "hidden": true,
+      "summary": "resets a variable back to its default zero value",
+      "isCustom": true,
+      "parentId": 2620,
+      "isPersonal": false
+    },
+    {
+      "id": 2634,
+      "label": "Compile-time",
+      "order": 7,
+      "hidden": true,
+      "summary": "retrieve information about a type at compile time rather than runtime",
+      "isCustom": true,
+      "parentId": 2620,
+      "isPersonal": false
+    },
+    {
+      "id": 2702,
+      "label": "Applied Psychology",
+      "hidden": true,
+      "parentId": 2134
+    },
+    {
+      "id": 2703,
+      "label": "Approaches to Psychology/Schools of Thought",
+      "hidden": true,
+      "parentId": 2134
+    },
+    {
+      "id": 2704,
+      "label": "Cognitive Psychology",
+      "hidden": true,
+      "parentId": 2134,
+      "excludedChildLabels": [
+        "Emotion"
+      ]
+    },
+    {
+      "id": 2705,
+      "label": "Developmental Psychology",
+      "hidden": true,
+      "parentId": 2134
+    },
+    {
+      "id": 2706,
+      "label": "Emotions",
+      "hidden": true,
+      "parentId": 2134,
+      "excludedChildLabels": [
+        "Neutral"
+      ]
+    },
+    {
+      "id": 2707,
+      "label": "Personality Psychology",
+      "hidden": true,
+      "parentId": 2134
+    },
+    {
+      "id": 2708,
+      "label": "Positive Psychology",
+      "hidden": true,
+      "parentId": 2134,
+      "excludedChildLabels": [
+        "Happiness"
+      ]
+    },
+    {
+      "id": 2709,
+      "label": "Senses",
+      "hidden": true,
+      "parentId": 2134
+    },
+    {
+      "id": 2710,
+      "label": "Social Psychology",
+      "hidden": true,
+      "parentId": 2134
+    },
+    {
+      "id": 2711,
+      "label": "Affective Psychology",
+      "hidden": true,
+      "parentId": 2704
+    },
+    {
+      "id": 2712,
+      "label": "Cognition",
+      "hidden": true,
+      "parentId": 2704
+    },
+    {
+      "id": 2714,
+      "label": "Executive Functions",
+      "hidden": true,
+      "parentId": 2704
+    },
+    {
+      "id": 2715,
+      "label": "Motivation",
+      "hidden": true,
+      "parentId": 2704
+    },
+    {
+      "id": 2716,
+      "label": "Learning Theory",
+      "hidden": true,
+      "parentId": 2704
+    },
+    {
+      "id": 2720,
+      "label": "Components of Emotions",
+      "order": 0,
+      "hidden": true,
+      "parentId": 2706
+    },
+    {
+      "id": 2721,
+      "label": "Types of Emotions",
+      "order": 1,
+      "hidden": true,
+      "parentId": 2706
+    },
+    {
+      "id": 2722,
+      "label": "Pleasant",
+      "order": 3,
+      "hidden": true,
+      "parentId": 2706
+    },
+    {
+      "id": 2723,
+      "label": "Neutral",
+      "order": 2,
+      "hidden": true,
+      "summary": "The category of emotions that are neither clearly pleasant nor unpleasant, often marked by reflection, ambiguity, or subdued tone.",
+      "isCustom": true,
+      "parentId": 2706
+    },
+    {
+      "id": 2724,
+      "label": "Unpleasant",
+      "order": 4,
+      "hidden": true,
+      "parentId": 2706
+    },
+    {
+      "id": 2725,
+      "label": "Happiness",
+      "hidden": true,
+      "parentId": 2722
+    },
+    {
+      "id": 2726,
+      "label": "Pleasantly Surprised",
+      "hidden": true,
+      "parentId": 2722
+    },
+    {
+      "id": 2727,
+      "label": "Playful",
+      "hidden": true,
+      "parentId": 2725
+    },
+    {
+      "id": 2728,
+      "label": "Interested",
+      "hidden": true,
+      "parentId": 2725
+    },
+    {
+      "id": 2729,
+      "label": "Accepted",
+      "hidden": true,
+      "parentId": 2725
+    },
+    {
+      "id": 2730,
+      "label": "Powerful",
+      "hidden": true,
+      "parentId": 2725
+    },
+    {
+      "id": 2731,
+      "label": "Trusting",
+      "hidden": true,
+      "parentId": 2725
+    },
+    {
+      "id": 2732,
+      "label": "Optimism",
+      "hidden": true,
+      "parentId": 2725
+    },
+    {
+      "id": 2733,
+      "label": "Zest",
+      "hidden": true,
+      "parentId": 2725
+    },
+    {
+      "id": 2734,
+      "label": "Joyful",
+      "hidden": true,
+      "parentId": 2725
+    },
+    {
+      "id": 2735,
+      "label": "Peacefulness",
+      "hidden": true,
+      "parentId": 2725
+    },
+    {
+      "id": 2736,
+      "label": "Gratitude",
+      "hidden": true,
+      "parentId": 2725
+    },
+    {
+      "id": 2737,
+      "label": "Meaning",
+      "hidden": true,
+      "parentId": 2725
+    },
+    {
+      "id": 3104,
+      "label": "Scope",
+      "order": 1,
+      "hidden": true,
+      "summary": "the local variables defined within the body of the function are only accessible inside the function and once they execute, they are gone.",
+      "isCustom": true,
+      "parentId": 1159,
+      "isPersonal": false
+    },
+    {
+      "id": 3116,
+      "label": "Control Flow",
+      "order": 6,
+      "hidden": true,
+      "summary": "the set of statements inside a function body that determine the order and conditions under which code executesthe set of statements inside a function body that determine the order and conditions under which code executes",
+      "isCustom": true,
+      "parentId": 1159,
+      "isPersonal": false
+    },
+    {
+      "id": 3124,
+      "label": "x ? y : z",
+      "order": 1,
+      "hidden": true,
+      "isCustom": true,
+      "parentId": 2632,
+      "isPersonal": false
+    },
+    {
+      "id": 3128,
+      "label": "Conditional Statements",
+      "order": 0,
+      "hidden": true,
+      "parentId": 3116,
+      "excludedChildLabels": [
+        "switch statements"
+      ]
+    },
+    {
+      "id": 3129,
+      "label": "Loops",
+      "order": 1,
+      "hidden": true,
+      "parentId": 3116
+    },
+    {
+      "id": 3131,
+      "label": "if-else if chains",
+      "hidden": true,
+      "parentId": 3128
+    },
+    {
+      "id": 3133,
+      "label": "Conditional Operator/Ternary Operator",
+      "hidden": true,
+      "parentId": 3128
+    },
+    {
+      "id": 3143,
+      "label": "const x = (y) ? z : a;",
+      "hidden": true,
+      "parentId": 3133
+    },
+    {
+      "id": 3144,
+      "label": "x|ternary",
+      "hidden": true,
+      "parentId": 3143
+    },
+    {
+      "id": 3145,
+      "label": "y|ternary",
+      "hidden": true,
+      "parentId": 3143
+    },
+    {
+      "id": 3146,
+      "label": "z|ternary",
+      "hidden": true,
+      "parentId": 3143
+    },
+    {
+      "id": 3147,
+      "label": "a|ternary",
+      "hidden": true,
+      "parentId": 3143
+    },
+    {
+      "id": 3169,
+      "label": "Error Handling",
+      "order": 2,
+      "hidden": true,
+      "summary": "check conditions and halt execution by reverting the transaction if something goes wrong.  When an error is thrown, gas is refunded and state updates are reverted.",
+      "isCustom": true,
+      "parentId": 3116,
+      "isPersonal": false
+    },
+    {
+      "id": 3190,
+      "label": "Modifiers",
+      "order": 7,
+      "hidden": true,
+      "summary": "reusable code blocks declared at the contract level that wrap a function, executing checks or logic before and/or after the function body runs.  the _ represents where the function runs in the flow of the modifier execution.",
+      "isCustom": true,
+      "parentId": 1159,
+      "isPersonal": false
+    },
+    {
+      "id": 3205,
+      "label": "Special Functions",
+      "order": 8,
+      "hidden": true,
+      "isCustom": true,
+      "parentId": 1159,
+      "isPersonal": false
+    },
+    {
+      "id": 3244,
+      "label": "Index/Access",
+      "order": 8,
+      "hidden": true,
+      "summary": "used to retrieve or reference a specific element within arrays, mappings, and structs",
+      "isCustom": true,
+      "parentId": 2620,
+      "isPersonal": false
+    },
+    {
+      "id": 3348,
+      "label": "Built-in Methods",
+      "order": 3,
+      "hidden": true,
+      "summary": "called on a value/variable",
+      "isCustom": true,
+      "parentId": 1159,
+      "isPersonal": false
+    },
+    {
+      "id": 3413,
+      "label": "ecrecover",
+      "order": 1,
+      "hidden": true,
+      "summary": "cryptographic function that recovers the signer's address from a message hash and its ECDSA signature components, commonly used for off-chain signature verification",
+      "isCustom": true,
+      "parentId": 1204,
+      "isPersonal": false
+    },
+    {
+      "id": 3414,
+      "label": "selfdestruct",
+      "order": 2,
+      "hidden": true,
+      "summary": "sends the contract's whole ETH balance to a specified address. Since the Dencun upgrade (EIP-6780, March 2024) it deletes the contract's code and storage only when called in the transaction that created the contract; otherwise it only sends the ETH. Deprecated since Solidity 0.8.18.",
+      "isCustom": true,
+      "parentId": 1204,
+      "isPersonal": false
+    },
+    {
+      "id": 3445,
+      "label": "Global",
+      "order": 4,
+      "hidden": true,
+      "isCustom": true,
+      "parentId": 995,
+      "isPersonal": false
+    },
+    {
+      "id": 3447,
+      "label": "To check what version you have installed|TypeScript",
+      "hidden": true,
+      "parentId": 750
+    },
+    {
+      "id": 3448,
+      "label": ".ts file extension",
+      "hidden": true,
+      "parentId": 750
+    },
+    {
+      "id": 3449,
+      "label": "Compile ts into js",
+      "hidden": true,
+      "parentId": 750
+    },
+    {
+      "id": 3450,
+      "label": "Define variable value type",
+      "hidden": true,
+      "parentId": 750
+    },
+    {
+      "id": 3451,
+      "label": "Configuring the TS Compiler",
+      "hidden": true,
+      "parentId": 750
+    },
+    {
+      "id": 3452,
+      "label": "Debugging|TypeScript",
+      "hidden": true,
+      "parentId": 750
+    },
+    {
+      "id": 3453,
+      "label": "Functions (TypeScript)|TypeScript",
+      "hidden": true,
+      "parentId": 750
+    },
+    {
+      "id": 3454,
+      "label": "Aliases|TypeScript",
+      "hidden": true,
+      "parentId": 750
+    },
+    {
+      "id": 3455,
+      "label": "Operators (TypeScript)|TypeScript",
+      "hidden": true,
+      "parentId": 750
+    },
+    {
+      "id": 3456,
+      "label": "Keywords (TypeScript)|TypeScript",
+      "hidden": true,
+      "parentId": 750
+    },
+    {
+      "id": 3585,
+      "label": "Probability",
+      "hidden": true,
+      "parentId": 595
+    },
+    {
+      "id": 3586,
+      "label": "Descriptive Statistics",
+      "hidden": true,
+      "parentId": 595
+    },
+    {
+      "id": 3587,
+      "label": "Inferential Statistics",
+      "hidden": true,
+      "parentId": 595
+    },
+    {
+      "id": 3588,
+      "label": "Regression",
+      "hidden": true,
+      "parentId": 595
+    },
+    {
+      "id": 3589,
+      "label": "Bayesian Statistics",
+      "hidden": true,
+      "parentId": 595
+    },
+    {
+      "id": 3590,
+      "label": "Experimental Design",
+      "hidden": true,
+      "parentId": 595
+    },
+    {
+      "id": 3647,
+      "label": "keccak256",
+      "hidden": true,
+      "parentId": 1215
+    },
+    {
+      "id": 3744,
+      "label": "Bronze Age (3,200 BC - 1,200 BC)",
+      "hidden": true,
+      "parentId": 24
+    },
+    {
+      "id": 3745,
+      "label": "Iron Age (1,200 BC - 600 BC)",
+      "hidden": true,
+      "parentId": 24
+    },
+    {
+      "id": 3746,
+      "label": "Classical Antiquity (800 BC - 500 AD)",
+      "hidden": true,
+      "parentId": 24
+    },
+    {
+      "id": 3747,
+      "label": "Late Antiquity (250 - 500 AD)",
+      "hidden": true,
+      "parentId": 24
+    },
+    {
+      "id": 3748,
+      "label": "Early Bronze Age (3,200 BC - 2,000 BC)",
+      "hidden": true,
+      "parentId": 3744
+    },
+    {
+      "id": 3749,
+      "label": "Middle Bronze Age (2,000 BC - 1,600 BC)",
+      "hidden": true,
+      "parentId": 3744
+    },
+    {
+      "id": 3750,
+      "label": "Late Bronze Age (1,600 BC - 1,200 BC)",
+      "hidden": true,
+      "parentId": 3744
+    },
+    {
+      "id": 3751,
+      "label": "Helladic Civilization (3,200 BC - 2,000 BC)",
+      "hidden": true,
+      "parentId": 3748
+    },
+    {
+      "id": 3752,
+      "label": "Ancient Egyptian Civilization (3,100 BC - 2,000 BC)",
+      "hidden": true,
+      "parentId": 3748
+    },
+    {
+      "id": 3753,
+      "label": "Minoan Civilization (3,100 BC - 2,000 BC)",
+      "hidden": true,
+      "parentId": 3748
+    },
+    {
+      "id": 3754,
+      "label": "Norte Chico Civilization (3,000 BC - 2,000 BC)",
+      "hidden": true,
+      "parentId": 3748
+    },
+    {
+      "id": 3755,
+      "label": "Mari Civilization (2,900 BC - 2,000 BC)",
+      "hidden": true,
+      "parentId": 3748
+    },
+    {
+      "id": 3756,
+      "label": "Elamite Civilization (2,700 BC - 539 BC)",
+      "hidden": true,
+      "parentId": 3748
+    },
+    {
+      "id": 3757,
+      "label": "Xia Dynasty (2,070 BC - 2,000 BC)",
+      "hidden": true,
+      "parentId": 3748
+    },
+    {
+      "id": 3953,
+      "label": "Connection to Spacetime Geometry",
+      "hidden": true,
+      "parentId": 2191
+    },
+    {
+      "id": 3954,
+      "label": "Superposition Threshold and Collapse",
+      "hidden": true,
+      "parentId": 2191
+    },
+    {
+      "id": 3955,
+      "label": "The Collapse is Non-Computational",
+      "hidden": true,
+      "parentId": 3954
+    },
+    {
+      "id": 3956,
+      "label": "A Physical Basis for Free Will",
+      "hidden": true,
+      "parentId": 3955
+    },
+    {
+      "id": 4061,
+      "label": "Physiological Arousal",
+      "hidden": true,
+      "parentId": 2720
+    },
+    {
+      "id": 4062,
+      "label": "Qualia",
+      "hidden": true,
+      "parentId": 2720
+    },
+    {
+      "id": 4063,
+      "label": "Expressive Behavior",
+      "hidden": true,
+      "parentId": 2720
+    },
+    {
+      "id": 4064,
+      "label": "Cognitive Appraisal/Interpretation",
+      "hidden": true,
+      "parentId": 2720
+    },
+    {
+      "id": 4090,
+      "label": "Relationship Psychology/Interpersonal Psychology",
+      "hidden": true,
+      "parentId": 2710
+    },
+    {
+      "id": 4091,
+      "label": "Social Influence",
+      "hidden": true,
+      "parentId": 2710
+    },
+    {
+      "id": 4092,
+      "label": "Intimacy",
+      "hidden": true,
+      "parentId": 4090
+    },
+    {
+      "id": 4093,
+      "label": "Emotional Intimacy",
+      "hidden": true,
+      "parentId": 4092
+    },
+    {
+      "id": 4094,
+      "label": "Emotional Availability",
+      "hidden": true,
+      "parentId": 4093
+    },
+    {
+      "id": 4095,
+      "label": "Esteem",
+      "hidden": true,
+      "parentId": 4093
+    },
+    {
+      "id": 4096,
+      "label": "Genuine Connection",
+      "hidden": true,
+      "parentId": 4093
+    },
+    {
+      "id": 4097,
+      "label": "Deep Connection",
+      "hidden": true,
+      "parentId": 4093
+    },
+    {
+      "id": 4098,
+      "label": "Security|Intimacy",
+      "hidden": true,
+      "parentId": 4093
+    },
+    {
+      "id": 4099,
+      "label": "Emotional Resonance",
+      "hidden": true,
+      "parentId": 4093
+    },
+    {
+      "id": 4100,
+      "label": "Persuasion",
+      "hidden": true,
+      "parentId": 4091
+    },
+    {
+      "id": 4101,
+      "label": "Manipulation|Social Influence",
+      "hidden": true,
+      "parentId": 4091
+    },
+    {
+      "id": 4102,
+      "label": "Manipulation Techniques/Strategies",
+      "hidden": true,
+      "parentId": 4101
+    },
+    {
+      "id": 4103,
+      "label": "Persuasion Techniques/Strategies",
+      "hidden": true,
+      "parentId": 4100
+    },
+    {
+      "id": 4104,
+      "label": "Aristotle's Rhetorical Appeals",
+      "hidden": true,
+      "parentId": 4103
+    },
+    {
+      "id": 4105,
+      "label": "Psychological Principles",
+      "hidden": true,
+      "parentId": 4103
+    },
+    {
+      "id": 4106,
+      "label": "Specific Persuasion Tactics",
+      "hidden": true,
+      "parentId": 4103
+    },
+    {
+      "id": 4107,
+      "label": "Using Logical Fallacies",
+      "hidden": true,
+      "parentId": 4102
+    },
+    {
+      "id": 4108,
+      "label": "Direct",
+      "hidden": true,
+      "parentId": 4102
+    },
+    {
+      "id": 4109,
+      "label": "Indirect",
+      "hidden": true,
+      "parentId": 4102
+    },
+    {
+      "id": 4110,
+      "label": "Deception",
+      "hidden": true,
+      "parentId": 4109
+    },
+    {
+      "id": 4111,
+      "label": "Sowing Doubt/Division",
+      "hidden": true,
+      "parentId": 4109
+    },
+    {
+      "id": 4112,
+      "label": "Tone Policing",
+      "hidden": true,
+      "parentId": 4109
+    },
+    {
+      "id": 4113,
+      "label": "Passive-Aggression",
+      "hidden": true,
+      "parentId": 4109
+    },
+    {
+      "id": 4114,
+      "label": "Shit-testing",
+      "hidden": true,
+      "parentId": 4109
+    },
+    {
+      "id": 4115,
+      "label": "Victim-playing",
+      "hidden": true,
+      "parentId": 4109
+    },
+    {
+      "id": 4116,
+      "label": "Negging",
+      "hidden": true,
+      "parentId": 4109
+    },
+    {
+      "id": 4117,
+      "label": "Love-bombing",
+      "hidden": true,
+      "parentId": 4109
+    },
+    {
+      "id": 4118,
+      "label": "Pigeonholing",
+      "hidden": true,
+      "parentId": 4109
+    },
+    {
+      "id": 4119,
+      "label": "Projection",
+      "hidden": true,
+      "parentId": 4109
+    },
+    {
+      "id": 4120,
+      "label": "Scapegoating",
+      "hidden": true,
+      "parentId": 4109
+    },
+    {
+      "id": 4217,
+      "label": "Joy vs Pleasure",
+      "hidden": true,
+      "isCustom": true,
+      "parentId": 2708
+    },
+    {
+      "id": 4222,
+      "label": "Emotional Well-Being",
+      "hidden": true,
+      "parentId": 2708
+    },
+    {
+      "id": 4266,
+      "label": "Appreciation",
+      "hidden": true,
+      "parentId": 2736
+    },
+    {
+      "id": 4267,
+      "label": "Admiration",
+      "hidden": true,
+      "parentId": 2736
+    },
+    {
+      "id": 4268,
+      "label": "Reverence",
+      "hidden": true,
+      "parentId": 2736
+    },
+    {
+      "id": 4269,
+      "label": "Indebtedness",
+      "hidden": true,
+      "parentId": 2736
+    },
+    {
+      "id": 4270,
+      "label": "Thankfulness",
+      "hidden": true,
+      "parentId": 2736
+    },
+    {
+      "id": 4271,
+      "label": "Esteem",
+      "hidden": true,
+      "parentId": 4266
+    },
+    {
+      "id": 4272,
+      "label": "Approbation",
+      "hidden": true,
+      "parentId": 4266
+    },
+    {
+      "id": 4273,
+      "label": "Admiration",
+      "hidden": true,
+      "parentId": 4271
+    },
+    {
+      "id": 4274,
+      "label": "Respect",
+      "hidden": true,
+      "parentId": 4271
+    },
+    {
+      "id": 4302,
+      "label": "Negativity Bias",
+      "hidden": true,
+      "parentId": 4222
+    },
+    {
+      "id": 4303,
+      "label": "Emotional Regulation",
+      "order": 5,
+      "hidden": true,
+      "parentId": 2706
+    },
+    {
+      "id": 4304,
+      "label": "Emotional Awareness and Identification",
+      "hidden": true,
+      "parentId": 4303
+    },
+    {
+      "id": 4305,
+      "label": "Mindfulness",
+      "hidden": true,
+      "parentId": 4303
+    },
+    {
+      "id": 4306,
+      "label": "Cognitive Behavioral Therapy (CBT)",
+      "hidden": true,
+      "parentId": 4303
+    },
+    {
+      "id": 4307,
+      "label": "Strong Healthy Relationships",
+      "hidden": true,
+      "parentId": 4303
+    },
+    {
+      "id": 4308,
+      "label": "Cognitive Restructuring",
+      "hidden": true,
+      "parentId": 4306
+    },
+    {
+      "id": 4309,
+      "label": "Rational Emotive Behavior Therapy (REBT)",
+      "hidden": true,
+      "parentId": 4306
+    },
+    {
+      "id": 4310,
+      "label": "Dialectical Behavior Therapy (DBT)",
+      "hidden": true,
+      "parentId": 4306
+    },
+    {
+      "id": 4320,
+      "label": "Evolutionary Origin|Negativity Bias",
+      "hidden": true,
+      "parentId": 4302
+    },
+    {
+      "id": 4321,
+      "label": "Workaround|Negativity Bias",
+      "hidden": true,
+      "parentId": 4302
+    },
+    {
+      "id": 4322,
+      "label": "Gratitude",
+      "hidden": true,
+      "parentId": 4321,
+      "excludedChildLabels": [
+        "Admiration",
+        "Appreciation",
+        "Indebtedness",
+        "Reverence",
+        "Thankfulness"
+      ]
+    },
+    {
+      "id": 4323,
+      "label": "Forgiveness/Grace",
+      "hidden": true,
+      "parentId": 4321
+    },
+    {
+      "id": 4324,
+      "label": "Humility",
+      "hidden": true,
+      "parentId": 4321
+    },
+    {
+      "id": 4472,
+      "label": "Clinical Psychology",
+      "hidden": true,
+      "parentId": 2702
+    },
+    {
+      "id": 4473,
+      "label": "Psychotherapy",
+      "hidden": true,
+      "parentId": 4472
+    },
+    {
+      "id": 4474,
+      "label": "Behavioral Therapy",
+      "hidden": true,
+      "parentId": 4473
+    },
+    {
+      "id": 4475,
+      "label": "Classical Conditioning Techniques",
+      "hidden": true,
+      "parentId": 4474
+    },
+    {
+      "id": 4476,
+      "label": "Operant Conditioning Techniques",
+      "hidden": true,
+      "parentId": 4474
+    },
+    {
+      "id": 4477,
+      "label": "Cognitive Behavioral Therapy (CBT)",
+      "hidden": true,
+      "parentId": 4474
+    },
+    {
+      "id": 4478,
+      "label": "Depth Psychology",
+      "hidden": true,
+      "parentId": 2703
+    },
+    {
+      "id": 4479,
+      "label": "Jung's Analytical Psychology",
+      "hidden": true,
+      "parentId": 4478,
+      "excludedChildLabels": [
+        "Shadow Aspect"
+      ]
+    },
+    {
+      "id": 4480,
+      "label": "Freud's Psychoanalysis",
+      "hidden": true,
+      "parentId": 4478
+    },
+    {
+      "id": 4481,
+      "label": "Adler's Individual Psychology",
+      "hidden": true,
+      "parentId": 4478
+    },
+    {
+      "id": 4483,
+      "label": "Intelligence",
+      "hidden": true,
+      "parentId": 2712
+    },
+    {
+      "id": 4485,
+      "label": "Fluid Intelligence",
+      "hidden": true,
+      "parentId": 4483
+    },
+    {
+      "id": 4486,
+      "label": "Crystallized Intelligence",
+      "hidden": true,
+      "parentId": 4483
+    },
+    {
+      "id": 4491,
+      "label": "Cognitive Restructuring",
+      "hidden": true,
+      "parentId": 4477
+    },
+    {
+      "id": 4492,
+      "label": "Rational Emotive Behavior Therapy (REBT)",
+      "hidden": true,
+      "parentId": 4477
+    },
+    {
+      "id": 4493,
+      "label": "Dialectical Behavior Therapy (DBT)",
+      "hidden": true,
+      "parentId": 4477
+    },
+    {
+      "id": 4587,
+      "label": "The Psyche Structure",
+      "order": 0,
+      "hidden": true,
+      "summary": "This represents the totality of the mind, divided into the conscious ego, the personal unconscious of forgotten experiences, and the collective unconscious shared by all humans.",
+      "isCustom": true,
+      "parentId": 4479,
+      "isPersonal": false
+    },
+    {
+      "id": 4588,
+      "label": "Jungian Archetypes",
+      "order": 1,
+      "hidden": true,
+      "summary": "These are universal, inherited psychic structures and symbols within the collective unconscious—such as the Shadow, Persona, and Anima/Animus—that shape human behavior and perception.",
+      "isCustom": true,
+      "parentId": 4594,
+      "isPersonal": false
+    },
+    {
+      "id": 4589,
+      "label": "Psychological Types",
+      "order": 2,
+      "hidden": true,
+      "summary": "This framework classifies personality based on an individual's fundamental orientation (Introversion or Extraversion) combined with their dominant cognitive functions (Thinking, Feeling, Sensation, or Intuition).",
+      "isCustom": true,
+      "parentId": 4479,
+      "isPersonal": false
+    },
+    {
+      "id": 4590,
+      "label": "The Individuation Process",
+      "order": 3,
+      "hidden": true,
+      "summary": "This is the lifelong psychological journey of self-realization where a person integrates the conscious mind with the unconscious elements of the self to achieve true wholeness.",
+      "isCustom": true,
+      "parentId": 4479,
+      "isPersonal": false
+    },
+    {
+      "id": 4591,
+      "label": "Clinical Concepts and Methods",
+      "order": 4,
+      "hidden": true,
+      "summary": "This category encompasses Jung's practical therapeutic tools—including dream analysis, active imagination, and complex theory—used to treat neurosis by uncovering unconscious conflicts.",
+      "isCustom": true,
+      "parentId": 4479,
+      "isPersonal": false
+    },
+    {
+      "id": 4592,
+      "label": "Conscious Ego",
+      "order": 0,
+      "hidden": true,
+      "summary": "This represents the center of your conscious awareness, managing your daily sense of personal identity, thoughts, and immediate perceptions.",
+      "isCustom": true,
+      "parentId": 4587,
+      "isPersonal": false
+    },
+    {
+      "id": 4593,
+      "label": "Personal Unconscious",
+      "order": 1,
+      "hidden": true,
+      "summary": "This contains an individual's forgotten memories, suppressed experiences, and emotionally charged clusters of ideas known as complexes.",
+      "isCustom": true,
+      "parentId": 4587,
+      "isPersonal": false
+    },
+    {
+      "id": 4594,
+      "label": "Collective Unconscious",
+      "order": 2,
+      "hidden": true,
+      "summary": "This is the deepest, inherited layer of the psyche shared by all humans, containing universal instincts and the symbolic blueprints known as archetypes.",
+      "isCustom": true,
+      "parentId": 4587,
+      "isPersonal": false
+    },
+    {
+      "id": 4595,
+      "label": "Persona",
+      "order": 0,
+      "hidden": true,
+      "summary": "This is the social mask or public face an individual presents to the world to conform to societal expectations while concealing their true nature.",
+      "isCustom": true,
+      "parentId": 4603,
+      "isPersonal": false
+    },
+    {
+      "id": 4596,
+      "label": "Shadow",
+      "order": 1,
+      "hidden": true,
+      "summary": "This consists of the repressed, unaccepted, or primitive aspects of the personality that the conscious ego rejects and hides out of shame or fear.",
+      "isCustom": true,
+      "parentId": 4603,
+      "isPersonal": false
+    },
+    {
+      "id": 4597,
+      "label": "Anima/Animus",
+      "order": 2,
+      "hidden": true,
+      "summary": "This represents the unconscious archetypal inner contrasexual element, where the anima is the feminine inner archetype in a man, and the animus is the masculine inner archetype in a woman.",
+      "isCustom": true,
+      "parentId": 4603,
+      "isPersonal": false
+    },
+    {
+      "id": 4598,
+      "label": "Self",
+      "order": 3,
+      "hidden": true,
+      "summary": "This is the central overarching archetype representing the unified consciousness and unconsciousness of a person, serving as the ultimate goal of the individuation process.",
+      "isCustom": true,
+      "parentId": 4603,
+      "isPersonal": false
+    },
+    {
+      "id": 4603,
+      "label": "Structural Archetypes",
+      "order": 4,
+      "hidden": true,
+      "isCustom": true,
+      "parentId": 4588,
+      "isPersonal": false
+    },
+    {
+      "id": 4604,
+      "label": "Situational Archetypes/Motifs",
+      "order": 5,
+      "hidden": true,
+      "isCustom": true,
+      "parentId": 4588,
+      "isPersonal": false
+    },
+    {
+      "id": 4607,
+      "label": "Personal Shadow",
+      "order": 0,
+      "hidden": true,
+      "summary": "This contains an individual's unique, personally repressed flaws, weaknesses, and desires that their conscious ego actively rejects due to social conditioning or fear.",
+      "isCustom": true,
+      "parentId": 4596,
+      "isPersonal": false
+    },
+    {
+      "id": 4608,
+      "label": "Collective Shadow",
+      "order": 1,
+      "hidden": true,
+      "summary": "This represents the shared, dark underbelly of a society or the entire human species, manifesting as systemic evils, tribal prejudice, and mass violence.",
+      "isCustom": true,
+      "parentId": 4596,
+      "isPersonal": false
+    },
+    {
+      "id": 4609,
+      "label": "Psychological Projection",
+      "order": 2,
+      "hidden": true,
+      "summary": "This is the unconscious defense mechanism where a person inadvertently attribute their own unacknowledged, negative shadow traits onto the people around them.",
+      "isCustom": true,
+      "parentId": 4596,
+      "isPersonal": false
+    },
+    {
+      "id": 4616,
+      "label": "Scapegoating",
+      "order": 0,
+      "hidden": true,
+      "summary": "This is the behavioral manifestation where an individual or group aggressively blames an innocent party for problems, projecting their own hidden collective shadow flaws onto a target.",
+      "isCustom": true,
+      "parentId": 4609,
+      "isPersonal": false
+    },
+    {
+      "id": 4617,
+      "label": "Projection Withdrawal",
+      "order": 1,
+      "hidden": true,
+      "summary": "This is the critical therapeutic process where a person consciously recognizes their own psychological projections and takes accountability for those hidden traits rather than blaming others.",
+      "isCustom": true,
+      "parentId": 4609,
+      "isPersonal": false
+    },
+    {
+      "id": 5131,
+      "label": "Ethos",
+      "hidden": true,
+      "parentId": 4104
+    },
+    {
+      "id": 5132,
+      "label": "Pathos",
+      "hidden": true,
+      "parentId": 4104
+    },
+    {
+      "id": 5133,
+      "label": "Logos",
+      "hidden": true,
+      "parentId": 4104
+    },
+    {
+      "id": 5141,
+      "label": "Emotional Language/Imagery",
+      "hidden": true,
+      "parentId": 5132
+    },
+    {
+      "id": 5142,
+      "label": "Personal Stories/Anecdotes",
+      "hidden": true,
+      "parentId": 5132
+    },
+    {
+      "id": 5143,
+      "label": "Empathy/Shared Values",
+      "hidden": true,
+      "parentId": 5132
+    },
+    {
+      "id": 5151,
+      "label": "Foot-in-the-Door Technique",
+      "hidden": true,
+      "parentId": 4106
+    },
+    {
+      "id": 5152,
+      "label": "Door-in-the-Face Technique",
+      "hidden": true,
+      "parentId": 4106
+    },
+    {
+      "id": 5153,
+      "label": "Emotional Appeals",
+      "hidden": true,
+      "parentId": 4106
+    },
+    {
+      "id": 5154,
+      "label": "Inclusive Language",
+      "hidden": true,
+      "parentId": 4106
+    },
+    {
+      "id": 5155,
+      "label": "Repetition",
+      "hidden": true,
+      "parentId": 4106
+    },
+    {
+      "id": 5156,
+      "label": "Rhetorical Questions",
+      "hidden": true,
+      "parentId": 4106
+    },
+    {
+      "id": 5157,
+      "label": "Framing",
+      "hidden": true,
+      "parentId": 4106
+    },
+    {
+      "id": 5158,
+      "label": "Benefits and Objection Handling",
+      "hidden": true,
+      "parentId": 4106
+    },
+    {
+      "id": 5159,
+      "label": "Appeals to Fundamental Needs",
+      "hidden": true,
+      "parentId": 4106
+    },
+    {
+      "id": 5161,
+      "label": "Applications",
+      "hidden": true,
+      "parentId": 665
+    },
+    {
+      "id": 5162,
+      "label": "Distributed",
+      "hidden": true,
+      "parentId": 665
+    },
+    {
+      "id": 5163,
+      "label": "Immutable",
+      "hidden": true,
+      "parentId": 665
+    },
+    {
+      "id": 5164,
+      "label": "Trustless",
+      "hidden": true,
+      "parentId": 665
+    },
+    {
+      "id": 5185,
+      "label": "Human Anatomy",
+      "order": 1,
+      "hidden": true,
+      "summary": "https://body-atlas-hd.vercel.app/",
+      "isCustom": true,
+      "parentId": 1563,
+      "isPersonal": false
+    },
+    {
+      "id": 5223,
+      "label": "Aliyahs (1882 - 1948)",
+      "order": 1,
+      "hidden": true,
+      "parentId": 1508
+    },
+    {
+      "id": 5240,
+      "label": "Early Africana Philosophy (c. 24th c BC - 19th c)",
+      "hidden": false,
+      "parentId": 1115
+    },
+    {
+      "id": 5241,
+      "label": "Jewish Philosophy (1st c - 21st c)",
+      "hidden": false,
+      "parentId": 1115
+    },
+    {
+      "id": 5242,
+      "label": "Byzantine Philosophy (4th c - 15th c)",
+      "hidden": false,
+      "parentId": 1115
+    },
+    {
+      "id": 5243,
+      "label": "Korean Philosophy (7th c - 19th c)",
+      "hidden": false,
+      "parentId": 1115
+    },
+    {
+      "id": 5244,
+      "label": "Classical and Medieval Japanese Philosophy (794-1603)",
+      "hidden": false,
+      "parentId": 1115
+    },
+    {
+      "id": 5245,
+      "label": "Latin American and Iberian Philosophy (16th c - 21st c)",
+      "hidden": false,
+      "parentId": 1115
+    }
+  ]
+}
