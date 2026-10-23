@@ -902,7 +902,7 @@ const moveBuiltInNode = (mapNodes, { move, id, into }, builtInSummary) => {
 // a namesake already there. A missing home and the levels above it are stored
 // as expanding them would; a home that held no built-in children before also
 // gets the rest of its built-in set, so it never needs expanding again, less
-// any label the owner took out of a refiled node's old parent.
+// any label the owner took out of a parent a refile path names.
 const refileBuiltInNodes = (mapNodes, { refile, into }, builtInSummary, topicSubdivisions) => {
   const byIdAtStart = new Map(mapNodes.map((node) => [node.id, node]))
   const sources = refile.flatMap((path) => nodesAtPath(mapNodes, byIdAtStart, path))
@@ -931,7 +931,8 @@ const refileBuiltInNodes = (mapNodes, { refile, into }, builtInSummary, topicSub
   if (!homeChildren.some((child) => !child.isCustom)) {
     const present = new Set(nodes.filter((node) => node.parentId === home.id).map((node) => node.label))
     const expected = [...new Set(expectedChildren(home, topicSubdivisions))].filter((label) => !present.has(label))
-    const ownerExcluded = new Set(sources.flatMap((source) => byIdAtStart.get(source.parentId)?.excludedChildLabels || []))
+    const oldParents = refile.flatMap((path) => nodesAtPath(mapNodes, byIdAtStart, path.slice(0, -1)))
+    const ownerExcluded = new Set(oldParents.flatMap((parent) => parent.excludedChildLabels || []))
     const dropped = expected.filter((label) => ownerExcluded.has(label))
     let maxId = maxIdOf(nodes)
     const created = expected

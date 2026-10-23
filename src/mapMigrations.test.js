@@ -2514,6 +2514,19 @@ test('migration 12 does not bring back a figure the owner deleted from the old p
   assert.deepEqual(loadMap(nodes), { nodes, changed: false })
 })
 
+test('migration 12 does not bring back a figure the owner deleted from another old parent of the same school', () => {
+  const NUSSBAUM = 'Martha Nussbaum (1947-present)'
+  const LIBERAL_EGALITARIANISM = 'Liberal Egalitarianism (1970s - present)'
+  const before = storedLooseMap()
+    .filter((n) => n.label !== NUSSBAUM)
+    .map((n) => (n.label === 'Contemporary Political Philosophy (19th c - 21st c)' ? { ...n, excludedChildLabels: [NUSSBAUM] } : n))
+  const { nodes } = loadMap(before)
+  assert.ok(!nodes.some((n) => n.label === NUSSBAUM))
+  assert.deepEqual(labelsUnder(nodes, LIBERAL_EGALITARIANISM), ['John Rawls (1921-2002)'])
+  assert.deepEqual(nodes.find((n) => n.label === LIBERAL_EGALITARIANISM).excludedChildLabels, [NUSSBAUM])
+  assert.deepEqual(loadMap(nodes), { nodes, changed: false })
+})
+
 test('migration 12 adds the new schools under parents expanded without the loose figures', () => {
   const before = buildMap(['Everything', [['Humanities', [['Philosophy', [[HOP, TOPIC_SUBDIVISIONS[HOP].map((label) => (label === CLASSICAL_INDIAN
     ? [label, ['Jainism (8th c BC - present)', 'Indian Buddhism (6th c BC - present)'].map((school) => [school])]
