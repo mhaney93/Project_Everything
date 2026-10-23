@@ -265,6 +265,7 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
     // The darśana founders are classical, not Vedic: date them by their sūtras
     // and give each its school under Classical Indian Philosophy.
     { rename: [...VEDIC, 'Vyasa (1500 BC)'], label: 'Bādarāyaṇa (Vyāsa) (c. 2nd c BC)', dropSummaries: [VYASA_SUMMARY] },
+    { rename: [...VEDIC, 'Kapila (7th c BC)'], label: 'Kapila (legendary, c. 6th c BC)' },
     { rename: [...VEDIC, 'Gautama (6th c BC)'], label: 'Akṣapāda Gautama (c. 2nd c AD)' },
     { rename: [...VEDIC, 'Kanada (6th c BC)'], label: 'Kaṇāda (c. 2nd c BC)' },
     { rename: [...VEDIC, 'Jaimini (6th c BC)'], label: 'Jaimini (c. 2nd c BC)' },
@@ -301,9 +302,9 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
     ...addEach([...HISTORY_OF_PHILOSOPHY, 'Post-Classical Islamic Philosophy (13th c - 19th c)'], ['Ibn Taymiyya (1263-1328)']),
     ...addEach([...HISTORY_OF_PHILOSOPHY, 'Western Renaissance Philosophy (15th c - 16th c)'], ['Nicholas of Cusa (1401-1464)']),
     ...addEach(EARLY_MODERN, ['Modern Natural Law (17th c - 18th c)', 'Joseph Butler (1692-1752)']),
-    ...addEach([...EARLY_MODERN, 'Continental Rationalism (17th c)'], ['Nicolas Malebranche (1638-1715)']),
+    ...addEach([...EARLY_MODERN, 'Continental Rationalism (17th c)'], ['Nicolas Malebranche (1638-1715)', 'Pierre Bayle (1647-1706)']),
     ...addEach([...EARLY_MODERN, 'British Empiricism (17th c - 18th c)'], ['Francis Bacon (1561-1626)']),
-    ...addEach([...EARLY_MODERN, 'The Enlightenment (18th c)'], ['Pierre Bayle (1647-1706)', 'Giambattista Vico (1668-1744)', 'Edmund Burke (1729-1797)', 'Johann Gottfried Herder (1744-1803)']),
+    ...addEach([...EARLY_MODERN, 'The Enlightenment (18th c)'], ['Giambattista Vico (1668-1744)', 'Edmund Burke (1729-1797)', 'Johann Gottfried Herder (1744-1803)']),
     ...addEach(LATE_MODERN, ['Positivism (1830s - 1900s)', 'Anarchism (1840s - present)', 'Herbert Spencer (1820-1903)', 'British Idealism (1860s - 1920s)', 'Process and Life Philosophy (1880s - present)']),
     ...addEach([...LATE_MODERN, 'Transcendentalism (1830s-1860s)'], ['Ralph Waldo Emerson (1803-1882)']),
     ...addEach([...HISTORY_OF_PHILOSOPHY, 'Modern Indian Philosophy (19th c - 21st c)'], ['K. C. Bhattacharya (1875-1949)', 'Bimal Krishna Matilal (1935-1991)']),
@@ -350,7 +351,7 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
     // Stored figures move to their one home with their ids, notes and subtrees;
     // a duplicate copy (Shankara under Vedic, Proclus under Neoplatonism) merges in.
     { label: 'Bādarāyaṇa (Vyāsa) (c. 2nd c BC)', homePath: [...CLASSICAL_INDIAN, 'Early Vedānta (c. 2nd c BC - 8th c AD)'] },
-    { label: 'Kapila (7th c BC)', homePath: [...CLASSICAL_INDIAN, 'Sāṃkhya (c. 6th c BC - 16th c AD)'] },
+    { label: 'Kapila (legendary, c. 6th c BC)', homePath: [...CLASSICAL_INDIAN, 'Sāṃkhya (c. 6th c BC - 16th c AD)'] },
     { label: 'Akṣapāda Gautama (c. 2nd c AD)', homePath: [...CLASSICAL_INDIAN, 'Nyāya (c. 2nd c AD - 10th c AD)'] },
     { label: 'Kaṇāda (c. 2nd c BC)', homePath: [...CLASSICAL_INDIAN, 'Vaiśeṣika (c. 2nd c BC - 10th c AD)'] },
     { label: 'Jaimini (c. 2nd c BC)', homePath: [...CLASSICAL_INDIAN, 'Mīmāṃsā (c. 2nd c BC - present)'] },

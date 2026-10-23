@@ -2000,7 +2000,7 @@ const GOODMAN = 'Nelson Goodman (1906-1998)'
 const GADAMER = 'Hans-Georg Gadamer (1900-2002)'
 const DARSHANA_FOUNDERS = [
   ['Vyasa (1500 BC)', 'Bādarāyaṇa (Vyāsa) (c. 2nd c BC)', 'Early Vedānta (c. 2nd c BC - 8th c AD)'],
-  ['Kapila (7th c BC)', 'Kapila (7th c BC)', 'Sāṃkhya (c. 6th c BC - 16th c AD)'],
+  ['Kapila (7th c BC)', 'Kapila (legendary, c. 6th c BC)', 'Sāṃkhya (c. 6th c BC - 16th c AD)'],
   ['Gautama (6th c BC)', 'Akṣapāda Gautama (c. 2nd c AD)', 'Nyāya (c. 2nd c AD - 10th c AD)'],
   ['Kanada (6th c BC)', 'Kaṇāda (c. 2nd c BC)', 'Vaiśeṣika (c. 2nd c BC - 10th c AD)'],
   ['Jaimini (6th c BC)', 'Jaimini (c. 2nd c BC)', 'Mīmāṃsā (c. 2nd c BC - present)'],
@@ -2182,7 +2182,7 @@ test('migration 11 refiles the stored philosophy figures with their ids, notes a
     assert.deepEqual(labelsUnder(nodes, school).sort(), [...TOPIC_SUBDIVISIONS[school]].sort())
   }
   assert.deepEqual(byId.get(idOf('Vyasa (1500 BC)')).notes, [{ id: 'note-vyasa', text: 'Brahma Sutras', level: 0 }])
-  assert.equal(parentLabel(nodes.find((n) => n.label === 'My Samkhya Notes')), 'Kapila (7th c BC)')
+  assert.equal(parentLabel(nodes.find((n) => n.label === 'My Samkhya Notes')), 'Kapila (legendary, c. 6th c BC)')
   assert.deepEqual(labelsUnder(nodes, CLASSICAL_INDIAN).sort(), [...TOPIC_SUBDIVISIONS[CLASSICAL_INDIAN]].sort())
 
   const shankara = nodes.filter((n) => n.label === SHANKARA)
