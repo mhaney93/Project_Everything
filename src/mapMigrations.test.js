@@ -2537,8 +2537,8 @@ test('migration 12 adds the new schools under parents expanded without the loose
 })
 
 const PRE_SOCRATIC_ADDS = [
-  ['Milesian School/Ionian School (6th c BC)', 'Diogenes of Apollonia (~440 BC)'],
   ['Milesian School/Ionian School (6th c BC)', 'Archelaus (~450 BC)'],
+  ['Milesian School/Ionian School (6th c BC)', 'Diogenes of Apollonia (~440 BC)'],
   ['Pythagorean School (6th - 5th c BC)', 'Philolaus (~470 BC - ~385 BC)'],
   ['Eleatic School (5th c BC)', 'Melissus of Samos (~440 BC)'],
 ]

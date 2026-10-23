@@ -424,7 +424,7 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
   ],
   13: [
     // Pre-Socratic figures new to schools a stored map may already have expanded.
-    ...addEach([...PRE_SOCRATIC, 'Milesian School/Ionian School (6th c BC)'], ['Diogenes of Apollonia (~440 BC)', 'Archelaus (~450 BC)']),
+    ...addEach([...PRE_SOCRATIC, 'Milesian School/Ionian School (6th c BC)'], ['Archelaus (~450 BC)', 'Diogenes of Apollonia (~440 BC)']),
     ...addEach([...PRE_SOCRATIC, 'Italian School (6th c BC - 5th c BC)', 'Pythagorean School (6th - 5th c BC)'], ['Philolaus (~470 BC - ~385 BC)']),
     ...addEach([...PRE_SOCRATIC, 'Italian School (6th c BC - 5th c BC)', 'Eleatic School (5th c BC)'], ['Melissus of Samos (~440 BC)']),
   ],
