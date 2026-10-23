@@ -2535,3 +2535,34 @@ test('migration 12 adds the new schools under parents expanded without the loose
   assert.ok(labelsUnder(nodes, CLASSICAL_INDIAN).includes('Vyākaraṇa/Grammarian School (c. 4th c BC - 18th c AD)'))
   assert.deepEqual(normalize(nodes, appSummary), { nodes, changed: false })
 })
+
+const PRE_SOCRATIC_ADDS = [
+  ['Milesian School/Ionian School (6th c BC)', 'Archelaus (~450 BC)'],
+  ['Milesian School/Ionian School (6th c BC)', 'Diogenes of Apollonia (~440 BC)'],
+  ['Pythagorean School (6th - 5th c BC)', 'Philolaus (~470 BC - ~385 BC)'],
+  ['Eleatic School (5th c BC)', 'Melissus of Samos (~440 BC)'],
+]
+
+test('migration 13 adds the four Pre-Socratics to their schools in the built-in taxonomy', () => {
+  assert.equal(STRUCTURAL_MIGRATIONS_BY_VERSION[13].length, PRE_SOCRATIC_ADDS.length)
+  for (const { add, under } of STRUCTURAL_MIGRATIONS_BY_VERSION[13]) {
+    for (let i = 1; i < under.length; i++) assert.ok(TOPIC_SUBDIVISIONS[under[i - 1]].includes(under[i]), `${under[i - 1]} > ${under[i]}`)
+    assert.ok(TOPIC_SUBDIVISIONS[under.at(-1)].includes(add), `${under.at(-1)} > ${add}`)
+    assert.equal(TOPIC_SUBDIVISIONS[add].length, 0)
+    assert.ok(appSummary(add), `${add} has no summary`)
+  }
+})
+
+test('migration 13 adds the Pre-Socratics under schools a stored map already expanded', () => {
+  const school = (label) => [label, TOPIC_SUBDIVISIONS[label].filter((child) => !PRE_SOCRATIC_ADDS.some(([, add]) => add === child)).map((child) => [child])]
+  const before = buildMap(['Everything', [['Humanities', [['Philosophy', [[HOP, [
+    ['Ancient Western Philosophy (6th c BC - 5th c AD)', [['Ancient Greek Philosophy (6th c BC - 1st c BC)', [['Pre-Socratic Philosophy (6th c BC - 5th c BC)', [
+      school('Milesian School/Ionian School (6th c BC)'),
+      ['Italian School (6th c BC - 5th c BC)', [school('Pythagorean School (6th - 5th c BC)'), ['Xenophanes (~565 BC - 478 BC)'], school('Eleatic School (5th c BC)')]],
+    ]]]]]],
+  ]]]]]]]])
+  const { nodes, changed } = normalize(before, appSummary)
+  assert.ok(changed)
+  for (const [parent, add] of PRE_SOCRATIC_ADDS) assert.ok(labelsUnder(nodes, parent).includes(add), `${parent} > ${add}`)
+  assert.deepEqual(normalize(nodes, appSummary), { nodes, changed: false })
+})
