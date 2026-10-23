@@ -30,6 +30,8 @@
 //   for the removed node's retired built-in summary. Without a target, a node holding anything
 //   the owner wrote becomes custom and stays put; a bare one is deleted (a
 //   stored copy of `summary` on the node itself does not count as the owner's).
+//   With `exclude`, the label also goes into the parent's excludedChildLabels,
+//   for a parent label whose built-in children other copies of it still need.
 // A node that lands beside a namesake is merged into it the same way.
 //
 // `rehomeOrphans` reattaches nodes whose parent no longer exists (left behind
@@ -78,6 +80,13 @@ const CONTEMPORARY_POLITICAL = [...CONTEMPORARY_WESTERN, 'Contemporary Political
 const AMERICAN_POLITICAL = [...CONTEMPORARY_POLITICAL, 'American Political Philosophy (20th c)']
 const VYASA_SUMMARY = 'Emphasized the interconnectedness of all existence and the pursuit of liberation (moksha) through self-knowledge and righteous action.'
 // `add` entries for built-in children new under `under`, in taxonomy order.
+const COGNITIVE_PSYCHOLOGY = ['Psychology', 'Cognitive Psychology']
+const COGNITION = [...COGNITIVE_PSYCHOLOGY, 'Cognition']
+const TYPES_OF_INTELLIGENCE = [...COGNITION, 'General Intelligence (g)', 'Types of Intelligence']
+const EARLY_BRONZE_AGE = ['Bronze Age (3,200 BC - 1,200 BC)', 'Early Bronze Age (3,200 BC - 2,000 BC)']
+const ASK_A_DEEP_QUESTION_SUMMARY = 'The first step in the Loop for Understanding: posing a meaningful question that invites the partner to share something real about themselves.'
+const EXPRESSIONISM_SUMMARY = 'The view that art expresses the emotions, feelings, or inner states of the artist.'
+const JEWISH_PHILOSOPHY_SUMMARY = 'The philosophical thought developing from Jewish theological and ethical traditions.'
 const addEach = (under, labels) => labels.map((add) => ({ add, under }))
 const refileEach = (from, labels, into) => ({ refile: labels.map((label) => [...from, label]), into })
 const ANCIENT_MIGRATION_PERIOD_SUMMARY = 'Characterized by significant movements of various peoples, primarily Germanic tribes, leading to widespread upheaval, the decline of the Western Roman Empire, and the emergence of new political entities across Europe.'
@@ -428,6 +437,51 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
     ...addEach([...PRE_SOCRATIC, 'Italian School (6th c BC - 5th c BC)', 'Pythagorean School (6th - 5th c BC)'], ['Philolaus (~470 BC - ~385 BC)']),
     ...addEach([...PRE_SOCRATIC, 'Italian School (6th c BC - 5th c BC)', 'Eleatic School (5th c BC)'], ['Melissus of Samos (~440 BC)']),
   ],
+  14: [
+    // One node per concept, each kept where a specialist would file it.
+    { label: 'Statistics', homePath: ['Sciences', 'Formal Sciences'] },
+    { label: 'Executive Functions', homePath: COGNITIVE_PSYCHOLOGY },
+    // The neuroscience Cognition holds the admin map's General Intelligence (g)
+    // branch; its built-in Intelligence folds into that branch.
+    { label: 'Cognition', homePath: COGNITIVE_PSYCHOLOGY },
+    { remove: [...COGNITION, 'Intelligence', 'Fluid Intelligence'], mergeInto: TYPES_OF_INTELLIGENCE },
+    { remove: [...COGNITION, 'Intelligence', 'Crystallized Intelligence'], mergeInto: TYPES_OF_INTELLIGENCE },
+    { remove: [...COGNITION, 'Intelligence'] },
+    { label: 'Cognitive Behavioral Therapy (CBT)', homePath: ['Psychotherapy', 'Behavioral Therapy'] },
+    { remove: ['Components of Emotions', 'Qualia'] },
+    { remove: ['Workaround|Negativity Bias', 'Gratitude'] },
+    { remove: ['Emotional Intimacy', 'Esteem'] },
+    { remove: ['Happiness', 'Gratitude', 'Admiration'] },
+    { remove: ['Manipulation Techniques/Strategies', 'Indirect', 'Projection'] },
+    { remove: ['Manipulation Techniques/Strategies', 'Indirect', 'Scapegoating'] },
+    { remove: ['Loop for Understanding', 'Ask a Deep Question'], summary: ASK_A_DEEP_QUESTION_SUMMARY },
+    { remove: ['Loop for Understanding', 'Ask Follow-Up Questions'], mergeInto: ['Demonstrating Active Listening'] },
+    { remove: ['Specific Persuasion Tactics', 'Emotional Appeals'] },
+    { remove: ['Aristotle\'s Virtue Ethics', 'Aristotelian Ethics'] },
+    { remove: ['Aristotle\'s Virtue Ethics', 'Practical Wisdom'] },
+    { move: ['Aesthetics', 'Expression Theory'], into: ['Aesthetics', 'Art Theory'] },
+    { remove: ['Art Theory', 'Expressionism'], summary: EXPRESSIONISM_SUMMARY },
+    { remove: ['Judaism', 'Jewish Philosophy'], summary: JEWISH_PHILOSOPHY_SUMMARY },
+    { remove: ['Ancient History (3,200 BC - 476 AD)', 'Late Antiquity (250 - 500 AD)'] },
+    {
+      remove: ['Prehistory (3.3 million years ago - 3,200 BC)', 'Early Bronze Age (3,300 BC - 3,200 BC)'],
+      mergeInto: EARLY_BRONZE_AGE.slice(0, -1),
+      as: EARLY_BRONZE_AGE.at(-1),
+    },
+    { rename: [...EARLY_BRONZE_AGE, 'Indus Valley Civilization (3,300 BC - 3,200 BC)'], label: 'Indus Valley Civilization (3,300 BC - 2,000 BC)' },
+    { rename: [...EARLY_BRONZE_AGE, 'Cycladic Civilization (3,300 BC - 3,200 BC)'], label: 'Cycladic Civilization (3,300 BC - 2,000 BC)' },
+    ...addEach(EARLY_BRONZE_AGE, ['Indus Valley Civilization (3,300 BC - 2,000 BC)', 'Cycladic Civilization (3,300 BC - 2,000 BC)']),
+    { move: ['Neuroscience', 'Systems/Cognitive Neuroscience', 'Cognitive Neuroscience'], into: ['Biology', 'Neuroscience'] },
+    { remove: ['Neuroscience', 'Systems/Cognitive Neuroscience'] },
+    { remove: ['Smart Contract Development', 'Security'] },
+    // JavaScript keeps its built-in ternary node; Solidity's own sits under Syntax > Operators.
+    { remove: ['Solidity', 'Data Types', 'Functions', 'Control Flow', 'Conditional Statements', 'Conditional Operator/Ternary Operator'], exclude: true },
+    { remove: ['Browser Environment|auth', 'Local Storage|auth'] },
+    { remove: ['Browser Environment|auth', 'Session Storage|auth'] },
+    { remove: ['CLI Tools', 'TypeScript|cli'] },
+    // The opcode and Solidity's keccak256() differ; a suffixed label gives the opcode its own summary.
+    { rename: ['opcodes (operation codes)', 'keccak256'], label: 'keccak256|opcode' },
+  ],
 }
 
 // Each entry rewrites a stored summary on a node with `label` only while it
@@ -540,6 +594,10 @@ export const SUMMARY_MIGRATIONS_BY_VERSION = {
 // id on another map, is left alone. `set` holds the new label and/or summary.
 // A `swap` entry exchanges the labels and sibling order of two such nodes,
 // so each keeps its summary and subtree under the other's placeholder.
+// A `mergeInto` entry ({ id, label } of the node to keep) merges a duplicate
+// custom node into another node, as a structural `remove` does; with
+// `takeSummary` the kept node shows the duplicate's summary and keeps its own
+// as a note.
 // Use these only for custom nodes, which have no built-in text to fix.
 export const NODE_EDITS_BY_VERSION = {
   9: [
@@ -590,6 +648,36 @@ export const NODE_EDITS_BY_VERSION = {
       label: 'Custom Errors',
       summary: 'named, optionally parameterized error types declared at the contract level that can only be triggered with revert, and are more gas efficient than string messages.',
       set: { summary: 'named, optionally parameterized error types, triggered with revert or (since 0.8.26 via IR, 0.8.27 in the legacy pipeline) require(condition, MyError()), and more gas efficient than string messages.' },
+    },
+  ],
+  14: [
+    // Operation Horev began on 22 Dec 1948; the 1949 copy is the same node.
+    {
+      id: 1496,
+      label: 'Operation Horev (Dec. - Jan.)',
+      summary: 'The large-scale Israeli offensive against Egyptian forces in the Western Negev, pushing into the Sinai and forcing Egypt to seek an armistice.',
+      mergeInto: { id: 1377, label: 'Operation Horev (Dec. - Jan.)' },
+    },
+    // Aliyah Bet ran until May 1948.
+    {
+      id: 1499,
+      label: 'Aliyah Bet (1934 - 1947)',
+      summary: 'Clandestine Jewish immigration to Palestine carried out in defiance of British restrictions, organized to rescue Jews from persecution in Europe.',
+      mergeInto: { id: 1527, label: 'Aliyah Bet (1934 - 1948)' },
+    },
+    {
+      id: 1455,
+      label: 'Iranian Revolution (Jan. - Apr.)',
+      summary: 'The overthrow of the Shah\'s regime and establishment of an Islamic Republic under Ayatollah Khomeini, fundamentally reshaping the Middle East.',
+      mergeInto: { id: 1252, label: 'Iranian Revolution of 1979' },
+    },
+    // The Cold War node restated its Cold War Era parent; its events move up a level.
+    {
+      id: 1391,
+      label: 'The Cold War (1947 - 1991)',
+      summary: 'a decades-long global struggle for ideological and geopolitical supremacy between the United States and the Soviet Union, characterized by proxy wars, nuclear brinkmanship, and the eventual collapse of the Eastern Bloc in 1991.',
+      mergeInto: { id: 208, label: 'Cold War Era (1947 - 1991)' },
+      takeSummary: true,
     },
   ],
 }
@@ -953,10 +1041,16 @@ const refileBuiltInNodes = (mapNodes, { refile, into }, builtInSummary, topicSub
   return { nodes, changed: true }
 }
 
-const removeBuiltInNode = (mapNodes, { remove, mergeInto, as, summary: retiredSummary }, builtInSummary, topicSubdivisions) => {
+const excludeChildLabel = (mapNodes, parentId, label) => mapNodes.map((node) => {
+  if (node.id !== parentId || (node.excludedChildLabels || []).includes(label)) return node
+  return { ...node, excludedChildLabels: [...(node.excludedChildLabels || []), label] }
+})
+
+const removeBuiltInNode = (mapNodes, { remove, mergeInto, as, summary: retiredSummary, exclude }, builtInSummary, topicSubdivisions) => {
   let nodes = mapNodes
   const sourceSummary = (label) => (label === remove.at(-1) && retiredSummary) || builtInSummary(label)
   for (const source of nodesAtPath(mapNodes, new Map(mapNodes.map((node) => [node.id, node])), remove)) {
+    if (exclude) nodes = excludeChildLabel(nodes, source.parentId, source.label)
     const byId = new Map(nodes.map((node) => [node.id, node]))
     const notPersonal = (node) => !node.isPersonal
     let target = mergeInto && nodesAtPath(nodes, byId, [...mergeInto, as || source.label], notPersonal).find((node) => node.id !== source.id)
@@ -1234,6 +1328,35 @@ export const applySummaryMigrations = (mapNodes) => {
   return { nodes: changed ? nodes : mapNodes, changed }
 }
 
+// Merges the custom node `source` into `target` with mergeNode. Its children
+// take its place among the target's children, in their own order, when the
+// source, they and those siblings are all ordered.
+const mergeCustomNode = (mapNodes, source, target, takeSummary) => {
+  let nodes = mapNodes
+  if (takeSummary && source.summary && source.summary !== target.summary) {
+    const earlier = target.summary ? [{ id: `replaced-summary-${target.id}`, text: `Earlier summary: ${target.summary}`, level: 0 }] : []
+    const notes = mergeNotes(target.notes, earlier)
+    nodes = nodes.map((node) => (node.id === target.id ? { ...node, summary: source.summary, notes } : node))
+  }
+  const siblings = nodes.filter((node) => node.parentId === target.id && node.id !== source.id)
+  const children = nodes.filter((node) => node.parentId === source.id)
+  nodes = mergeNode(nodes, source.id, target.id, () => '')
+
+  const ordered = (list) => list.every((node) => Number.isInteger(node.order))
+  if (!Number.isInteger(source.order) || !ordered(siblings) || !ordered(children)) return nodes
+  const childIds = new Set(children.map((node) => node.id))
+  const movedIds = new Set(nodes.filter((node) => node.parentId === target.id && childIds.has(node.id)).map((node) => node.id))
+  if (movedIds.size === 0) return nodes
+  const byOrder = (a, b) => a.order - b.order
+  const sequence = [
+    ...siblings.filter((node) => node.order < source.order).sort(byOrder),
+    ...children.filter((node) => movedIds.has(node.id)).sort(byOrder),
+    ...siblings.filter((node) => node.order >= source.order).sort(byOrder),
+  ]
+  const orderOf = new Map(sequence.map((node, index) => [node.id, index]))
+  return nodes.map((node) => (orderOf.has(node.id) ? { ...node, order: orderOf.get(node.id) } : node))
+}
+
 export const applyNodeEdits = (mapNodes) => {
   if (!Array.isArray(mapNodes)) return { nodes: [], changed: false }
 
@@ -1252,6 +1375,12 @@ export const applyNodeEdits = (mapNodes) => {
     return 'order' in other ? { ...moved, order: other.order } : moved
   }
   for (const edit of edits) {
+    if (edit.mergeInto) {
+      const node = unedited(edit)
+      const target = node && nodes.find((n) => n.id === edit.mergeInto.id && n.label === edit.mergeInto.label)
+      if (target) nodes = mergeCustomNode(nodes, node, target, edit.takeSummary)
+      continue
+    }
     const updates = new Map()
     if (edit.swap) {
       const [a, b] = edit.swap.map(unedited)
