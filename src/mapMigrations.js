@@ -54,7 +54,28 @@ const GALILEAN_MINISTRY = ['Matthew', '4:12–9:35 (The Galilean Ministry Begins
 const PETERS_DENIALS_SUMMARY = 'Peter follows into the high priest\'s courtyard and denies Jesus twice at the gate; meanwhile Jesus is questioned about his teaching and struck by a guard.'
 const FINE_ARTS_SUMMARY = 'The visual and performing arts created primarily for aesthetic and expressive purposes, including film, painting, and sculpture.'
 const KECCAK256_SUMMARY = 'Computes the Keccak-256 hash (a bytes32) of a bytes input, often built with abi.encode or abi.encodePacked, e.g. keccak256(abi.encodePacked("x")).'
-const ANCIENT_MIGRATION_PERIOD_SUMMARY = 'Characterized by significant movements of various peoples, primarily Germanic tribes, leading to widespread upheaval, the decline of the Western Roman Empire, and the emergence of new political entities across Europe.'
+const HISTORY_OF_PHILOSOPHY = ['History of Philosophy']
+const VEDIC = [...HISTORY_OF_PHILOSOPHY, 'Vedic Indian Philosophy (16th c BC - 6th c BC)']
+const CLASSICAL_CHINESE = [...HISTORY_OF_PHILOSOPHY, 'Classical Chinese Philosophy (6th c BC - 3rd c BC)']
+const ANCIENT_GREEK = [...HISTORY_OF_PHILOSOPHY, 'Ancient Western Philosophy (6th c BC - 5th c AD)', 'Ancient Greek Philosophy (6th c BC - 1st c BC)']
+const CLASSICAL_GREEK = [...ANCIENT_GREEK, 'Classical Greek Philosophy (5th c BC - 4th c BC)']
+const HELLENISTIC = [...ANCIENT_GREEK, 'Hellenistic Philosophy (3rd c BC - 1st c BC)']
+const LATE_NEOPLATONISM = [...HISTORY_OF_PHILOSOPHY, 'Ancient Western Philosophy (6th c BC - 5th c AD)', 'Late Antiquity (1st c AD - 6th c AD)', 'Late Neoplatonism (350 AD - 500 AD)']
+const CLASSICAL_INDIAN = [...HISTORY_OF_PHILOSOPHY, 'Classical Indian Philosophy (6th c BC - 11th c AD)']
+const INDIAN_BUDDHISM = [...CLASSICAL_INDIAN, 'Indian Buddhism (6th c BC - present)']
+const IMPERIAL_CHINESE = [...HISTORY_OF_PHILOSOPHY, 'Imperial Chinese Philosophy (3rd c BC - 20th c AD)']
+const MEDIEVAL_WESTERN = [...HISTORY_OF_PHILOSOPHY, 'Medieval Western Philosophy (5th c - 15th c)']
+const SCHOLASTICISM = [...MEDIEVAL_WESTERN, 'Scholasticism (11th c - 17th c)']
+const MEDIEVAL_INDIAN = [...HISTORY_OF_PHILOSOPHY, 'Medieval Indian Philosophy (8th c - 18th c)']
+const EARLY_MODERN = [...HISTORY_OF_PHILOSOPHY, 'Early Modern Western Philosophy (17th c - 18th c)']
+const LATE_MODERN = [...HISTORY_OF_PHILOSOPHY, 'Late Modern Western Philosophy (19th c)']
+const CONTEMPORARY_WESTERN = [...HISTORY_OF_PHILOSOPHY, 'Contemporary Western Philosophy (19th c - 21st c)']
+const ANALYTIC = [...CONTEMPORARY_WESTERN, 'Analytic Philosophy (1900s - present)']
+const CONTINENTAL = [...CONTEMPORARY_WESTERN, 'Continental Philosophy (1920s - present)']
+const VYASA_SUMMARY = 'Emphasized the interconnectedness of all existence and the pursuit of liberation (moksha) through self-knowledge and righteous action.'
+// `add` entries for built-in children new under `under`, in taxonomy order.
+const addEach = (under, labels) => labels.map((add) => ({ add, under }))
+const ANCIENT_MIGRATION_PERIOD_SUMMARY ='Characterized by significant movements of various peoples, primarily Germanic tribes, leading to widespread upheaval, the decline of the Western Roman Empire, and the emergence of new political entities across Europe.'
 
 // The admin map's hidden Mossad Killed Kennedy summary, archived off-map.
 const ARCHIVED_MOSSAD_SUMMARY = "The theory that Israeli intelligence orchestrated Kennedy's assassination in response to his pressure on Israel to open its Dimona nuclear facility to international inspection."
@@ -141,6 +162,12 @@ export const LABEL_MIGRATIONS_BY_VERSION = {
     'First Trump Presidency (2016 - 2020)': 'First Trump Presidency (2017 - 2021)',
     'Migration Period (500 - 750)': 'Migration Period (c. 375 - 568)',
     'Migration Period (750 - 800)': 'Rise of the Carolingians (750 - 800)',
+  },
+  4: {
+    'Jürgen Habermas (1929-present)': 'Jürgen Habermas (1929-2026)',
+    'V. Y. Mudimbe (1941-present)': 'V. Y. Mudimbe (1941-2025)',
+    'Paulin J. Hountondji (1942-present)': 'Paulin J. Hountondji (1942-2024)',
+    'Li Zehou (1930-present)': 'Li Zehou (1930-2021)',
   },
 }
 
@@ -233,6 +260,108 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
     // The Sermon on the Mount is Matthew 5–7 and opens with the Beatitudes.
     { rename: [...GALILEAN_MINISTRY, '5:13–7:27 (The Sermon on the Mount)'], label: '5–7 (The Sermon on the Mount)' },
     { label: '5:1–12 (The Beatitudes)', homePath: [...GALILEAN_MINISTRY, '5–7 (The Sermon on the Mount)'] },
+  ],
+  11: [
+    // The darśana founders are classical, not Vedic: date them by their sūtras
+    // and give each its school under Classical Indian Philosophy.
+    { rename: [...VEDIC, 'Vyasa (1500 BC)'], label: 'Bādarāyaṇa (Vyāsa) (c. 2nd c BC)', dropSummaries: [VYASA_SUMMARY] },
+    { rename: [...VEDIC, 'Gautama (6th c BC)'], label: 'Akṣapāda Gautama (c. 2nd c AD)' },
+    { rename: [...VEDIC, 'Kanada (6th c BC)'], label: 'Kaṇāda (c. 2nd c BC)' },
+    { rename: [...VEDIC, 'Jaimini (6th c BC)'], label: 'Jaimini (c. 2nd c BC)' },
+    // New traditions, schools and figures under built-in parents that are already stored.
+    ...addEach(HISTORY_OF_PHILOSOPHY, [
+      'Early Africana Philosophy (c. 24th c BC - 19th c)',
+      'Jewish Philosophy (1st c - 21st c)',
+      'Byzantine Philosophy (4th c - 15th c)',
+      'Korean Philosophy (7th c - 19th c)',
+      'Classical and Medieval Japanese Philosophy (794-1603)',
+      'Latin American and Iberian Philosophy (16th c - 21st c)',
+    ]),
+    ...addEach(CLASSICAL_CHINESE, ['Mohism (5th c BC - 3rd c BC)', 'School of Names (4th c BC - 3rd c BC)']),
+    ...addEach(CLASSICAL_GREEK, ['Cyrenaics (4th c BC - 3rd c BC)']),
+    ...addEach(HELLENISTIC, ['Peripatetic School (335 BC - 3rd c AD)']),
+    ...addEach([...HELLENISTIC, 'Skepticism (4th c BC - 3rd c AD)'], ['Academic Skepticism (3rd c BC - 1st c BC)']),
+    ...addEach(CLASSICAL_INDIAN, [
+      'Sāṃkhya (c. 6th c BC - 16th c AD)',
+      'Mīmāṃsā (c. 2nd c BC - present)',
+      'Vaiśeṣika (c. 2nd c BC - 10th c AD)',
+      'Yoga (c. 2nd c BC - present)',
+      'Early Vedānta (c. 2nd c BC - 8th c AD)',
+      'Nyāya (c. 2nd c AD - 10th c AD)',
+      'Bhartṛhari (c. 5th c AD)',
+    ]),
+    ...addEach(INDIAN_BUDDHISM, ['Asaṅga (4th c AD)', 'Buddhaghosa (5th c AD)', 'Candrakīrti (c. 600 AD - c. 650 AD)', 'Dharmakīrti (7th c AD)']),
+    ...addEach(IMPERIAL_CHINESE, ['Neo-Daoism/Xuanxue (3rd c - 4th c)']),
+    ...addEach([...IMPERIAL_CHINESE, 'Neo-Confucianism (960 - present)'], ['Lu Xiangshan (1139-1193)', 'Wang Fuzhi (1619-1692)', 'Dai Zhen (1724-1777)']),
+    ...addEach(MEDIEVAL_WESTERN, ['Medieval Mysticism (13th c - 15th c)']),
+    ...addEach(SCHOLASTICISM, ['Early Scholasticism (11th c - 12th c)', 'Albertus Magnus (c. 1200-1280)', 'Roger Bacon (c. 1214-1292)', 'Bonaventure (c. 1217-1274)', 'Marsilius of Padua (c. 1275-1342)']),
+    ...addEach([...SCHOLASTICISM, 'Nominalism (11th c - 21st c)'], ['Jean Buridan (c. 1300-c. 1360)']),
+    ...addEach([...HISTORY_OF_PHILOSOPHY, 'Golden Age Islamic Philosophy (8th c - 13th c)'], ['Kalām (8th c - present)']),
+    ...addEach(MEDIEVAL_INDIAN, ['Tibetan Buddhist Philosophy (8th c - present)', 'Abhinavagupta (c. 950-1016)']),
+    ...addEach([...HISTORY_OF_PHILOSOPHY, 'Post-Classical Islamic Philosophy (13th c - 19th c)'], ['Ibn Taymiyya (1263-1328)']),
+    ...addEach([...HISTORY_OF_PHILOSOPHY, 'Western Renaissance Philosophy (15th c - 16th c)'], ['Nicholas of Cusa (1401-1464)']),
+    ...addEach(EARLY_MODERN, ['Modern Natural Law (17th c - 18th c)', 'Joseph Butler (1692-1752)']),
+    ...addEach([...EARLY_MODERN, 'Continental Rationalism (17th c)'], ['Nicolas Malebranche (1638-1715)']),
+    ...addEach([...EARLY_MODERN, 'British Empiricism (17th c - 18th c)'], ['Francis Bacon (1561-1626)']),
+    ...addEach([...EARLY_MODERN, 'The Enlightenment (18th c)'], ['Pierre Bayle (1647-1706)', 'Giambattista Vico (1668-1744)', 'Edmund Burke (1729-1797)', 'Johann Gottfried Herder (1744-1803)']),
+    ...addEach(LATE_MODERN, ['Positivism (1830s - 1900s)', 'Anarchism (1840s - present)', 'Herbert Spencer (1820-1903)', 'British Idealism (1860s - 1920s)', 'Process and Life Philosophy (1880s - present)']),
+    ...addEach([...LATE_MODERN, 'Transcendentalism (1830s-1860s)'], ['Ralph Waldo Emerson (1803-1882)']),
+    ...addEach([...HISTORY_OF_PHILOSOPHY, 'Modern Indian Philosophy (19th c - 21st c)'], ['K. C. Bhattacharya (1875-1949)', 'Bimal Krishna Matilal (1935-1991)']),
+    ...addEach([...HISTORY_OF_PHILOSOPHY, 'Modern Japanese Philosophy (19th c - 21st c)'], ['D. T. Suzuki (1870-1966)']),
+    ...addEach([...HISTORY_OF_PHILOSOPHY, 'Modern Islamic Philosophy (20th c - 21st c)'], ['Seyyed Hossein Nasr (1933-present)']),
+    ...addEach([...HISTORY_OF_PHILOSOPHY, 'Modern African Philosophy (20th c - 21st c)'], [
+      'Placide Tempels (1906-1977)',
+      'Léopold Sédar Senghor (1906-2001)',
+      'Kwame Nkrumah (1909-1972)',
+      'Frantz Fanon (1925-1961)',
+      'Kwame Gyekye (1939-2019)',
+      'Henry Odera Oruka (1944-1995)',
+    ]),
+    ...addEach(ANALYTIC, [
+      'Bernard Bolzano (1781-1848)',
+      'Logical Positivism (1920s - 1950s)',
+      'Alfred Tarski (1901-1983)',
+      'Kurt Gödel (1906-1978)',
+      'Ordinary Language Philosophy (1940s - 1960s)',
+      'Philosophy of Science (20th c - present)',
+      'Wilfrid Sellars (1912-1989)',
+      'Donald Davidson (1917-2003)',
+      'P. F. Strawson (1919-2006)',
+      'Virtue Ethics Revival (1958 - present)',
+      'Hilary Putnam (1926-2016)',
+      'Edmund Gettier (1927-2021)',
+      'Bernard Williams (1929-2003)',
+      'David Lewis (1941-2001)',
+      'Derek Parfit (1942-2017)',
+      'Philosophy of Mind (20th c - present)',
+      'Analytic Philosophy of Religion (1960s - present)',
+    ]),
+    ...addEach([...CONTEMPORARY_WESTERN, 'Contemporary Political Philosophy (19th c - 21st c)'], [
+      'Alexis de Tocqueville (1805-1859)',
+      'Classical Liberalism (17th c - present)',
+      'Michael Oakeshott (1901-1990)',
+      'Ayn Rand (1905-1982)',
+      'Isaiah Berlin (1909-1997)',
+      'Charles Taylor (1931-present)',
+      'Martha Nussbaum (1947-present)',
+    ]),
+    ...addEach(CONTINENTAL, ['Hermeneutics (19th c - present)', 'Structuralism (1910s - 1970s)', 'Simone Weil (1909-1943)', 'René Girard (1923-2015)', 'Feminist Philosophy (20th c - present)']),
+    ...addEach([...CONTINENTAL, 'Phenomenology (19th c - present)'], ['Franz Brentano (1838-1917)', 'Max Scheler (1874-1928)', 'Emmanuel Levinas (1906-1995)', 'Maurice Merleau-Ponty (1908-1961)']),
+    // Stored figures move to their one home with their ids, notes and subtrees;
+    // a duplicate copy (Shankara under Vedic, Proclus under Neoplatonism) merges in.
+    { label: 'Bādarāyaṇa (Vyāsa) (c. 2nd c BC)', homePath: [...CLASSICAL_INDIAN, 'Early Vedānta (c. 2nd c BC - 8th c AD)'] },
+    { label: 'Kapila (7th c BC)', homePath: [...CLASSICAL_INDIAN, 'Sāṃkhya (c. 6th c BC - 16th c AD)'] },
+    { label: 'Akṣapāda Gautama (c. 2nd c AD)', homePath: [...CLASSICAL_INDIAN, 'Nyāya (c. 2nd c AD - 10th c AD)'] },
+    { label: 'Kaṇāda (c. 2nd c BC)', homePath: [...CLASSICAL_INDIAN, 'Vaiśeṣika (c. 2nd c BC - 10th c AD)'] },
+    { label: 'Jaimini (c. 2nd c BC)', homePath: [...CLASSICAL_INDIAN, 'Mīmāṃsā (c. 2nd c BC - present)'] },
+    { label: 'Adi Shankara (788 AD - 820 AD)', homePath: [...MEDIEVAL_INDIAN, 'Vedanta Schools (8th c - present)'] },
+    { label: 'Proclus (412 AD - 485 AD)', homePath: LATE_NEOPLATONISM },
+    // Hobbes, Gassendi and Goodman are not medieval nominalists. Gassendi goes
+    // first: storing Hobbes's home would create a bare Gassendi beside it.
+    { label: 'Pierre Gassendi (1592-1655)', homePath: EARLY_MODERN },
+    { label: 'Thomas Hobbes (1588-1679)', homePath: [...EARLY_MODERN, 'British Empiricism (17th c - 18th c)'] },
+    { label: 'Nelson Goodman (1906-1998)', homePath: ANALYTIC },
+    { label: 'Hans-Georg Gadamer (1900-2002)', homePath: [...CONTINENTAL, 'Hermeneutics (19th c - present)'] },
   ],
 }
 
