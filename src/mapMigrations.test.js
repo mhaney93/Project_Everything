@@ -1997,6 +1997,8 @@ const PROCLUS = 'Proclus (412 AD - 485 AD)'
 const HOBBES = 'Thomas Hobbes (1588-1679)'
 const GASSENDI = 'Pierre Gassendi (1592-1655)'
 const GOODMAN = 'Nelson Goodman (1906-1998)'
+const EPICUREANISM = 'Epicureanism (306 BC - present)'
+const PHILOSOPHY_OF_SCIENCE = 'Philosophy of Science (20th c - present)'
 const GADAMER = 'Hans-Georg Gadamer (1900-2002)'
 const DARSHANA_FOUNDERS = [
   ['Vyasa (1500 BC)', 'Bādarāyaṇa (Vyāsa) (c. 2nd c BC)', 'Early Vedānta (c. 2nd c BC - 8th c AD)'],
@@ -2052,8 +2054,8 @@ test('the History of Philosophy taxonomy files each figure once, in its school',
   assert.deepEqual(parents.get(SHANKARA), [VEDANTA_SCHOOLS])
   assert.deepEqual(parents.get(PROCLUS), [LATE_NEOPLATONISM])
   assert.deepEqual(parents.get(HOBBES), [BRITISH_EMPIRICISM])
-  assert.deepEqual(parents.get(GASSENDI), [EARLY_MODERN])
-  assert.deepEqual(parents.get(GOODMAN), [ANALYTIC])
+  assert.deepEqual(parents.get(GASSENDI), [EPICUREANISM])
+  assert.deepEqual(parents.get(GOODMAN), [PHILOSOPHY_OF_SCIENCE])
   assert.deepEqual(parents.get(GADAMER), [HERMENEUTICS])
   assert.ok(TOPIC_SUBDIVISIONS[CONTINENTAL].includes('Structuralism (1910s - 1970s)'))
   for (const [oldLabel, label] of STALE_PRESENT) {
@@ -2201,8 +2203,9 @@ test('migration 11 refiles the stored philosophy figures with their ids, notes a
   const hobbes = byId.get(idOf(HOBBES))
   assert.equal(pathOf(nodes, hobbes), `Everything > Humanities > Philosophy > ${HOP} > ${EARLY_MODERN} > ${BRITISH_EMPIRICISM} > ${HOBBES}`)
   assert.deepEqual(hobbes.notes, [{ id: 'note-hobbes', text: 'Leviathan', level: 0 }])
-  assert.equal(parentLabel(byId.get(idOf(GASSENDI))), EARLY_MODERN)
-  assert.equal(parentLabel(byId.get(idOf(GOODMAN))), ANALYTIC)
+  assert.equal(parentLabel(byId.get(idOf(GASSENDI))), EPICUREANISM)
+  assert.equal(parentLabel(byId.get(idOf(GOODMAN))), PHILOSOPHY_OF_SCIENCE)
+  assert.deepEqual(labelsUnder(nodes, EPICUREANISM).sort(), [...TOPIC_SUBDIVISIONS[EPICUREANISM]].sort())
   assert.deepEqual(labelsUnder(nodes, EARLY_MODERN).sort(), [...TOPIC_SUBDIVISIONS[EARLY_MODERN]].sort())
   assert.deepEqual(labelsUnder(nodes, ANALYTIC).sort(), [...TOPIC_SUBDIVISIONS[ANALYTIC]].sort())
   assert.deepEqual(labelsUnder(nodes, NOMINALISM).sort(), [...TOPIC_SUBDIVISIONS[NOMINALISM]].sort())
@@ -2245,4 +2248,290 @@ test('migration 11 leaves an unexpanded History of Philosophy, and custom copies
     assert.equal(nodeAt(nodes, [VEDIC, label]).length, 1)
     assert.deepEqual(node, before.find((n) => n.label === label))
   }
+})
+
+// Migration 12: each figure that sat loose beside the schools of a period or
+// tradition, with the school it now belongs to.
+const LOOSE_FIGURE_HOMES = [
+  ['Heraclitus of Ephesus (535 BC - 475 BC)', 'Milesian School/Ionian School (6th c BC)'],
+  ['Plato (~428 BC - ~347 BC)', 'The Academy (c. 387 BC - 1st c BC)'],
+  ['Aristotle (384 BC - 322 BC)', 'Peripatetic School (335 BC - 3rd c AD)'],
+  ['Bhartṛhari (c. 5th c AD)', 'Vyākaraṇa/Grammarian School (c. 4th c BC - 18th c AD)'],
+  ['Albertus Magnus (c. 1200-1280)', 'High Scholasticism (13th c - 14th c)'],
+  ['Roger Bacon (c. 1214-1292)', 'High Scholasticism (13th c - 14th c)'],
+  ['Bonaventure (c. 1217-1274)', 'High Scholasticism (13th c - 14th c)'],
+  ['Marsilius of Padua (c. 1275-1342)', 'High Scholasticism (13th c - 14th c)'],
+  ['Al-Ghazali (1058-1111)', 'Kalām (8th c - present)'],
+  ['Al-Kindi (801-873)', 'Falsafa (9th c - 12th c)'],
+  ['Al-Farabi (872-950)', 'Falsafa (9th c - 12th c)'],
+  ['Avicenna (Ibn Sina) (980-1037)', 'Falsafa (9th c - 12th c)'],
+  ['Ibn Bajjah (Avempace) (1085-1138)', 'Falsafa (9th c - 12th c)'],
+  ['Ibn Tufail (1105-1185)', 'Falsafa (9th c - 12th c)'],
+  ['Ibn Rushd (Averroes) (1126-1198)', 'Falsafa (9th c - 12th c)'],
+  ['Abhinavagupta (c. 950-1016)', 'Shaiva Philosophy (9th c - present)'],
+  ['Basava (1131-1167)', 'Shaiva Philosophy (9th c - present)'],
+  ['Gangesha Upadhyaya (13th c - 14th c)', 'Nyaya and Vaisheshika (10th c - present)'],
+  [GASSENDI, EPICUREANISM],
+  ['Joseph Butler (1692-1752)', 'The Enlightenment (18th c)'],
+  ['Herbert Spencer (1820-1903)', 'Utilitarianism (18th c - present)'],
+  ['Alfred North Whitehead (1861-1947)', 'Process and Life Philosophy (1880s - present)'],
+  ['Bernard Bolzano (1781-1848)', 'Early Analytic Philosophy (1870s - 1930s)'],
+  ['Gottlob Frege (1848-1925)', 'Early Analytic Philosophy (1870s - 1930s)'],
+  ['Bertrand Russell (1872-1970)', 'Early Analytic Philosophy (1870s - 1930s)'],
+  ['G. E. Moore (1873-1958)', 'Early Analytic Philosophy (1870s - 1930s)'],
+  ['Ludwig Wittgenstein (1889-1951)', 'Early Analytic Philosophy (1870s - 1930s)'],
+  ['Rudolf Carnap (1891-1970)', 'Logical Positivism (1920s - 1950s)'],
+  ['Alfred Tarski (1901-1983)', 'Philosophy of Logic and Mathematics (20th c - present)'],
+  ['Kurt Gödel (1906-1978)', 'Philosophy of Logic and Mathematics (20th c - present)'],
+  [GOODMAN, PHILOSOPHY_OF_SCIENCE],
+  ['P. F. Strawson (1919-2006)', 'Ordinary Language Philosophy (1940s - 1960s)'],
+  ['Willard Van Orman Quine (1908-2000)', 'Philosophy of Language (20th c - present)'],
+  ['Donald Davidson (1917-2003)', 'Philosophy of Language (20th c - present)'],
+  ['Saul Kripke (1940-2022)', 'Philosophy of Language (20th c - present)'],
+  ['David Lewis (1941-2001)', 'Philosophy of Language (20th c - present)'],
+  ['Hilary Putnam (1926-2016)', 'Philosophy of Mind (20th c - present)'],
+  ['Wilfrid Sellars (1912-1989)', 'Analytic Epistemology (20th c - present)'],
+  ['Edmund Gettier (1927-2021)', 'Analytic Epistemology (20th c - present)'],
+  ['Bernard Williams (1929-2003)', 'Analytic Ethics (20th c - present)'],
+  ['Derek Parfit (1942-2017)', 'Analytic Ethics (20th c - present)'],
+  ['Walter Lippmann (1889-1974)', 'Classical Liberalism (17th c - present)'],
+  ['Isaiah Berlin (1909-1997)', 'Classical Liberalism (17th c - present)'],
+  ['Alexis de Tocqueville (1805-1859)', 'Civic Republicanism (15th c - present)'],
+  ['Hannah Arendt (1906-1975)', 'Civic Republicanism (15th c - present)'],
+  ['Leo Strauss (1899-1973)', 'Conservatism (18th c - present)'],
+  ['Michael Oakeshott (1901-1990)', 'Conservatism (18th c - present)'],
+  ['Ayn Rand (1905-1982)', 'Objectivism (1940s - present)'],
+  ['Charles Taylor (1931-present)', 'Communitarianism (1980s - present)'],
+  ['John Rawls (1921-2002)', 'Liberal Egalitarianism (1970s - present)'],
+  ['Martha Nussbaum (1947-present)', 'Liberal Egalitarianism (1970s - present)'],
+  ['Simone Weil (1909-1943)', 'Christian Platonism and Religious Thought (20th c)'],
+  ['René Girard (1923-2015)', 'Christian Platonism and Religious Thought (20th c)'],
+]
+// Period and tradition nodes that divide into schools; Socrates, who founded
+// none, is the one figure left directly under one.
+const SCHOOL_DIVIDED = [
+  'Pre-Socratic Philosophy (6th c BC - 5th c BC)',
+  'Classical Greek Philosophy (5th c BC - 4th c BC)',
+  CLASSICAL_INDIAN,
+  'Scholasticism (11th c - 17th c)',
+  'Golden Age Islamic Philosophy (8th c - 13th c)',
+  MEDIEVAL_INDIAN,
+  EARLY_MODERN,
+  'Late Modern Western Philosophy (19th c)',
+  ANALYTIC,
+  'Contemporary Political Philosophy (19th c - 21st c)',
+  'American Political Philosophy (20th c)',
+  CONTINENTAL,
+]
+const INDEPENDENTS = ['Socrates (469 BC - 399 BC)']
+
+test('migration 12 gives every loose History of Philosophy figure a school', () => {
+  const parents = philosophyParents()
+  for (const [label, school] of LOOSE_FIGURE_HOMES) assert.deepEqual(parents.get(label), [school], label)
+  for (const label of SCHOOL_DIVIDED) {
+    for (const child of TOPIC_SUBDIVISIONS[label]) {
+      assert.ok(TOPIC_SUBDIVISIONS[child].length > 0 || INDEPENDENTS.includes(child), `${child} hangs loose under ${label}`)
+    }
+  }
+  for (const school of new Set(LOOSE_FIGURE_HOMES.map(([, school]) => school))) {
+    assert.ok(appSummary(school), `${school} has no summary`)
+  }
+})
+
+test('migration 12 names only places that exist in the built-in taxonomy', () => {
+  const lists = (path, label) => {
+    for (let i = 1; i < path.length; i++) assert.ok((TOPIC_SUBDIVISIONS[path[i - 1]] || []).includes(path[i]), `${path[i - 1]} > ${path[i]}`)
+    if (label) assert.ok(TOPIC_SUBDIVISIONS[path.at(-1)].includes(label), `${path.at(-1)} > ${label}`)
+  }
+  const refiled = new Set()
+  for (const migration of STRUCTURAL_MIGRATIONS_BY_VERSION[12]) {
+    if (migration.add) {
+      lists(migration.under, migration.add)
+      continue
+    }
+    lists(migration.into)
+    for (const from of migration.refile) {
+      const label = from.at(-1)
+      lists(from.slice(0, -1))
+      assert.ok(!TOPIC_SUBDIVISIONS[from.at(-2)].includes(label), `${label} still listed under ${from.at(-2)}`)
+      assert.ok(TOPIC_SUBDIVISIONS[migration.into.at(-1)].includes(label), `${migration.into.at(-1)} > ${label}`)
+      refiled.add(label)
+    }
+  }
+  const moved = LOOSE_FIGURE_HOMES.map(([label]) => label).filter((label) => label !== GASSENDI && label !== GOODMAN)
+  assert.deepEqual([...refiled].sort(), moved.sort())
+})
+
+// A stored History of Philosophy from before migration 12, with the loose
+// figures in their old places (some with notes or a custom child), several
+// schools never expanded, and custom and Personal namesakes.
+const storedLooseMap = () => {
+  const leaves = (labels) => labels.map((label) => [label])
+  const noted = (label, text) => [label, [], { notes: [{ id: `note-${label}`, text, level: 0 }] }]
+  const ancient = ['Ancient Western Philosophy (6th c BC - 5th c AD)', [
+    ['Ancient Greek Philosophy (6th c BC - 1st c BC)', [
+      ['Pre-Socratic Philosophy (6th c BC - 5th c BC)', [
+        ['Milesian School/Ionian School (6th c BC)', leaves(['Thales of Miletus (~624 BC - ~545 BC)', 'Anaximander of Miletus (610 BC - 546 BC)', 'Anaximenes of Miletus (545 BC)'])],
+        ['Italian School (6th c BC - 5th c BC)'],
+        noted('Heraclitus of Ephesus (535 BC - 475 BC)', 'Logos'),
+        ['Pluralists (5th c BC)'],
+        ['Atomists (5th c BC)'],
+      ]],
+      ['Classical Greek Philosophy (5th c BC - 4th c BC)', [
+        ['Sophists (5th c BC - 4th c BC)'],
+        ['Socrates (469 BC - 399 BC)'],
+        ['Cyrenaics (4th c BC - 3rd c BC)'],
+        ['Plato (~428 BC - ~347 BC)', [['My Republic Notes', [], { isCustom: true }]]],
+        ['Plato (~428 BC - ~347 BC)', [], { isPersonal: true }],
+        noted('Aristotle (384 BC - 322 BC)', 'Nicomachean Ethics'),
+      ]],
+      ['Hellenistic Philosophy (3rd c BC - 1st c BC)', [
+        ['Peripatetic School (335 BC - 3rd c AD)'],
+        ['Skepticism (4th c BC - 3rd c AD)'],
+        ['The Cynics (4th c BC - 4th c AD)'],
+        [EPICUREANISM],
+        ['Stoicism (300 BC - present)'],
+      ]],
+    ]],
+    ['Roman Philosophy (1st c AD - 5th c)'],
+    ['Late Antiquity (1st c AD - 6th c AD)'],
+  ]]
+  const classicalIndian = [CLASSICAL_INDIAN, [
+    ...leaves(['Jainism (8th c BC - present)', 'Indian Buddhism (6th c BC - present)', 'Sāṃkhya (c. 6th c BC - 16th c AD)', 'Mīmāṃsā (c. 2nd c BC - present)', 'Vaiśeṣika (c. 2nd c BC - 10th c AD)', 'Yoga (c. 2nd c BC - present)', 'Early Vedānta (c. 2nd c BC - 8th c AD)', 'Nyāya (c. 2nd c AD - 10th c AD)']),
+    noted('Bhartṛhari (c. 5th c AD)', 'Vākyapadīya'),
+  ]]
+  const medieval = ['Medieval Western Philosophy (5th c - 15th c)', [
+    ['Early Medieval (5th c - 11th c)'],
+    ['Scholasticism (11th c - 17th c)', [
+      ['Early Scholasticism (11th c - 12th c)'],
+      [NOMINALISM],
+      noted('Albertus Magnus (c. 1200-1280)', 'Teacher of Aquinas'),
+      ...leaves(['Roger Bacon (c. 1214-1292)', 'Bonaventure (c. 1217-1274)', 'Thomism (13th c - 21st c)', 'Scotism (13th c - 21st c)', 'Marsilius of Padua (c. 1275-1342)']),
+    ]],
+    ['Medieval Mysticism (13th c - 15th c)'],
+  ]]
+  const goldenAge = ['Golden Age Islamic Philosophy (8th c - 13th c)', [
+    ['Kalām (8th c - present)'],
+    ...leaves(['Al-Kindi (801-873)', 'Al-Farabi (872-950)']),
+    noted('Avicenna (Ibn Sina) (980-1037)', 'Floating man'),
+    noted('Al-Ghazali (1058-1111)', 'Incoherence of the Philosophers'),
+    ...leaves(['Ibn Bajjah (Avempace) (1085-1138)', 'Ibn Tufail (1105-1185)', 'Ibn Rushd (Averroes) (1126-1198)']),
+  ]]
+  const medievalIndian = [MEDIEVAL_INDIAN, [
+    ...leaves([VEDANTA_SCHOOLS, 'Tibetan Buddhist Philosophy (8th c - present)']),
+    ['Nyaya and Vaisheshika (10th c - present)', leaves(['Udayana (10th c - 11th c)'])],
+    ...leaves(['Abhinavagupta (c. 950-1016)', 'Basava (1131-1167)', 'Gangesha Upadhyaya (13th c - 14th c)']),
+  ]]
+  const earlyModern = [EARLY_MODERN, [
+    ...leaves(['Continental Rationalism (17th c)', BRITISH_EMPIRICISM, 'Modern Natural Law (17th c - 18th c)']),
+    noted(GASSENDI, 'Syntagma'),
+    ['The Enlightenment (18th c)', leaves([...TOPIC_SUBDIVISIONS['The Enlightenment (18th c)']].filter((label) => label !== 'Joseph Butler (1692-1752)'))],
+    noted('Joseph Butler (1692-1752)', 'Fifteen Sermons'),
+    ['Scottish Enlightenment (1740-1790)'],
+  ]]
+  const lateModern = ['Late Modern Western Philosophy (19th c)', [
+    ['Utilitarianism (18th c - present)', leaves(['Jeremy Bentham (1748-1832)', 'John Stuart Mill (1806-1873)', 'Henry Sidgwick (1838-1900)', 'R.M. Hare (1919-2002)', 'Peter Singer (1946-present)'])],
+    ...leaves(['German Idealism (1780\'s - 1840s)', 'Pessimism (19th c)', 'Positivism (1830s - 1900s)', 'Anthropological Materialism (19th c)', 'Anarchism (1840s - present)', 'Existentialism (19th c - present)', 'Transcendentalism (1830s-1860s)', 'Herbert Spencer (1820-1903)', 'British Idealism (1860s - 1920s)', 'Process and Life Philosophy (1880s - present)', 'Depth Psychology/Analytical Psychology/Psychology of Religion (1880-1970)']),
+  ]]
+  const analytic = [ANALYTIC, [
+    ...leaves(['Bernard Bolzano (1781-1848)', 'Gottlob Frege (1848-1925)']),
+    noted('Alfred North Whitehead (1861-1947)', 'Process and Reality'),
+    ...leaves(['Bertrand Russell (1872-1970)', 'G. E. Moore (1873-1958)', 'Ludwig Wittgenstein (1889-1951)', 'Rudolf Carnap (1891-1970)']),
+    ['Logical Positivism (1920s - 1950s)', leaves(['Moritz Schlick (1882-1936)', 'Otto Neurath (1882-1945)', 'A. J. Ayer (1910-1989)'])],
+    ...leaves(['Alfred Tarski (1901-1983)', 'Kurt Gödel (1906-1978)', GOODMAN, 'Willard Van Orman Quine (1908-2000)', 'Ordinary Language Philosophy (1940s - 1960s)', PHILOSOPHY_OF_SCIENCE, 'Wilfrid Sellars (1912-1989)', 'Donald Davidson (1917-2003)', 'P. F. Strawson (1919-2006)', 'Virtue Ethics Revival (1958 - present)', 'Hilary Putnam (1926-2016)', 'Edmund Gettier (1927-2021)', 'Bernard Williams (1929-2003)', 'Saul Kripke (1940-2022)', 'David Lewis (1941-2001)', 'Derek Parfit (1942-2017)', 'Philosophy of Mind (20th c - present)', 'Analytic Philosophy of Religion (1960s - present)']),
+  ]]
+  const political = ['Contemporary Political Philosophy (19th c - 21st c)', [
+    ['Alexis de Tocqueville (1805-1859)'],
+    ['Classical Liberalism (17th c - present)'],
+    ['Political Realism (20th c - 21st c)'],
+    ['American Political Philosophy (20th c)', [['Walter Lippmann (1889-1974)'], noted('John Rawls (1921-2002)', 'A Theory of Justice'), ['Libertarianism (20th c - 21st c)']]],
+    ...leaves(['Leo Strauss (1899-1973)', 'Michael Oakeshott (1901-1990)', 'Ayn Rand (1905-1982)', 'Hannah Arendt (1906-1975)', 'Isaiah Berlin (1909-1997)', 'Charles Taylor (1931-present)', 'Martha Nussbaum (1947-present)']),
+  ]]
+  const continental = [CONTINENTAL, [
+    ...leaves([PHENOMENOLOGY, HERMENEUTICS, 'Structuralism (1910s - 1970s)', 'Critical Theory (1920s-present)']),
+    noted('Simone Weil (1909-1943)', 'Gravity and Grace'),
+    ['René Girard (1923-2015)'],
+    ['René Girard (1923-2015)', [], { isCustom: true, summary: 'My own Girard notes' }],
+    ...leaves(['Post-structuralism (1960s-present)', 'Postmodernism (1960-present)', 'Feminist Philosophy (20th c - present)']),
+  ]]
+  const contemporary = ['Contemporary Western Philosophy (19th c - 21st c)', [
+    ['Pragmatism (1870s - present)'], political, analytic, continental, ['Cognitive Philosophical Synthesis (1980s - present)'],
+  ]]
+  const buckets = Object.fromEntries([ancient, classicalIndian, medieval, goldenAge, medievalIndian, earlyModern, lateModern, contemporary].map((bucket) => [bucket[0], bucket]))
+  return buildMap(['Everything', [['Humanities', [['Philosophy', [
+    [HOP, TOPIC_SUBDIVISIONS[HOP].map((label) => buckets[label] || [label])],
+    // A built-in namesake outside its old place is not refiled.
+    ['Metaphysics', [noted('Aristotle (384 BC - 322 BC)', 'Metaphysics Z')]],
+  ]]]]]])
+}
+
+test('migration 12 refiles the stored loose figures into their schools with their ids, notes and children', () => {
+  const before = storedLooseMap()
+  const builtInId = (label) => before.find((n) => n.label === label && !n.isCustom && !n.isPersonal && pathOf(before, n).includes(HOP)).id
+  const { nodes } = loadMap(before)
+  const byId = new Map(nodes.map((n) => [n.id, n]))
+  const parentLabel = (node) => byId.get(node.parentId).label
+
+  assert.deepEqual(orphansOf(nodes), [])
+  for (const [label, school] of LOOSE_FIGURE_HOMES) {
+    const id = builtInId(label)
+    const figure = byId.get(id)
+    assert.equal(figure?.label, label, `${label} kept its id`)
+    assert.equal(parentLabel(figure), school, label)
+    assert.deepEqual(figure.notes, before.find((n) => n.id === id).notes, `${label} kept its notes`)
+    assert.deepEqual(labelsUnder(nodes, school).sort(), [...TOPIC_SUBDIVISIONS[school]].sort(), school)
+  }
+  assert.equal(parentLabel(nodes.find((n) => n.label === 'My Republic Notes')), 'Plato (~428 BC - ~347 BC)')
+  for (const label of SCHOOL_DIVIDED) assert.deepEqual(labelsUnder(nodes, label).filter((l) => !l.startsWith('Plato') && !l.startsWith('René')).sort(), [...TOPIC_SUBDIVISIONS[label]].sort(), label)
+
+  // Custom, Personal and out-of-place namesakes stay where they were, untouched.
+  for (const node of before.filter((n) => n.isCustom || n.isPersonal || pathOf(before, n).includes('Metaphysics'))) {
+    assert.deepEqual(byId.get(node.id), node)
+  }
+
+  // Every stored built-in node under History of Philosophy sits where the taxonomy lists it, once.
+  const hop = nodes.find((n) => n.label === HOP)
+  const seen = new Set()
+  for (const node of descendantsOf(nodes, hop.id).filter((n) => !n.isCustom && !n.isPersonal)) {
+    assert.ok(TOPIC_SUBDIVISIONS[parentLabel(node)].includes(node.label), pathOf(nodes, node))
+    assert.ok(!seen.has(node.label), `${node.label} is stored twice`)
+    seen.add(node.label)
+  }
+
+  assert.deepEqual(loadMap(nodes), { nodes, changed: false })
+})
+
+test('migration 12 does not bring back a figure the owner deleted from the old parent', () => {
+  const FREGE = 'Gottlob Frege (1848-1925)'
+  const EARLY_ANALYTIC = 'Early Analytic Philosophy (1870s - 1930s)'
+  const before = storedLooseMap()
+    .filter((n) => n.label !== FREGE)
+    .map((n) => (n.label === ANALYTIC ? { ...n, excludedChildLabels: [FREGE] } : n))
+  const { nodes } = loadMap(before)
+  assert.ok(!nodes.some((n) => n.label === FREGE))
+  assert.deepEqual(labelsUnder(nodes, EARLY_ANALYTIC).sort(), [...TOPIC_SUBDIVISIONS[EARLY_ANALYTIC]].filter((l) => l !== FREGE).sort())
+  assert.deepEqual(nodes.find((n) => n.label === EARLY_ANALYTIC).excludedChildLabels, [FREGE])
+  assert.deepEqual(loadMap(nodes), { nodes, changed: false })
+})
+
+test('migration 12 does not bring back a figure the owner deleted from another old parent of the same school', () => {
+  const NUSSBAUM = 'Martha Nussbaum (1947-present)'
+  const LIBERAL_EGALITARIANISM = 'Liberal Egalitarianism (1970s - present)'
+  const before = storedLooseMap()
+    .filter((n) => n.label !== NUSSBAUM)
+    .map((n) => (n.label === 'Contemporary Political Philosophy (19th c - 21st c)' ? { ...n, excludedChildLabels: [NUSSBAUM] } : n))
+  const { nodes } = loadMap(before)
+  assert.ok(!nodes.some((n) => n.label === NUSSBAUM))
+  assert.deepEqual(labelsUnder(nodes, LIBERAL_EGALITARIANISM), ['John Rawls (1921-2002)'])
+  assert.deepEqual(nodes.find((n) => n.label === LIBERAL_EGALITARIANISM).excludedChildLabels, [NUSSBAUM])
+  assert.deepEqual(loadMap(nodes), { nodes, changed: false })
+})
+
+test('migration 12 adds the new schools under parents expanded without the loose figures', () => {
+  const before = buildMap(['Everything', [['Humanities', [['Philosophy', [[HOP, TOPIC_SUBDIVISIONS[HOP].map((label) => (label === CLASSICAL_INDIAN
+    ? [label, ['Jainism (8th c BC - present)', 'Indian Buddhism (6th c BC - present)'].map((school) => [school])]
+    : [label]))]]]]]]])
+  const { nodes } = normalize(before, appSummary)
+  assert.ok(labelsUnder(nodes, CLASSICAL_INDIAN).includes('Vyākaraṇa/Grammarian School (c. 4th c BC - 18th c AD)'))
+  assert.deepEqual(normalize(nodes, appSummary), { nodes, changed: false })
 })
