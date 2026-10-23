@@ -72,9 +72,14 @@ const LATE_MODERN = [...HISTORY_OF_PHILOSOPHY, 'Late Modern Western Philosophy (
 const CONTEMPORARY_WESTERN = [...HISTORY_OF_PHILOSOPHY, 'Contemporary Western Philosophy (19th c - 21st c)']
 const ANALYTIC = [...CONTEMPORARY_WESTERN, 'Analytic Philosophy (1900s - present)']
 const CONTINENTAL = [...CONTEMPORARY_WESTERN, 'Continental Philosophy (1920s - present)']
+const PRE_SOCRATIC = [...ANCIENT_GREEK, 'Pre-Socratic Philosophy (6th c BC - 5th c BC)']
+const GOLDEN_AGE_ISLAMIC = [...HISTORY_OF_PHILOSOPHY, 'Golden Age Islamic Philosophy (8th c - 13th c)']
+const CONTEMPORARY_POLITICAL = [...CONTEMPORARY_WESTERN, 'Contemporary Political Philosophy (19th c - 21st c)']
+const AMERICAN_POLITICAL = [...CONTEMPORARY_POLITICAL, 'American Political Philosophy (20th c)']
 const VYASA_SUMMARY = 'Emphasized the interconnectedness of all existence and the pursuit of liberation (moksha) through self-knowledge and righteous action.'
 // `add` entries for built-in children new under `under`, in taxonomy order.
 const addEach = (under, labels) => labels.map((add) => ({ add, under }))
+const refileEach = (from, labels, into) => ({ refile: labels.map((label) => [...from, label]), into })
 const ANCIENT_MIGRATION_PERIOD_SUMMARY = 'Characterized by significant movements of various peoples, primarily Germanic tribes, leading to widespread upheaval, the decline of the Western Roman Empire, and the emergence of new political entities across Europe.'
 
 // The admin map's hidden Mossad Killed Kennedy summary, archived off-map.
@@ -289,23 +294,22 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
       'Yoga (c. 2nd c BC - present)',
       'Early Vedānta (c. 2nd c BC - 8th c AD)',
       'Nyāya (c. 2nd c AD - 10th c AD)',
-      'Bhartṛhari (c. 5th c AD)',
     ]),
     ...addEach(INDIAN_BUDDHISM, ['Asaṅga (4th c AD)', 'Buddhaghosa (5th c AD)', 'Candrakīrti (c. 600 AD - c. 650 AD)', 'Dharmakīrti (7th c AD)']),
     ...addEach(IMPERIAL_CHINESE, ['Neo-Daoism/Xuanxue (3rd c - 4th c)']),
     ...addEach([...IMPERIAL_CHINESE, 'Neo-Confucianism (960 - present)'], ['Lu Xiangshan (1139-1193)', 'Wang Fuzhi (1619-1692)', 'Dai Zhen (1724-1777)']),
     ...addEach(MEDIEVAL_WESTERN, ['Medieval Mysticism (13th c - 15th c)']),
-    ...addEach(SCHOLASTICISM, ['Early Scholasticism (11th c - 12th c)', 'Albertus Magnus (c. 1200-1280)', 'Roger Bacon (c. 1214-1292)', 'Bonaventure (c. 1217-1274)', 'Marsilius of Padua (c. 1275-1342)']),
+    ...addEach(SCHOLASTICISM, ['Early Scholasticism (11th c - 12th c)']),
     ...addEach([...SCHOLASTICISM, 'Nominalism (11th c - 21st c)'], ['Jean Buridan (c. 1300-c. 1360)']),
-    ...addEach([...HISTORY_OF_PHILOSOPHY, 'Golden Age Islamic Philosophy (8th c - 13th c)'], ['Kalām (8th c - present)']),
-    ...addEach(MEDIEVAL_INDIAN, ['Tibetan Buddhist Philosophy (8th c - present)', 'Abhinavagupta (c. 950-1016)']),
+    ...addEach(GOLDEN_AGE_ISLAMIC, ['Kalām (8th c - present)']),
+    ...addEach(MEDIEVAL_INDIAN, ['Tibetan Buddhist Philosophy (8th c - present)']),
     ...addEach([...HISTORY_OF_PHILOSOPHY, 'Post-Classical Islamic Philosophy (13th c - 19th c)'], ['Ibn Taymiyya (1263-1328)']),
     ...addEach([...HISTORY_OF_PHILOSOPHY, 'Western Renaissance Philosophy (15th c - 16th c)'], ['Nicholas of Cusa (1401-1464)']),
-    ...addEach(EARLY_MODERN, ['Modern Natural Law (17th c - 18th c)', 'Joseph Butler (1692-1752)']),
+    ...addEach(EARLY_MODERN, ['Modern Natural Law (17th c - 18th c)']),
     ...addEach([...EARLY_MODERN, 'Continental Rationalism (17th c)'], ['Nicolas Malebranche (1638-1715)', 'Pierre Bayle (1647-1706)']),
     ...addEach([...EARLY_MODERN, 'British Empiricism (17th c - 18th c)'], ['Francis Bacon (1561-1626)']),
     ...addEach([...EARLY_MODERN, 'The Enlightenment (18th c)'], ['Giambattista Vico (1668-1744)', 'Edmund Burke (1729-1797)', 'Johann Gottfried Herder (1744-1803)']),
-    ...addEach(LATE_MODERN, ['Positivism (1830s - 1900s)', 'Anarchism (1840s - present)', 'Herbert Spencer (1820-1903)', 'British Idealism (1860s - 1920s)', 'Process and Life Philosophy (1880s - present)']),
+    ...addEach(LATE_MODERN, ['Positivism (1830s - 1900s)', 'Anarchism (1840s - present)', 'British Idealism (1860s - 1920s)', 'Process and Life Philosophy (1880s - present)']),
     ...addEach([...LATE_MODERN, 'Transcendentalism (1830s-1860s)'], ['Ralph Waldo Emerson (1803-1882)']),
     ...addEach([...HISTORY_OF_PHILOSOPHY, 'Modern Indian Philosophy (19th c - 21st c)'], ['K. C. Bhattacharya (1875-1949)', 'Bimal Krishna Matilal (1935-1991)']),
     ...addEach([...HISTORY_OF_PHILOSOPHY, 'Modern Japanese Philosophy (19th c - 21st c)'], ['D. T. Suzuki (1870-1966)']),
@@ -319,34 +323,15 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
       'Henry Odera Oruka (1944-1995)',
     ]),
     ...addEach(ANALYTIC, [
-      'Bernard Bolzano (1781-1848)',
       'Logical Positivism (1920s - 1950s)',
-      'Alfred Tarski (1901-1983)',
-      'Kurt Gödel (1906-1978)',
       'Ordinary Language Philosophy (1940s - 1960s)',
       'Philosophy of Science (20th c - present)',
-      'Wilfrid Sellars (1912-1989)',
-      'Donald Davidson (1917-2003)',
-      'P. F. Strawson (1919-2006)',
       'Virtue Ethics Revival (1958 - present)',
-      'Hilary Putnam (1926-2016)',
-      'Edmund Gettier (1927-2021)',
-      'Bernard Williams (1929-2003)',
-      'David Lewis (1941-2001)',
-      'Derek Parfit (1942-2017)',
       'Philosophy of Mind (20th c - present)',
       'Analytic Philosophy of Religion (1960s - present)',
     ]),
-    ...addEach([...CONTEMPORARY_WESTERN, 'Contemporary Political Philosophy (19th c - 21st c)'], [
-      'Alexis de Tocqueville (1805-1859)',
-      'Classical Liberalism (17th c - present)',
-      'Michael Oakeshott (1901-1990)',
-      'Ayn Rand (1905-1982)',
-      'Isaiah Berlin (1909-1997)',
-      'Charles Taylor (1931-present)',
-      'Martha Nussbaum (1947-present)',
-    ]),
-    ...addEach(CONTINENTAL, ['Hermeneutics (19th c - present)', 'Structuralism (1910s - 1970s)', 'Simone Weil (1909-1943)', 'René Girard (1923-2015)', 'Feminist Philosophy (20th c - present)']),
+    ...addEach(CONTEMPORARY_POLITICAL, ['Classical Liberalism (17th c - present)']),
+    ...addEach(CONTINENTAL, ['Hermeneutics (19th c - present)', 'Structuralism (1910s - 1970s)', 'Feminist Philosophy (20th c - present)']),
     ...addEach([...CONTINENTAL, 'Phenomenology (19th c - present)'], ['Franz Brentano (1838-1917)', 'Max Scheler (1874-1928)', 'Emmanuel Levinas (1906-1995)', 'Maurice Merleau-Ponty (1908-1961)']),
     // Stored figures move to their one home with their ids, notes and subtrees;
     // a duplicate copy (Shankara under Vedic, Proclus under Neoplatonism) merges in.
@@ -357,12 +342,85 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
     { label: 'Jaimini (c. 2nd c BC)', homePath: [...CLASSICAL_INDIAN, 'Mīmāṃsā (c. 2nd c BC - present)'] },
     { label: 'Adi Shankara (788 AD - 820 AD)', homePath: [...MEDIEVAL_INDIAN, 'Vedanta Schools (8th c - present)'] },
     { label: 'Proclus (412 AD - 485 AD)', homePath: LATE_NEOPLATONISM },
-    // Hobbes, Gassendi and Goodman are not medieval nominalists. Gassendi goes
-    // first: storing Hobbes's home would create a bare Gassendi beside it.
-    { label: 'Pierre Gassendi (1592-1655)', homePath: EARLY_MODERN },
+    // Hobbes, Gassendi and Goodman are not medieval nominalists. Gassendi, who
+    // revived Epicurus, and Goodman share migration 12's homes for them.
+    { label: 'Pierre Gassendi (1592-1655)', homePath: [...HELLENISTIC, 'Epicureanism (306 BC - present)'] },
     { label: 'Thomas Hobbes (1588-1679)', homePath: [...EARLY_MODERN, 'British Empiricism (17th c - 18th c)'] },
-    { label: 'Nelson Goodman (1906-1998)', homePath: ANALYTIC },
+    { label: 'Nelson Goodman (1906-1998)', homePath: [...ANALYTIC, 'Philosophy of Science (20th c - present)'] },
     { label: 'Hans-Georg Gadamer (1900-2002)', homePath: [...CONTINENTAL, 'Hermeneutics (19th c - present)'] },
+  ],
+  12: [
+    // Figures that sat loose under a period or tradition beside its schools
+    // move into a school: an existing one, or a new subgroup the sources name.
+    // Each refile moves the built-in copies stored in the figure's old place,
+    // with their ids, notes and subtrees; the subgroups are also added under
+    // parents already expanded, for maps that never stored the figures.
+    ...addEach(CLASSICAL_GREEK, ['The Academy (c. 387 BC - 1st c BC)']),
+    ...addEach(CLASSICAL_INDIAN, ['Vyākaraṇa/Grammarian School (c. 4th c BC - 18th c AD)']),
+    ...addEach(SCHOLASTICISM, ['High Scholasticism (13th c - 14th c)']),
+    ...addEach(GOLDEN_AGE_ISLAMIC, ['Falsafa (9th c - 12th c)']),
+    ...addEach(MEDIEVAL_INDIAN, ['Shaiva Philosophy (9th c - present)']),
+    ...addEach(ANALYTIC, [
+      'Early Analytic Philosophy (1870s - 1930s)',
+      'Philosophy of Logic and Mathematics (20th c - present)',
+      'Philosophy of Language (20th c - present)',
+      'Analytic Epistemology (20th c - present)',
+      'Analytic Ethics (20th c - present)',
+    ]),
+    ...addEach(CONTEMPORARY_POLITICAL, [
+      'Civic Republicanism (15th c - present)',
+      'Conservatism (18th c - present)',
+      'Objectivism (1940s - present)',
+      'Communitarianism (1980s - present)',
+    ]),
+    ...addEach(AMERICAN_POLITICAL, ['Liberal Egalitarianism (1970s - present)']),
+    ...addEach(CONTINENTAL, ['Christian Platonism and Religious Thought (20th c)']),
+    refileEach(PRE_SOCRATIC, ['Heraclitus of Ephesus (535 BC - 475 BC)'], [...PRE_SOCRATIC, 'Milesian School/Ionian School (6th c BC)']),
+    refileEach(CLASSICAL_GREEK, ['Plato (~428 BC - ~347 BC)'], [...CLASSICAL_GREEK, 'The Academy (c. 387 BC - 1st c BC)']),
+    refileEach(CLASSICAL_GREEK, ['Aristotle (384 BC - 322 BC)'], [...HELLENISTIC, 'Peripatetic School (335 BC - 3rd c AD)']),
+    refileEach(CLASSICAL_INDIAN, ['Bhartṛhari (c. 5th c AD)'], [...CLASSICAL_INDIAN, 'Vyākaraṇa/Grammarian School (c. 4th c BC - 18th c AD)']),
+    refileEach(SCHOLASTICISM, ['Albertus Magnus (c. 1200-1280)', 'Roger Bacon (c. 1214-1292)', 'Bonaventure (c. 1217-1274)', 'Marsilius of Padua (c. 1275-1342)'], [...SCHOLASTICISM, 'High Scholasticism (13th c - 14th c)']),
+    refileEach(GOLDEN_AGE_ISLAMIC, ['Al-Ghazali (1058-1111)'], [...GOLDEN_AGE_ISLAMIC, 'Kalām (8th c - present)']),
+    refileEach(GOLDEN_AGE_ISLAMIC, [
+      'Al-Kindi (801-873)',
+      'Al-Farabi (872-950)',
+      'Avicenna (Ibn Sina) (980-1037)',
+      'Ibn Bajjah (Avempace) (1085-1138)',
+      'Ibn Tufail (1105-1185)',
+      'Ibn Rushd (Averroes) (1126-1198)',
+    ], [...GOLDEN_AGE_ISLAMIC, 'Falsafa (9th c - 12th c)']),
+    refileEach(MEDIEVAL_INDIAN, ['Abhinavagupta (c. 950-1016)', 'Basava (1131-1167)'], [...MEDIEVAL_INDIAN, 'Shaiva Philosophy (9th c - present)']),
+    refileEach(MEDIEVAL_INDIAN, ['Gangesha Upadhyaya (13th c - 14th c)'], [...MEDIEVAL_INDIAN, 'Nyaya and Vaisheshika (10th c - present)']),
+    refileEach(EARLY_MODERN, ['Joseph Butler (1692-1752)'], [...EARLY_MODERN, 'The Enlightenment (18th c)']),
+    refileEach(LATE_MODERN, ['Herbert Spencer (1820-1903)'], [...LATE_MODERN, 'Utilitarianism (18th c - present)']),
+    refileEach(ANALYTIC, ['Alfred North Whitehead (1861-1947)'], [...LATE_MODERN, 'Process and Life Philosophy (1880s - present)']),
+    refileEach(ANALYTIC, [
+      'Bernard Bolzano (1781-1848)',
+      'Gottlob Frege (1848-1925)',
+      'Bertrand Russell (1872-1970)',
+      'G. E. Moore (1873-1958)',
+      'Ludwig Wittgenstein (1889-1951)',
+    ], [...ANALYTIC, 'Early Analytic Philosophy (1870s - 1930s)']),
+    refileEach(ANALYTIC, ['Rudolf Carnap (1891-1970)'], [...ANALYTIC, 'Logical Positivism (1920s - 1950s)']),
+    refileEach(ANALYTIC, ['Alfred Tarski (1901-1983)', 'Kurt Gödel (1906-1978)'], [...ANALYTIC, 'Philosophy of Logic and Mathematics (20th c - present)']),
+    refileEach(ANALYTIC, ['P. F. Strawson (1919-2006)'], [...ANALYTIC, 'Ordinary Language Philosophy (1940s - 1960s)']),
+    refileEach(ANALYTIC, ['Willard Van Orman Quine (1908-2000)', 'Donald Davidson (1917-2003)', 'Saul Kripke (1940-2022)', 'David Lewis (1941-2001)'], [...ANALYTIC, 'Philosophy of Language (20th c - present)']),
+    refileEach(ANALYTIC, ['Hilary Putnam (1926-2016)'], [...ANALYTIC, 'Philosophy of Mind (20th c - present)']),
+    refileEach(ANALYTIC, ['Wilfrid Sellars (1912-1989)', 'Edmund Gettier (1927-2021)'], [...ANALYTIC, 'Analytic Epistemology (20th c - present)']),
+    refileEach(ANALYTIC, ['Bernard Williams (1929-2003)', 'Derek Parfit (1942-2017)'], [...ANALYTIC, 'Analytic Ethics (20th c - present)']),
+    {
+      refile: [[...AMERICAN_POLITICAL, 'Walter Lippmann (1889-1974)'], [...CONTEMPORARY_POLITICAL, 'Isaiah Berlin (1909-1997)']],
+      into: [...CONTEMPORARY_POLITICAL, 'Classical Liberalism (17th c - present)'],
+    },
+    refileEach(CONTEMPORARY_POLITICAL, ['Alexis de Tocqueville (1805-1859)', 'Hannah Arendt (1906-1975)'], [...CONTEMPORARY_POLITICAL, 'Civic Republicanism (15th c - present)']),
+    refileEach(CONTEMPORARY_POLITICAL, ['Leo Strauss (1899-1973)', 'Michael Oakeshott (1901-1990)'], [...CONTEMPORARY_POLITICAL, 'Conservatism (18th c - present)']),
+    refileEach(CONTEMPORARY_POLITICAL, ['Ayn Rand (1905-1982)'], [...CONTEMPORARY_POLITICAL, 'Objectivism (1940s - present)']),
+    refileEach(CONTEMPORARY_POLITICAL, ['Charles Taylor (1931-present)'], [...CONTEMPORARY_POLITICAL, 'Communitarianism (1980s - present)']),
+    {
+      refile: [[...AMERICAN_POLITICAL, 'John Rawls (1921-2002)'], [...CONTEMPORARY_POLITICAL, 'Martha Nussbaum (1947-present)']],
+      into: [...AMERICAN_POLITICAL, 'Liberal Egalitarianism (1970s - present)'],
+    },
+    refileEach(CONTINENTAL, ['Simone Weil (1909-1943)', 'René Girard (1923-2015)'], [...CONTINENTAL, 'Christian Platonism and Religious Thought (20th c)']),
   ],
 }
 
@@ -839,6 +897,47 @@ const moveBuiltInNode = (mapNodes, { move, id, into }, builtInSummary) => {
   return { nodes, changed: nodes !== mapNodes }
 }
 
+// Moves the built-in nodes stored at each of `refile`'s label paths under the
+// built-in node at `into`, with their ids, notes and subtrees, merging one into
+// a namesake already there. A missing home and the levels above it are stored
+// as expanding them would; a home that held no built-in children before also
+// gets the rest of its built-in set, so it never needs expanding again.
+const refileBuiltInNodes = (mapNodes, { refile, into }, builtInSummary, topicSubdivisions) => {
+  const byIdAtStart = new Map(mapNodes.map((node) => [node.id, node]))
+  const sources = refile.flatMap((path) => nodesAtPath(mapNodes, byIdAtStart, path))
+  if (sources.length === 0) return { nodes: mapNodes, changed: false }
+
+  let nodes = mapNodes
+  let home = findHome(nodes, byIdAtStart, into)
+  if (!home) {
+    const ensured = ensureHome(nodes, into, topicSubdivisions)
+    if (!ensured) return { nodes: mapNodes, changed: false }
+    nodes = ensured.nodes
+    home = ensured.home
+  }
+  const homeChildren = nodes.filter((node) => node.parentId === home.id)
+  const hidden = homeChildren[0]?.hidden ?? (home.hidden || sources[0].hidden)
+  const moved = []
+  for (const source of sources) {
+    if (isAncestorOrSelf(new Map(nodes.map((node) => [node.id, node])), source.id, home.id)) continue
+    const sourcePath = labelPathOf(nodes, source.id)
+    nodes = nodes.map((node) => (node.id === source.id ? withoutOrder({ ...node, parentId: home.id, hidden }) : node))
+    nodes = settleUnder(nodes, source.id, home.id, builtInSummary, sourcePath)
+    moved.push(source.label)
+  }
+  if (moved.length === 0) return { nodes: mapNodes, changed: false }
+
+  if (!homeChildren.some((child) => !child.isCustom)) {
+    const present = new Set(nodes.filter((node) => node.parentId === home.id).map((node) => node.label))
+    let maxId = maxIdOf(nodes)
+    const created = [...new Set(expectedChildren(home, topicSubdivisions))]
+      .filter((label) => !present.has(label))
+      .map((label) => ({ id: ++maxId, label, parentId: home.id, hidden }))
+    nodes = [...nodes, ...created]
+  }
+  return { nodes, changed: true }
+}
+
 const removeBuiltInNode = (mapNodes, { remove, mergeInto, as, summary: retiredSummary }, builtInSummary, topicSubdivisions) => {
   let nodes = mapNodes
   const sourceSummary = (label) => (label === remove.at(-1) && retiredSummary) || builtInSummary(label)
@@ -1017,6 +1116,7 @@ const runStructuralMigration = (mapNodes, migration, builtInSummary, topicSubdiv
   if (migration.rename) return renameBuiltInNode(mapNodes, migration, builtInSummary)
   if (migration.add) return addBuiltInNode(mapNodes, migration)
   if (migration.move) return moveBuiltInNode(mapNodes, migration, builtInSummary)
+  if (migration.refile) return refileBuiltInNodes(mapNodes, migration, builtInSummary, topicSubdivisions)
   if (migration.remove) return removeBuiltInNode(mapNodes, migration, builtInSummary, topicSubdivisions)
   return consolidateBuiltInNode(mapNodes, migration, builtInSummary, topicSubdivisions)
 }
@@ -1185,11 +1285,13 @@ export const dropStaleChildren = (mapNodes, staleIds, builtInSummary = () => '')
 // Remove stale predefined children: for any node with known subdivisions,
 // drop predefined children whose labels are not in the expected set, with
 // dropStaleChildren. addChildren recreates correct children on first expand.
-// A copy of a structurally migrated label is never dropped: if its home could
-// not be stored (the owner deleted a level of it), it stays put.
+// A copy of a structurally migrated or refiled label is never dropped: if its
+// home could not be stored (the owner deleted a level of it), it stays put.
 export const removeStalePredefinedChildren = (mapNodes, topicSubdivisions, builtInSummary = () => '') => {
   const childrenByParent = buildChildrenByParent(mapNodes)
-  const migratedLabels = new Set(Object.values(STRUCTURAL_MIGRATIONS_BY_VERSION).flat().map(({ label }) => label).filter(Boolean))
+  const migratedLabels = new Set(Object.values(STRUCTURAL_MIGRATIONS_BY_VERSION).flat()
+    .flatMap(({ label, refile }) => (refile ? refile.map((path) => path.at(-1)) : [label]))
+    .filter(Boolean))
 
   const staleIds = []
   for (const node of mapNodes) {
