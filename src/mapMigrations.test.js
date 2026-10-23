@@ -2,7 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
-import { applyLabelMigrations, applyNodeEdits, applyStructuralMigrations, applySummaryMigrations, dropStaleChildren, LATEST_LABEL_MIGRATION_VERSION, NODE_EDITS_BY_VERSION, SUMMARY_MIGRATIONS_BY_VERSION, removeStalePredefinedChildren } from './mapMigrations.js'
+import { applyLabelMigrations, applyNodeEdits, applyStructuralMigrations, applySummaryMigrations, dropStaleChildren, LATEST_LABEL_MIGRATION_VERSION, NODE_EDITS_BY_VERSION, STRUCTURAL_MIGRATIONS_BY_VERSION, SUMMARY_MIGRATIONS_BY_VERSION, removeStalePredefinedChildren } from './mapMigrations.js'
 
 // TOPIC_SUBDIVISIONS and generateSummary's summaries live inside the App
 // component, so evaluate the object literals from the source.
@@ -1975,5 +1975,274 @@ test('a built-in node beside a custom namesake is renamed in place, nothing merg
   assert.deepEqual(nodes.find((n) => n.id === art.id), { ...art, label: 'Arts' })
   for (const node of before.filter((n) => n.id !== art.id && n.parentId !== null)) {
     assert.deepEqual(nodes.find((n) => n.id === node.id), node)
+  }
+})
+
+const HOP = 'History of Philosophy'
+const VEDIC = 'Vedic Indian Philosophy (16th c BC - 6th c BC)'
+const CLASSICAL_INDIAN = 'Classical Indian Philosophy (6th c BC - 11th c AD)'
+const MEDIEVAL_INDIAN = 'Medieval Indian Philosophy (8th c - 18th c)'
+const VEDANTA_SCHOOLS = 'Vedanta Schools (8th c - present)'
+const NEOPLATONISM = 'Neoplatonism (3rd c AD - 6th c AD)'
+const LATE_NEOPLATONISM = 'Late Neoplatonism (350 AD - 500 AD)'
+const NOMINALISM = 'Nominalism (11th c - 21st c)'
+const EARLY_MODERN = 'Early Modern Western Philosophy (17th c - 18th c)'
+const BRITISH_EMPIRICISM = 'British Empiricism (17th c - 18th c)'
+const ANALYTIC = 'Analytic Philosophy (1900s - present)'
+const CONTINENTAL = 'Continental Philosophy (1920s - present)'
+const PHENOMENOLOGY = 'Phenomenology (19th c - present)'
+const HERMENEUTICS = 'Hermeneutics (19th c - present)'
+const SHANKARA = 'Adi Shankara (788 AD - 820 AD)'
+const PROCLUS = 'Proclus (412 AD - 485 AD)'
+const HOBBES = 'Thomas Hobbes (1588-1679)'
+const GASSENDI = 'Pierre Gassendi (1592-1655)'
+const GOODMAN = 'Nelson Goodman (1906-1998)'
+const GADAMER = 'Hans-Georg Gadamer (1900-2002)'
+const DARSHANA_FOUNDERS = [
+  ['Vyasa (1500 BC)', 'Bādarāyaṇa (Vyāsa) (c. 2nd c BC)', 'Early Vedānta (c. 2nd c BC - 8th c AD)'],
+  ['Kapila (7th c BC)', 'Kapila (legendary, c. 6th c BC)', 'Sāṃkhya (c. 6th c BC - 16th c AD)'],
+  ['Gautama (6th c BC)', 'Akṣapāda Gautama (c. 2nd c AD)', 'Nyāya (c. 2nd c AD - 10th c AD)'],
+  ['Kanada (6th c BC)', 'Kaṇāda (c. 2nd c BC)', 'Vaiśeṣika (c. 2nd c BC - 10th c AD)'],
+  ['Jaimini (6th c BC)', 'Jaimini (c. 2nd c BC)', 'Mīmāṃsā (c. 2nd c BC - present)'],
+]
+const STALE_PRESENT = [
+  ['Jürgen Habermas (1929-present)', 'Jürgen Habermas (1929-2026)'],
+  ['V. Y. Mudimbe (1941-present)', 'V. Y. Mudimbe (1941-2025)'],
+  ['Paulin J. Hountondji (1942-present)', 'Paulin J. Hountondji (1942-2024)'],
+  ['Li Zehou (1930-present)', 'Li Zehou (1930-2021)'],
+]
+const NEW_TRADITIONS = [
+  'Early Africana Philosophy (c. 24th c BC - 19th c)',
+  'Jewish Philosophy (1st c - 21st c)',
+  'Byzantine Philosophy (4th c - 15th c)',
+  'Korean Philosophy (7th c - 19th c)',
+  'Classical and Medieval Japanese Philosophy (794-1603)',
+  'Latin American and Iberian Philosophy (16th c - 21st c)',
+]
+
+// Every label under History of Philosophy, with the parent listing it.
+const philosophyParents = () => {
+  const parents = new Map()
+  const walk = (label) => {
+    for (const child of TOPIC_SUBDIVISIONS[label] || []) {
+      parents.set(child, [...(parents.get(child) || []), label])
+      walk(child)
+    }
+  }
+  walk(HOP)
+  return parents
+}
+
+test('the History of Philosophy taxonomy files each figure once, in its school', () => {
+  const parents = philosophyParents()
+  for (const [label, listedBy] of parents) {
+    assert.equal(listedBy.length, 1, `${label} is listed by ${listedBy.join(', ')}`)
+    assert.ok(Array.isArray(TOPIC_SUBDIVISIONS[label]), `${label} has no taxonomy entry`)
+    assert.ok(appSummary(label), `${label} has no summary`)
+  }
+  assert.deepEqual([...TOPIC_SUBDIVISIONS[VEDIC]], ['Yajnavalkya (8th c BC)'])
+  for (const [oldLabel, label, school] of DARSHANA_FOUNDERS) {
+    assert.deepEqual(parents.get(label), [school])
+    assert.deepEqual(parents.get(school), [CLASSICAL_INDIAN])
+    if (oldLabel !== label) {
+      assert.equal(TOPIC_SUBDIVISIONS[oldLabel], undefined)
+      assert.equal(appSummary(oldLabel), '')
+    }
+  }
+  assert.deepEqual(parents.get(SHANKARA), [VEDANTA_SCHOOLS])
+  assert.deepEqual(parents.get(PROCLUS), [LATE_NEOPLATONISM])
+  assert.deepEqual(parents.get(HOBBES), [BRITISH_EMPIRICISM])
+  assert.deepEqual(parents.get(GASSENDI), [EARLY_MODERN])
+  assert.deepEqual(parents.get(GOODMAN), [ANALYTIC])
+  assert.deepEqual(parents.get(GADAMER), [HERMENEUTICS])
+  assert.ok(TOPIC_SUBDIVISIONS[CONTINENTAL].includes('Structuralism (1910s - 1970s)'))
+  for (const [oldLabel, label] of STALE_PRESENT) {
+    assert.ok(parents.has(label) && !parents.has(oldLabel), label)
+  }
+})
+
+test('History of Philosophy gains the six missing traditions in chronological order', () => {
+  const buckets = TOPIC_SUBDIVISIONS[HOP]
+  const after = (label, earlier) => assert.ok(buckets.indexOf(label) > buckets.indexOf(earlier), `${label} after ${earlier}`)
+  assert.equal(buckets[0], NEW_TRADITIONS[0])
+  after(NEW_TRADITIONS[1], 'Imperial Chinese Philosophy (3rd c BC - 20th c AD)')
+  after('Medieval Western Philosophy (5th c - 15th c)', NEW_TRADITIONS[2])
+  after(NEW_TRADITIONS[3], 'Medieval Western Philosophy (5th c - 15th c)')
+  after('Golden Age Islamic Philosophy (8th c - 13th c)', NEW_TRADITIONS[3])
+  after(NEW_TRADITIONS[4], MEDIEVAL_INDIAN)
+  after('Edo Japanese Philosophy (1603-1868)', NEW_TRADITIONS[4])
+  after(NEW_TRADITIONS[5], 'Western Renaissance Philosophy (15th c - 16th c)')
+  after(EARLY_MODERN, NEW_TRADITIONS[5])
+  for (const tradition of NEW_TRADITIONS) assert.ok(TOPIC_SUBDIVISIONS[tradition].length > 0, tradition)
+})
+
+test('migration 11 names only places that exist in the built-in taxonomy', () => {
+  const lists = (path, label) => {
+    for (let i = 1; i < path.length; i++) assert.ok((TOPIC_SUBDIVISIONS[path[i - 1]] || []).includes(path[i]), `${path[i - 1]} > ${path[i]}`)
+    assert.ok(TOPIC_SUBDIVISIONS[path.at(-1)].includes(label), `${path.at(-1)} > ${label}`)
+  }
+  for (const migration of STRUCTURAL_MIGRATIONS_BY_VERSION[11]) {
+    if (migration.add) lists(migration.under, migration.add)
+    else if (migration.homePath) lists(migration.homePath, migration.label)
+    else {
+      // A renamed founder's old label is retired and its new one has a home entry.
+      assert.equal(TOPIC_SUBDIVISIONS[migration.rename.at(-1)], undefined)
+      assert.ok(STRUCTURAL_MIGRATIONS_BY_VERSION[11].some((m) => m.homePath && m.label === migration.label), migration.label)
+    }
+  }
+})
+
+// Map 7's stored History of Philosophy before this change: every era bucket,
+// with the old built-in children stored under the expanded ones.
+const storedPhilosophyMap = () => {
+  const leaves = (labels) => labels.map((label) => [label])
+  const ancient = ['Ancient Western Philosophy (6th c BC - 5th c AD)', [
+    ['Ancient Greek Philosophy (6th c BC - 1st c BC)'],
+    ['Roman Philosophy (1st c AD - 5th c)'],
+    ['Late Antiquity (1st c AD - 6th c AD)', [
+      ['Imperial Philosophy (27 BC - 6th c AD)', [[NEOPLATONISM, leaves([
+        'Plotinus (~204 AD - 270 AD)', 'Porphyry (234 AD - 305 AD)', 'Iamblichus (245 AD - 325 AD)', 'Hypatia of Alexandria (360 AD - 415 AD)', PROCLUS,
+      ])]]],
+      ['Early Christian Philosophy (150 AD - 500 AD)'],
+      [LATE_NEOPLATONISM, leaves([PROCLUS, 'Damascius (480-550)', 'Simplicius of Cilicia (490-560)', 'Olympiodorus the Younger (5th c - 6th c)'])],
+      ['The Transition to Medieval Philosophy (500 AD - 800 AD)'],
+    ]],
+  ]]
+  const medieval = ['Medieval Western Philosophy (5th c - 15th c)', [
+    ['Early Medieval (5th c - 11th c)'],
+    ['Scholasticism (11th c - 17th c)', [
+      [NOMINALISM, [
+        ...leaves(['Roscellinus (1050-1125)', 'Peter Abelard (1079-1142)', 'William of Ockham (1287-1347)']),
+        [HOBBES, [], { notes: [{ id: 'note-hobbes', text: 'Leviathan', level: 0 }] }],
+        [GASSENDI], [GOODMAN],
+      ]],
+      ['Thomism (13th c - 21st c)'],
+      ['Scotism (13th c - 21st c)'],
+    ]],
+  ]]
+  const contemporary = ['Contemporary Western Philosophy (19th c - 21st c)', [
+    ['Pragmatism (1870s - present)'],
+    ['Contemporary Political Philosophy (19th c - 21st c)'],
+    [ANALYTIC],
+    [CONTINENTAL, [
+      [PHENOMENOLOGY, [['Edmund Husserl (1859-1938)']]],
+      [GADAMER, [], { notes: [{ id: 'note-gadamer', text: 'Truth and Method', level: 0 }] }],
+      ['Critical Theory (1920s-present)', [
+        ['Erich Fromm (1900-1980)'],
+        ['The Frankfurt School (1923 - present)', leaves(['Walter Benjamin (1892-1940)', 'Max Horkheimer (1895-1973)', 'Herbert Marcuse (1898-1979)', 'Theodor W. Adorno (1903-1969)', 'Jürgen Habermas (1929-present)'])],
+        ['Slavoj Žižek (1949-present)'],
+      ]],
+      ['Post-structuralism (1960s-present)'],
+      ['Postmodernism (1960-present)'],
+    ]],
+    ['Cognitive Philosophical Synthesis (1980s - present)'],
+  ]]
+  const buckets = {
+    [VEDIC]: [VEDIC, [
+      ['Vyasa (1500 BC)', [], { notes: [{ id: 'note-vyasa', text: 'Brahma Sutras', level: 0 }] }],
+      ['Yajnavalkya (8th c BC)'],
+      ['Kapila (7th c BC)', [['My Samkhya Notes', [], { isCustom: true }]]],
+      ['Gautama (6th c BC)'],
+      ['Kanada (6th c BC)'],
+      ['Jaimini (6th c BC)'],
+      [SHANKARA, [], { notes: [{ id: 'note-shankara', text: 'Advaita', level: 0 }] }],
+    ]],
+    'Ancient Western Philosophy (6th c BC - 5th c AD)': ancient,
+    'Medieval Western Philosophy (5th c - 15th c)': medieval,
+    'Modern African Philosophy (20th c - 21st c)': ['Modern African Philosophy (20th c - 21st c)', leaves([
+      'Kwasi Wiredu (1931-2022)', 'Sophie Oluwole (1935-2018)', 'V. Y. Mudimbe (1941-present)', 'Paulin J. Hountondji (1942-present)', 'Kwame Anthony Appiah (1954-present)',
+    ])],
+    'Contemporary Western Philosophy (19th c - 21st c)': contemporary,
+  }
+  const oldBuckets = TOPIC_SUBDIVISIONS[HOP].filter((label) => !NEW_TRADITIONS.includes(label))
+  return buildMap(['Everything', [['Humanities', [['Philosophy', [[HOP, oldBuckets.map((label) => buckets[label] || [label])]]]]]]])
+}
+
+const loadMap = (mapNodes) => {
+  const relabelled = relabel(mapNodes)
+  const normalized = normalize(relabelled.nodes, appSummary)
+  return { nodes: normalized.nodes, changed: relabelled.changed || normalized.changed }
+}
+
+const nodeAt = (mapNodes, path) => mapNodes.filter((n) => pathOf(mapNodes, n).endsWith(path.join(' > ')))
+
+test('migration 11 refiles the stored philosophy figures with their ids, notes and children', () => {
+  const before = storedPhilosophyMap()
+  const idOf = (label) => before.find((n) => n.label === label).id
+  const { nodes } = loadMap(before)
+  const byId = new Map(nodes.map((n) => [n.id, n]))
+  const parentLabel = (node) => byId.get(node.parentId).label
+
+  assert.deepEqual(orphansOf(nodes), [])
+  assert.deepEqual(labelsUnder(nodes, VEDIC), ['Yajnavalkya (8th c BC)'])
+  for (const [oldLabel, label, school] of DARSHANA_FOUNDERS) {
+    const founder = byId.get(idOf(oldLabel))
+    assert.equal(founder.label, label)
+    assert.equal(pathOf(nodes, founder), `Everything > Humanities > Philosophy > ${HOP} > ${CLASSICAL_INDIAN} > ${school} > ${label}`)
+    assert.deepEqual(labelsUnder(nodes, school).sort(), [...TOPIC_SUBDIVISIONS[school]].sort())
+  }
+  assert.deepEqual(byId.get(idOf('Vyasa (1500 BC)')).notes, [{ id: 'note-vyasa', text: 'Brahma Sutras', level: 0 }])
+  assert.equal(parentLabel(nodes.find((n) => n.label === 'My Samkhya Notes')), 'Kapila (legendary, c. 6th c BC)')
+  assert.deepEqual(labelsUnder(nodes, CLASSICAL_INDIAN).sort(), [...TOPIC_SUBDIVISIONS[CLASSICAL_INDIAN]].sort())
+
+  const shankara = nodes.filter((n) => n.label === SHANKARA)
+  assert.equal(shankara.length, 1)
+  assert.equal(shankara[0].id, idOf(SHANKARA))
+  assert.equal(parentLabel(shankara[0]), VEDANTA_SCHOOLS)
+  assert.deepEqual(shankara[0].notes, [{ id: 'note-shankara', text: 'Advaita', level: 0 }])
+  assert.deepEqual(labelsUnder(nodes, MEDIEVAL_INDIAN).sort(), [...TOPIC_SUBDIVISIONS[MEDIEVAL_INDIAN]].sort())
+  assert.deepEqual(labelsUnder(nodes, VEDANTA_SCHOOLS).sort(), [...TOPIC_SUBDIVISIONS[VEDANTA_SCHOOLS]].sort())
+
+  const proclus = nodes.filter((n) => n.label === PROCLUS)
+  assert.equal(proclus.length, 1)
+  assert.equal(parentLabel(proclus[0]), LATE_NEOPLATONISM)
+  assert.deepEqual(labelsUnder(nodes, NEOPLATONISM), [...TOPIC_SUBDIVISIONS[NEOPLATONISM]])
+
+  const hobbes = byId.get(idOf(HOBBES))
+  assert.equal(pathOf(nodes, hobbes), `Everything > Humanities > Philosophy > ${HOP} > ${EARLY_MODERN} > ${BRITISH_EMPIRICISM} > ${HOBBES}`)
+  assert.deepEqual(hobbes.notes, [{ id: 'note-hobbes', text: 'Leviathan', level: 0 }])
+  assert.equal(parentLabel(byId.get(idOf(GASSENDI))), EARLY_MODERN)
+  assert.equal(parentLabel(byId.get(idOf(GOODMAN))), ANALYTIC)
+  assert.deepEqual(labelsUnder(nodes, EARLY_MODERN).sort(), [...TOPIC_SUBDIVISIONS[EARLY_MODERN]].sort())
+  assert.deepEqual(labelsUnder(nodes, ANALYTIC).sort(), [...TOPIC_SUBDIVISIONS[ANALYTIC]].sort())
+  assert.deepEqual(labelsUnder(nodes, NOMINALISM).sort(), [...TOPIC_SUBDIVISIONS[NOMINALISM]].sort())
+
+  const gadamer = byId.get(idOf(GADAMER))
+  assert.equal(parentLabel(gadamer), HERMENEUTICS)
+  assert.deepEqual(gadamer.notes, [{ id: 'note-gadamer', text: 'Truth and Method', level: 0 }])
+  assert.deepEqual(labelsUnder(nodes, HERMENEUTICS).sort(), [...TOPIC_SUBDIVISIONS[HERMENEUTICS]].sort())
+  assert.deepEqual(labelsUnder(nodes, CONTINENTAL).sort(), [...TOPIC_SUBDIVISIONS[CONTINENTAL]].sort())
+  assert.deepEqual(labelsUnder(nodes, PHENOMENOLOGY).sort(), [...TOPIC_SUBDIVISIONS[PHENOMENOLOGY]].sort())
+
+  // Expanded parents gain their new built-in children; the stale dates are fixed in place.
+  assert.deepEqual(labelsUnder(nodes, HOP).sort(), [...TOPIC_SUBDIVISIONS[HOP]].sort())
+  for (const [oldLabel, label] of STALE_PRESENT.filter(([oldLabel]) => before.some((n) => n.label === oldLabel))) {
+    assert.equal(byId.get(idOf(oldLabel)).label, label)
+  }
+
+  // Every stored built-in node sits where the taxonomy lists it, once.
+  const hop = nodes.find((n) => n.label === HOP)
+  const seen = new Set()
+  for (const node of descendantsOf(nodes, hop.id).filter((n) => !n.isCustom)) {
+    assert.ok(TOPIC_SUBDIVISIONS[parentLabel(node)].includes(node.label), pathOf(nodes, node))
+    assert.ok(!seen.has(node.label), `${node.label} is stored twice`)
+    seen.add(node.label)
+  }
+
+  assert.deepEqual(loadMap(nodes), { nodes, changed: false })
+})
+
+test('migration 11 leaves an unexpanded History of Philosophy, and custom copies, alone', () => {
+  const unexpanded = buildMap(['Everything', [['Humanities', [['Philosophy', [[HOP]]]]]]])
+  assert.equal(normalize(unexpanded, appSummary).changed, false)
+
+  const vedic = TOPIC_SUBDIVISIONS[HOP].filter((label) => !NEW_TRADITIONS.includes(label)).map((label) => [label])
+  vedic[0] = [VEDIC, [['Yajnavalkya (8th c BC)'], ['Kapila (7th c BC)', [], { isCustom: true }], [SHANKARA, [], { isPersonal: true }]]]
+  const before = buildMap(['Everything', [['Humanities', [['Philosophy', [[HOP, vedic]]]]]]])
+  const { nodes } = normalize(before, appSummary)
+  for (const label of ['Kapila (7th c BC)', SHANKARA]) {
+    const node = nodes.find((n) => n.label === label)
+    assert.equal(nodeAt(nodes, [VEDIC, label]).length, 1)
+    assert.deepEqual(node, before.find((n) => n.label === label))
   }
 })
