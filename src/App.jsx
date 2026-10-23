@@ -11654,7 +11654,8 @@ function App() {
     'Law Enforcement': ['Criminal Investigation and Analysis'],
     'Criminal Investigation and Analysis': ['Means, Motive, and Opportunity (MMO)'],
     'Means, Motive, and Opportunity (MMO)': [],
-    'Political Science': [],
+    'Political Science': ['Collective Action Problems'],
+    'Collective Action Problems': [],
     'Sociology': ['National Crime Syndicate/Mob'],
     'National Crime Syndicate/Mob': ['Formation of the Syndicate (1929-1934)', 'Jewish Mafia', 'Italian Mafia (La Cosa Nostra)'],
 
@@ -21470,6 +21471,7 @@ function App() {
       'Criminal Investigation and Analysis': 'The systematic process of gathering evidence, identifying suspects, and reconstructing events to solve crimes.',
       'Means, Motive, and Opportunity (MMO)': 'A fundamental investigative framework assessing a suspect\'s capability to commit the crime (means), their reason for doing so (motive), and whether they had the chance (opportunity).',
       'Political Science': 'The study of political systems, government institutions, political behavior, and the theory and practice of governance.',
+      'Collective Action Problems': 'Situations where everyone in a group would gain by acting together, but each individual does better by not acting or acting alone, so the group fails to act, as in free riding and assurance problems.',
       'Sociology': 'The study of social groups, institutions, networks, and the forces that shape human social life and organization.',
       'National Crime Syndicate/Mob': 'The overarching American organized crime network formed in the early 1930s that united Jewish and Italian criminal factions under a cooperative, profit-driven structure governed by the Commission.',
       'Formation of the Syndicate (1929-1934)': 'The period during which the National Crime Syndicate was formalized through key meetings and structural decisions that ended gang warfare and established a governing body.',
