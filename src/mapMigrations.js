@@ -75,7 +75,7 @@ const CONTINENTAL = [...CONTEMPORARY_WESTERN, 'Continental Philosophy (1920s - p
 const VYASA_SUMMARY = 'Emphasized the interconnectedness of all existence and the pursuit of liberation (moksha) through self-knowledge and righteous action.'
 // `add` entries for built-in children new under `under`, in taxonomy order.
 const addEach = (under, labels) => labels.map((add) => ({ add, under }))
-const ANCIENT_MIGRATION_PERIOD_SUMMARY ='Characterized by significant movements of various peoples, primarily Germanic tribes, leading to widespread upheaval, the decline of the Western Roman Empire, and the emergence of new political entities across Europe.'
+const ANCIENT_MIGRATION_PERIOD_SUMMARY = 'Characterized by significant movements of various peoples, primarily Germanic tribes, leading to widespread upheaval, the decline of the Western Roman Empire, and the emergence of new political entities across Europe.'
 
 // The admin map's hidden Mossad Killed Kennedy summary, archived off-map.
 const ARCHIVED_MOSSAD_SUMMARY = "The theory that Israeli intelligence orchestrated Kennedy's assassination in response to his pressure on Israel to open its Dimona nuclear facility to international inspection."
