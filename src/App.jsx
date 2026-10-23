@@ -2575,7 +2575,7 @@ function App() {
     'Rudolf Carnap (1891-1970)': [],
     'Willard Van Orman Quine (1908-2000)': [],
     'Saul Kripke (1940-2022)': [],
-    'Contemporary Political Philosophy (19th c - 21st c)': ['Classical Liberalism (17th c - present)', 'Civic Republicanism (15th c - present)', 'Conservatism (18th c - present)', 'Political Realism (20th c - 21st c)', 'American Political Philosophy (20th c)', 'Objectivism (1940s - present)', 'Communitarianism (1980s - present)'],
+    'Contemporary Political Philosophy (19th c - 21st c)': ['Civic Republicanism (15th c - present)', 'Classical Liberalism (17th c - present)', 'Conservatism (18th c - present)', 'Political Realism (20th c - 21st c)', 'American Political Philosophy (20th c)', 'Objectivism (1940s - present)', 'Communitarianism (1980s - present)'],
     'Civic Republicanism (15th c - present)': ['Alexis de Tocqueville (1805-1859)', 'Hannah Arendt (1906-1975)'],
     'Conservatism (18th c - present)': ['Leo Strauss (1899-1973)', 'Michael Oakeshott (1901-1990)'],
     'Objectivism (1940s - present)': ['Ayn Rand (1905-1982)'],

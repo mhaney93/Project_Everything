@@ -2501,6 +2501,19 @@ test('migration 12 refiles the stored loose figures into their schools with thei
   assert.deepEqual(loadMap(nodes), { nodes, changed: false })
 })
 
+test('migration 12 does not bring back a figure the owner deleted from the old parent', () => {
+  const FREGE = 'Gottlob Frege (1848-1925)'
+  const EARLY_ANALYTIC = 'Early Analytic Philosophy (1870s - 1930s)'
+  const before = storedLooseMap()
+    .filter((n) => n.label !== FREGE)
+    .map((n) => (n.label === ANALYTIC ? { ...n, excludedChildLabels: [FREGE] } : n))
+  const { nodes } = loadMap(before)
+  assert.ok(!nodes.some((n) => n.label === FREGE))
+  assert.deepEqual(labelsUnder(nodes, EARLY_ANALYTIC).sort(), [...TOPIC_SUBDIVISIONS[EARLY_ANALYTIC]].filter((l) => l !== FREGE).sort())
+  assert.deepEqual(nodes.find((n) => n.label === EARLY_ANALYTIC).excludedChildLabels, [FREGE])
+  assert.deepEqual(loadMap(nodes), { nodes, changed: false })
+})
+
 test('migration 12 adds the new schools under parents expanded without the loose figures', () => {
   const before = buildMap(['Everything', [['Humanities', [['Philosophy', [[HOP, TOPIC_SUBDIVISIONS[HOP].map((label) => (label === CLASSICAL_INDIAN
     ? [label, ['Jainism (8th c BC - present)', 'Indian Buddhism (6th c BC - present)'].map((school) => [school])]
