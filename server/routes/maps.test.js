@@ -12,35 +12,39 @@ const own = (id) => rows.filter((row) => row.user_id === id);
 const newestAdmin = () => rows
   .filter((row) => ADMIN_EMAILS.includes(row.email))
   .sort((a, b) => (a.version < b.version ? 1 : -1))[0];
+const query = async (sql, params) => {
+  if (['BEGIN', 'COMMIT', 'ROLLBACK'].includes(sql)) return { rows: [] };
+  if (sql.startsWith('SELECT id, nodes')) {
+    return { rows: own(params[0]).map((row) => ({ ...row, updated_at: row.version })) };
+  }
+  if (sql.startsWith('SELECT m.nodes')) {
+    const row = newestAdmin();
+    return { rows: row ? [{ nodes: row.nodes }] : [] };
+  }
+  if (sql.startsWith('SELECT m.updated_at')) {
+    const row = newestAdmin();
+    return { rows: row ? [{ updated_at: row.version, version: row.version }] : [] };
+  }
+  if (sql.startsWith('SELECT user_id, updated_at')) {
+    const [id, emails] = params;
+    return {
+      rows: rows
+        .filter((row) => row.user_id === id || emails.includes(row.email))
+        .map((row) => ({ user_id: row.user_id, updated_at: row.version, version: row.version })),
+    };
+  }
+  if (sql.trim().startsWith('UPDATE maps')) {
+    const [nodes, id] = params;
+    const row = own(id)[0];
+    row.nodes = nodes;
+    row.version = `${rows.map((r) => r.version).sort().at(-1)}+`;
+    return { rows: [{ id: row.id, nodes: row.nodes, updated_at: row.version, version: row.version }] };
+  }
+  throw new Error(`unexpected query: ${sql}`);
+};
 const pool = {
-  query: async (sql, params) => {
-    if (sql.startsWith('SELECT 1 FROM maps')) return { rows: own(params[0]) };
-    if (sql.startsWith('SELECT id, nodes')) {
-      return { rows: own(params[0]).map((row) => ({ ...row, updated_at: row.version })) };
-    }
-    if (sql.startsWith('SELECT m.nodes')) {
-      const row = newestAdmin();
-      return { rows: row ? [{ nodes: row.nodes }] : [] };
-    }
-    if (sql.startsWith('SELECT m.updated_at')) {
-      const row = newestAdmin();
-      return { rows: row ? [{ updated_at: row.version, version: row.version }] : [] };
-    }
-    if (sql.trim().startsWith('UPDATE maps')) {
-      const [nodes, id, version, emails] = params;
-      const row = own(id)[0];
-      const current = rows
-        .filter((r) => r.user_id === id || emails.includes(r.email))
-        .map((r) => r.version)
-        .sort()
-        .at(-1);
-      if (!row || current !== version) return { rows: [] };
-      row.nodes = nodes;
-      row.version = `${current}+`;
-      return { rows: [{ id: row.id, nodes: row.nodes, updated_at: row.version, version: row.version }] };
-    }
-    throw new Error(`unexpected query: ${sql}`);
-  },
+  query,
+  connect: async () => ({ query, release: () => {} }),
 };
 const stub = (relative, exports) => {
   const file = require.resolve(path.join(__dirname, relative));

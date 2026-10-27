@@ -23702,15 +23702,17 @@ function App() {
       try {
         const mapData = await mapsAPI.getMap()
         const { nodes: normalizedNodes, changed } = normalizeLoadedNodes(mapData.nodes || [])
-        if (changed) {
-          await mapsAPI.saveMap(normalizedNodes)
-        }
         const nodesWithHidden = normalizedNodes.map((node) =>
           ('hidden' in node) ? node : { ...node, hidden: false }
         )
+        const reloadedNodes = collapseNodesToRoot(nodesWithHidden)
+        nodesRef.current = reloadedNodes
         setUndoSnapshot(null)
-        setNodesFromBackend(collapseNodesToRoot(nodesWithHidden))
+        setNodesFromBackend(reloadedNodes)
         setNotification({ message: 'The map changed elsewhere, so it was reloaded.', type: 'info' })
+        if (changed) {
+          await mapsAPI.saveMap(normalizedNodes)
+        }
       } catch (err) {
         console.error('Failed to reload map after a save conflict:', err)
         setNotification({ message: 'The map changed elsewhere. Refresh the page before editing.', type: 'error' })

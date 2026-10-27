@@ -132,24 +132,39 @@ router.post('/', verifyToken, async (req, res) => {
       }
     }
 
-    const result = await pool.query(
-      `UPDATE maps
-       SET nodes = $1, updated_at = CURRENT_TIMESTAMP
-       WHERE user_id = $2 AND $3 = (
-         SELECT MAX(m.updated_at)::text FROM maps m
-         JOIN users u ON m.user_id = u.id
-         WHERE m.user_id = $2 OR u.email = ANY($4)
-       )
-       RETURNING id, nodes, updated_at, updated_at::text AS version`,
-      [JSON.stringify(nodes), req.userId, typeof version === 'string' ? version : null, isAdmin ? ADMIN_EMAILS : []]
-    );
-
-    if (result.rows.length === 0) {
-      const existing = await pool.query('SELECT 1 FROM maps WHERE user_id = $1', [req.userId]);
-      if (existing.rows.length === 0) {
+    const client = await pool.connect();
+    let result;
+    try {
+      await client.query('BEGIN');
+      const locked = await client.query(
+        `SELECT user_id, updated_at, updated_at::text AS version FROM maps
+         WHERE user_id = $1 OR user_id IN (SELECT id FROM users WHERE email = ANY($2))
+         ORDER BY user_id
+         FOR UPDATE`,
+        [req.userId, isAdmin ? ADMIN_EMAILS : []]
+      );
+      if (!locked.rows.some((row) => row.user_id === req.userId)) {
+        await client.query('ROLLBACK');
         return res.status(404).json({ error: 'Map not found' });
       }
-      return res.status(409).json({ error: 'Map changed since it was loaded' });
+      const newest = locked.rows.reduce((a, b) => (b.updated_at > a.updated_at ? b : a));
+      if (newest.version !== version) {
+        await client.query('ROLLBACK');
+        return res.status(409).json({ error: 'Map changed since it was loaded' });
+      }
+      result = await client.query(
+        `UPDATE maps
+         SET nodes = $1, updated_at = clock_timestamp()
+         WHERE user_id = $2
+         RETURNING id, nodes, updated_at, updated_at::text AS version`,
+        [JSON.stringify(nodes), req.userId]
+      );
+      await client.query('COMMIT');
+    } catch (err) {
+      await client.query('ROLLBACK').catch(() => {});
+      throw err;
+    } finally {
+      client.release();
     }
 
     const map = result.rows[0];
