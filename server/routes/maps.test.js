@@ -13,7 +13,7 @@ const newestAdmin = () => rows
   .filter((row) => ADMIN_EMAILS.includes(row.email))
   .sort((a, b) => (a.version < b.version ? 1 : -1))[0];
 const query = async (sql, params) => {
-  if (['BEGIN', 'COMMIT', 'ROLLBACK'].includes(sql)) return { rows: [] };
+  if (sql.startsWith('BEGIN') || ['COMMIT', 'ROLLBACK'].includes(sql)) return { rows: [] };
   if (sql.startsWith('SELECT id, nodes')) {
     return { rows: own(params[0]).map((row) => ({ ...row, updated_at: row.version })) };
   }

@@ -12,8 +12,8 @@ const router = express.Router();
 
 // Helper: get non-personal nodes from the most recently updated admin map, with
 // the version (updated_at text) of the row they were read from
-async function getLatestGlobalNodes() {
-  const result = await pool.query(
+async function getLatestGlobalNodes(db = pool) {
+  const result = await db.query(
     `SELECT m.nodes, m.updated_at::text AS version FROM maps m
      JOIN users u ON m.user_id = u.id
      WHERE u.email = ANY($1)
@@ -51,10 +51,26 @@ router.get('/global', async (req, res) => {
 // always start from the same up-to-date global state.
 router.get('/', verifyToken, async (req, res) => {
   try {
-    const result = await pool.query(
-      'SELECT id, nodes, updated_at, updated_at::text AS version FROM maps WHERE user_id = $1',
-      [req.userId]
-    );
+    const admin = await isUserAdmin(req.userId);
+
+    const client = await pool.connect();
+    let result;
+    let latest;
+    try {
+      await client.query('BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY');
+      result = await client.query(
+        'SELECT id, nodes, updated_at, updated_at::text AS version FROM maps WHERE user_id = $1',
+        [req.userId]
+      );
+      // Get the latest global nodes (may be from a different admin account)
+      if (admin) latest = await getLatestGlobalNodes(client);
+      await client.query('COMMIT');
+    } catch (err) {
+      await client.query('ROLLBACK').catch(() => {});
+      throw err;
+    } finally {
+      client.release();
+    }
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Map not found' });
@@ -67,18 +83,12 @@ router.get('/', verifyToken, async (req, res) => {
     }
     nodes = nodes || [];
 
-    const admin = await isUserAdmin(req.userId);
-    if (admin) {
-      // Get the latest global nodes (may be from a different admin account)
-      const latest = await getLatestGlobalNodes();
-
-      if (latest.version && latest.version !== map.version) {
-        // Another admin saved more recently — use their global nodes as the base,
-        // then add this admin's personal nodes on top.
-        const personalNodes = nodes.filter(n => n.isPersonal === true || n.label === 'Personal');
-        const merged = [...latest.nodes, ...personalNodes];
-        return res.json({ id: map.id, nodes: merged, updatedAt: map.updated_at, version: latest.version });
-      }
+    if (latest?.version && latest.version !== map.version) {
+      // Another admin saved more recently — use their global nodes as the base,
+      // then add this admin's personal nodes on top.
+      const personalNodes = nodes.filter(n => n.isPersonal === true || n.label === 'Personal');
+      const merged = [...latest.nodes, ...personalNodes];
+      return res.json({ id: map.id, nodes: merged, updatedAt: map.updated_at, version: latest.version });
     }
 
     res.json({ id: map.id, nodes, updatedAt: map.updated_at, version: map.version });
