@@ -10,30 +10,34 @@ const {
 
 const router = express.Router();
 
-// Helper: get non-personal nodes from the most recently updated admin map
+// Helper: get non-personal nodes from the most recently updated admin map, with
+// the version (updated_at text) of the row they were read from
 async function getLatestGlobalNodes() {
   const result = await pool.query(
-    `SELECT m.nodes FROM maps m
+    `SELECT m.nodes, m.updated_at::text AS version FROM maps m
      JOIN users u ON m.user_id = u.id
      WHERE u.email = ANY($1)
      ORDER BY m.updated_at DESC
      LIMIT 1`,
     [ADMIN_EMAILS]
   );
-  if (result.rows.length === 0) return [];
+  if (result.rows.length === 0) return { nodes: [], version: null };
 
   let nodes = result.rows[0].nodes;
   if (typeof nodes === 'string') {
     try { nodes = JSON.parse(nodes); } catch (e) { nodes = []; }
   }
-  return (nodes || []).filter(n => n.isPersonal !== true && n.label !== 'Personal');
+  return {
+    nodes: (nodes || []).filter(n => n.isPersonal !== true && n.label !== 'Personal'),
+    version: result.rows[0].version,
+  };
 }
 
 // Get global (non-personal) nodes — no auth required
 // Returns the most recently saved admin map (minus Personal branch and notes).
 router.get('/global', async (req, res) => {
   try {
-    const globalNodes = await getLatestGlobalNodes();
+    const { nodes: globalNodes } = await getLatestGlobalNodes();
     res.json({ nodes: globalNodes.map(({ notes, ...rest }) => rest) });
   } catch (err) {
     console.error('GET /api/maps/global error:', err);
@@ -63,34 +67,21 @@ router.get('/', verifyToken, async (req, res) => {
     }
     nodes = nodes || [];
 
-    let version = map.version;
     const admin = await isUserAdmin(req.userId);
     if (admin) {
       // Get the latest global nodes (may be from a different admin account)
-      const latestGlobal = await getLatestGlobalNodes();
+      const latest = await getLatestGlobalNodes();
 
-      // Check if another admin's map is newer than this admin's map
-      const latestResult = await pool.query(
-        `SELECT m.updated_at, m.updated_at::text AS version FROM maps m
-         JOIN users u ON m.user_id = u.id
-         WHERE u.email = ANY($1)
-         ORDER BY m.updated_at DESC
-         LIMIT 1`,
-        [ADMIN_EMAILS]
-      );
-      const latestUpdatedAt = latestResult.rows[0]?.updated_at;
-      version = latestResult.rows[0]?.version ?? version;
-
-      if (latestUpdatedAt && latestUpdatedAt > map.updated_at) {
+      if (latest.version && latest.version !== map.version) {
         // Another admin saved more recently — use their global nodes as the base,
         // then add this admin's personal nodes on top.
         const personalNodes = nodes.filter(n => n.isPersonal === true || n.label === 'Personal');
-        const merged = [...latestGlobal, ...personalNodes];
-        return res.json({ id: map.id, nodes: merged, updatedAt: map.updated_at, version });
+        const merged = [...latest.nodes, ...personalNodes];
+        return res.json({ id: map.id, nodes: merged, updatedAt: map.updated_at, version: latest.version });
       }
     }
 
-    res.json({ id: map.id, nodes, updatedAt: map.updated_at, version });
+    res.json({ id: map.id, nodes, updatedAt: map.updated_at, version: map.version });
   } catch (err) {
     console.error('GET /api/maps error:', err);
     res.status(500).json({ error: err.message });
@@ -137,7 +128,7 @@ router.post('/', verifyToken, async (req, res) => {
     try {
       await client.query('BEGIN');
       const locked = await client.query(
-        `SELECT user_id, updated_at, updated_at::text AS version FROM maps
+        `SELECT user_id, updated_at::text AS version FROM maps
          WHERE user_id = $1 OR user_id IN (SELECT id FROM users WHERE email = ANY($2))
          ORDER BY user_id
          FOR UPDATE`,
@@ -147,7 +138,7 @@ router.post('/', verifyToken, async (req, res) => {
         await client.query('ROLLBACK');
         return res.status(404).json({ error: 'Map not found' });
       }
-      const newest = locked.rows.reduce((a, b) => (b.updated_at > a.updated_at ? b : a));
+      const newest = locked.rows.reduce((a, b) => (b.version > a.version ? b : a));
       if (newest.version !== version) {
         await client.query('ROLLBACK');
         return res.status(409).json({ error: 'Map changed since it was loaded' });

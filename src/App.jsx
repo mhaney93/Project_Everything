@@ -23743,6 +23743,7 @@ function App() {
           setTimeout(async () => {
             try { await mapsAPI.saveMap(nodesRef.current); }
             catch (err2) {
+              if (err2.conflict) return;
               console.error('Failed to save map (retry):', err2);
               setNotification({ message: 'Failed to save — changes may not persist after refresh.', type: 'error' });
             }
@@ -23762,6 +23763,7 @@ function App() {
         setTimeout(async () => {
           try { await mapsAPI.saveMap(nodesRef.current); }
           catch (err2) {
+            if (err2.conflict) return;
             console.error('Failed to save map (retry):', err2);
             setNotification({ message: 'Failed to save — changes may not persist after refresh.', type: 'error' });
           }

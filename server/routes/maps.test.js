@@ -19,18 +19,14 @@ const query = async (sql, params) => {
   }
   if (sql.startsWith('SELECT m.nodes')) {
     const row = newestAdmin();
-    return { rows: row ? [{ nodes: row.nodes }] : [] };
+    return { rows: row ? [{ nodes: row.nodes, version: row.version }] : [] };
   }
-  if (sql.startsWith('SELECT m.updated_at')) {
-    const row = newestAdmin();
-    return { rows: row ? [{ updated_at: row.version, version: row.version }] : [] };
-  }
-  if (sql.startsWith('SELECT user_id, updated_at')) {
+  if (sql.startsWith('SELECT user_id, updated_at::text')) {
     const [id, emails] = params;
     return {
       rows: rows
         .filter((row) => row.user_id === id || emails.includes(row.email))
-        .map((row) => ({ user_id: row.user_id, updated_at: row.version, version: row.version })),
+        .map((row) => ({ user_id: row.user_id, version: row.version })),
     };
   }
   if (sql.trim().startsWith('UPDATE maps')) {
