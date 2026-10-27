@@ -82,6 +82,30 @@ test('saves queued before the reload are dropped, and saves after it go through'
   assert.deepEqual(server.stored.nodes, [{ id: 'fresh' }])
 })
 
+test('saves made after a conflict but before the reload finishes are dropped', async () => {
+  const server = fakeServer()
+  const sync = createMapSync(server.request)
+  let conflicts = 0
+  let reloading = null
+  let during = null
+  sync.setConflictHandler(() => {
+    conflicts += 1
+    reloading = sync.getMap()
+    during = sync.saveMap([{ id: 'during reload' }])
+  })
+  await sync.getMap()
+  server.stored = { nodes: [{ id: 'other tab' }], version: 'elsewhere' }
+  await assert.rejects(sync.saveMap([{ id: 'stale' }]), (err) => err.conflict === true)
+  await assert.rejects(during, (err) => err.conflict === true)
+  await reloading
+  assert.equal(conflicts, 1)
+  assert.equal(server.posts.length, 1)
+  assert.deepEqual(server.stored.nodes, [{ id: 'other tab' }])
+
+  await sync.saveMap([{ id: 'fresh' }])
+  assert.equal(server.posts[1].version, 'elsewhere')
+})
+
 test('other save errors are thrown without the conflict flag', async () => {
   const sync = createMapSync(async (method) => method === 'GET'
     ? { status: 200, data: { nodes: [], version: 'v0' } }

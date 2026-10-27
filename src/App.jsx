@@ -22442,7 +22442,7 @@ function App() {
     suppressSaveUntil.current = Date.now() + 6000
     setUndoSnapshot({ type: 'node-delete', nodes: removedNodes, label: deletedLabel, message: `"${deletedLabel}" deleted.` })
     setNotification(null)
-    mapsAPI.saveMap(nodesAfterDelete).catch(e => { console.error('Failed to save after delete:', e); setNotification({ message: 'Failed to save — changes may not persist after refresh.', type: 'error' }) })
+    mapsAPI.saveMap(nodesAfterDelete).catch(e => { if (e.conflict) return; console.error('Failed to save after delete:', e); setNotification({ message: 'Failed to save — changes may not persist after refresh.', type: 'error' }) })
 
     if (undoTimerRef.current) clearTimeout(undoTimerRef.current)
     undoTimerRef.current = setTimeout(() => {
@@ -24245,6 +24245,7 @@ function App() {
 
           const result = [...prev, ...newNodes]
           mapsAPI.saveMap(result).catch(e => {
+            if (e.conflict) return
             console.error('Failed to save after paste:', e)
             setNotification({ message: 'Failed to save — changes may not persist after refresh.', type: 'error' })
           })
@@ -25419,7 +25420,7 @@ function App() {
                 return n
               })
             }
-            mapsAPI.saveMap(result).catch(e => { console.error('Failed to save after reparent:', e); setNotification({ message: 'Failed to save — changes may not persist after refresh.', type: 'error' }) })
+            mapsAPI.saveMap(result).catch(e => { if (e.conflict) return; console.error('Failed to save after reparent:', e); setNotification({ message: 'Failed to save — changes may not persist after refresh.', type: 'error' }) })
             return result
           })
           setMultiSelectedIds(new Set())

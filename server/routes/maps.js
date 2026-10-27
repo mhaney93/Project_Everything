@@ -63,6 +63,7 @@ router.get('/', verifyToken, async (req, res) => {
     }
     nodes = nodes || [];
 
+    let version = map.version;
     const admin = await isUserAdmin(req.userId);
     if (admin) {
       // Get the latest global nodes (may be from a different admin account)
@@ -70,7 +71,7 @@ router.get('/', verifyToken, async (req, res) => {
 
       // Check if another admin's map is newer than this admin's map
       const latestResult = await pool.query(
-        `SELECT m.updated_at FROM maps m
+        `SELECT m.updated_at, m.updated_at::text AS version FROM maps m
          JOIN users u ON m.user_id = u.id
          WHERE u.email = ANY($1)
          ORDER BY m.updated_at DESC
@@ -78,17 +79,18 @@ router.get('/', verifyToken, async (req, res) => {
         [ADMIN_EMAILS]
       );
       const latestUpdatedAt = latestResult.rows[0]?.updated_at;
+      version = latestResult.rows[0]?.version ?? version;
 
       if (latestUpdatedAt && latestUpdatedAt > map.updated_at) {
         // Another admin saved more recently — use their global nodes as the base,
         // then add this admin's personal nodes on top.
         const personalNodes = nodes.filter(n => n.isPersonal === true || n.label === 'Personal');
         const merged = [...latestGlobal, ...personalNodes];
-        return res.json({ id: map.id, nodes: merged, updatedAt: map.updated_at, version: map.version });
+        return res.json({ id: map.id, nodes: merged, updatedAt: map.updated_at, version });
       }
     }
 
-    res.json({ id: map.id, nodes, updatedAt: map.updated_at, version: map.version });
+    res.json({ id: map.id, nodes, updatedAt: map.updated_at, version });
   } catch (err) {
     console.error('GET /api/maps error:', err);
     res.status(500).json({ error: err.message });
@@ -97,9 +99,12 @@ router.get('/', verifyToken, async (req, res) => {
 
 // Save/update user's map.
 // `version` is the updated_at text the client last read or saved. The update only
-// applies while the row still has that version, so a tab holding an older copy of
-// the map gets a 409 instead of overwriting newer changes. It is compared as text
-// because node-pg shifts tz-less timestamps into local time when parsing them.
+// applies while the map still has that version, so a tab holding an older copy of
+// the map gets a 409 instead of overwriting newer changes. For admins the version
+// is the newest updated_at across the admin rows, since that row is the global
+// base GET serves, so a save from before another admin's save is refused too. It
+// is compared as text because node-pg shifts tz-less timestamps into local time
+// when parsing them.
 router.post('/', verifyToken, async (req, res) => {
   try {
     const { nodes, version } = req.body;
@@ -130,9 +135,13 @@ router.post('/', verifyToken, async (req, res) => {
     const result = await pool.query(
       `UPDATE maps
        SET nodes = $1, updated_at = CURRENT_TIMESTAMP
-       WHERE user_id = $2 AND updated_at::text = $3
+       WHERE user_id = $2 AND $3 = (
+         SELECT MAX(m.updated_at)::text FROM maps m
+         JOIN users u ON m.user_id = u.id
+         WHERE m.user_id = $2 OR u.email = ANY($4)
+       )
        RETURNING id, nodes, updated_at, updated_at::text AS version`,
-      [JSON.stringify(nodes), req.userId, typeof version === 'string' ? version : null]
+      [JSON.stringify(nodes), req.userId, typeof version === 'string' ? version : null, isAdmin ? ADMIN_EMAILS : []]
     );
 
     if (result.rows.length === 0) {

@@ -4,8 +4,9 @@
 //
 // Saves run one at a time, so consecutive saves from this tab each send the
 // version returned by the save before them rather than racing each other.
-// After a conflict, saves queued before the map is reloaded are dropped: they
-// hold the stale copy and would otherwise overwrite the reloaded map.
+// After a conflict, every save is dropped without being sent until the map has
+// been reloaded, and so is any save queued before that reload: they hold the
+// stale copy and would otherwise overwrite the reloaded map.
 
 export class MapConflictError extends Error {
   constructor(message = 'Map changed since it was loaded') {
@@ -18,6 +19,7 @@ export class MapConflictError extends Error {
 export const createMapSync = (request) => {
   let version = null
   let generation = 0
+  let stale = false
   let queue = Promise.resolve()
   let onConflict = null
 
@@ -26,14 +28,15 @@ export const createMapSync = (request) => {
     if (status < 200 || status >= 300) throw new Error(data.error)
     version = data.version ?? null
     generation += 1
+    stale = false
     return data
   }
 
   const sendSave = async (nodes, savedGeneration) => {
-    if (savedGeneration !== generation) throw new MapConflictError()
+    if (stale || savedGeneration !== generation) throw new MapConflictError()
     const { status, data } = await request('POST', { nodes, version })
     if (status === 409) {
-      generation += 1
+      stale = true
       if (onConflict) onConflict()
       throw new MapConflictError(data.error)
     }

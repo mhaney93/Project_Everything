@@ -4,20 +4,40 @@ const path = require('node:path');
 const express = require('express');
 
 // Stub the database, auth and storage modules before loading the router.
+// Each row's `version` stands in for its updated_at text; versions compare in order.
+const ADMIN_EMAILS = ['a@admin', 'b@admin'];
 let rows = [];
-const queries = [];
+let userId = 7;
+const own = (id) => rows.filter((row) => row.user_id === id);
+const newestAdmin = () => rows
+  .filter((row) => ADMIN_EMAILS.includes(row.email))
+  .sort((a, b) => (a.version < b.version ? 1 : -1))[0];
 const pool = {
   query: async (sql, params) => {
-    queries.push({ sql, params });
-    if (sql.startsWith('SELECT 1 FROM maps')) {
-      return { rows: rows.filter((row) => row.user_id === params[0]) };
+    if (sql.startsWith('SELECT 1 FROM maps')) return { rows: own(params[0]) };
+    if (sql.startsWith('SELECT id, nodes')) {
+      return { rows: own(params[0]).map((row) => ({ ...row, updated_at: row.version })) };
+    }
+    if (sql.startsWith('SELECT m.nodes')) {
+      const row = newestAdmin();
+      return { rows: row ? [{ nodes: row.nodes }] : [] };
+    }
+    if (sql.startsWith('SELECT m.updated_at')) {
+      const row = newestAdmin();
+      return { rows: row ? [{ updated_at: row.version, version: row.version }] : [] };
     }
     if (sql.trim().startsWith('UPDATE maps')) {
-      const row = rows.find((r) => r.user_id === params[1] && r.version === params[2]);
-      if (!row) return { rows: [] };
-      row.nodes = params[0];
-      row.version = `${row.version}+`;
-      return { rows: [{ id: row.id, nodes: row.nodes, updated_at: new Date(), version: row.version }] };
+      const [nodes, id, version, emails] = params;
+      const row = own(id)[0];
+      const current = rows
+        .filter((r) => r.user_id === id || emails.includes(r.email))
+        .map((r) => r.version)
+        .sort()
+        .at(-1);
+      if (!row || current !== version) return { rows: [] };
+      row.nodes = nodes;
+      row.version = `${current}+`;
+      return { rows: [{ id: row.id, nodes: row.nodes, updated_at: row.version, version: row.version }] };
     }
     throw new Error(`unexpected query: ${sql}`);
   },
@@ -27,12 +47,12 @@ const stub = (relative, exports) => {
   require.cache[file] = { id: file, filename: file, loaded: true, exports };
 };
 stub('../db/config', pool);
-stub('../middleware/auth', { verifyToken: (req, res, next) => { req.userId = 7; next(); } });
+stub('../middleware/auth', { verifyToken: (req, res, next) => { req.userId = userId; next(); } });
 stub('../utils/storage', {
   TOTAL_STORAGE_LIMIT_PER_USER: Infinity,
-  ADMIN_EMAILS: [],
+  ADMIN_EMAILS,
   getFileStorageUsage: async () => 0,
-  isUserAdmin: async () => true,
+  isUserAdmin: async (id) => own(id).some((row) => ADMIN_EMAILS.includes(row.email)),
 });
 const router = require('./maps');
 
@@ -49,6 +69,8 @@ const withServer = async (fn) => {
   }
 };
 
+const load = async (url) => (await fetch(url)).json();
+
 const save = (url, body) => fetch(url, {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
@@ -56,7 +78,7 @@ const save = (url, body) => fetch(url, {
 });
 
 test('a save with the current version updates the map and returns the new version', async () => {
-  rows = [{ id: 1, user_id: 7, nodes: '[]', version: '2026-10-27 02:38:38.609' }];
+  rows = [{ id: 1, user_id: 7, email: 'user@x', nodes: '[]', version: '2026-10-27 02:38:38.609' }];
   await withServer(async (url) => {
     const res = await save(url, { nodes: [{ id: 1 }], version: '2026-10-27 02:38:38.609' });
     assert.equal(res.status, 200);
@@ -64,11 +86,10 @@ test('a save with the current version updates the map and returns the new versio
     assert.equal(data.version, '2026-10-27 02:38:38.609+');
     assert.deepEqual(data.nodes, [{ id: 1 }]);
   });
-  assert.match(queries.at(-1).sql, /updated_at::text = \$3/);
 });
 
 test('a save with an old version is refused with 409 and leaves the map alone', async () => {
-  rows = [{ id: 1, user_id: 7, nodes: '[{"id":"newer"}]', version: 'newer' }];
+  rows = [{ id: 1, user_id: 7, email: 'user@x', nodes: '[{"id":"newer"}]', version: 'newer' }];
   await withServer(async (url) => {
     const res = await save(url, { nodes: [{ id: 'stale' }], version: 'older' });
     assert.equal(res.status, 409);
@@ -77,7 +98,7 @@ test('a save with an old version is refused with 409 and leaves the map alone', 
 });
 
 test('a save without a version is refused with 409', async () => {
-  rows = [{ id: 1, user_id: 7, nodes: '[]', version: 'v1' }];
+  rows = [{ id: 1, user_id: 7, email: 'user@x', nodes: '[]', version: 'v1' }];
   await withServer(async (url) => {
     const res = await save(url, { nodes: [] });
     assert.equal(res.status, 409);
@@ -90,5 +111,43 @@ test('a save for a user with no map is still a 404', async () => {
   await withServer(async (url) => {
     const res = await save(url, { nodes: [], version: 'v1' });
     assert.equal(res.status, 404);
+  });
+});
+
+test('an admin save made before another admin saved is refused with 409', async () => {
+  rows = [
+    { id: 1, user_id: 7, email: 'a@admin', nodes: '[{"id":"a"}]', version: 't1' },
+    { id: 2, user_id: 8, email: 'b@admin', nodes: '[{"id":"a"}]', version: 't0' },
+  ];
+  await withServer(async (url) => {
+    userId = 7;
+    const tabA = await load(url);
+    userId = 8;
+    const tabB = await load(url);
+    assert.equal(tabA.version, 't1');
+    assert.equal(tabB.version, 't1');
+    const bSave = await save(url, { nodes: [{ id: 'b edit' }], version: tabB.version });
+    assert.equal(bSave.status, 200);
+
+    userId = 7;
+    const aSave = await save(url, { nodes: [{ id: 'a stale' }], version: tabA.version });
+    assert.equal(aSave.status, 409);
+    assert.deepEqual((await load(url)).nodes, [{ id: 'b edit' }]);
+  });
+  userId = 7;
+});
+
+test('an admin save after reloading the newest global map goes through', async () => {
+  rows = [
+    { id: 1, user_id: 7, email: 'a@admin', nodes: '[]', version: 't1' },
+    { id: 2, user_id: 8, email: 'b@admin', nodes: '[{"id":"b"}]', version: 't2' },
+  ];
+  await withServer(async (url) => {
+    userId = 7;
+    const tabA = await load(url);
+    assert.equal(tabA.version, 't2');
+    assert.deepEqual(tabA.nodes, [{ id: 'b' }]);
+    const res = await save(url, { nodes: [{ id: 'a edit' }], version: tabA.version });
+    assert.equal(res.status, 200);
   });
 });
