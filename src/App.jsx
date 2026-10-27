@@ -23695,6 +23695,30 @@ function App() {
     loadUserData()
   }, [])
 
+  // A save was refused because the map changed in another tab or device since
+  // this tab loaded it: reload the newer map instead of overwriting it.
+  useEffect(() => {
+    mapsAPI.onConflict(async () => {
+      try {
+        const mapData = await mapsAPI.getMap()
+        const { nodes: normalizedNodes, changed } = normalizeLoadedNodes(mapData.nodes || [])
+        if (changed) {
+          await mapsAPI.saveMap(normalizedNodes)
+        }
+        const nodesWithHidden = normalizedNodes.map((node) =>
+          ('hidden' in node) ? node : { ...node, hidden: false }
+        )
+        setUndoSnapshot(null)
+        setNodesFromBackend(collapseNodesToRoot(nodesWithHidden))
+        setNotification({ message: 'The map changed elsewhere, so it was reloaded.', type: 'info' })
+      } catch (err) {
+        console.error('Failed to reload map after a save conflict:', err)
+        setNotification({ message: 'The map changed elsewhere. Refresh the page before editing.', type: 'error' })
+      }
+    })
+    return () => mapsAPI.onConflict(null)
+  }, [])
+
   useEffect(() => {
     if (!currentUser) return;
 
@@ -23711,6 +23735,7 @@ function App() {
         try {
           await mapsAPI.saveMap(nodesRef.current);
         } catch (err) {
+          if (err.conflict) return;
           console.error('Failed to save map (deferred):', err);
           // Retry once after 3 seconds
           setTimeout(async () => {
@@ -23729,6 +23754,7 @@ function App() {
       try {
         await mapsAPI.saveMap(nodesRef.current);
       } catch (err) {
+        if (err.conflict) return;
         console.error('Failed to save map:', err);
         // Retry once after 3 seconds before showing the error
         setTimeout(async () => {

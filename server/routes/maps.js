@@ -48,7 +48,7 @@ router.get('/global', async (req, res) => {
 router.get('/', verifyToken, async (req, res) => {
   try {
     const result = await pool.query(
-      'SELECT id, nodes, updated_at FROM maps WHERE user_id = $1',
+      'SELECT id, nodes, updated_at, updated_at::text AS version FROM maps WHERE user_id = $1',
       [req.userId]
     );
 
@@ -84,21 +84,25 @@ router.get('/', verifyToken, async (req, res) => {
         // then add this admin's personal nodes on top.
         const personalNodes = nodes.filter(n => n.isPersonal === true || n.label === 'Personal');
         const merged = [...latestGlobal, ...personalNodes];
-        return res.json({ id: map.id, nodes: merged, updatedAt: map.updated_at });
+        return res.json({ id: map.id, nodes: merged, updatedAt: map.updated_at, version: map.version });
       }
     }
 
-    res.json({ id: map.id, nodes, updatedAt: map.updated_at });
+    res.json({ id: map.id, nodes, updatedAt: map.updated_at, version: map.version });
   } catch (err) {
     console.error('GET /api/maps error:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// Save/update user's map
+// Save/update user's map.
+// `version` is the updated_at text the client last read or saved. The update only
+// applies while the row still has that version, so a tab holding an older copy of
+// the map gets a 409 instead of overwriting newer changes. It is compared as text
+// because node-pg shifts tz-less timestamps into local time when parsing them.
 router.post('/', verifyToken, async (req, res) => {
   try {
-    const { nodes } = req.body;
+    const { nodes, version } = req.body;
 
     if (!Array.isArray(nodes)) {
       return res.status(400).json({ error: 'Nodes must be an array' });
@@ -126,13 +130,17 @@ router.post('/', verifyToken, async (req, res) => {
     const result = await pool.query(
       `UPDATE maps
        SET nodes = $1, updated_at = CURRENT_TIMESTAMP
-       WHERE user_id = $2
-       RETURNING id, nodes, updated_at`,
-      [JSON.stringify(nodes), req.userId]
+       WHERE user_id = $2 AND updated_at::text = $3
+       RETURNING id, nodes, updated_at, updated_at::text AS version`,
+      [JSON.stringify(nodes), req.userId, typeof version === 'string' ? version : null]
     );
 
     if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Map not found' });
+      const existing = await pool.query('SELECT 1 FROM maps WHERE user_id = $1', [req.userId]);
+      if (existing.rows.length === 0) {
+        return res.status(404).json({ error: 'Map not found' });
+      }
+      return res.status(409).json({ error: 'Map changed since it was loaded' });
     }
 
     const map = result.rows[0];
@@ -144,7 +152,7 @@ router.post('/', verifyToken, async (req, res) => {
         console.error('Failed to parse nodes JSON:', responseNodes);
       }
     }
-    res.json({ id: map.id, nodes: responseNodes, updatedAt: map.updated_at });
+    res.json({ id: map.id, nodes: responseNodes, updatedAt: map.updated_at, version: map.version });
   } catch (err) {
     console.error('POST /api/maps error:', err);
     res.status(500).json({ error: err.message });
