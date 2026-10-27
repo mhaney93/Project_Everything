@@ -10,30 +10,34 @@ const {
 
 const router = express.Router();
 
-// Helper: get non-personal nodes from the most recently updated admin map
-async function getLatestGlobalNodes() {
-  const result = await pool.query(
-    `SELECT m.nodes FROM maps m
+// Helper: get non-personal nodes from the most recently updated admin map, with
+// the version (updated_at text) of the row they were read from
+async function getLatestGlobalNodes(db = pool) {
+  const result = await db.query(
+    `SELECT m.nodes, m.updated_at::text AS version FROM maps m
      JOIN users u ON m.user_id = u.id
      WHERE u.email = ANY($1)
      ORDER BY m.updated_at DESC
      LIMIT 1`,
     [ADMIN_EMAILS]
   );
-  if (result.rows.length === 0) return [];
+  if (result.rows.length === 0) return { nodes: [], version: null };
 
   let nodes = result.rows[0].nodes;
   if (typeof nodes === 'string') {
     try { nodes = JSON.parse(nodes); } catch (e) { nodes = []; }
   }
-  return (nodes || []).filter(n => n.isPersonal !== true && n.label !== 'Personal');
+  return {
+    nodes: (nodes || []).filter(n => n.isPersonal !== true && n.label !== 'Personal'),
+    version: result.rows[0].version,
+  };
 }
 
 // Get global (non-personal) nodes — no auth required
 // Returns the most recently saved admin map (minus Personal branch and notes).
 router.get('/global', async (req, res) => {
   try {
-    const globalNodes = await getLatestGlobalNodes();
+    const { nodes: globalNodes } = await getLatestGlobalNodes();
     res.json({ nodes: globalNodes.map(({ notes, ...rest }) => rest) });
   } catch (err) {
     console.error('GET /api/maps/global error:', err);
@@ -47,10 +51,26 @@ router.get('/global', async (req, res) => {
 // always start from the same up-to-date global state.
 router.get('/', verifyToken, async (req, res) => {
   try {
-    const result = await pool.query(
-      'SELECT id, nodes, updated_at FROM maps WHERE user_id = $1',
-      [req.userId]
-    );
+    const admin = await isUserAdmin(req.userId);
+
+    const client = await pool.connect();
+    let result;
+    let latest;
+    try {
+      await client.query('BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY');
+      result = await client.query(
+        'SELECT id, nodes, updated_at, updated_at::text AS version FROM maps WHERE user_id = $1',
+        [req.userId]
+      );
+      // Get the latest global nodes (may be from a different admin account)
+      if (admin) latest = await getLatestGlobalNodes(client);
+      await client.query('COMMIT');
+    } catch (err) {
+      await client.query('ROLLBACK').catch(() => {});
+      throw err;
+    } finally {
+      client.release();
+    }
 
     if (result.rows.length === 0) {
       return res.status(404).json({ error: 'Map not found' });
@@ -63,42 +83,32 @@ router.get('/', verifyToken, async (req, res) => {
     }
     nodes = nodes || [];
 
-    const admin = await isUserAdmin(req.userId);
-    if (admin) {
-      // Get the latest global nodes (may be from a different admin account)
-      const latestGlobal = await getLatestGlobalNodes();
-
-      // Check if another admin's map is newer than this admin's map
-      const latestResult = await pool.query(
-        `SELECT m.updated_at FROM maps m
-         JOIN users u ON m.user_id = u.id
-         WHERE u.email = ANY($1)
-         ORDER BY m.updated_at DESC
-         LIMIT 1`,
-        [ADMIN_EMAILS]
-      );
-      const latestUpdatedAt = latestResult.rows[0]?.updated_at;
-
-      if (latestUpdatedAt && latestUpdatedAt > map.updated_at) {
-        // Another admin saved more recently — use their global nodes as the base,
-        // then add this admin's personal nodes on top.
-        const personalNodes = nodes.filter(n => n.isPersonal === true || n.label === 'Personal');
-        const merged = [...latestGlobal, ...personalNodes];
-        return res.json({ id: map.id, nodes: merged, updatedAt: map.updated_at });
-      }
+    if (latest?.version && latest.version !== map.version) {
+      // Another admin saved more recently — use their global nodes as the base,
+      // then add this admin's personal nodes on top.
+      const personalNodes = nodes.filter(n => n.isPersonal === true || n.label === 'Personal');
+      const merged = [...latest.nodes, ...personalNodes];
+      return res.json({ id: map.id, nodes: merged, updatedAt: map.updated_at, version: latest.version });
     }
 
-    res.json({ id: map.id, nodes, updatedAt: map.updated_at });
+    res.json({ id: map.id, nodes, updatedAt: map.updated_at, version: map.version });
   } catch (err) {
     console.error('GET /api/maps error:', err);
     res.status(500).json({ error: err.message });
   }
 });
 
-// Save/update user's map
+// Save/update user's map.
+// `version` is the updated_at text the client last read or saved. The update only
+// applies while the map still has that version, so a tab holding an older copy of
+// the map gets a 409 instead of overwriting newer changes. For admins the version
+// is the newest updated_at across the admin rows, since that row is the global
+// base GET serves, so a save from before another admin's save is refused too. It
+// is compared as text because node-pg shifts tz-less timestamps into local time
+// when parsing them.
 router.post('/', verifyToken, async (req, res) => {
   try {
-    const { nodes } = req.body;
+    const { nodes, version } = req.body;
 
     if (!Array.isArray(nodes)) {
       return res.status(400).json({ error: 'Nodes must be an array' });
@@ -123,16 +133,39 @@ router.post('/', verifyToken, async (req, res) => {
       }
     }
 
-    const result = await pool.query(
-      `UPDATE maps
-       SET nodes = $1, updated_at = CURRENT_TIMESTAMP
-       WHERE user_id = $2
-       RETURNING id, nodes, updated_at`,
-      [JSON.stringify(nodes), req.userId]
-    );
-
-    if (result.rows.length === 0) {
-      return res.status(404).json({ error: 'Map not found' });
+    const client = await pool.connect();
+    let result;
+    try {
+      await client.query('BEGIN');
+      const locked = await client.query(
+        `SELECT user_id, updated_at::text AS version FROM maps
+         WHERE user_id = $1 OR user_id IN (SELECT id FROM users WHERE email = ANY($2))
+         ORDER BY user_id
+         FOR UPDATE`,
+        [req.userId, isAdmin ? ADMIN_EMAILS : []]
+      );
+      if (!locked.rows.some((row) => row.user_id === req.userId)) {
+        await client.query('ROLLBACK');
+        return res.status(404).json({ error: 'Map not found' });
+      }
+      const newest = locked.rows.reduce((a, b) => (b.version > a.version ? b : a));
+      if (newest.version !== version) {
+        await client.query('ROLLBACK');
+        return res.status(409).json({ error: 'Map changed since it was loaded' });
+      }
+      result = await client.query(
+        `UPDATE maps
+         SET nodes = $1, updated_at = clock_timestamp()
+         WHERE user_id = $2
+         RETURNING id, nodes, updated_at, updated_at::text AS version`,
+        [JSON.stringify(nodes), req.userId]
+      );
+      await client.query('COMMIT');
+    } catch (err) {
+      await client.query('ROLLBACK').catch(() => {});
+      throw err;
+    } finally {
+      client.release();
     }
 
     const map = result.rows[0];
@@ -144,7 +177,7 @@ router.post('/', verifyToken, async (req, res) => {
         console.error('Failed to parse nodes JSON:', responseNodes);
       }
     }
-    res.json({ id: map.id, nodes: responseNodes, updatedAt: map.updated_at });
+    res.json({ id: map.id, nodes: responseNodes, updatedAt: map.updated_at, version: map.version });
   } catch (err) {
     console.error('POST /api/maps error:', err);
     res.status(500).json({ error: err.message });

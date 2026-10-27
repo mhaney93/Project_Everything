@@ -112,11 +112,12 @@ The frontend API base URL (`src/api.js`) resolves to:
 
 ### Maps (require Bearer token)
 - `GET /api/maps` - Get user's map
-  - Returns: `{ id, nodes, updatedAt }`
+  - Returns: `{ id, nodes, updatedAt, version }`
 
 - `POST /api/maps` - Save user's map
-  - Body: `{ nodes }`
-  - Returns: `{ id, nodes, updatedAt }`
+  - Body: `{ nodes, version }` (`version` from the last GET or save)
+  - Returns: `{ id, nodes, updatedAt, version }`
+  - `409` if the map changed since that version (see `server/routes/maps.js`)
 
 ## Environment Variables
 

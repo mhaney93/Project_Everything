@@ -1,4 +1,5 @@
 import { upload } from '@vercel/blob/client';
+import { createMapSync } from './mapSync.js';
 
 export const API_BASE_URL =
   import.meta.env.VITE_API_URL ||
@@ -77,15 +78,23 @@ export const authAPI = {
 };
 
 // Maps API calls
+const mapSync = createMapSync(async (method, body) => {
+  const res = await fetch(`${API_BASE_URL}/maps`, {
+    ...defaultFetchOptions,
+    method,
+    ...(body && {
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    }),
+  });
+  return { status: res.status, data: await res.json() };
+});
+
 export const mapsAPI = {
-  getMap: async () => {
-    const res = await fetch(`${API_BASE_URL}/maps`, {
-      ...defaultFetchOptions,
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
-    return data;
-  },
+  getMap: mapSync.getMap,
+
+  // Called when a save is refused because the map changed elsewhere.
+  onConflict: mapSync.setConflictHandler,
 
   getGlobalMap: async () => {
     const res = await fetch(`${API_BASE_URL}/maps/global`);
@@ -94,19 +103,7 @@ export const mapsAPI = {
     return data;
   },
 
-  saveMap: async (nodes) => {
-    const res = await fetch(`${API_BASE_URL}/maps`, {
-      ...defaultFetchOptions,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ nodes }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error);
-    return data;
-  },
+  saveMap: mapSync.saveMap,
 };
 
 // Files API calls
