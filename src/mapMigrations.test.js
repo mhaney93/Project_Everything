@@ -2,6 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
+import { renameNode } from './labels.js'
 import { applyLabelMigrations, applyNodeEdits, applyStructuralMigrations, applySummaryMigrations, dropStaleChildren, LATEST_LABEL_MIGRATION_VERSION, NODE_EDITS_BY_VERSION, STRUCTURAL_MIGRATIONS_BY_VERSION, SUMMARY_MIGRATIONS_BY_VERSION, removeStalePredefinedChildren } from './mapMigrations.js'
 
 // TOPIC_SUBDIVISIONS and generateSummary's summaries live inside the App
@@ -2765,4 +2766,134 @@ test('a mergeInto node edit skips an edited duplicate or a missing target', () =
   assert.equal(applyNodeEdits(builtInCopy).changed, false)
   const renamedTarget = coldWarNodes().map((n) => (n.id === 208 ? { ...n, label: 'Cold War' } : n))
   assert.equal(applyNodeEdits(renamedTarget).changed, false)
+})
+
+const AFRICANA = 'Early Africana Philosophy (c. 24th c BC - 19th c)'
+const CLASSICAL_CHINESE = 'Classical Chinese Philosophy (6th c BC - 3rd c BC)'
+const PTAHHOTEP = 'Ptahhotep (c. 24th c BC)'
+const LAOZI = 'Laozi (Lao Tzu) (6th c BC)'
+const AMO = 'Anton Wilhelm Amo (c. 1703-c. 1759)'
+const NAMED_IDEA_PHILOSOPHERS = [
+  [[HOP, AFRICANA], PTAHHOTEP],
+  [[HOP, AFRICANA], AMO],
+  [[HOP, AFRICANA], 'Frederick Douglass (1818-1895)'],
+  [[HOP, AFRICANA], 'W. E. B. Du Bois (1868-1963)'],
+  [[HOP, VEDIC], 'Yajnavalkya (8th c BC)'],
+  [[HOP, CLASSICAL_CHINESE, 'Daoism (6th c BC - present)'], LAOZI],
+  [[HOP, CLASSICAL_CHINESE, 'Daoism (6th c BC - present)'], 'Zhuangzi (Chuang Tzu) (369 BC - 286 BC)'],
+  [[HOP, CLASSICAL_CHINESE, 'Confucianism (551 BC - present)'], 'Confucius (Kong Fuzi) (551 BC - 479 BC)'],
+  [[HOP, CLASSICAL_CHINESE, 'Confucianism (551 BC - present)'], 'Mencius (Mengzi) (372 BC - 289 BC)'],
+]
+
+// The owner's map before the named ideas: each philosopher a stored leaf, and
+// Ptahhotep a custom copy carrying its built-in label and summary, as saving
+// the label editor unchanged leaves it.
+const preNamedIdeasMap = () => {
+  const africana = NAMED_IDEA_PHILOSOPHERS.filter(([path]) => path[1] === AFRICANA).map(([, label]) => [label])
+  africana.splice(1, 0, ['Zera Yacob (1599-1692)'])
+  africana[0] = [PTAHHOTEP, [], { isCustom: true, summary: appSummary(PTAHHOTEP) }]
+  return buildMap([HOP, [
+    [AFRICANA, africana],
+    [VEDIC, [['Yajnavalkya (8th c BC)']]],
+    [CLASSICAL_CHINESE, [
+      ['Daoism (6th c BC - present)', [[LAOZI], ['Zhuangzi (Chuang Tzu) (369 BC - 286 BC)']]],
+      ['Confucianism (551 BC - present)', [['Confucius (Kong Fuzi) (551 BC - 479 BC)'], ['Mencius (Mengzi) (372 BC - 289 BC)'], ['Xunzi (Xun Kuang) (3rd c BC)'], ['Dong Zhongshu (179 BC - 104 BC)']]],
+    ]],
+  ]])
+}
+
+const philosopherIn = (nodes, label) => nodes.find((n) => n.label === label)
+const childLabels = (nodes, parent) => nodes.filter((n) => n.parentId === parent.id).map((n) => n.label)
+// The tree shows a node's expand dots when it is built-in with taxonomy
+// children, or when anything is stored under it.
+const showsExpandDots = (nodes, node) =>
+  (!node.isCustom && (TOPIC_SUBDIVISIONS[node.label] || []).some((l) => !(node.excludedChildLabels || []).includes(l)))
+  || nodes.some((n) => n.parentId === node.id)
+
+test('the nine philosophers list 38 named ideas between them', () => {
+  const ideas = NAMED_IDEA_PHILOSOPHERS.flatMap(([, label]) => TOPIC_SUBDIVISIONS[label])
+  assert.equal(ideas.length, 38)
+  for (const idea of ideas) assert.ok(appSummary(idea), `${idea} has no summary`)
+})
+
+test('a map saved before the named ideas stores all 38 under their philosophers on load', () => {
+  const { nodes, changed } = normalize(preNamedIdeasMap(), appSummary)
+  assert.equal(changed, true)
+  for (const [, label] of NAMED_IDEA_PHILOSOPHERS) {
+    const philosopher = philosopherIn(nodes, label)
+    assert.deepEqual(childLabels(nodes, philosopher), [...TOPIC_SUBDIVISIONS[label]], label)
+    for (const child of nodes.filter((n) => n.parentId === philosopher.id)) {
+      assert.equal(child.isCustom, undefined, child.label)
+      assert.equal(child.hidden, true, child.label)
+    }
+    assert.ok(showsExpandDots(nodes, philosopher), `${label} shows no expand dots`)
+  }
+  assert.equal(nodes.filter((n) => n.parentId === philosopherIn(nodes, 'Xunzi (Xun Kuang) (3rd c BC)').id).length, 0)
+  assert.equal(normalize(nodes, appSummary).changed, false)
+})
+
+test('storing the named ideas leaves what the owner wrote alone', () => {
+  const before = preNamedIdeasMap()
+  const laozi = philosopherIn(before, LAOZI)
+  const confucius = philosopherIn(before, 'Confucius (Kong Fuzi) (551 BC - 479 BC)')
+  const amo = philosopherIn(before, AMO)
+  Object.assign(laozi, { summary: 'My own summary.', notes: [{ id: 'n1', text: 'Read the Daodejing.', level: 0 }] })
+  confucius.excludedChildLabels = ['Li']
+  const ownDao = { id: 900, label: 'Dao', parentId: laozi.id, hidden: false, isCustom: true, notes: [{ id: 'n2', text: 'Mine.', level: 0 }] }
+  const ownIdea = { id: 901, label: 'My Reading of Amo', parentId: amo.id, hidden: false, isCustom: true }
+  const personalCopy = { id: 902, label: PTAHHOTEP, parentId: 1, hidden: false, isPersonal: true }
+  const { nodes } = normalize([...before, ownDao, ownIdea, personalCopy], appSummary)
+
+  assert.deepEqual(nodes.find((n) => n.id === laozi.id), laozi)
+  assert.deepEqual(nodes.find((n) => n.id === 900), ownDao)
+  assert.deepEqual(childLabels(nodes, laozi), ['Dao'])
+  assert.ok(!childLabels(nodes, confucius).includes('Li'))
+  assert.equal(childLabels(nodes, confucius).length, 6)
+  assert.deepEqual(nodes.find((n) => n.id === 901), ownIdea)
+  assert.deepEqual(childLabels(nodes, amo), ['My Reading of Amo'])
+  assert.deepEqual(childLabels(nodes, personalCopy), [])
+  const ptahhotep = nodes.find((n) => n.label === PTAHHOTEP && !n.isPersonal)
+  assert.equal(ptahhotep.isCustom, true)
+  assert.equal(ptahhotep.summary, appSummary(PTAHHOTEP))
+  assert.equal(normalize(nodes, appSummary).changed, false)
+})
+
+test('the named ideas are not stored again under a philosopher already expanded, or one not stored', () => {
+  const expanded = buildMap([HOP, [[AFRICANA, [
+    [AMO, [['Impassivity of the Mind', [], { hidden: true }]]],
+  ]]]])
+  const { nodes } = normalize(expanded, appSummary)
+  assert.deepEqual(nodes.filter((n) => n.parentId === philosopherIn(expanded, AMO).id), [expanded.at(-1)])
+  const unexpanded = normalize(buildMap([HOP, [[AFRICANA]]]), appSummary).nodes
+  assert.deepEqual(unexpanded.filter((n) => n.label === PTAHHOTEP || n.label === AMO), [])
+})
+
+test('a named idea the owner renamed is not stored again on reload', () => {
+  const stored = normalize(preNamedIdeasMap(), appSummary).nodes
+  const ptahhotep = philosopherIn(stored, PTAHHOTEP)
+  const renamed = stored.map((n) => (n.parentId === ptahhotep.id && n.label === 'Ma\'at'
+    ? { ...n, label: 'Maat', isCustom: true, summary: appSummary('Ma\'at') }
+    : n))
+  const { nodes, changed } = normalize(renamed, appSummary)
+  assert.equal(changed, false)
+  assert.deepEqual(childLabels(nodes, ptahhotep), ['Maat'])
+})
+
+test('a named idea renamed beside other named ideas is not stored again on reload', () => {
+  const stored = normalize(preNamedIdeasMap(), appSummary).nodes
+  const laozi = philosopherIn(stored, LAOZI)
+  const dao = stored.find((n) => n.parentId === laozi.id && n.label === 'Dao')
+  const { nodes, changed } = normalize(renameNode(stored, dao.id, 'The Way', appSummary), appSummary)
+  assert.equal(changed, false)
+  assert.deepEqual(childLabels(nodes, laozi), ['The Way', 'Wu Wei', 'Ziran'])
+})
+
+test('a named idea renamed and then deleted is not stored again on reload', () => {
+  const stored = normalize(preNamedIdeasMap(), appSummary).nodes
+  const ptahhotep = philosopherIn(stored, PTAHHOTEP)
+  const maat = stored.find((n) => n.parentId === ptahhotep.id && n.label === 'Ma\'at')
+  const deleted = renameNode(stored, maat.id, 'Maat', appSummary).filter((n) => n.id !== maat.id)
+  const { nodes, changed } = normalize(deleted, appSummary)
+  assert.equal(changed, false)
+  assert.deepEqual(childLabels(nodes, philosopherIn(nodes, PTAHHOTEP)), [])
 })
