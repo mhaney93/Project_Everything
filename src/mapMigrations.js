@@ -20,6 +20,11 @@
 //   it is one of `dropSummaries`, so the built-in summary of the new label shows.
 // - `add` creates a built-in child `add` under the node at `under`, when that
 //   node's built-in children are already stored (expanding never adds more).
+//   With `everyCopy`, it also does so under a copy holding no built-in child
+//   yet and under a custom copy of the node (one whose label the owner saved
+//   in the editor), which never offers its built-in children otherwise; give
+//   such a node an entry for each of its built-in children, so the first one
+//   stored does not stand in for the rest.
 // - `move` reparents the node, with its subtree, under the node at `into`,
 //   creating `into` when only its parent is stored. With `id`, it moves the
 //   node with that id at the path instead, custom or not.
@@ -59,6 +64,9 @@ const KECCAK256_SUMMARY = 'Computes the Keccak-256 hash (a bytes32) of a bytes i
 const HISTORY_OF_PHILOSOPHY = ['History of Philosophy']
 const VEDIC = [...HISTORY_OF_PHILOSOPHY, 'Vedic Indian Philosophy (16th c BC - 6th c BC)']
 const CLASSICAL_CHINESE = [...HISTORY_OF_PHILOSOPHY, 'Classical Chinese Philosophy (6th c BC - 3rd c BC)']
+const DAOISM = [...CLASSICAL_CHINESE, 'Daoism (6th c BC - present)']
+const CONFUCIANISM = [...CLASSICAL_CHINESE, 'Confucianism (551 BC - present)']
+const EARLY_AFRICANA = [...HISTORY_OF_PHILOSOPHY, 'Early Africana Philosophy (c. 24th c BC - 19th c)']
 const ANCIENT_GREEK = [...HISTORY_OF_PHILOSOPHY, 'Ancient Western Philosophy (6th c BC - 5th c AD)', 'Ancient Greek Philosophy (6th c BC - 1st c BC)']
 const CLASSICAL_GREEK = [...ANCIENT_GREEK, 'Classical Greek Philosophy (5th c BC - 4th c BC)']
 const HELLENISTIC = [...ANCIENT_GREEK, 'Hellenistic Philosophy (3rd c BC - 1st c BC)']
@@ -88,6 +96,7 @@ const ASK_A_DEEP_QUESTION_SUMMARY = 'The first step in the Loop for Understandin
 const EXPRESSIONISM_SUMMARY = 'The view that art expresses the emotions, feelings, or inner states of the artist.'
 const JEWISH_PHILOSOPHY_SUMMARY = 'The philosophical thought developing from Jewish theological and ethical traditions.'
 const addEach = (under, labels) => labels.map((add) => ({ add, under }))
+const addEachToEveryCopy = (under, labels) => labels.map((add) => ({ add, under, everyCopy: true }))
 const refileEach = (from, labels, into) => ({ refile: labels.map((label) => [...from, label]), into })
 const ANCIENT_MIGRATION_PERIOD_SUMMARY = 'Characterized by significant movements of various peoples, primarily Germanic tribes, leading to widespread upheaval, the decline of the Western Roman Empire, and the emergence of new political entities across Europe.'
 
@@ -481,6 +490,22 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
     { remove: ['CLI Tools', 'TypeScript|cli'] },
     // The opcode and Solidity's keccak256() differ; a suffixed label gives the opcode its own summary.
     { rename: ['opcodes (operation codes)', 'keccak256'], label: 'keccak256|opcode' },
+  ],
+  15: [
+    // Each philosopher's named ideas. The philosophers were leaves, and a copy
+    // saved from the label editor is custom, so it showed none of them.
+    ...addEachToEveryCopy([...EARLY_AFRICANA, 'Ptahhotep (c. 24th c BC)'], ['Ma\'at']),
+    ...addEachToEveryCopy([...EARLY_AFRICANA, 'Anton Wilhelm Amo (c. 1703-c. 1759)'], ['Impassivity of the Mind']),
+    ...addEachToEveryCopy([...EARLY_AFRICANA, 'Frederick Douglass (1818-1895)'], ['Composite Nationality']),
+    ...addEachToEveryCopy([...EARLY_AFRICANA, 'W. E. B. Du Bois (1868-1963)'], ['Double Consciousness', 'Psychological Wage', 'Talented Tenth']),
+    ...addEachToEveryCopy([...VEDIC, 'Yajnavalkya (8th c BC)'], ['Atman', 'Atman-Brahman Identity', 'Karma', 'Neti Neti']),
+    ...addEachToEveryCopy([...DAOISM, 'Laozi (Lao Tzu) (6th c BC)'], ['Dao', 'Wu Wei', 'Ziran']),
+    ...addEachToEveryCopy([...DAOISM, 'Zhuangzi (Chuang Tzu) (369 BC - 286 BC)'], ['Butterfly Dream', 'Cook Ding', 'Happy Fish Debate', 'Perspectivism (Qiwulun)', 'Usefulness of the Useless']),
+    ...addEachToEveryCopy([...CONFUCIANISM, 'Confucius (Kong Fuzi) (551 BC - 479 BC)'], ['Filial Piety', 'Golden Rule (Shu)', 'Junzi', 'Li', 'Rectification of Names', 'Ren', 'Rule by Virtue']),
+    ...addEachToEveryCopy([...CONFUCIANISM, 'Mencius (Mengzi) (372 BC - 289 BC)'], [
+      'Child at the Well', 'Constant Means, Constant Heart', 'Extension', 'Fish and Bear\'s Paw', 'Flood-like Qi', 'Four Sprouts', 'Graded Love',
+      'Great Body and Small Body', 'Human Nature Is Good', 'Mandate of Heaven', 'Ox Mountain', 'Right of Revolution', 'Righteousness over Profit',
+    ]),
   ],
 }
 
@@ -952,17 +977,18 @@ const renameBuiltInNode = (mapNodes, { rename, label, dropSummaries = [] }, buil
   return { nodes, changed: nodes !== mapNodes }
 }
 
-const addBuiltInNode = (mapNodes, { add, under }) => {
+const addBuiltInNode = (mapNodes, { add, under, everyCopy }) => {
   const byId = new Map(mapNodes.map((node) => [node.id, node]))
   const childrenByParent = buildChildrenByParent(mapNodes)
   let maxId = maxIdOf(mapNodes)
   const created = []
-  for (const parent of nodesAtPath(mapNodes, byId, under)) {
+  const accepts = everyCopy ? (node) => !node.isPersonal : isBuiltIn
+  for (const parent of nodesAtPath(mapNodes, byId, under, accepts)) {
     const children = childrenByParent.get(parent.id) || []
-    if (!children.some((child) => !child.isCustom)) continue
+    if (!everyCopy && !children.some((child) => !child.isCustom)) continue
     if (children.some((child) => child.label === add)) continue
     if ((parent.excludedChildLabels || []).includes(add)) continue
-    created.push({ id: ++maxId, label: add, parentId: parent.id, hidden: children[0].hidden ?? true })
+    created.push({ id: ++maxId, label: add, parentId: parent.id, hidden: children[0]?.hidden ?? true })
   }
   if (created.length === 0) return { nodes: mapNodes, changed: false }
   return { nodes: [...mapNodes, ...created], changed: true }
