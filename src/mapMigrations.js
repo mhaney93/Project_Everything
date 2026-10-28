@@ -20,11 +20,12 @@
 //   it is one of `dropSummaries`, so the built-in summary of the new label shows.
 // - `add` creates a built-in child `add` under the node at `under`, when that
 //   node's built-in children are already stored (expanding never adds more).
-//   With `everyCopy`, it also does so under a copy holding no built-in child
-//   yet and under a custom copy of the node (one whose label the owner saved
-//   in the editor), which never offers its built-in children otherwise; give
-//   such a node an entry for each of its built-in children, so the first one
-//   stored does not stand in for the rest.
+//   With `everyCopy`, it also does so under a copy with nothing stored under
+//   it yet, built-in or custom (one whose label the owner saved in the
+//   editor, which never offers its built-in children otherwise); a copy
+//   holding only custom children is left alone. Give such a node an entry for
+//   each of its built-in children, so the first one stored does not stand in
+//   for the rest.
 // - `move` reparents the node, with its subtree, under the node at `into`,
 //   creating `into` when only its parent is stored. With `id`, it moves the
 //   node with that id at the path instead, custom or not.
@@ -985,7 +986,7 @@ const addBuiltInNode = (mapNodes, { add, under, everyCopy }) => {
   const accepts = everyCopy ? (node) => !node.isPersonal : isBuiltIn
   for (const parent of nodesAtPath(mapNodes, byId, under, accepts)) {
     const children = childrenByParent.get(parent.id) || []
-    if (!everyCopy && !children.some((child) => !child.isCustom)) continue
+    if (!children.some((child) => !child.isCustom) && !(everyCopy && children.length === 0)) continue
     if (children.some((child) => child.label === add)) continue
     if ((parent.excludedChildLabels || []).includes(add)) continue
     created.push({ id: ++maxId, label: add, parentId: parent.id, hidden: children[0]?.hidden ?? true })

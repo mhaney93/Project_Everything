@@ -2845,13 +2845,11 @@ test('storing the named ideas leaves what the owner wrote alone', () => {
 
   assert.deepEqual(nodes.find((n) => n.id === laozi.id), laozi)
   assert.deepEqual(nodes.find((n) => n.id === 900), ownDao)
-  assert.deepEqual(childLabels(nodes, laozi), ['Dao', 'Wu Wei', 'Ziran'])
-  assert.equal(nodes.filter((n) => n.parentId === laozi.id && n.label === 'Dao').length, 1)
+  assert.deepEqual(childLabels(nodes, laozi), ['Dao'])
   assert.ok(!childLabels(nodes, confucius).includes('Li'))
   assert.equal(childLabels(nodes, confucius).length, 6)
   assert.deepEqual(nodes.find((n) => n.id === 901), ownIdea)
-  for (const child of nodes.filter((n) => n.parentId === amo.id && !n.isCustom)) assert.equal(child.hidden, false, child.label)
-  assert.deepEqual(childLabels(nodes, amo), ['My Reading of Amo', 'Impassivity of the Mind'])
+  assert.deepEqual(childLabels(nodes, amo), ['My Reading of Amo'])
   assert.deepEqual(childLabels(nodes, personalCopy), [])
   const ptahhotep = nodes.find((n) => n.label === PTAHHOTEP && !n.isPersonal)
   assert.equal(ptahhotep.isCustom, true)
@@ -2867,4 +2865,15 @@ test('the named ideas are not stored again under a philosopher already expanded,
   assert.deepEqual(nodes.filter((n) => n.parentId === philosopherIn(expanded, AMO).id), [expanded.at(-1)])
   const unexpanded = normalize(buildMap([HOP, [[AFRICANA]]]), appSummary).nodes
   assert.deepEqual(unexpanded.filter((n) => n.label === PTAHHOTEP || n.label === AMO), [])
+})
+
+test('a named idea the owner renamed is not stored again on reload', () => {
+  const stored = normalize(preNamedIdeasMap(), appSummary).nodes
+  const ptahhotep = philosopherIn(stored, PTAHHOTEP)
+  const renamed = stored.map((n) => (n.parentId === ptahhotep.id && n.label === 'Ma\'at'
+    ? { ...n, label: 'Maat', isCustom: true, summary: appSummary('Ma\'at') }
+    : n))
+  const { nodes, changed } = normalize(renamed, appSummary)
+  assert.equal(changed, false)
+  assert.deepEqual(childLabels(nodes, ptahhotep), ['Maat'])
 })
