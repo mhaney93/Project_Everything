@@ -508,6 +508,24 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
       'Great Body and Small Body', 'Human Nature Is Good', 'Mandate of Heaven', 'Ox Mountain', 'Right of Revolution', 'Righteousness over Profit',
     ]),
   ],
+  16: [
+    // Xunzi's named ideas, stored the same way as migration 15's.
+    ...addEachToEveryCopy([...CONFUCIANISM, 'Xunzi (Xun Kuang) (3rd c BC)'], [
+      'Division of Heaven and Humans',
+      'Emptiness, Unity and Stillness',
+      'Fen',
+      'Heavenly Ruler',
+      'Human Nature Is Bad',
+      'Li|xunzi',
+      'Obscuration',
+      'Potter and Clay',
+      'Rectification of Names|xunzi',
+      'Rule of Man',
+      'The Man in the Street Can Become Yu',
+      'Warped Wood',
+      'Wei',
+    ]),
+  ],
 }
 
 // Each entry rewrites a stored summary on a node with `label` only while it

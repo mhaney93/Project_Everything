@@ -2828,7 +2828,7 @@ test('a map saved before the named ideas stores all 38 under their philosophers 
     }
     assert.ok(showsExpandDots(nodes, philosopher), `${label} shows no expand dots`)
   }
-  assert.equal(nodes.filter((n) => n.parentId === philosopherIn(nodes, 'Xunzi (Xun Kuang) (3rd c BC)').id).length, 0)
+  assert.equal(nodes.filter((n) => n.parentId === philosopherIn(nodes, 'Dong Zhongshu (179 BC - 104 BC)').id).length, 0)
   assert.equal(normalize(nodes, appSummary).changed, false)
 })
 
@@ -2896,4 +2896,49 @@ test('a named idea renamed and then deleted is not stored again on reload', () =
   const { nodes, changed } = normalize(deleted, appSummary)
   assert.equal(changed, false)
   assert.deepEqual(childLabels(nodes, philosopherIn(nodes, PTAHHOTEP)), [])
+})
+
+const XUNZI = 'Xunzi (Xun Kuang) (3rd c BC)'
+
+test('Xunzi lists 13 named ideas, each with a summary that does not name him', () => {
+  const ideas = TOPIC_SUBDIVISIONS[XUNZI]
+  assert.equal(ideas.length, 13)
+  for (const idea of ideas) {
+    assert.ok(appSummary(idea), `${idea} has no summary`)
+    assert.ok(!appSummary(idea).includes('Xunzi'), `${idea} names Xunzi`)
+  }
+  assert.ok(ideas.includes('Li|xunzi') && ideas.includes('Rectification of Names|xunzi'))
+  assert.notEqual(appSummary('Li|xunzi'), appSummary('Li'))
+})
+
+test('a map saved before Xunzi\'s named ideas stores all 13 under him on load, once', () => {
+  const { nodes, changed } = normalize(preNamedIdeasMap(), appSummary)
+  assert.equal(changed, true)
+  const xunzi = philosopherIn(nodes, XUNZI)
+  assert.deepEqual(childLabels(nodes, xunzi), [...TOPIC_SUBDIVISIONS[XUNZI]])
+  for (const child of nodes.filter((n) => n.parentId === xunzi.id)) {
+    assert.equal(child.isCustom, undefined, child.label)
+    assert.equal(child.hidden, true, child.label)
+  }
+  assert.ok(showsExpandDots(nodes, xunzi))
+  assert.deepEqual(childLabels(nodes, philosopherIn(nodes, 'Confucius (Kong Fuzi) (551 BC - 479 BC)')), [...TOPIC_SUBDIVISIONS['Confucius (Kong Fuzi) (551 BC - 479 BC)']])
+  assert.equal(normalize(nodes, appSummary).changed, false)
+})
+
+test('storing Xunzi\'s named ideas keeps the owner\'s renames and deletions', () => {
+  const stored = normalize(preNamedIdeasMap(), appSummary).nodes
+  const xunzi = philosopherIn(stored, XUNZI)
+  const wei = stored.find((n) => n.parentId === xunzi.id && n.label === 'Wei')
+  const fen = stored.find((n) => n.parentId === xunzi.id && n.label === 'Fen')
+  // Deleting a built-in child, as the app does, records its label as excluded on the parent.
+  const edited = renameNode(stored, wei.id, 'Deliberate Effort', appSummary)
+    .filter((n) => n.id !== fen.id)
+    .map((n) => (n.id === xunzi.id ? { ...n, excludedChildLabels: [...(n.excludedChildLabels || []), 'Fen'] } : n))
+  const { nodes, changed } = normalize(edited, appSummary)
+  assert.equal(changed, false)
+  const labels = childLabels(nodes, philosopherIn(nodes, XUNZI))
+  assert.ok(labels.includes('Deliberate Effort'))
+  assert.ok(!labels.includes('Wei'))
+  assert.ok(!labels.includes('Fen'))
+  assert.equal(labels.length, 12)
 })
