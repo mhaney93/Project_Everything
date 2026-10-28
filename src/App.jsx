@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import './App.css';
 import { authAPI, mapsAPI, filesAPI, API_BASE_URL } from './api';
 import { applyLabelMigrations, applyNodeEdits, applyStructuralMigrations, applySummaryMigrations, dropStaleChildren, removeStalePredefinedChildren } from './mapMigrations';
-import { stripLabelSuffix } from './labels';
+import { renameNode, stripLabelSuffix } from './labels';
 
 // Node size and layout constants
 const NODE_SIZE_MIN = 0.6;
@@ -22633,15 +22633,9 @@ function App() {
     const parentId = node?.parentId
 
     setNodes((prev) => {
-      // Update the label. If the node has no stored summary, bake in the
-      // generated summary for the OLD label so it survives the rename.
       // Always mark as isCustom: true — a renamed node has a user-defined label
       // and must not be stripped by normalizeLoadedNodes as a stale predefined child.
-      const updated = prev.map((n) => {
-        if (n.id !== nodeId) return n
-        const preservedSummary = n.summary || generateSummary(n.label) || undefined
-        return { ...n, label: newLabel.trim(), summary: preservedSummary, isCustom: true }
-      })
+      const updated = renameNode(prev, nodeId, newLabel.trim(), generateSummary)
 
       // If it's a custom node, reorder it alphabetically among siblings
       if (isCustom && parentId !== undefined) {

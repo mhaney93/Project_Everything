@@ -2,6 +2,7 @@ import { test } from 'node:test'
 import assert from 'node:assert/strict'
 import { readFileSync } from 'node:fs'
 import vm from 'node:vm'
+import { renameNode } from './labels.js'
 import { applyLabelMigrations, applyNodeEdits, applyStructuralMigrations, applySummaryMigrations, dropStaleChildren, LATEST_LABEL_MIGRATION_VERSION, NODE_EDITS_BY_VERSION, STRUCTURAL_MIGRATIONS_BY_VERSION, SUMMARY_MIGRATIONS_BY_VERSION, removeStalePredefinedChildren } from './mapMigrations.js'
 
 // TOPIC_SUBDIVISIONS and generateSummary's summaries live inside the App
@@ -2876,4 +2877,23 @@ test('a named idea the owner renamed is not stored again on reload', () => {
   const { nodes, changed } = normalize(renamed, appSummary)
   assert.equal(changed, false)
   assert.deepEqual(childLabels(nodes, ptahhotep), ['Maat'])
+})
+
+test('a named idea renamed beside other named ideas is not stored again on reload', () => {
+  const stored = normalize(preNamedIdeasMap(), appSummary).nodes
+  const laozi = philosopherIn(stored, LAOZI)
+  const dao = stored.find((n) => n.parentId === laozi.id && n.label === 'Dao')
+  const { nodes, changed } = normalize(renameNode(stored, dao.id, 'The Way', appSummary), appSummary)
+  assert.equal(changed, false)
+  assert.deepEqual(childLabels(nodes, laozi), ['The Way', 'Wu Wei', 'Ziran'])
+})
+
+test('a named idea renamed and then deleted is not stored again on reload', () => {
+  const stored = normalize(preNamedIdeasMap(), appSummary).nodes
+  const ptahhotep = philosopherIn(stored, PTAHHOTEP)
+  const maat = stored.find((n) => n.parentId === ptahhotep.id && n.label === 'Ma\'at')
+  const deleted = renameNode(stored, maat.id, 'Maat', appSummary).filter((n) => n.id !== maat.id)
+  const { nodes, changed } = normalize(deleted, appSummary)
+  assert.equal(changed, false)
+  assert.deepEqual(childLabels(nodes, philosopherIn(nodes, PTAHHOTEP)), [])
 })
