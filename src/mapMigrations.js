@@ -526,6 +526,21 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
       'Wei',
     ]),
   ],
+  17: [
+    // Dong Zhongshu's named ideas, stored the same way as migration 15's.
+    ...addEachToEveryCopy([...CONFUCIANISM, 'Dong Zhongshu (179 BC - 104 BC)'], [
+      'Dismiss the Hundred Schools',
+      'Five Constants',
+      'Heaven Does Not Change, Nor Does the Way',
+      'Rice and Grain',
+      'Subtle Words and Great Meaning',
+      'Three Bonds',
+      'Tianren Ganying',
+      'Uncrowned King',
+      'Virtue Primary, Punishment Secondary',
+      'Zaiyi',
+    ]),
+  ],
 }
 
 // Each entry rewrites a stored summary on a node with `label` only while it
