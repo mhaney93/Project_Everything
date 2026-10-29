@@ -2984,3 +2984,50 @@ test('storing Dong Zhongshu\'s named ideas keeps the owner\'s renames and deleti
   assert.ok(!labels.includes('Three Bonds'))
   assert.equal(labels.length, 9)
 })
+
+const MOZI = 'Mozi (Mo Di) (c. 470 BC - c. 391 BC)'
+const preMoziIdeasMap = () => buildMap([HOP, [
+  [CLASSICAL_CHINESE, [
+    ['Mohism (5th c BC - 3rd c BC)', [[MOZI]]],
+  ]],
+]])
+
+test('Mozi lists 13 named ideas, each with a summary that does not name him', () => {
+  const ideas = TOPIC_SUBDIVISIONS[MOZI]
+  assert.equal(ideas.length, 13)
+  for (const idea of ideas) {
+    assert.ok(appSummary(idea), `${idea} has no summary`)
+    assert.ok(!appSummary(idea).includes('Mozi'), `${idea} names Mozi`)
+  }
+})
+
+test('a map saved before Mozi\'s named ideas stores all 13 under him on load, once', () => {
+  const { nodes, changed } = normalize(preMoziIdeasMap(), appSummary)
+  assert.equal(changed, true)
+  const mozi = philosopherIn(nodes, MOZI)
+  assert.deepEqual(childLabels(nodes, mozi), [...TOPIC_SUBDIVISIONS[MOZI]])
+  for (const child of nodes.filter((n) => n.parentId === mozi.id)) {
+    assert.equal(child.isCustom, undefined, child.label)
+    assert.equal(child.hidden, true, child.label)
+  }
+  assert.ok(showsExpandDots(nodes, mozi))
+  assert.equal(normalize(nodes, appSummary).changed, false)
+})
+
+test('storing Mozi\'s named ideas keeps the owner\'s renames and deletions', () => {
+  const stored = normalize(preMoziIdeasMap(), appSummary).nodes
+  const mozi = philosopherIn(stored, MOZI)
+  const jianAi = stored.find((n) => n.parentId === mozi.id && n.label === 'Jian Ai')
+  const zhu = stored.find((n) => n.parentId === mozi.id && n.label === 'Zhu')
+  // Deleting a built-in child, as the app does, records its label as excluded on the parent.
+  const edited = renameNode(stored, jianAi.id, 'Inclusive Care', appSummary)
+    .filter((n) => n.id !== zhu.id)
+    .map((n) => (n.id === mozi.id ? { ...n, excludedChildLabels: [...(n.excludedChildLabels || []), 'Zhu'] } : n))
+  const { nodes, changed } = normalize(edited, appSummary)
+  assert.equal(changed, false)
+  const labels = childLabels(nodes, philosopherIn(nodes, MOZI))
+  assert.ok(labels.includes('Inclusive Care'))
+  assert.ok(!labels.includes('Jian Ai'))
+  assert.ok(!labels.includes('Zhu'))
+  assert.equal(labels.length, 12)
+})

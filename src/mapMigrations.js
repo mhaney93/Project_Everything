@@ -541,6 +541,24 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
       'Zaiyi',
     ]),
   ],
+  18: [
+    // Mozi's named ideas, stored the same way as migration 15's.
+    ...addEachToEveryCopy([...CLASSICAL_CHINESE, 'Mohism (5th c BC - 3rd c BC)', 'Mozi (Mo Di) (c. 470 BC - c. 391 BC)'], [
+      'Fa',
+      'Fei Gong',
+      'Fei Ming',
+      'Fei Yue',
+      'Jian Ai',
+      'Jie Yong',
+      'Jie Zang',
+      'Ming Gui',
+      'San Biao',
+      'Shang Tong',
+      'Shang Xian',
+      'Tian Zhi',
+      'Zhu',
+    ]),
+  ],
 }
 
 // Each entry rewrites a stored summary on a node with `label` only while it
