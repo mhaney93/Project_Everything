@@ -3031,3 +3031,50 @@ test('storing Mozi\'s named ideas keeps the owner\'s renames and deletions', () 
   assert.ok(!labels.includes('Zhu'))
   assert.equal(labels.length, 12)
 })
+
+const HUI_SHI = 'Hui Shi (c. 370 BC - c. 310 BC)'
+const preHuiShiIdeasMap = () => buildMap([HOP, [
+  [CLASSICAL_CHINESE, [
+    ['School of Names (4th c BC - 3rd c BC)', [[HUI_SHI]]],
+  ]],
+]])
+
+test('Hui Shi lists 9 named ideas, each with a summary that does not name him', () => {
+  const ideas = TOPIC_SUBDIVISIONS[HUI_SHI]
+  assert.equal(ideas.length, 9)
+  for (const idea of ideas) {
+    assert.ok(appSummary(idea), `${idea} has no summary`)
+    assert.ok(!appSummary(idea).includes('Hui Shi'), `${idea} names Hui Shi`)
+  }
+})
+
+test('a map saved before Hui Shi\'s named ideas stores all 9 under him on load, once', () => {
+  const { nodes, changed } = normalize(preHuiShiIdeasMap(), appSummary)
+  assert.equal(changed, true)
+  const huiShi = philosopherIn(nodes, HUI_SHI)
+  assert.deepEqual(childLabels(nodes, huiShi), [...TOPIC_SUBDIVISIONS[HUI_SHI]])
+  for (const child of nodes.filter((n) => n.parentId === huiShi.id)) {
+    assert.equal(child.isCustom, undefined, child.label)
+    assert.equal(child.hidden, true, child.label)
+  }
+  assert.ok(showsExpandDots(nodes, huiShi))
+  assert.equal(normalize(nodes, appSummary).changed, false)
+})
+
+test('storing Hui Shi\'s named ideas keeps the owner\'s renames and deletions', () => {
+  const stored = normalize(preHuiShiIdeasMap(), appSummary).nodes
+  const huiShi = philosopherIn(stored, HUI_SHI)
+  const oneBody = stored.find((n) => n.parentId === huiShi.id && n.label === 'One Body')
+  const pi = stored.find((n) => n.parentId === huiShi.id && n.label === 'Pi')
+  // Deleting a built-in child, as the app does, records its label as excluded on the parent.
+  const edited = renameNode(stored, oneBody.id, 'Yi Ti', appSummary)
+    .filter((n) => n.id !== pi.id)
+    .map((n) => (n.id === huiShi.id ? { ...n, excludedChildLabels: [...(n.excludedChildLabels || []), 'Pi'] } : n))
+  const { nodes, changed } = normalize(edited, appSummary)
+  assert.equal(changed, false)
+  const labels = childLabels(nodes, philosopherIn(nodes, HUI_SHI))
+  assert.ok(labels.includes('Yi Ti'))
+  assert.ok(!labels.includes('One Body'))
+  assert.ok(!labels.includes('Pi'))
+  assert.equal(labels.length, 8)
+})

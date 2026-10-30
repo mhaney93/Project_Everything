@@ -559,6 +559,20 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
       'Zhu',
     ]),
   ],
+  19: [
+    // Hui Shi's named ideas, stored the same way as migration 15's.
+    ...addEachToEveryCopy([...CLASSICAL_CHINESE, 'School of Names (4th c BC - 3rd c BC)', 'Hui Shi (c. 370 BC - c. 310 BC)'], [
+      'Fan Ai',
+      'Great One',
+      'Great Sameness and Difference',
+      'One Body',
+      'Pi',
+      'Quarrel on a Snail\'s Horns',
+      'Small One',
+      'Small Sameness and Difference',
+      'Wu Qing',
+    ]),
+  ],
 }
 
 // Each entry rewrites a stored summary on a node with `label` only while it
