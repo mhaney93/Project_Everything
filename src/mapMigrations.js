@@ -573,6 +573,19 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
       'Wu Qing',
     ]),
   ],
+  20: [
+    // Gongsun Long's named ideas, stored the same way as migration 15's.
+    ...addEachToEveryCopy([...CLASSICAL_CHINESE, 'School of Names (4th c BC - 3rd c BC)', 'Gongsun Long (c. 320 BC - c. 250 BC)'], [
+      'Chicken Has Three Legs',
+      'Kuang Ju',
+      'Ming Shi',
+      'Separating Hard and White',
+      'White Horse Paradox',
+      'Yan Bing',
+      'Zang Has Three Ears',
+      'Zhi Wu',
+    ]),
+  ],
 }
 
 // Each entry rewrites a stored summary on a node with `label` only while it

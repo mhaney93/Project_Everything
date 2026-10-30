@@ -3078,3 +3078,50 @@ test('storing Hui Shi\'s named ideas keeps the owner\'s renames and deletions', 
   assert.ok(!labels.includes('Pi'))
   assert.equal(labels.length, 8)
 })
+
+const GONGSUN_LONG = 'Gongsun Long (c. 320 BC - c. 250 BC)'
+const preGongsunLongIdeasMap = () => buildMap([HOP, [
+  [CLASSICAL_CHINESE, [
+    ['School of Names (4th c BC - 3rd c BC)', [[GONGSUN_LONG]]],
+  ]],
+]])
+
+test('Gongsun Long lists 8 named ideas, each with a summary that does not name him', () => {
+  const ideas = TOPIC_SUBDIVISIONS[GONGSUN_LONG]
+  assert.equal(ideas.length, 8)
+  for (const idea of ideas) {
+    assert.ok(appSummary(idea), `${idea} has no summary`)
+    assert.ok(!appSummary(idea).includes('Gongsun Long'), `${idea} names Gongsun Long`)
+  }
+})
+
+test('a map saved before Gongsun Long\'s named ideas stores all 8 under him on load, once', () => {
+  const { nodes, changed } = normalize(preGongsunLongIdeasMap(), appSummary)
+  assert.equal(changed, true)
+  const gongsunLong = philosopherIn(nodes, GONGSUN_LONG)
+  assert.deepEqual(childLabels(nodes, gongsunLong), [...TOPIC_SUBDIVISIONS[GONGSUN_LONG]])
+  for (const child of nodes.filter((n) => n.parentId === gongsunLong.id)) {
+    assert.equal(child.isCustom, undefined, child.label)
+    assert.equal(child.hidden, true, child.label)
+  }
+  assert.ok(showsExpandDots(nodes, gongsunLong))
+  assert.equal(normalize(nodes, appSummary).changed, false)
+})
+
+test('storing Gongsun Long\'s named ideas keeps the owner\'s renames and deletions', () => {
+  const stored = normalize(preGongsunLongIdeasMap(), appSummary).nodes
+  const gongsunLong = philosopherIn(stored, GONGSUN_LONG)
+  const whiteHorse = stored.find((n) => n.parentId === gongsunLong.id && n.label === 'White Horse Paradox')
+  const zhiWu = stored.find((n) => n.parentId === gongsunLong.id && n.label === 'Zhi Wu')
+  // Deleting a built-in child, as the app does, records its label as excluded on the parent.
+  const edited = renameNode(stored, whiteHorse.id, 'Bai Ma Fei Ma', appSummary)
+    .filter((n) => n.id !== zhiWu.id)
+    .map((n) => (n.id === gongsunLong.id ? { ...n, excludedChildLabels: [...(n.excludedChildLabels || []), 'Zhi Wu'] } : n))
+  const { nodes, changed } = normalize(edited, appSummary)
+  assert.equal(changed, false)
+  const labels = childLabels(nodes, philosopherIn(nodes, GONGSUN_LONG))
+  assert.ok(labels.includes('Bai Ma Fei Ma'))
+  assert.ok(!labels.includes('White Horse Paradox'))
+  assert.ok(!labels.includes('Zhi Wu'))
+  assert.equal(labels.length, 7)
+})
