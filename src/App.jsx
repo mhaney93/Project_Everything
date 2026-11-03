@@ -11820,7 +11820,7 @@ function App() {
   nodesRef.current = nodes
   const selectedNode = nodes.find((node) => node.id === selectedId)
   const isAuthenticated = Boolean(currentUser)
-  const isAdmin = currentUser?.email === 'matthew.haney1993@gmail.com' || currentUser?.email === 'preveil.llc@gmail.com'
+  const isAdmin = currentUser?.email === 'matthew.haney1993@gmail.com'
   const canEditNode = (node) => isAuthenticated && (node?.isCustom || isAdmin)
   const canDragNodeToReparent = (node) => {
     if (!currentUser) return false
