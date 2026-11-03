@@ -3,7 +3,7 @@ const pool = require('../db/config');
 // Total storage limit per user (files + map data): 10GB
 const TOTAL_STORAGE_LIMIT_PER_USER = 10 * 1024 * 1024 * 1024; // 10GB
 const ADMIN_EMAIL = 'matthew.haney1993@gmail.com';
-const ADMIN_EMAILS = ['matthew.haney1993@gmail.com', 'preveil.llc@gmail.com'];
+const ADMIN_EMAILS = ['matthew.haney1993@gmail.com'];
 
 // Get user's file storage usage
 const getFileStorageUsage = async (userId) => {
