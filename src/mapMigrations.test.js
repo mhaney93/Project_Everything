@@ -3125,3 +3125,50 @@ test('storing Gongsun Long\'s named ideas keeps the owner\'s renames and deletio
   assert.ok(!labels.includes('Zhi Wu'))
   assert.equal(labels.length, 7)
 })
+
+const SHANG_YANG = 'Shang Yang (390 BC - 338 BC)'
+const preShangYangIdeasMap = () => buildMap([HOP, [
+  [CLASSICAL_CHINESE, [
+    ['Legalism (4th c BC - 3rd c BC)', [[SHANG_YANG]]],
+  ]],
+]])
+
+test('Shang Yang lists 12 named ideas, each with a summary that does not name him', () => {
+  const ideas = TOPIC_SUBDIVISIONS[SHANG_YANG]
+  assert.equal(ideas.length, 12)
+  for (const idea of ideas) {
+    assert.ok(appSummary(idea), `${idea} has no summary`)
+    assert.ok(!appSummary(idea).includes('Shang Yang'), `${idea} names Shang Yang`)
+  }
+})
+
+test('a map saved before Shang Yang\'s named ideas stores all 12 under him on load, once', () => {
+  const { nodes, changed } = normalize(preShangYangIdeasMap(), appSummary)
+  assert.equal(changed, true)
+  const shangYang = philosopherIn(nodes, SHANG_YANG)
+  assert.deepEqual(childLabels(nodes, shangYang), [...TOPIC_SUBDIVISIONS[SHANG_YANG]])
+  for (const child of nodes.filter((n) => n.parentId === shangYang.id)) {
+    assert.equal(child.isCustom, undefined, child.label)
+    assert.equal(child.hidden, true, child.label)
+  }
+  assert.ok(showsExpandDots(nodes, shangYang))
+  assert.equal(normalize(nodes, appSummary).changed, false)
+})
+
+test('storing Shang Yang\'s named ideas keeps the owner\'s renames and deletions', () => {
+  const stored = normalize(preShangYangIdeasMap(), appSummary).nodes
+  const shangYang = philosopherIn(stored, SHANG_YANG)
+  const ruoMin = stored.find((n) => n.parentId === shangYang.id && n.label === 'Ruo Min')
+  const lianzuo = stored.find((n) => n.parentId === shangYang.id && n.label === 'Lianzuo')
+  // Deleting a built-in child, as the app does, records its label as excluded on the parent.
+  const edited = renameNode(stored, ruoMin.id, 'Weakening the People', appSummary)
+    .filter((n) => n.id !== lianzuo.id)
+    .map((n) => (n.id === shangYang.id ? { ...n, excludedChildLabels: [...(n.excludedChildLabels || []), 'Lianzuo'] } : n))
+  const { nodes, changed } = normalize(edited, appSummary)
+  assert.equal(changed, false)
+  const labels = childLabels(nodes, philosopherIn(nodes, SHANG_YANG))
+  assert.ok(labels.includes('Weakening the People'))
+  assert.ok(!labels.includes('Ruo Min'))
+  assert.ok(!labels.includes('Lianzuo'))
+  assert.equal(labels.length, 11)
+})

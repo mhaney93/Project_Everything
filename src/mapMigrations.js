@@ -586,6 +586,23 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
       'Zhi Wu',
     ]),
   ],
+  21: [
+    // Shang Yang's named ideas, stored the same way as migration 15's.
+    ...addEachToEveryCopy([...CLASSICAL_CHINESE, 'Legalism (4th c BC - 3rd c BC)', 'Shang Yang (390 BC - 338 BC)'], [
+      'Bian Fa',
+      'Fu Guo Qiang Bing',
+      'Jun Gong Jue',
+      'Lianzuo',
+      'Ming Li',
+      'Nong Zhan',
+      'Ruo Min',
+      'Six Lice',
+      'Xi Mu Li Xin',
+      'Yi Xing',
+      'Yi Xing Qu Xing',
+      'Yi Zhan Qu Zhan',
+    ]),
+  ],
 }
 
 // Each entry rewrites a stored summary on a node with `label` only while it
