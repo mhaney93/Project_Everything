@@ -2804,6 +2804,17 @@ const preNamedIdeasMap = () => {
 
 const philosopherIn = (nodes, label) => nodes.find((n) => n.label === label)
 const childLabels = (nodes, parent) => nodes.filter((n) => n.parentId === parent.id).map((n) => n.label)
+// A philosopher's named ideas: its built-in children, or with more than 6 of
+// them, the children of its subcategories.
+const isSubcategory = (label) => label.includes('|') && (TOPIC_SUBDIVISIONS[label] || []).length > 0
+const namedIdeasOf = (label) => [...TOPIC_SUBDIVISIONS[label]].flatMap((child) => (isSubcategory(child) ? TOPIC_SUBDIVISIONS[child] : [child]))
+// The stored idea nodes under a philosopher, directly or one subcategory down.
+const ideaNodesUnder = (nodes, philosopher) => nodes.filter((n) => n.parentId === philosopher.id).flatMap((child) => {
+  const grandchildren = nodes.filter((n) => n.parentId === child.id)
+  return isSubcategory(child.label) ? grandchildren : [child]
+})
+const ideaLabels = (nodes, philosopher) => ideaNodesUnder(nodes, philosopher).map((n) => n.label)
+const ideaIn = (nodes, philosopher, label) => ideaNodesUnder(nodes, philosopher).find((n) => n.label === label)
 // The tree shows a node's expand dots when it is built-in with taxonomy
 // children, or when anything is stored under it.
 const showsExpandDots = (nodes, node) =>
@@ -2811,7 +2822,7 @@ const showsExpandDots = (nodes, node) =>
   || nodes.some((n) => n.parentId === node.id)
 
 test('the nine philosophers list 38 named ideas between them', () => {
-  const ideas = NAMED_IDEA_PHILOSOPHERS.flatMap(([, label]) => TOPIC_SUBDIVISIONS[label])
+  const ideas = NAMED_IDEA_PHILOSOPHERS.flatMap(([, label]) => namedIdeasOf(label))
   assert.equal(ideas.length, 38)
   for (const idea of ideas) assert.ok(appSummary(idea), `${idea} has no summary`)
 })
@@ -2846,8 +2857,8 @@ test('storing the named ideas leaves what the owner wrote alone', () => {
   assert.deepEqual(nodes.find((n) => n.id === laozi.id), laozi)
   assert.deepEqual(nodes.find((n) => n.id === 900), ownDao)
   assert.deepEqual(childLabels(nodes, laozi), ['Dao'])
-  assert.ok(!childLabels(nodes, confucius).includes('Li'))
-  assert.equal(childLabels(nodes, confucius).length, 6)
+  assert.ok(!ideaLabels(nodes, confucius).includes('Li'))
+  assert.equal(ideaLabels(nodes, confucius).length, 6)
   assert.deepEqual(nodes.find((n) => n.id === 901), ownIdea)
   assert.deepEqual(childLabels(nodes, amo), ['My Reading of Amo'])
   assert.deepEqual(childLabels(nodes, personalCopy), [])
@@ -2881,7 +2892,7 @@ test('a named idea the owner renamed is not stored again on reload', () => {
 test('a named idea renamed beside other named ideas is not stored again on reload', () => {
   const stored = normalize(preNamedIdeasMap(), appSummary).nodes
   const laozi = philosopherIn(stored, LAOZI)
-  const dao = stored.find((n) => n.parentId === laozi.id && n.label === 'Dao')
+  const dao = ideaIn(stored, laozi, 'Dao')
   const { nodes, changed } = normalize(renameNode(stored, dao.id, 'The Way', appSummary), appSummary)
   assert.equal(changed, false)
   assert.deepEqual(childLabels(nodes, laozi), ['The Way', 'Wu Wei', 'Ziran'])
@@ -2890,7 +2901,7 @@ test('a named idea renamed beside other named ideas is not stored again on reloa
 test('a named idea renamed and then deleted is not stored again on reload', () => {
   const stored = normalize(preNamedIdeasMap(), appSummary).nodes
   const ptahhotep = philosopherIn(stored, PTAHHOTEP)
-  const maat = stored.find((n) => n.parentId === ptahhotep.id && n.label === 'Ma\'at')
+  const maat = ideaIn(stored, ptahhotep, 'Ma\'at')
   const deleted = renameNode(stored, maat.id, 'Maat', appSummary).filter((n) => n.id !== maat.id)
   const { nodes, changed } = normalize(deleted, appSummary)
   assert.equal(changed, false)
@@ -2900,7 +2911,7 @@ test('a named idea renamed and then deleted is not stored again on reload', () =
 const XUNZI = 'Xunzi (Xun Kuang) (3rd c BC)'
 
 test('Xunzi lists 13 named ideas, each with a summary that does not name him', () => {
-  const ideas = TOPIC_SUBDIVISIONS[XUNZI]
+  const ideas = namedIdeasOf(XUNZI)
   assert.equal(ideas.length, 13)
   for (const idea of ideas) {
     assert.ok(appSummary(idea), `${idea} has no summary`)
@@ -2927,15 +2938,15 @@ test('a map saved before Xunzi\'s named ideas stores all 13 under him on load, o
 test('storing Xunzi\'s named ideas keeps the owner\'s renames and deletions', () => {
   const stored = normalize(preNamedIdeasMap(), appSummary).nodes
   const xunzi = philosopherIn(stored, XUNZI)
-  const wei = stored.find((n) => n.parentId === xunzi.id && n.label === 'Wei')
-  const fen = stored.find((n) => n.parentId === xunzi.id && n.label === 'Fen')
-  // Deleting a built-in child, as the app does, records its label as excluded on the parent.
+  const wei = ideaIn(stored, xunzi, 'Wei')
+  const fen = ideaIn(stored, xunzi, 'Fen')
+  // Deleting a built-in child, as the app does, records its label as excluded on its parent.
   const edited = renameNode(stored, wei.id, 'Deliberate Effort', appSummary)
     .filter((n) => n.id !== fen.id)
-    .map((n) => (n.id === xunzi.id ? { ...n, excludedChildLabels: [...(n.excludedChildLabels || []), 'Fen'] } : n))
+    .map((n) => (n.id === fen.parentId ? { ...n, excludedChildLabels: [...(n.excludedChildLabels || []), 'Fen'] } : n))
   const { nodes, changed } = normalize(edited, appSummary)
   assert.equal(changed, false)
-  const labels = childLabels(nodes, philosopherIn(nodes, XUNZI))
+  const labels = ideaLabels(nodes, philosopherIn(nodes, XUNZI))
   assert.ok(labels.includes('Deliberate Effort'))
   assert.ok(!labels.includes('Wei'))
   assert.ok(!labels.includes('Fen'))
@@ -2945,7 +2956,7 @@ test('storing Xunzi\'s named ideas keeps the owner\'s renames and deletions', ()
 const DONG = 'Dong Zhongshu (179 BC - 104 BC)'
 
 test('Dong Zhongshu lists 10 named ideas, each with a summary that does not name him', () => {
-  const ideas = TOPIC_SUBDIVISIONS[DONG]
+  const ideas = namedIdeasOf(DONG)
   assert.equal(ideas.length, 10)
   for (const idea of ideas) {
     assert.ok(appSummary(idea), `${idea} has no summary`)
@@ -2970,15 +2981,15 @@ test('a map saved before Dong Zhongshu\'s named ideas stores all 10 under him on
 test('storing Dong Zhongshu\'s named ideas keeps the owner\'s renames and deletions', () => {
   const stored = normalize(preNamedIdeasMap(), appSummary).nodes
   const dong = philosopherIn(stored, DONG)
-  const zaiyi = stored.find((n) => n.parentId === dong.id && n.label === 'Zaiyi')
-  const bonds = stored.find((n) => n.parentId === dong.id && n.label === 'Three Bonds')
-  // Deleting a built-in child, as the app does, records its label as excluded on the parent.
+  const zaiyi = ideaIn(stored, dong, 'Zaiyi')
+  const bonds = ideaIn(stored, dong, 'Three Bonds')
+  // Deleting a built-in child, as the app does, records its label as excluded on its parent.
   const edited = renameNode(stored, zaiyi.id, 'Calamities and Anomalies', appSummary)
     .filter((n) => n.id !== bonds.id)
-    .map((n) => (n.id === dong.id ? { ...n, excludedChildLabels: [...(n.excludedChildLabels || []), 'Three Bonds'] } : n))
+    .map((n) => (n.id === bonds.parentId ? { ...n, excludedChildLabels: [...(n.excludedChildLabels || []), 'Three Bonds'] } : n))
   const { nodes, changed } = normalize(edited, appSummary)
   assert.equal(changed, false)
-  const labels = childLabels(nodes, philosopherIn(nodes, DONG))
+  const labels = ideaLabels(nodes, philosopherIn(nodes, DONG))
   assert.ok(labels.includes('Calamities and Anomalies'))
   assert.ok(!labels.includes('Zaiyi'))
   assert.ok(!labels.includes('Three Bonds'))
@@ -2993,7 +3004,7 @@ const preMoziIdeasMap = () => buildMap([HOP, [
 ]])
 
 test('Mozi lists 13 named ideas, each with a summary that does not name him', () => {
-  const ideas = TOPIC_SUBDIVISIONS[MOZI]
+  const ideas = namedIdeasOf(MOZI)
   assert.equal(ideas.length, 13)
   for (const idea of ideas) {
     assert.ok(appSummary(idea), `${idea} has no summary`)
@@ -3017,15 +3028,15 @@ test('a map saved before Mozi\'s named ideas stores all 13 under him on load, on
 test('storing Mozi\'s named ideas keeps the owner\'s renames and deletions', () => {
   const stored = normalize(preMoziIdeasMap(), appSummary).nodes
   const mozi = philosopherIn(stored, MOZI)
-  const jianAi = stored.find((n) => n.parentId === mozi.id && n.label === 'Jian Ai')
-  const zhu = stored.find((n) => n.parentId === mozi.id && n.label === 'Zhu')
-  // Deleting a built-in child, as the app does, records its label as excluded on the parent.
+  const jianAi = ideaIn(stored, mozi, 'Jian Ai')
+  const zhu = ideaIn(stored, mozi, 'Zhu')
+  // Deleting a built-in child, as the app does, records its label as excluded on its parent.
   const edited = renameNode(stored, jianAi.id, 'Inclusive Care', appSummary)
     .filter((n) => n.id !== zhu.id)
-    .map((n) => (n.id === mozi.id ? { ...n, excludedChildLabels: [...(n.excludedChildLabels || []), 'Zhu'] } : n))
+    .map((n) => (n.id === zhu.parentId ? { ...n, excludedChildLabels: [...(n.excludedChildLabels || []), 'Zhu'] } : n))
   const { nodes, changed } = normalize(edited, appSummary)
   assert.equal(changed, false)
-  const labels = childLabels(nodes, philosopherIn(nodes, MOZI))
+  const labels = ideaLabels(nodes, philosopherIn(nodes, MOZI))
   assert.ok(labels.includes('Inclusive Care'))
   assert.ok(!labels.includes('Jian Ai'))
   assert.ok(!labels.includes('Zhu'))
@@ -3040,7 +3051,7 @@ const preHuiShiIdeasMap = () => buildMap([HOP, [
 ]])
 
 test('Hui Shi lists 9 named ideas, each with a summary that does not name him', () => {
-  const ideas = TOPIC_SUBDIVISIONS[HUI_SHI]
+  const ideas = namedIdeasOf(HUI_SHI)
   assert.equal(ideas.length, 9)
   for (const idea of ideas) {
     assert.ok(appSummary(idea), `${idea} has no summary`)
@@ -3064,15 +3075,15 @@ test('a map saved before Hui Shi\'s named ideas stores all 9 under him on load, 
 test('storing Hui Shi\'s named ideas keeps the owner\'s renames and deletions', () => {
   const stored = normalize(preHuiShiIdeasMap(), appSummary).nodes
   const huiShi = philosopherIn(stored, HUI_SHI)
-  const oneBody = stored.find((n) => n.parentId === huiShi.id && n.label === 'One Body')
-  const pi = stored.find((n) => n.parentId === huiShi.id && n.label === 'Pi')
-  // Deleting a built-in child, as the app does, records its label as excluded on the parent.
+  const oneBody = ideaIn(stored, huiShi, 'One Body')
+  const pi = ideaIn(stored, huiShi, 'Pi')
+  // Deleting a built-in child, as the app does, records its label as excluded on its parent.
   const edited = renameNode(stored, oneBody.id, 'Yi Ti', appSummary)
     .filter((n) => n.id !== pi.id)
-    .map((n) => (n.id === huiShi.id ? { ...n, excludedChildLabels: [...(n.excludedChildLabels || []), 'Pi'] } : n))
+    .map((n) => (n.id === pi.parentId ? { ...n, excludedChildLabels: [...(n.excludedChildLabels || []), 'Pi'] } : n))
   const { nodes, changed } = normalize(edited, appSummary)
   assert.equal(changed, false)
-  const labels = childLabels(nodes, philosopherIn(nodes, HUI_SHI))
+  const labels = ideaLabels(nodes, philosopherIn(nodes, HUI_SHI))
   assert.ok(labels.includes('Yi Ti'))
   assert.ok(!labels.includes('One Body'))
   assert.ok(!labels.includes('Pi'))
@@ -3087,7 +3098,7 @@ const preGongsunLongIdeasMap = () => buildMap([HOP, [
 ]])
 
 test('Gongsun Long lists 8 named ideas, each with a summary that does not name him', () => {
-  const ideas = TOPIC_SUBDIVISIONS[GONGSUN_LONG]
+  const ideas = namedIdeasOf(GONGSUN_LONG)
   assert.equal(ideas.length, 8)
   for (const idea of ideas) {
     assert.ok(appSummary(idea), `${idea} has no summary`)
@@ -3111,15 +3122,15 @@ test('a map saved before Gongsun Long\'s named ideas stores all 8 under him on l
 test('storing Gongsun Long\'s named ideas keeps the owner\'s renames and deletions', () => {
   const stored = normalize(preGongsunLongIdeasMap(), appSummary).nodes
   const gongsunLong = philosopherIn(stored, GONGSUN_LONG)
-  const whiteHorse = stored.find((n) => n.parentId === gongsunLong.id && n.label === 'White Horse Paradox')
-  const zhiWu = stored.find((n) => n.parentId === gongsunLong.id && n.label === 'Zhi Wu')
-  // Deleting a built-in child, as the app does, records its label as excluded on the parent.
+  const whiteHorse = ideaIn(stored, gongsunLong, 'White Horse Paradox')
+  const zhiWu = ideaIn(stored, gongsunLong, 'Zhi Wu')
+  // Deleting a built-in child, as the app does, records its label as excluded on its parent.
   const edited = renameNode(stored, whiteHorse.id, 'Bai Ma Fei Ma', appSummary)
     .filter((n) => n.id !== zhiWu.id)
-    .map((n) => (n.id === gongsunLong.id ? { ...n, excludedChildLabels: [...(n.excludedChildLabels || []), 'Zhi Wu'] } : n))
+    .map((n) => (n.id === zhiWu.parentId ? { ...n, excludedChildLabels: [...(n.excludedChildLabels || []), 'Zhi Wu'] } : n))
   const { nodes, changed } = normalize(edited, appSummary)
   assert.equal(changed, false)
-  const labels = childLabels(nodes, philosopherIn(nodes, GONGSUN_LONG))
+  const labels = ideaLabels(nodes, philosopherIn(nodes, GONGSUN_LONG))
   assert.ok(labels.includes('Bai Ma Fei Ma'))
   assert.ok(!labels.includes('White Horse Paradox'))
   assert.ok(!labels.includes('Zhi Wu'))
@@ -3134,7 +3145,7 @@ const preShangYangIdeasMap = () => buildMap([HOP, [
 ]])
 
 test('Shang Yang lists 12 named ideas, each with a summary that does not name him', () => {
-  const ideas = TOPIC_SUBDIVISIONS[SHANG_YANG]
+  const ideas = namedIdeasOf(SHANG_YANG)
   assert.equal(ideas.length, 12)
   for (const idea of ideas) {
     assert.ok(appSummary(idea), `${idea} has no summary`)
@@ -3158,17 +3169,140 @@ test('a map saved before Shang Yang\'s named ideas stores all 12 under him on lo
 test('storing Shang Yang\'s named ideas keeps the owner\'s renames and deletions', () => {
   const stored = normalize(preShangYangIdeasMap(), appSummary).nodes
   const shangYang = philosopherIn(stored, SHANG_YANG)
-  const ruoMin = stored.find((n) => n.parentId === shangYang.id && n.label === 'Ruo Min')
-  const lianzuo = stored.find((n) => n.parentId === shangYang.id && n.label === 'Lianzuo')
-  // Deleting a built-in child, as the app does, records its label as excluded on the parent.
+  const ruoMin = ideaIn(stored, shangYang, 'Ruo Min')
+  const lianzuo = ideaIn(stored, shangYang, 'Lianzuo')
+  // Deleting a built-in child, as the app does, records its label as excluded on its parent.
   const edited = renameNode(stored, ruoMin.id, 'Weakening the People', appSummary)
     .filter((n) => n.id !== lianzuo.id)
-    .map((n) => (n.id === shangYang.id ? { ...n, excludedChildLabels: [...(n.excludedChildLabels || []), 'Lianzuo'] } : n))
+    .map((n) => (n.id === lianzuo.parentId ? { ...n, excludedChildLabels: [...(n.excludedChildLabels || []), 'Lianzuo'] } : n))
   const { nodes, changed } = normalize(edited, appSummary)
   assert.equal(changed, false)
-  const labels = childLabels(nodes, philosopherIn(nodes, SHANG_YANG))
+  const labels = ideaLabels(nodes, philosopherIn(nodes, SHANG_YANG))
   assert.ok(labels.includes('Weakening the People'))
   assert.ok(!labels.includes('Ruo Min'))
   assert.ok(!labels.includes('Lianzuo'))
   assert.equal(labels.length, 11)
+})
+
+// Migration 22: named ideas grouped under subcategories.
+const HAN_FEI = 'Hanfeizi (Han Fei) (280 BC - 233 BC)'
+const IDEA_PHILOSOPHERS = [
+  ...NAMED_IDEA_PHILOSOPHERS.map(([, label]) => label),
+  XUNZI, DONG, MOZI, HUI_SHI, GONGSUN_LONG, SHANG_YANG, HAN_FEI,
+]
+const shortName = (label) => label.replace(/ \(.*$/, '').replace(/^Hanfeizi$/, 'Han Fei')
+
+test('every philosopher with more than 6 named ideas groups them in 2-5 subcategories', () => {
+  for (const label of IDEA_PHILOSOPHERS) {
+    const children = [...TOPIC_SUBDIVISIONS[label]]
+    const ideas = namedIdeasOf(label)
+    if (ideas.length <= 6) {
+      assert.deepEqual(children, ideas, label)
+      continue
+    }
+    assert.ok(children.length >= 2 && children.length <= 5, label)
+    assert.equal(new Set(ideas).size, ideas.length, label)
+    for (const sub of children) {
+      assert.ok(isSubcategory(sub), `${sub} under ${label}`)
+      assert.ok(TOPIC_SUBDIVISIONS[sub].length >= 2, `${sub} holds a single idea`)
+      assert.ok(appSummary(sub), `${sub} has no summary`)
+      assert.ok(!sub.includes(shortName(label)) && !appSummary(sub).includes(shortName(label)), `${sub} names ${label}`)
+    }
+  }
+})
+
+test('Han Fei lists 15 named ideas, each with a summary that does not name him', () => {
+  const ideas = namedIdeasOf(HAN_FEI)
+  assert.equal(ideas.length, 15)
+  for (const idea of ideas) {
+    assert.ok(appSummary(idea), `${idea} has no summary`)
+    assert.ok(!appSummary(idea).includes('Han Fei'), `${idea} names Han Fei`)
+  }
+})
+
+// A map saved after migration 21: Shang Yang expanded, his ideas stored
+// directly under him and showing, as the owner left them.
+const flatShangYangMap = () => buildMap([HOP, [
+  [CLASSICAL_CHINESE, [
+    ['Legalism (4th c BC - 3rd c BC)', [[SHANG_YANG, namedIdeasOf(SHANG_YANG).map((idea) => [idea]), { hidden: false }], [HAN_FEI]]],
+  ]],
+]])
+
+test('stored named ideas move under their subcategories with their ids, once', () => {
+  const before = flatShangYangMap()
+  const shangYang = philosopherIn(before, SHANG_YANG)
+  const ideaIds = new Map(before.filter((n) => n.parentId === shangYang.id).map((n) => [n.label, n.id]))
+  const { nodes, changed } = normalize(before, appSummary)
+  assert.equal(changed, true)
+  assert.deepEqual(childLabels(nodes, shangYang), [...TOPIC_SUBDIVISIONS[SHANG_YANG]])
+  for (const sub of nodes.filter((n) => n.parentId === shangYang.id)) {
+    assert.equal(sub.isCustom, undefined, sub.label)
+    assert.equal(sub.hidden, false, sub.label)
+    assert.deepEqual(childLabels(nodes, sub).sort(), [...TOPIC_SUBDIVISIONS[sub.label]].sort(), sub.label)
+    for (const idea of nodes.filter((n) => n.parentId === sub.id)) {
+      assert.equal(idea.id, ideaIds.get(idea.label), idea.label)
+      assert.equal(idea.hidden, true, idea.label)
+    }
+  }
+  const again = normalize(nodes, appSummary)
+  assert.equal(again.changed, false)
+  assert.deepEqual(again.nodes, nodes)
+})
+
+test('grouping the named ideas keeps the owner\'s notes, own children, renames and deletions', () => {
+  const before = flatShangYangMap()
+  const shangYang = philosopherIn(before, SHANG_YANG)
+  const at = (label) => before.find((n) => n.parentId === shangYang.id && n.label === label)
+  // Ruo Min renamed, Lianzuo deleted, and a note on Nong Zhan with a child of
+  // the owner's own under it.
+  const ownChild = { id: 900, label: 'My Notes on Farming', parentId: at('Nong Zhan').id, hidden: false, isCustom: true }
+  const notes = [{ id: 'n1', text: 'Compare Mozi.', level: 0 }]
+  const edited = renameNode([...before, ownChild], at('Ruo Min').id, 'Weakening the People', appSummary)
+    .filter((n) => n.id !== at('Lianzuo').id)
+    .map((n) => {
+      if (n.id === shangYang.id) return { ...n, excludedChildLabels: [...n.excludedChildLabels, 'Lianzuo'] }
+      return n.id === at('Nong Zhan').id ? { ...n, notes } : n
+    })
+  const { nodes } = normalize(edited, appSummary)
+  const labels = ideaLabels(nodes, philosopherIn(nodes, SHANG_YANG))
+  assert.ok(labels.includes('Weakening the People'))
+  assert.ok(!labels.includes('Ruo Min') && !labels.includes('Lianzuo'))
+  assert.equal(labels.length, 11)
+  const renamed = nodes.find((n) => n.label === 'Weakening the People')
+  assert.equal(nodes.find((n) => n.id === renamed.parentId).label, 'Steering the People|shang-yang')
+  const nongZhan = nodes.find((n) => n.id === at('Nong Zhan').id)
+  assert.deepEqual(nongZhan.notes, notes)
+  assert.equal(nodes.find((n) => n.id === nongZhan.parentId).label, 'Agriculture and War|shang-yang')
+  assert.equal(nodes.find((n) => n.id === 900).parentId, nongZhan.id)
+  assert.equal(nodes.find((n) => n.id === 900).hidden, true)
+  const law = nodes.find((n) => n.label === 'Law and Punishment|shang-yang')
+  assert.deepEqual(law.excludedChildLabels, ['Lianzuo'])
+  assert.equal(normalize(nodes, appSummary).changed, false)
+})
+
+test('a subcategory whose every idea the owner deleted is left out', () => {
+  const before = flatShangYangMap()
+  const shangYang = philosopherIn(before, SHANG_YANG)
+  const steering = TOPIC_SUBDIVISIONS['Steering the People|shang-yang']
+  const edited = before
+    .filter((n) => !(n.parentId === shangYang.id && steering.includes(n.label)))
+    .map((n) => (n.id === shangYang.id ? { ...n, excludedChildLabels: [...steering] } : n))
+  const { nodes } = normalize(edited, appSummary)
+  assert.ok(!childLabels(nodes, shangYang).includes('Steering the People|shang-yang'))
+  assert.deepEqual(childLabels(nodes, shangYang), ['Law and Punishment|shang-yang', 'Agriculture and War|shang-yang'])
+  assert.equal(ideaLabels(nodes, shangYang).length, 10)
+  assert.equal(normalize(nodes, appSummary).changed, false)
+})
+
+test('a map saved before Han Fei\'s named ideas stores all 15 under his subcategories on load, once', () => {
+  const { nodes, changed } = normalize(flatShangYangMap(), appSummary)
+  assert.equal(changed, true)
+  const hanFei = philosopherIn(nodes, HAN_FEI)
+  assert.deepEqual(childLabels(nodes, hanFei), [...TOPIC_SUBDIVISIONS[HAN_FEI]])
+  for (const sub of nodes.filter((n) => n.parentId === hanFei.id)) {
+    assert.equal(sub.hidden, true, sub.label)
+    assert.deepEqual(childLabels(nodes, sub), [...TOPIC_SUBDIVISIONS[sub.label]])
+  }
+  assert.deepEqual(ideaLabels(nodes, hanFei).sort(), namedIdeasOf(HAN_FEI).sort())
+  assert.equal(normalize(nodes, appSummary).changed, false)
 })
