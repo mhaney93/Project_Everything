@@ -26,6 +26,9 @@
 //   holding only custom children is left alone. Give such a node an entry for
 //   each of its built-in children, so the first one stored does not stand in
 //   for the rest.
+//   An `add` the taxonomy no longer lists under that parent is skipped.
+// - `regroup` moves the named children `labels` of every non-Personal copy of
+//   the node at the path into its new child `into`; see regroupBuiltInChildren.
 // - `move` reparents the node, with its subtree, under the node at `into`,
 //   creating `into` when only its parent is stored. With `id`, it moves the
 //   node with that id at the path instead, custom or not.
@@ -67,6 +70,9 @@ const VEDIC = [...HISTORY_OF_PHILOSOPHY, 'Vedic Indian Philosophy (16th c BC - 6
 const CLASSICAL_CHINESE = [...HISTORY_OF_PHILOSOPHY, 'Classical Chinese Philosophy (6th c BC - 3rd c BC)']
 const DAOISM = [...CLASSICAL_CHINESE, 'Daoism (6th c BC - present)']
 const CONFUCIANISM = [...CLASSICAL_CHINESE, 'Confucianism (551 BC - present)']
+const MOHISM = [...CLASSICAL_CHINESE, 'Mohism (5th c BC - 3rd c BC)']
+const SCHOOL_OF_NAMES = [...CLASSICAL_CHINESE, 'School of Names (4th c BC - 3rd c BC)']
+const LEGALISM = [...CLASSICAL_CHINESE, 'Legalism (4th c BC - 3rd c BC)']
 const EARLY_AFRICANA = [...HISTORY_OF_PHILOSOPHY, 'Early Africana Philosophy (c. 24th c BC - 19th c)']
 const ANCIENT_GREEK = [...HISTORY_OF_PHILOSOPHY, 'Ancient Western Philosophy (6th c BC - 5th c AD)', 'Ancient Greek Philosophy (6th c BC - 1st c BC)']
 const CLASSICAL_GREEK = [...ANCIENT_GREEK, 'Classical Greek Philosophy (5th c BC - 4th c BC)']
@@ -99,6 +105,14 @@ const JEWISH_PHILOSOPHY_SUMMARY = 'The philosophical thought developing from Jew
 const addEach = (under, labels) => labels.map((add) => ({ add, under }))
 const addEachToEveryCopy = (under, labels) => labels.map((add) => ({ add, under, everyCopy: true }))
 const refileEach = (from, labels, into) => ({ refile: labels.map((label) => [...from, label]), into })
+// Groups a philosopher's named ideas under subcategories, given as [label, ideas]
+// pairs: stored ideas are regrouped, then each copy gets any subcategory and
+// idea it lacks, as addEachToEveryCopy would.
+const groupNamedIdeas = (philosopher, groups) => [
+  ...groups.map(([into, labels]) => ({ regroup: philosopher, into, labels })),
+  ...addEachToEveryCopy(philosopher, groups.map(([into]) => into)),
+  ...groups.flatMap(([into, labels]) => addEachToEveryCopy([...philosopher, into], labels)),
+]
 const ANCIENT_MIGRATION_PERIOD_SUMMARY = 'Characterized by significant movements of various peoples, primarily Germanic tribes, leading to widespread upheaval, the decline of the Western Roman Empire, and the emergence of new political entities across Europe.'
 
 // The admin map's hidden Mossad Killed Kennedy summary, archived off-map.
@@ -603,6 +617,55 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
       'Yi Zhan Qu Zhan',
     ]),
   ],
+  22: [
+    // Philosophers with more than 6 named ideas get thematic subcategories
+    // (the grouping rule in App.jsx). Stored ideas move under them with their
+    // ids, notes and subtrees; copies that never stored the ideas get them
+    // there. Han Fei's named ideas arrive already grouped.
+    ...groupNamedIdeas([...CONFUCIANISM, 'Confucius (Kong Fuzi) (551 BC - 479 BC)'], [
+      ['Virtue and Character|confucius', ['Filial Piety', 'Golden Rule (Shu)', 'Junzi', 'Ren']],
+      ['Ritual and Government|confucius', ['Li', 'Rectification of Names', 'Rule by Virtue']],
+    ]),
+    ...groupNamedIdeas([...CONFUCIANISM, 'Mencius (Mengzi) (372 BC - 289 BC)'], [
+      ['Human Nature|mencius', ['Child at the Well', 'Four Sprouts', 'Great Body and Small Body', 'Human Nature Is Good', 'Ox Mountain']],
+      ['Moral Cultivation|mencius', ['Extension', 'Fish and Bear\'s Paw', 'Flood-like Qi', 'Graded Love']],
+      ['Government|mencius', ['Constant Means, Constant Heart', 'Mandate of Heaven', 'Right of Revolution', 'Righteousness over Profit']],
+    ]),
+    ...groupNamedIdeas([...CONFUCIANISM, 'Xunzi (Xun Kuang) (3rd c BC)'], [
+      ['Human Nature and Effort|xunzi', ['Human Nature Is Bad', 'Potter and Clay', 'The Man in the Street Can Become Yu', 'Warped Wood', 'Wei']],
+      ['Heaven and the Mind|xunzi', ['Division of Heaven and Humans', 'Emptiness, Unity and Stillness', 'Heavenly Ruler', 'Obscuration']],
+      ['Ritual and Rule|xunzi', ['Fen', 'Li|xunzi', 'Rectification of Names|xunzi', 'Rule of Man']],
+    ]),
+    ...groupNamedIdeas([...CONFUCIANISM, 'Dong Zhongshu (179 BC - 104 BC)'], [
+      ['Heaven and Rule|dong-zhongshu', ['Heaven Does Not Change, Nor Does the Way', 'Tianren Ganying', 'Virtue Primary, Punishment Secondary', 'Zaiyi']],
+      ['Human Nature and Bonds|dong-zhongshu', ['Five Constants', 'Rice and Grain', 'Three Bonds']],
+      ['Confucius and the Classics|dong-zhongshu', ['Dismiss the Hundred Schools', 'Subtle Words and Great Meaning', 'Uncrowned King']],
+    ]),
+    ...groupNamedIdeas([...MOHISM, 'Mozi (Mo Di) (c. 470 BC - c. 391 BC)'], [
+      ['Heaven and Standards|mozi', ['Fa', 'Fei Ming', 'Ming Gui', 'San Biao', 'Tian Zhi']],
+      ['Care and War|mozi', ['Fei Gong', 'Jian Ai', 'Zhu']],
+      ['Government and Thrift|mozi', ['Fei Yue', 'Jie Yong', 'Jie Zang', 'Shang Tong', 'Shang Xian']],
+    ]),
+    ...groupNamedIdeas([...SCHOOL_OF_NAMES, 'Hui Shi (c. 370 BC - c. 310 BC)'], [
+      ['Logic and Scale|hui-shi', ['Great One', 'Great Sameness and Difference', 'Pi', 'Small One', 'Small Sameness and Difference']],
+      ['Ethics|hui-shi', ['Fan Ai', 'One Body', 'Quarrel on a Snail\'s Horns', 'Wu Qing']],
+    ]),
+    ...groupNamedIdeas([...SCHOOL_OF_NAMES, 'Gongsun Long (c. 320 BC - c. 250 BC)'], [
+      ['Paradoxes|gongsun-long', ['Chicken Has Three Legs', 'Separating Hard and White', 'White Horse Paradox', 'Zang Has Three Ears', 'Zhi Wu']],
+      ['Names and Actualities|gongsun-long', ['Kuang Ju', 'Ming Shi', 'Yan Bing']],
+    ]),
+    ...groupNamedIdeas([...LEGALISM, 'Shang Yang (390 BC - 338 BC)'], [
+      ['Law and Punishment|shang-yang', ['Bian Fa', 'Lianzuo', 'Xi Mu Li Xin', 'Yi Xing', 'Yi Xing Qu Xing']],
+      ['Agriculture and War|shang-yang', ['Fu Guo Qiang Bing', 'Jun Gong Jue', 'Nong Zhan', 'Six Lice', 'Yi Zhan Qu Zhan']],
+      ['Steering the People|shang-yang', ['Ming Li', 'Ruo Min']],
+    ]),
+    ...groupNamedIdeas([...LEGALISM, 'Hanfeizi (Han Fei) (280 BC - 233 BC)'], [
+      ['Power and Position|han-fei', ['Bei Nei', 'Fa, Shu and Shi', 'Shi', 'Zhong Zhu']],
+      ['Controlling Officials|han-fei', ['Er Bing', 'Shu', 'Xing Ming', 'Xu Jing']],
+      ['Persuasion and Argument|han-fei', ['Mao Dun', 'Ni Lin', 'Shui Nan']],
+      ['Society and the Past|han-fei', ['Ji Suan Zhi Xin', 'Shou Zhu Dai Tu', 'Wu Du', 'Yi Fa Wei Jiao']],
+    ]),
+  ],
 }
 
 // Each entry rewrites a stored summary on a node with `label` only while it
@@ -1073,13 +1136,17 @@ const renameBuiltInNode = (mapNodes, { rename, label, dropSummaries = [] }, buil
   return { nodes, changed: nodes !== mapNodes }
 }
 
-const addBuiltInNode = (mapNodes, { add, under, everyCopy }) => {
+const addBuiltInNode = (mapNodes, { add, under, everyCopy }, topicSubdivisions) => {
   const byId = new Map(mapNodes.map((node) => [node.id, node]))
   const childrenByParent = buildChildrenByParent(mapNodes)
   let maxId = maxIdOf(mapNodes)
   const created = []
   const accepts = everyCopy ? (node) => !node.isPersonal : isBuiltIn
   for (const parent of nodesAtPath(mapNodes, byId, under, accepts)) {
+    // A label the taxonomy has since moved elsewhere (a named idea now under
+    // a subcategory) is no longer added here.
+    const expected = topicSubdivisions[parent.label]
+    if (expected && !expected.includes(add)) continue
     const children = childrenByParent.get(parent.id) || []
     if (!children.some((child) => !child.isCustom) && !(everyCopy && children.length === 0)) continue
     if (children.some((child) => child.label === add)) continue
@@ -1161,6 +1228,56 @@ const refileBuiltInNodes = (mapNodes, { refile, into }, builtInSummary, topicSub
     nodes = [...nodes, ...created]
   }
   return { nodes, changed: true }
+}
+
+// For every non-Personal copy of the node at `regroup`, moves its stored
+// built-in children labelled one of `labels` under its child `into` (a new
+// subcategory), with their ids, notes and subtrees. `into` is created as a
+// built-in node showing where the children showed, and the moved children are
+// left collapsed under it. Labels the owner deleted from the copy (its
+// excludedChildLabels) are excluded on `into` too, and one the owner renamed
+// (a custom child still showing that label's built-in summary) moves with the
+// rest. When every one of `labels` was deleted and none is stored, `into`
+// itself is excluded on the copy.
+const regroupBuiltInChildren = (mapNodes, { regroup, into, labels }, builtInSummary) => {
+  let nodes = mapNodes
+  const parents = nodesAtPath(mapNodes, new Map(mapNodes.map((node) => [node.id, node])), regroup, (node) => !node.isPersonal)
+  for (const { id: parentId } of parents) {
+    const parent = nodes.find((node) => node.id === parentId)
+    const parentExcluded = parent.excludedChildLabels || []
+    const deleted = labels.filter((label) => parentExcluded.includes(label))
+    // An idea the owner renamed is a custom node still showing its old built-in summary.
+    const renamedFrom = new Set(deleted.map((label) => builtInSummary(label)).filter(Boolean))
+    const sources = nodes.filter((node) => node.parentId === parentId && !node.isPersonal
+      && (node.isCustom ? renamedFrom.has(node.summary) : labels.includes(node.label)))
+    let home = nodes.find((node) => node.parentId === parentId && node.label === into && !node.isPersonal)
+    if (sources.length === 0 && deleted.length === 0) continue
+    if (sources.length === 0 && !home && deleted.length === labels.length) {
+      if (!parentExcluded.includes(into)) nodes = excludeChildLabel(nodes, parentId, into)
+      continue
+    }
+    if (!home) {
+      const siblings = nodes.filter((node) => node.parentId === parentId)
+      home = { id: maxIdOf(nodes) + 1, label: into, parentId, hidden: sources[0]?.hidden ?? siblings[0]?.hidden ?? true }
+      nodes = [...nodes, home]
+    }
+    const homeExcluded = home.excludedChildLabels || []
+    const newlyExcluded = deleted.filter((label) => !homeExcluded.includes(label))
+    if (newlyExcluded.length > 0) {
+      const excludedChildLabels = [...homeExcluded, ...newlyExcluded]
+      nodes = nodes.map((node) => (node.id === home.id ? { ...node, excludedChildLabels } : node))
+    }
+    for (const source of sources) {
+      const sourcePath = labelPathOf(nodes, source.id)
+      const collapsed = new Set(subtreeIds(buildChildrenByParent(nodes), source.id))
+      nodes = nodes.map((node) => {
+        if (node.id === source.id) return withoutOrder({ ...node, parentId: home.id, hidden: true })
+        return collapsed.has(node.id) ? { ...node, hidden: true } : node
+      })
+      nodes = settleUnder(nodes, source.id, home.id, builtInSummary, sourcePath)
+    }
+  }
+  return { nodes, changed: nodes !== mapNodes }
 }
 
 const excludeChildLabel = (mapNodes, parentId, label) => mapNodes.map((node) => {
@@ -1345,7 +1462,8 @@ const rehomeOrphans = (mapNodes, { dropArchived = [] }, builtInSummary, topicSub
 const runStructuralMigration = (mapNodes, migration, builtInSummary, topicSubdivisions, log) => {
   if (migration.rehomeOrphans) return rehomeOrphans(mapNodes, migration, builtInSummary, topicSubdivisions, log)
   if (migration.rename) return renameBuiltInNode(mapNodes, migration, builtInSummary)
-  if (migration.add) return addBuiltInNode(mapNodes, migration)
+  if (migration.add) return addBuiltInNode(mapNodes, migration, topicSubdivisions)
+  if (migration.regroup) return regroupBuiltInChildren(mapNodes, migration, builtInSummary)
   if (migration.move) return moveBuiltInNode(mapNodes, migration, builtInSummary)
   if (migration.refile) return refileBuiltInNodes(mapNodes, migration, builtInSummary, topicSubdivisions)
   if (migration.remove) return removeBuiltInNode(mapNodes, migration, builtInSummary, topicSubdivisions)
