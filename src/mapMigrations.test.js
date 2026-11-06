@@ -3186,9 +3186,10 @@ test('storing Shang Yang\'s named ideas keeps the owner\'s renames and deletions
 
 // Migration 22: named ideas grouped under subcategories.
 const HAN_FEI = 'Hanfeizi (Han Fei) (280 BC - 233 BC)'
+const LI_SI = 'Li Si (280 BC - 208 BC)'
 const IDEA_PHILOSOPHERS = [
   ...NAMED_IDEA_PHILOSOPHERS.map(([, label]) => label),
-  XUNZI, DONG, MOZI, HUI_SHI, GONGSUN_LONG, SHANG_YANG, HAN_FEI,
+  XUNZI, DONG, MOZI, HUI_SHI, GONGSUN_LONG, SHANG_YANG, HAN_FEI, LI_SI,
 ]
 const shortName = (label) => label.replace(/ \(.*$/, '').replace(/^Hanfeizi$/, 'Han Fei')
 
@@ -3304,5 +3305,33 @@ test('a map saved before Han Fei\'s named ideas stores all 15 under his subcateg
     assert.deepEqual(childLabels(nodes, sub), [...TOPIC_SUBDIVISIONS[sub.label]])
   }
   assert.deepEqual(ideaLabels(nodes, hanFei).sort(), namedIdeasOf(HAN_FEI).sort())
+  assert.equal(normalize(nodes, appSummary).changed, false)
+})
+
+// Migration 23: Li Si's named ideas, grouped.
+test('Li Si lists 14 named ideas, each with a summary that does not name him', () => {
+  const ideas = namedIdeasOf(LI_SI)
+  assert.equal(ideas.length, 14)
+  for (const idea of ideas) {
+    assert.ok(appSummary(idea), `${idea} has no summary`)
+    assert.ok(!appSummary(idea).includes('Li Si'), `${idea} names Li Si`)
+  }
+})
+
+test('a map saved before Li Si\'s named ideas stores all 14 under his subcategories on load, once', () => {
+  const before = buildMap([HOP, [
+    [CLASSICAL_CHINESE, [
+      ['Legalism (4th c BC - 3rd c BC)', [[SHANG_YANG], [HAN_FEI], [LI_SI]]],
+    ]],
+  ]])
+  const { nodes, changed } = normalize(before, appSummary)
+  assert.equal(changed, true)
+  const liSi = philosopherIn(nodes, LI_SI)
+  assert.deepEqual(childLabels(nodes, liSi), [...TOPIC_SUBDIVISIONS[LI_SI]])
+  for (const sub of nodes.filter((n) => n.parentId === liSi.id)) {
+    assert.equal(sub.hidden, true, sub.label)
+    assert.deepEqual(childLabels(nodes, sub), [...TOPIC_SUBDIVISIONS[sub.label]])
+  }
+  assert.deepEqual(ideaLabels(nodes, liSi).sort(), namedIdeasOf(LI_SI).sort())
   assert.equal(normalize(nodes, appSummary).changed, false)
 })
