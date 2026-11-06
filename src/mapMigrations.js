@@ -666,6 +666,15 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
       ['Society and the Past|han-fei', ['Ji Suan Zhi Xin', 'Shou Zhu Dai Tu', 'Wu Du', 'Yi Fa Wei Jiao']],
     ]),
   ],
+  23: [
+    // Li Si's named ideas, grouped like migration 22's.
+    ...groupNamedIdeas([...LEGALISM, 'Li Si (280 BC - 208 BC)'], [
+      ['Power and Position|li-si', ['Du Ze', 'Jun Xian', 'Shu Tong Wen', 'Yi Tian Xia Wei Zhi Gu']],
+      ['Talent and Officials|li-si', ['Jian Zhu Ke Shu', 'Tai Shan Bu Rang Tu Rang']],
+      ['Controlling Thought|li-si', ['Fen Shu', 'Yi Gu Fei Jin', 'Yi Li Wei Shi']],
+      ['Ambition and Downfall|li-si', ['Gou Mo Da Yu Bei Jian', 'Huang Quan Zhi Tan', 'Li Si\'s Rats', 'Sha Qiu Zhi Mou', 'Wu Ji Ze Shuai']],
+    ]),
+  ],
 }
 
 // Each entry rewrites a stored summary on a node with `label` only while it
