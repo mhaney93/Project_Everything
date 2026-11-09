@@ -3187,9 +3187,10 @@ test('storing Shang Yang\'s named ideas keeps the owner\'s renames and deletions
 // Migration 22: named ideas grouped under subcategories.
 const HAN_FEI = 'Hanfeizi (Han Fei) (280 BC - 233 BC)'
 const LI_SI = 'Li Si (280 BC - 208 BC)'
+const THALES = 'Thales of Miletus (~624 BC - ~545 BC)'
 const IDEA_PHILOSOPHERS = [
   ...NAMED_IDEA_PHILOSOPHERS.map(([, label]) => label),
-  XUNZI, DONG, MOZI, HUI_SHI, GONGSUN_LONG, SHANG_YANG, HAN_FEI, LI_SI,
+  XUNZI, DONG, MOZI, HUI_SHI, GONGSUN_LONG, SHANG_YANG, HAN_FEI, LI_SI, THALES,
 ]
 const shortName = (label) => label.replace(/ \(.*$/, '').replace(/^Hanfeizi$/, 'Han Fei')
 
@@ -3333,5 +3334,37 @@ test('a map saved before Li Si\'s named ideas stores all 14 under his subcategor
     assert.deepEqual(childLabels(nodes, sub), [...TOPIC_SUBDIVISIONS[sub.label]])
   }
   assert.deepEqual(ideaLabels(nodes, liSi).sort(), namedIdeasOf(LI_SI).sort())
+  assert.equal(normalize(nodes, appSummary).changed, false)
+})
+
+// Migration 24: Thales's named ideas, grouped.
+test('Thales lists 9 named ideas, each with a summary that does not name him', () => {
+  const ideas = namedIdeasOf(THALES)
+  assert.equal(ideas.length, 9)
+  for (const idea of ideas) {
+    assert.ok(appSummary(idea), `${idea} has no summary`)
+    assert.ok(!appSummary(idea).includes('Thales'), `${idea} names Thales`)
+  }
+})
+
+test('a map saved before Thales\'s named ideas stores all 9 under his subcategories on load, once', () => {
+  const before = buildMap([HOP, [
+    ['Ancient Western Philosophy (6th c BC - 5th c AD)', [
+      ['Ancient Greek Philosophy (6th c BC - 1st c BC)', [
+        ['Pre-Socratic Philosophy (6th c BC - 5th c BC)', [
+          ['Milesian School/Ionian School (6th c BC)', [[THALES]]],
+        ]],
+      ]],
+    ]],
+  ]])
+  const { nodes, changed } = normalize(before, appSummary)
+  assert.equal(changed, true)
+  const thales = philosopherIn(nodes, THALES)
+  assert.deepEqual(childLabels(nodes, thales), [...TOPIC_SUBDIVISIONS[THALES]])
+  for (const sub of nodes.filter((n) => n.parentId === thales.id)) {
+    assert.equal(sub.hidden, true, sub.label)
+    assert.deepEqual(childLabels(nodes, sub), [...TOPIC_SUBDIVISIONS[sub.label]])
+  }
+  assert.deepEqual(ideaLabels(nodes, thales).sort(), namedIdeasOf(THALES).sort())
   assert.equal(normalize(nodes, appSummary).changed, false)
 })

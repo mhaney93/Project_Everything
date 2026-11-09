@@ -675,6 +675,14 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
       ['Ambition and Downfall|li-si', ['Gou Mo Da Yu Bei Jian', 'Huang Quan Zhi Tan', 'Li Si\'s Rats', 'Sha Qiu Zhi Mou', 'Wu Ji Ze Shuai']],
     ]),
   ],
+  24: [
+    // Thales's named ideas, grouped like migration 22's.
+    ...groupNamedIdeas([...PRE_SOCRATIC, 'Milesian School/Ionian School (6th c BC)', 'Thales of Miletus (~624 BC - ~545 BC)'], [
+      ['First Stuff|thales', ['Archê', 'Material Monism']],
+      ['Soul in Nature|thales', ['All Things Are Full of Gods', 'Hylozoism', 'Panpsychism']],
+      ['Inquiry and Knowledge|thales', ['Know Thyself', 'Methodological Naturalism', 'Predictivism', 'Thales\'s Theorem']],
+    ]),
+  ],
 }
 
 // Each entry rewrites a stored summary on a node with `label` only while it
