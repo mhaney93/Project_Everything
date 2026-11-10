@@ -683,6 +683,16 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
       ['Inquiry and Knowledge|thales', ['Know Thyself', 'Methodological Naturalism', 'Predictivism', 'Thales\'s Theorem']],
     ]),
   ],
+  25: [
+    // Žižek's named ideas, grouped like migration 22's.
+    ...groupNamedIdeas([...CONTINENTAL, 'Critical Theory (1920s-present)', 'Slavoj Žižek (1949-present)'], [
+      ['Language and Lack|zizek', ['Constitutive Lack', 'Split Subject', 'The Real', 'The Symbolic']],
+      ['Ideology and Fantasy|zizek', ['Antagonism', 'Objet Petit a', 'The Thing', 'Theft of Enjoyment']],
+      ['Desire and Enjoyment|zizek', ['Desire Is the Desire of the Other', 'Jouissance', 'The Symptom']],
+      ['Belief and Cynicism|zizek', ['Belief in Rituals', 'Cynical Ideology', 'Fetishistic Disavowal']],
+      ['Liberation|zizek', ['The Big Other Doesn\'t Exist', 'Traversing the Fantasy']],
+    ]),
+  ],
 }
 
 // Each entry rewrites a stored summary on a node with `label` only while it
@@ -785,6 +795,13 @@ export const SUMMARY_MIGRATIONS_BY_VERSION = {
       label: 'Ethash (PoW)',
       from: 'Ethereum\'s original memory-hard, ASIC-resistant proof-of-work mining algorithm, designed to favor GPU miners over centralized mining farms by requiring large amounts of memory.',
       to: 'Ethereum\'s original memory-hard, ASIC-resistant proof-of-work mining algorithm, designed to favor GPU miners over centralized mining farms by requiring large amounts of memory. Retired at The Merge (September 2022), when Ethereum moved to proof-of-stake.',
+    },
+  ],
+  10: [
+    {
+      label: 'Slavoj Žižek (1949-present)',
+      from: 'Applies Lacanian psychoanalysis, Hegelian philosophy, and Marxist critique to analyze contemporary culture and ideology, revealing underlying contradictions.',
+      to: 'Because we enter the Symbolic order of language, the subject is split, haunted by a constitutive lack and the unsayable Real. Society is split too, by antagonism, and ultimately class struggle. To cover these gaps, fantasy and ideology sublimate ordinary things into sublime objects, objet petit a, raised to the dignity of the Thing, or into scapegoats blamed for stealing our wholeness. Desire is the desire of the Other, and it desires its own continuation, so we enjoy the endless chase, a painful jouissance that gets bound up in our symptoms. Through fetishistic disavowal, "I know very well, but all the same", cynical irony becomes the alibi for going along with it, since belief lives in our rituals, not our heads. Liberation isn\'t filling the hole but traversing the fantasy: accepting that the Big Other doesn\'t exist and the lack is permanent.',
     },
   ],
 }

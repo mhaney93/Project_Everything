@@ -3188,9 +3188,10 @@ test('storing Shang Yang\'s named ideas keeps the owner\'s renames and deletions
 const HAN_FEI = 'Hanfeizi (Han Fei) (280 BC - 233 BC)'
 const LI_SI = 'Li Si (280 BC - 208 BC)'
 const THALES = 'Thales of Miletus (~624 BC - ~545 BC)'
+const ZIZEK = 'Slavoj Žižek (1949-present)'
 const IDEA_PHILOSOPHERS = [
   ...NAMED_IDEA_PHILOSOPHERS.map(([, label]) => label),
-  XUNZI, DONG, MOZI, HUI_SHI, GONGSUN_LONG, SHANG_YANG, HAN_FEI, LI_SI, THALES,
+  XUNZI, DONG, MOZI, HUI_SHI, GONGSUN_LONG, SHANG_YANG, HAN_FEI, LI_SI, THALES, ZIZEK,
 ]
 const shortName = (label) => label.replace(/ \(.*$/, '').replace(/^Hanfeizi$/, 'Han Fei')
 
@@ -3367,4 +3368,44 @@ test('a map saved before Thales\'s named ideas stores all 9 under his subcategor
   }
   assert.deepEqual(ideaLabels(nodes, thales).sort(), namedIdeasOf(THALES).sort())
   assert.equal(normalize(nodes, appSummary).changed, false)
+})
+
+// Migration 25: Žižek's named ideas, grouped, with summary migration 10.
+test('Žižek lists 16 named ideas, each with a summary that does not name him', () => {
+  const ideas = namedIdeasOf(ZIZEK)
+  assert.equal(ideas.length, 16)
+  for (const idea of ideas) {
+    assert.ok(appSummary(idea), `${idea} has no summary`)
+    assert.ok(!/ižek|izek/.test(appSummary(idea)), `${idea} names Žižek`)
+  }
+})
+
+test('a map saved before Žižek\'s named ideas stores all 16 under his subcategories on load, once', () => {
+  const before = buildMap([HOP, [
+    ['Contemporary Western Philosophy (19th c - 21st c)', [
+      ['Continental Philosophy (1920s - present)', [
+        ['Critical Theory (1920s-present)', [[ZIZEK]]],
+      ]],
+    ]],
+  ]])
+  const { nodes, changed } = normalize(before, appSummary)
+  assert.equal(changed, true)
+  const zizek = philosopherIn(nodes, ZIZEK)
+  assert.deepEqual(childLabels(nodes, zizek), [...TOPIC_SUBDIVISIONS[ZIZEK]])
+  for (const sub of nodes.filter((n) => n.parentId === zizek.id)) {
+    assert.equal(sub.hidden, true, sub.label)
+    assert.deepEqual(childLabels(nodes, sub), [...TOPIC_SUBDIVISIONS[sub.label]])
+  }
+  assert.deepEqual(ideaLabels(nodes, zizek).sort(), namedIdeasOf(ZIZEK).sort())
+  assert.equal(normalize(nodes, appSummary).changed, false)
+})
+
+test('Žižek\'s stored summary is rewritten to the new built-in one only while unedited', () => {
+  const [{ label, from, to }] = SUMMARY_MIGRATIONS_BY_VERSION[10]
+  assert.equal(appSummary(label), to)
+  const before = buildMap(['Root', [[label, [], { summary: from }], [label, [], { summary: 'Mine.' }]]])
+  const { nodes, changed } = applySummaryMigrations(before)
+  assert.equal(changed, true)
+  assert.equal(nodes[1].summary, to)
+  assert.equal(nodes[2].summary, 'Mine.')
 })
