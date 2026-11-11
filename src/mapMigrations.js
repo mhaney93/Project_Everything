@@ -693,6 +693,14 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
       ['Liberation|zizek', ['The Big Other Doesn\'t Exist', 'Traversing the Fantasy']],
     ]),
   ],
+  26: [
+    // Anaximander's named ideas, stored the same way as migration 21's.
+    ...addEachToEveryCopy([...PRE_SOCRATIC, 'Milesian School/Ionian School (6th c BC)', 'Anaximander of Miletus (610 BC - 546 BC)'], [
+      'Apeiron',
+      'Cosmic Justice',
+      'Innumerable Worlds',
+    ]),
+  ],
 }
 
 // Each entry rewrites a stored summary on a node with `label` only while it
