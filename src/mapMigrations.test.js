@@ -3189,6 +3189,7 @@ const HAN_FEI = 'Hanfeizi (Han Fei) (280 BC - 233 BC)'
 const LI_SI = 'Li Si (280 BC - 208 BC)'
 const THALES = 'Thales of Miletus (~624 BC - ~545 BC)'
 const ZIZEK = 'Slavoj Žižek (1949-present)'
+const ANAXIMANDER = 'Anaximander of Miletus (610 BC - 546 BC)'
 const IDEA_PHILOSOPHERS = [
   ...NAMED_IDEA_PHILOSOPHERS.map(([, label]) => label),
   XUNZI, DONG, MOZI, HUI_SHI, GONGSUN_LONG, SHANG_YANG, HAN_FEI, LI_SI, THALES, ZIZEK,
@@ -3408,4 +3409,35 @@ test('Žižek\'s stored summary is rewritten to the new built-in one only while 
   assert.equal(changed, true)
   assert.equal(nodes[1].summary, to)
   assert.equal(nodes[2].summary, 'Mine.')
+})
+
+// Migration 26: Anaximander's named ideas, stored directly.
+test('Anaximander lists 3 named ideas, each with a summary that does not name him', () => {
+  const ideas = namedIdeasOf(ANAXIMANDER)
+  assert.equal(ideas.length, 3)
+  for (const idea of ideas) {
+    assert.ok(appSummary(idea), `${idea} has no summary`)
+    assert.ok(!appSummary(idea).includes('Anaximander'), `${idea} names Anaximander`)
+  }
+})
+
+test('a map saved before Anaximander\'s named ideas stores all 3 under him on load, once', () => {
+  const before = buildMap([HOP, [
+    ['Ancient Western Philosophy (6th c BC - 5th c AD)', [
+      ['Ancient Greek Philosophy (6th c BC - 1st c BC)', [
+        ['Pre-Socratic Philosophy (6th c BC - 5th c BC)', [
+          ['Milesian School/Ionian School (6th c BC)', [[ANAXIMANDER]]],
+        ]],
+      ]],
+    ]],
+  ]])
+  const { nodes, changed } = normalize(before, appSummary)
+  assert.equal(changed, true)
+  const anaximander = philosopherIn(nodes, ANAXIMANDER)
+  assert.deepEqual(childLabels(nodes, anaximander), [...TOPIC_SUBDIVISIONS[ANAXIMANDER]])
+  for (const child of nodes.filter((n) => n.parentId === anaximander.id)) {
+    assert.equal(child.isCustom, undefined, child.label)
+    assert.equal(child.hidden, true, child.label)
+  }
+  assert.equal(normalize(nodes, appSummary).changed, false)
 })
