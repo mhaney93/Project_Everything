@@ -3,6 +3,7 @@ import { useMobileHeaderSpacer } from './mobileHeaderSpacer';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import './App.css';
 import { authAPI, mapsAPI, filesAPI, API_BASE_URL } from './api';
+import { OWNER_EMAIL, seedMyAncestry } from './personalSeeds';
 import { applyLabelMigrations, applyNodeEdits, applyStructuralMigrations, applySummaryMigrations, dropStaleChildren, removeStalePredefinedChildren } from './mapMigrations';
 import { renameNode, stripLabelSuffix } from './labels';
 
@@ -24060,15 +24061,27 @@ function App() {
         }
 
         // Use cached email or fetch from server
+        let userEmail = cachedUserEmail
         if (cachedUserEmail) {
           setCurrentUser({ email: cachedUserEmail })
         } else {
           try {
             const meData = await authAPI.getMe()
+            userEmail = meData.user.email
             setCurrentUser(meData.user)
             localStorage.setItem('everything_user_email', meData.user.email)
           } catch {
             setCurrentUser({ authenticated: true })
+          }
+        }
+
+        // The owner's private ancestry nodes are seeded into their own map only.
+        if (userEmail === OWNER_EMAIL && Array.isArray(mapData.nodes) && mapData.nodes.length > 0) {
+          const { nodes: normalizedNodes } = normalizeLoadedNodes(mapData.nodes)
+          const { nodes: seededNodes, changed: seeded } = seedMyAncestry(normalizedNodes)
+          if (seeded) {
+            await mapsAPI.saveMap(seededNodes)
+            setNodesFromBackend(collapseNodesToRoot(seededNodes.map((node) => ('hidden' in node ? node : { ...node, hidden: false }))))
           }
         }
       } catch (err) {
