@@ -1,6 +1,6 @@
 // ...existing code...
 import { useMobileHeaderSpacer } from './mobileHeaderSpacer';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import './App.css';
 import { authAPI, mapsAPI, filesAPI, API_BASE_URL } from './api';
 import { applyLabelMigrations, applyNodeEdits, applyStructuralMigrations, applySummaryMigrations, dropStaleChildren, removeStalePredefinedChildren } from './mapMigrations';
@@ -11914,6 +11914,11 @@ function App() {
   }
   const adjustNodeSizeRef = useRef(adjustNodeSize)
   adjustNodeSizeRef.current = adjustNodeSize
+  // Zoom-to-cursor: wheel handler records the layout node nearest the cursor plus the cursor's
+  // offset from it (in unscaled units); after the re-render at the new scale, a layout effect
+  // adjusts the pan so that same map point is back under the cursor.
+  const zoomCtxRef = useRef(null) // latest render's layout/offset context
+  const zoomAnchorRef = useRef(null)
   const [isZooming, setIsZooming] = useState(false)
   const isZoomingSetterRef = useRef(setIsZooming)
   const zoomTimeoutRef = useRef(null)
@@ -25686,6 +25691,22 @@ function App() {
 
   clampPanOffsetRef.current = clampPanOffset
 
+  zoomCtxRef.current = { positions: layout.positions, visibleIds: visibleNodeIdSet, offsetX, offsetY, renderOffsetX, renderOffsetY, nodeWidth, nodeHeight, nodeSizeScale }
+  useLayoutEffect(() => {
+    const anchor = zoomAnchorRef.current
+    const ctx = zoomCtxRef.current
+    zoomAnchorRef.current = null
+    if (!anchor || !ctx || Date.now() - anchor.time > 500) return
+    const pos = ctx.positions.get(anchor.id)
+    if (!pos) return
+    const k = ctx.nodeSizeScale
+    const targetX = anchor.cursorX - anchor.relX * k
+    const targetY = anchor.cursorY - anchor.relY * k
+    const curX = pos.x + ctx.offsetX + ctx.renderOffsetX
+    const curY = pos.y + ctx.offsetY + ctx.renderOffsetY
+    setBasePanOffset((prev) => clampPanOffsetRef.current({ x: prev.x + (curX - targetX), y: prev.y + (curY - targetY) }))
+  }, [nodeSizeScale])
+
   // Middle-click autoscroll RAF loop
   useEffect(() => {
     if (!midPanAnchor) {
@@ -26004,6 +26025,42 @@ function App() {
       isZoomingSetterRef.current(true)
       clearTimeout(zoomTimeoutRef.current)
       zoomTimeoutRef.current = setTimeout(() => isZoomingSetterRef.current(false), 150)
+      const zctx = zoomCtxRef.current
+      if (zctx) {
+        const rect = el.getBoundingClientRect()
+        const cursorX = e.clientX - rect.left
+        const cursorY = e.clientY - rect.top
+        const prevAnchor = zoomAnchorRef.current
+        if (prevAnchor && Date.now() - prevAnchor.time < 500) {
+          // Re-render hasn't happened yet; keep the anchor, just track the cursor
+          prevAnchor.cursorX = cursorX
+          prevAnchor.cursorY = cursorY
+          prevAnchor.time = Date.now()
+        } else {
+          let best = null
+          let bestDist = Infinity
+          zctx.positions.forEach((pos, id) => {
+            if (zctx.visibleIds && !zctx.visibleIds.has(id)) return
+            const left = pos.x + zctx.offsetX + zctx.renderOffsetX
+            const top = pos.y + zctx.offsetY + zctx.renderOffsetY
+            const dx = cursorX - Math.max(left, Math.min(cursorX, left + zctx.nodeWidth))
+            const dy = cursorY - Math.max(top, Math.min(cursorY, top + zctx.nodeHeight))
+            const d = dx * dx + dy * dy
+            if (d < bestDist) { bestDist = d; best = { id, left, top } }
+          })
+          if (best) {
+            const k = zctx.nodeSizeScale || 1
+            zoomAnchorRef.current = {
+              id: best.id,
+              relX: (cursorX - best.left) / k,
+              relY: (cursorY - best.top) / k,
+              cursorX,
+              cursorY,
+              time: Date.now(),
+            }
+          }
+        }
+      }
       adjustNodeSizeRef.current(e.deltaY < 0 ? NODE_SIZE_STEP : -NODE_SIZE_STEP)
       showZoomIndicatorSetterRef.current(true)
       clearTimeout(zoomIndicatorTimeoutRef.current)
