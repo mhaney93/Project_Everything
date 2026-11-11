@@ -26305,6 +26305,11 @@ function App() {
             >
               Profile
             </button>
+            {currentUser?.email && openTooltip !== 'profile' && (
+              <div className="profile-email-indicator" title={currentUser.email}>
+                {currentUser.email}
+              </div>
+            )}
             {openTooltip === 'profile' && (
               <div className="tooltip profile-tooltip">
                 {currentUser ? (

@@ -99,6 +99,22 @@
   position: relative;
 }
 
+.profile-email-indicator {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.15rem;
+  max-width: min(14rem, 45vw);
+  font-size: 0.72rem;
+  line-height: 1.2;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: right;
+  color: #1d4f91;
+  pointer-events: none;
+}
+
 .tooltip {
   position: absolute;
   top: 100%;
