@@ -3473,3 +3473,32 @@ test('a map saved before Anaximenes\'s named ideas stores both under him on load
   }
   assert.equal(normalize(nodes, appSummary).changed, false)
 })
+
+// Migration 28: movie quotes corrected to verbatim lines.
+const QUOTE_RENAMES = STRUCTURAL_MIGRATIONS_BY_VERSION[28]
+
+test('every corrected movie quote is the movie\'s one built-in quote and the old one is gone', () => {
+  for (const { rename: [movie, oldQuote], label } of QUOTE_RENAMES) {
+    assert.deepEqual([...TOPIC_SUBDIVISIONS[movie]], [label], movie)
+    assert.deepEqual([...TOPIC_SUBDIVISIONS[label]], [], label)
+    assert.ok(!(oldQuote in TOPIC_SUBDIVISIONS), `${oldQuote} is still a built-in node`)
+  }
+})
+
+test('a saved built-in quote is relabelled in place, keeping the movie seen, once', () => {
+  const [{ rename: [movie, oldQuote], label }] = QUOTE_RENAMES
+  const before = buildMap(['Movies', [[movie, [[oldQuote, [], { hidden: true }]]]]])
+  const { nodes, changed } = normalize(before, appSummary)
+  assert.equal(changed, true)
+  const quotes = nodes.filter((node) => node.parentId === nodes.find((n) => n.label === movie).id)
+  assert.deepEqual(quotes.map((n) => [n.id, n.label, n.hidden, n.isCustom]), [[3, label, true, undefined]])
+  assert.equal(normalize(nodes, appSummary).changed, false)
+})
+
+test('a quote the owner saved as a custom node is left to the live-map edit, not duplicated', () => {
+  const [{ rename: [movie, oldQuote] }] = QUOTE_RENAMES
+  const before = buildMap(['Movies', [[movie, [[oldQuote, [], { hidden: true, isCustom: true }]]]]])
+  const { nodes } = normalize(before, appSummary)
+  assert.deepEqual(nodes.filter((n) => n.label === oldQuote).map((n) => n.isCustom), [true])
+  assert.equal(nodes.filter((n) => n.parentId === nodes.find((m) => m.label === movie).id).length, 1)
+})

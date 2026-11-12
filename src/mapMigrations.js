@@ -708,6 +708,36 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
       'Rarefaction and Condensation',
     ]),
   ],
+  28: [
+    // Movie quotes corrected in the built-in map (verbatim lines from each film). The stored
+    // built-in quote node is relabelled in place, so a movie keeps its quote child
+    // instead of the stale-child prune dropping it.
+    { rename: ['12 Angry Men', '"It\'s not easy to stand alone against the ridicule of others, but if you believe in something that\'s true, you have to stand for it."'], label: '"It\'s not easy to stand alone against the ridicule of others."' },
+    { rename: ['The Lord of the Rings: The Return of the King', '"I am glad you are here with me. Here at the end of all things, Sam."'], label: '"I\'m glad to be with you, Samwise Gamgee, here at the end of all things."' },
+    { rename: ['The Lord of the Rings: The Fellowship of the Ring', '"All we have to decide is what to do with the time that is given us."'], label: '"All we have to decide is what to do with the time that is given to us."' },
+    { rename: ['Pulp Fiction', '"The path of the righteous man is beset on all sides by the inequities of the selfish and the tyranny of evil men."'], label: '"The path of the righteous man is beset on all sides by the iniquities of the selfish and the tyranny of evil men."' },
+    { rename: ['The Good, the Bad and the Ugly', '"There are two kinds of people in the world, my friend: those with loaded guns and those who dig. You dig."'], label: '"You see in this world there\'s two kinds of people, my friend. Those with loaded guns and those who dig. You dig."' },
+    { rename: ['Forrest Gump', '"Life is like a box of chocolates. You never know what you\'re gonna get."'], label: '"My Momma always said life was like a box of chocolates. You never know what you\'re gonna get."' },
+    { rename: ['The Matrix', '"There is a difference between knowing the path and walking the path."'], label: '"There\'s a difference between knowing the path and walking the path."' },
+    { rename: ["One Flew Over the Cuckoo's Nest", '"He\'s crazy, but he\'s brave enough to live his own life."'], label: '"But I tried, didn\'t I? Goddammit, at least I did that."' },
+    { rename: ['Seven Samurai', '"We are poor, but we have each other—and that is enough."'], label: '"So. Again we are defeated. The farmers have won. Not us."' },
+    { rename: ['The Green Mile', '"Sometimes the world ain\'t all bad, you know. Sometimes it\'s good."'], label: '"Mostly, I\'m tired of people being ugly to each other."' },
+    { rename: ['City of God', '"In the City of God, if you run, the devil catches you; if you stay, the devil kills you."'], label: '"What should have been swift revenge turned into an all out war."' },
+    { rename: ['Life Is Beautiful', '"The most wonderful thing in life is to be able to make someone else smile."'], label: '"Maybe it\'s only a dream! We\'re dreaming, Joshua."' },
+    { rename: ['Terminator 2: Judgment Day', '"The future is not set. There is no fate but what we make for ourselves."'], label: '"The unknown future rolls toward us. I face it for the first time with a sense of hope, because if a machine, a Terminator, can learn the value of human life, maybe we can too."' },
+    { rename: ['The Pianist', '"I don\'t want to survive. I want to live."'], label: '"Thank God, not me. He wants us to survive. Well, that\'s what we have to believe."' },
+    { rename: ['Parasite', '"You know what kind of plan never fails? No plan at all."'], label: '"You know what kind of plan never fails? No plan. No plan at all."' },
+    { rename: ['Grave of the Fireflies', '"Why did I have to survive when so many others died?"'], label: '"Why do fireflies have to die so soon?"' },
+    { rename: ['Harakiri', '"A sword is not meant to kill a man; it is meant to uphold honor."'], label: '"After all, this thing we call samurai honor is ultimately nothing but a facade."' },
+    { rename: ['American History X', '"Hatred is baggage. Life\'s too short to be pissed off all the time."'], label: '"Hate is baggage. Life\'s too short to be pissed off all the time."' },
+    { rename: ['Spider-Man: Across the Spider-Verse', '"We\'re all the Spider-Man of our own story."'], label: '"Anyone can wear the mask. But how you wear it... that\'s what matters."' },
+    { rename: ['The Intouchables', '"My real disability is not being in a wheel chair, it\'s having to be without her."'], label: '"My true disability is not having to be in a wheel chair. It\'s having to be without her."' },
+    { rename: ['Once Upon a Time in the West', '"The railroad is coming... and there\'s nothing you can do to stop it."'], label: '"An ancient race. Other Mortons will be along, and they\'ll kill it off."' },
+    { rename: ['Wall-E', '"I don\'t want to survive, I want to live!"'], label: '"I don\'t want to survive! I wanna live!"' },
+    { rename: ['Memento', '"We all lie to ourselves to be happy."'], label: '"So you lie to yourself to be happy."' },
+    { rename: ['Dune: Part Two', '"The world has made choices for us."'], label: '"You want to control people, you tell them a Messiah will come. Then they\'ll wait, for centuries."' },
+    { rename: ['Raiders of the Lost Ark', '"It\'s a radio for speaking to God—and it\'s a transmitter, a radio for speaking to God!"'], label: '"It\'s a transmitter! It\'s a radio for speaking to God, and it\'s within my reach!"' },
+  ],
 }
 
 // Each entry rewrites a stored summary on a node with `label` only while it
