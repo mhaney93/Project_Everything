@@ -701,6 +701,13 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
       'Innumerable Worlds',
     ]),
   ],
+  27: [
+    // Anaximenes's named ideas, stored the same way as migration 26's.
+    ...addEachToEveryCopy([...PRE_SOCRATIC, 'Milesian School/Ionian School (6th c BC)', 'Anaximenes of Miletus (545 BC)'], [
+      'Air as Archê',
+      'Rarefaction and Condensation',
+    ]),
+  ],
 }
 
 // Each entry rewrites a stored summary on a node with `label` only while it

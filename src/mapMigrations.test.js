@@ -3190,9 +3190,10 @@ const LI_SI = 'Li Si (280 BC - 208 BC)'
 const THALES = 'Thales of Miletus (~624 BC - ~545 BC)'
 const ZIZEK = 'Slavoj Žižek (1949-present)'
 const ANAXIMANDER = 'Anaximander of Miletus (610 BC - 546 BC)'
+const ANAXIMENES = 'Anaximenes of Miletus (545 BC)'
 const IDEA_PHILOSOPHERS = [
   ...NAMED_IDEA_PHILOSOPHERS.map(([, label]) => label),
-  XUNZI, DONG, MOZI, HUI_SHI, GONGSUN_LONG, SHANG_YANG, HAN_FEI, LI_SI, THALES, ZIZEK,
+  XUNZI, DONG, MOZI, HUI_SHI, GONGSUN_LONG, SHANG_YANG, HAN_FEI, LI_SI, THALES, ZIZEK, ANAXIMANDER, ANAXIMENES,
 ]
 const shortName = (label) => label.replace(/ \(.*$/, '').replace(/^Hanfeizi$/, 'Han Fei')
 
@@ -3436,6 +3437,37 @@ test('a map saved before Anaximander\'s named ideas stores all 3 under him on lo
   const anaximander = philosopherIn(nodes, ANAXIMANDER)
   assert.deepEqual(childLabels(nodes, anaximander), [...TOPIC_SUBDIVISIONS[ANAXIMANDER]])
   for (const child of nodes.filter((n) => n.parentId === anaximander.id)) {
+    assert.equal(child.isCustom, undefined, child.label)
+    assert.equal(child.hidden, true, child.label)
+  }
+  assert.equal(normalize(nodes, appSummary).changed, false)
+})
+
+// Migration 27: Anaximenes's named ideas, stored directly.
+test('Anaximenes lists 2 named ideas, each with a summary that does not name him', () => {
+  const ideas = namedIdeasOf(ANAXIMENES)
+  assert.equal(ideas.length, 2)
+  for (const idea of ideas) {
+    assert.ok(appSummary(idea), `${idea} has no summary`)
+    assert.ok(!appSummary(idea).includes('Anaximenes'), `${idea} names Anaximenes`)
+  }
+})
+
+test('a map saved before Anaximenes\'s named ideas stores both under him on load, once', () => {
+  const before = buildMap([HOP, [
+    ['Ancient Western Philosophy (6th c BC - 5th c AD)', [
+      ['Ancient Greek Philosophy (6th c BC - 1st c BC)', [
+        ['Pre-Socratic Philosophy (6th c BC - 5th c BC)', [
+          ['Milesian School/Ionian School (6th c BC)', [[ANAXIMENES]]],
+        ]],
+      ]],
+    ]],
+  ]])
+  const { nodes, changed } = normalize(before, appSummary)
+  assert.equal(changed, true)
+  const anaximenes = philosopherIn(nodes, ANAXIMENES)
+  assert.deepEqual(childLabels(nodes, anaximenes), [...TOPIC_SUBDIVISIONS[ANAXIMENES]])
+  for (const child of nodes.filter((n) => n.parentId === anaximenes.id)) {
     assert.equal(child.isCustom, undefined, child.label)
     assert.equal(child.hidden, true, child.label)
   }
