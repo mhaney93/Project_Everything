@@ -29,6 +29,8 @@
 //   An `add` the taxonomy no longer lists under that parent is skipped.
 // - `regroup` moves the named children `labels` of every non-Personal copy of
 //   the node at the path into its new child `into`; see regroupBuiltInChildren.
+// - `reorder` puts the stored built-in children of every non-Personal copy of
+//   the node at the path into the order of `labels`; see reorderBuiltInChildren.
 // - `move` reparents the node, with its subtree, under the node at `into`,
 //   creating `into` when only its parent is stored. With `id`, it moves the
 //   node with that id at the path instead, custom or not.
@@ -93,6 +95,8 @@ const PRE_SOCRATIC = [...ANCIENT_GREEK, 'Pre-Socratic Philosophy (6th c BC - 5th
 const GOLDEN_AGE_ISLAMIC = [...HISTORY_OF_PHILOSOPHY, 'Golden Age Islamic Philosophy (8th c - 13th c)']
 const CONTEMPORARY_POLITICAL = [...CONTEMPORARY_WESTERN, 'Contemporary Political Philosophy (19th c - 21st c)']
 const AMERICAN_POLITICAL = [...CONTEMPORARY_POLITICAL, 'American Political Philosophy (20th c)']
+const PYTHAGOREAN = [...PRE_SOCRATIC, 'Italian School (6th c BC - 5th c BC)', 'Pythagorean School (6th - 5th c BC)']
+const THOMISM = [...SCHOLASTICISM, 'Thomism (13th c - 21st c)']
 const VYASA_SUMMARY = 'Emphasized the interconnectedness of all existence and the pursuit of liberation (moksha) through self-knowledge and righteous action.'
 // `add` entries for built-in children new under `under`, in taxonomy order.
 const COGNITIVE_PSYCHOLOGY = ['Psychology', 'Cognitive Psychology']
@@ -761,6 +765,61 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
       'Pantheism',
     ]),
   ],
+  32: [
+    // History of Philosophy siblings put oldest to newest, matching the new
+    // built-in order in App.jsx.
+    {
+      reorder: HISTORY_OF_PHILOSOPHY,
+      labels: [
+        'Early Africana Philosophy (c. 24th c BC - 19th c)',
+        'Vedic Indian Philosophy (16th c BC - 6th c BC)',
+        'Classical Chinese Philosophy (6th c BC - 3rd c BC)',
+        'Ancient Western Philosophy (6th c BC - 5th c AD)',
+        'Classical Indian Philosophy (6th c BC - 11th c AD)',
+        'Imperial Chinese Philosophy (3rd c BC - 20th c AD)',
+        'Jewish Philosophy (1st c - 21st c)',
+        'Byzantine Philosophy (4th c - 15th c)',
+        'Medieval Western Philosophy (5th c - 15th c)',
+        'Korean Philosophy (7th c - 19th c)',
+        'Golden Age Islamic Philosophy (8th c - 13th c)',
+        'Medieval Indian Philosophy (8th c - 18th c)',
+        'Classical and Medieval Japanese Philosophy (794-1603)',
+        'Post-Classical Islamic Philosophy (13th c - 19th c)',
+        'Western Renaissance Philosophy (15th c - 16th c)',
+        'Latin American and Iberian Philosophy (16th c - 21st c)',
+        'Early Modern Western Philosophy (17th c - 18th c)',
+        'Edo Japanese Philosophy (1603-1868)',
+        'Late Modern Western Philosophy (19th c)',
+        'Modern Indian Philosophy (19th c - 21st c)',
+        'Modern Japanese Philosophy (19th c - 21st c)',
+        'Contemporary Western Philosophy (19th c - 21st c)',
+        'Modern Chinese Philosophy (20th c - 21st c)',
+        'Modern Islamic Philosophy (20th c - 21st c)',
+        'Modern African Philosophy (20th c - 21st c)',
+      ],
+    },
+    { reorder: PYTHAGOREAN, labels: ['Pythagoras of Samos (570 BC - 495 BC)', 'Philolaus (~470 BC - ~385 BC)'] },
+    {
+      reorder: THOMISM,
+      labels: ['St. Thomas Aquinas (1225-1274)', 'Cardinal Cajetan (1469-1534)', 'Francisco Suárez (1548-1617)', 'Neo-Thomism (19th c - present)', 'Karl Rahner (1904-1984)'],
+    },
+    {
+      reorder: LATE_MODERN,
+      labels: [
+        'Utilitarianism (18th c - present)',
+        'German Idealism (1780\'s - 1840s)',
+        'Pessimism (19th c)',
+        'Positivism (1830s - 1900s)',
+        'Anthropological Materialism (19th c)',
+        'Transcendentalism (1830s-1860s)',
+        'Anarchism (1840s - present)',
+        'Existentialism (19th c - present)',
+        'British Idealism (1860s - 1920s)',
+        'Process and Life Philosophy (1880s - present)',
+        'Depth Psychology/Analytical Psychology/Psychology of Religion (1880-1970)',
+      ],
+    },
+  ],
 }
 
 // Each entry rewrites a stored summary on a node with `label` only while it
@@ -1382,6 +1441,27 @@ const regroupBuiltInChildren = (mapNodes, { regroup, into, labels }, builtInSumm
   return { nodes, changed: nodes !== mapNodes }
 }
 
+// For every non-Personal copy of the node at `reorder`, puts its stored
+// built-in children labelled one of `labels` into the order of `labels`. Only
+// a stored `order` (an admin reorder) can override the built-in order, so the
+// children that hold one swap those same order values among themselves, in
+// the new order; children without one, and the owner's own nodes, keep
+// theirs, so a custom node stays where it was placed.
+const reorderBuiltInChildren = (mapNodes, { reorder, labels }) => {
+  const byId = new Map(mapNodes.map((node) => [node.id, node]))
+  const parentIds = new Set(nodesAtPath(mapNodes, byId, reorder, (node) => !node.isPersonal).map((node) => node.id))
+  const newOrder = new Map()
+  for (const parentId of parentIds) {
+    const ordered = mapNodes
+      .filter((node) => node.parentId === parentId && isBuiltIn(node) && labels.includes(node.label) && node.order !== undefined)
+      .sort((a, b) => labels.indexOf(a.label) - labels.indexOf(b.label))
+    const slots = ordered.map((node) => node.order).sort((a, b) => a - b)
+    ordered.forEach((node, i) => { if (node.order !== slots[i]) newOrder.set(node.id, slots[i]) })
+  }
+  if (newOrder.size === 0) return { nodes: mapNodes, changed: false }
+  return { nodes: mapNodes.map((node) => (newOrder.has(node.id) ? { ...node, order: newOrder.get(node.id) } : node)), changed: true }
+}
+
 const excludeChildLabel = (mapNodes, parentId, label) => mapNodes.map((node) => {
   if (node.id !== parentId || (node.excludedChildLabels || []).includes(label)) return node
   return { ...node, excludedChildLabels: [...(node.excludedChildLabels || []), label] }
@@ -1566,6 +1646,7 @@ const runStructuralMigration = (mapNodes, migration, builtInSummary, topicSubdiv
   if (migration.rename) return renameBuiltInNode(mapNodes, migration, builtInSummary)
   if (migration.add) return addBuiltInNode(mapNodes, migration, topicSubdivisions)
   if (migration.regroup) return regroupBuiltInChildren(mapNodes, migration, builtInSummary)
+  if (migration.reorder) return reorderBuiltInChildren(mapNodes, migration)
   if (migration.move) return moveBuiltInNode(mapNodes, migration, builtInSummary)
   if (migration.refile) return refileBuiltInNodes(mapNodes, migration, builtInSummary, topicSubdivisions)
   if (migration.remove) return removeBuiltInNode(mapNodes, migration, builtInSummary, topicSubdivisions)
