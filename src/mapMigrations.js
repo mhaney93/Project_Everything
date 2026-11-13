@@ -753,6 +753,14 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
       'Spontaneous Generation',
     ]),
   ],
+  31: [
+    // Diogenes of Apollonia's named ideas, stored directly like migration 30's.
+    ...addEachToEveryCopy([...PRE_SOCRATIC, 'Milesian School/Ionian School (6th c BC)', 'Diogenes of Apollonia (~440 BC)'], [
+      'Material Monism|diogenes',
+      'Teleological Argument',
+      'Pantheism',
+    ]),
+  ],
 }
 
 // Each entry rewrites a stored summary on a node with `label` only while it
