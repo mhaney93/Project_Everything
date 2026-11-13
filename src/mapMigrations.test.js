@@ -3600,3 +3600,83 @@ test('a map saved before Diogenes\'s named ideas stores all 3 under him on load,
   }
   assert.equal(normalize(nodes, appSummary).changed, false)
 })
+
+// Migration 32: History of Philosophy siblings oldest to newest.
+const ORDERED_CHILDREN_PARENTS = (() => {
+  const source = readFileSync(new URL('./App.jsx', import.meta.url), 'utf8')
+  const start = source.indexOf('[', source.indexOf('const ORDERED_CHILDREN_PARENTS = new Set('))
+  return new Set(vm.runInNewContext(source.slice(start, source.indexOf('\n])', start) + 2)))
+})()
+const PYTHAGOREAN_SCHOOL = 'Pythagorean School (6th - 5th c BC)'
+const THOMISM = 'Thomism (13th c - 21st c)'
+
+test('migration 32 orders each parent\'s children as the built-in taxonomy does', () => {
+  for (const { reorder, labels } of STRUCTURAL_MIGRATIONS_BY_VERSION[32]) {
+    const parent = reorder.at(-1)
+    for (let i = 1; i < reorder.length; i++) assert.ok(TOPIC_SUBDIVISIONS[reorder[i - 1]].includes(reorder[i]), `${reorder[i - 1]} > ${reorder[i]}`)
+    assert.deepEqual(labels, [...TOPIC_SUBDIVISIONS[parent]], parent)
+    assert.ok(ORDERED_CHILDREN_PARENTS.has(parent), `${parent} keeps its built-in order on the canvas`)
+  }
+  assert.deepEqual([...TOPIC_SUBDIVISIONS[PYTHAGOREAN_SCHOOL]], ['Pythagoras of Samos (570 BC - 495 BC)', 'Philolaus (~470 BC - ~385 BC)'])
+})
+
+test('a map with admin-ordered philosophy siblings takes the new order on load, keeping custom nodes in place, once', () => {
+  const before = buildMap([HOP, [
+    ['Ancient Western Philosophy (6th c BC - 5th c AD)', [
+      ['Ancient Greek Philosophy (6th c BC - 1st c BC)', [
+        ['Pre-Socratic Philosophy (6th c BC - 5th c BC)', [
+          ['Italian School (6th c BC - 5th c BC)', [
+            [PYTHAGOREAN_SCHOOL, [
+              ['Philolaus (~470 BC - ~385 BC)', [], { order: 0 }],
+              ['My Pythagorean', [], { isCustom: true, order: 1 }],
+              ['Pythagoras of Samos (570 BC - 495 BC)', [], { order: 2 }],
+            ]],
+          ]],
+        ]],
+      ]],
+    ]],
+    ['Medieval Western Philosophy (5th c - 15th c)', [
+      ['Scholasticism (11th c - 17th c)', [
+        [THOMISM, [
+          ['St. Thomas Aquinas (1225-1274)', [], { order: 0 }],
+          ['Cardinal Cajetan (1469-1534)', [], { order: 1 }],
+          ['Francisco Suárez (1548-1617)', [], { order: 2 }],
+          ['Karl Rahner (1904-1984)', [], { order: 3 }],
+          ['Neo-Thomism (19th c - present)', [], { order: 4 }],
+          ['My Thomist', [], { isCustom: true, order: 5 }],
+        ]],
+      ]],
+    ]],
+  ]])
+  const { nodes, changed } = normalize(before, appSummary)
+  assert.equal(changed, true)
+  const orderOf = (label) => nodes.find((n) => n.label === label).order
+  assert.equal(orderOf('Pythagoras of Samos (570 BC - 495 BC)'), 0)
+  assert.equal(orderOf('My Pythagorean'), 1)
+  assert.equal(orderOf('Philolaus (~470 BC - ~385 BC)'), 2)
+  assert.equal(orderOf('Neo-Thomism (19th c - present)'), 3)
+  assert.equal(orderOf('Karl Rahner (1904-1984)'), 4)
+  assert.equal(orderOf('My Thomist'), 5)
+  assert.equal(orderOf('St. Thomas Aquinas (1225-1274)'), 0)
+  for (const label of ['My Pythagorean', 'My Thomist']) {
+    const custom = nodes.find((n) => n.label === label)
+    assert.equal(custom.isCustom, true, label)
+    assert.equal(custom.parentId, before.find((n) => n.label === label).parentId, label)
+  }
+  assert.equal(normalize(nodes, appSummary).changed, false)
+})
+
+test('a map without stored orders keeps none after migration 32', () => {
+  const before = buildMap([HOP, [
+    ['Ancient Western Philosophy (6th c BC - 5th c AD)', [
+      ['Ancient Greek Philosophy (6th c BC - 1st c BC)', [
+        ['Pre-Socratic Philosophy (6th c BC - 5th c BC)', [
+          ['Italian School (6th c BC - 5th c BC)', [builtIn(PYTHAGOREAN_SCHOOL)]],
+        ]],
+      ]],
+    ]],
+  ]])
+  const { nodes } = normalize(before, appSummary)
+  assert.ok(nodes.every((n) => n.order === undefined))
+  assert.equal(normalize(nodes, appSummary).changed, false)
+})

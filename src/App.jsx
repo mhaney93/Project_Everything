@@ -248,6 +248,7 @@ const ORDERED_CHILDREN_PARENTS = new Set([
   'Pre-Socratic Philosophy (6th c BC - 5th c BC)',
   'Milesian School/Ionian School (6th c BC)',
   'Italian School (6th c BC - 5th c BC)',
+  'Pythagorean School (6th - 5th c BC)',
   'Eleatic School (5th c BC)',
   'Pluralists (5th c BC)',
   'Atomists (5th c BC)',
@@ -2028,10 +2029,10 @@ function App() {
       'Late Modern Western Philosophy (19th c)',
       'Modern Indian Philosophy (19th c - 21st c)',
       'Modern Japanese Philosophy (19th c - 21st c)',
+      'Contemporary Western Philosophy (19th c - 21st c)',
       'Modern Chinese Philosophy (20th c - 21st c)',
       'Modern Islamic Philosophy (20th c - 21st c)',
       'Modern African Philosophy (20th c - 21st c)',
-      'Contemporary Western Philosophy (19th c - 21st c)',
     ],
 
     // Philosophers' named ideas. Once a philosopher is finished in Logos, each
@@ -2468,7 +2469,7 @@ function App() {
     'Roscellinus (1050-1125)': [],
     'Peter Abelard (1079-1142)': [],
     'William of Ockham (1287-1347)': [],
-    'Thomism (13th c - 21st c)': ['St. Thomas Aquinas (1225-1274)', 'Cardinal Cajetan (1469-1534)', 'Francisco Suárez (1548-1617)', 'Karl Rahner (1904-1984)', 'Neo-Thomism (19th c - present)'],
+    'Thomism (13th c - 21st c)': ['St. Thomas Aquinas (1225-1274)', 'Cardinal Cajetan (1469-1534)', 'Francisco Suárez (1548-1617)', 'Neo-Thomism (19th c - present)', 'Karl Rahner (1904-1984)'],
     'St. Thomas Aquinas (1225-1274)': [],
     'Cardinal Cajetan (1469-1534)': [],
     'Francisco Suárez (1548-1617)': [],
@@ -2606,7 +2607,7 @@ function App() {
     'Motoori Norinaga (1730-1801)': [],
 
     // Late Modern Western Philosophy
-    'Late Modern Western Philosophy (19th c)': ['Utilitarianism (18th c - present)', 'German Idealism (1780\'s - 1840s)', 'Pessimism (19th c)', 'Positivism (1830s - 1900s)', 'Anthropological Materialism (19th c)', 'Anarchism (1840s - present)', 'Existentialism (19th c - present)', 'Transcendentalism (1830s-1860s)', 'British Idealism (1860s - 1920s)', 'Process and Life Philosophy (1880s - present)', 'Depth Psychology/Analytical Psychology/Psychology of Religion (1880-1970)'],
+    'Late Modern Western Philosophy (19th c)': ['Utilitarianism (18th c - present)', 'German Idealism (1780\'s - 1840s)', 'Pessimism (19th c)', 'Positivism (1830s - 1900s)', 'Anthropological Materialism (19th c)', 'Transcendentalism (1830s-1860s)', 'Anarchism (1840s - present)', 'Existentialism (19th c - present)', 'British Idealism (1860s - 1920s)', 'Process and Life Philosophy (1880s - present)', 'Depth Psychology/Analytical Psychology/Psychology of Religion (1880-1970)'],
     'Positivism (1830s - 1900s)': ['Auguste Comte (1798-1857)'],
     'Auguste Comte (1798-1857)': [],
     'Anarchism (1840s - present)': ['Pierre-Joseph Proudhon (1809-1865)', 'Mikhail Bakunin (1814-1876)', 'Peter Kropotkin (1842-1921)'],
