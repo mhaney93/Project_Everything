@@ -745,6 +745,14 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
       ['Knowledge and Character|heraclitus', ['Character Is Fate', 'Nature Loves to Hide', 'Polymathy']],
     ]),
   ],
+  30: [
+    // Archelaus's named ideas, stored directly like migration 27's.
+    ...addEachToEveryCopy([...PRE_SOCRATIC, 'Milesian School/Ionian School (6th c BC)', 'Archelaus (~450 BC)'], [
+      'Nomos vs. Physis',
+      'Nous|archelaus',
+      'Spontaneous Generation',
+    ]),
+  ],
 }
 
 // Each entry rewrites a stored summary on a node with `label` only while it

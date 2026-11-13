@@ -2556,7 +2556,8 @@ test('migration 13 adds the four Pre-Socratics to their schools in the built-in 
   for (const { add, under } of STRUCTURAL_MIGRATIONS_BY_VERSION[13]) {
     for (let i = 1; i < under.length; i++) assert.ok(TOPIC_SUBDIVISIONS[under[i - 1]].includes(under[i]), `${under[i - 1]} > ${under[i]}`)
     assert.ok(TOPIC_SUBDIVISIONS[under.at(-1)].includes(add), `${under.at(-1)} > ${add}`)
-    assert.equal(TOPIC_SUBDIVISIONS[add].length, 0)
+    // A philosopher later given named ideas (Archelaus, migration 30) has those as children.
+    if (!IDEA_PHILOSOPHERS.includes(add)) assert.equal(TOPIC_SUBDIVISIONS[add].length, 0)
     assert.ok(appSummary(add), `${add} has no summary`)
   }
 })
@@ -3192,9 +3193,10 @@ const ZIZEK = 'Slavoj Žižek (1949-present)'
 const ANAXIMANDER = 'Anaximander of Miletus (610 BC - 546 BC)'
 const ANAXIMENES = 'Anaximenes of Miletus (545 BC)'
 const HERACLITUS = 'Heraclitus of Ephesus (535 BC - 475 BC)'
+const ARCHELAUS = 'Archelaus (~450 BC)'
 const IDEA_PHILOSOPHERS = [
   ...NAMED_IDEA_PHILOSOPHERS.map(([, label]) => label),
-  XUNZI, DONG, MOZI, HUI_SHI, GONGSUN_LONG, SHANG_YANG, HAN_FEI, LI_SI, THALES, ZIZEK, ANAXIMANDER, ANAXIMENES, HERACLITUS,
+  XUNZI, DONG, MOZI, HUI_SHI, GONGSUN_LONG, SHANG_YANG, HAN_FEI, LI_SI, THALES, ZIZEK, ANAXIMANDER, ANAXIMENES, HERACLITUS, ARCHELAUS,
 ]
 const shortName = (label) => label.replace(/ \(.*$/, '').replace(/^Hanfeizi$/, 'Han Fei')
 
@@ -3533,5 +3535,36 @@ test('a map saved before Heraclitus\'s named ideas stores all 10 under his subca
     assert.deepEqual(childLabels(nodes, sub), [...TOPIC_SUBDIVISIONS[sub.label]])
   }
   assert.deepEqual(ideaLabels(nodes, heraclitus).sort(), namedIdeasOf(HERACLITUS).sort())
+  assert.equal(normalize(nodes, appSummary).changed, false)
+})
+
+// Migration 30: Archelaus's named ideas, stored directly.
+test('Archelaus lists 3 named ideas, each with a summary that does not name him', () => {
+  const ideas = namedIdeasOf(ARCHELAUS)
+  assert.equal(ideas.length, 3)
+  for (const idea of ideas) {
+    assert.ok(appSummary(idea), `${idea} has no summary`)
+    assert.ok(!appSummary(idea).includes('Archelaus'), `${idea} names Archelaus`)
+  }
+})
+
+test('a map saved before Archelaus\'s named ideas stores all 3 under him on load, once', () => {
+  const before = buildMap([HOP, [
+    ['Ancient Western Philosophy (6th c BC - 5th c AD)', [
+      ['Ancient Greek Philosophy (6th c BC - 1st c BC)', [
+        ['Pre-Socratic Philosophy (6th c BC - 5th c BC)', [
+          ['Milesian School/Ionian School (6th c BC)', [[ARCHELAUS]]],
+        ]],
+      ]],
+    ]],
+  ]])
+  const { nodes, changed } = normalize(before, appSummary)
+  assert.equal(changed, true)
+  const archelaus = philosopherIn(nodes, ARCHELAUS)
+  assert.deepEqual(childLabels(nodes, archelaus), [...TOPIC_SUBDIVISIONS[ARCHELAUS]])
+  for (const child of nodes.filter((n) => n.parentId === archelaus.id)) {
+    assert.equal(child.isCustom, undefined, child.label)
+    assert.equal(child.hidden, true, child.label)
+  }
   assert.equal(normalize(nodes, appSummary).changed, false)
 })
