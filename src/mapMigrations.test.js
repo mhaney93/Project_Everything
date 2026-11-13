@@ -3191,9 +3191,10 @@ const THALES = 'Thales of Miletus (~624 BC - ~545 BC)'
 const ZIZEK = 'Slavoj Žižek (1949-present)'
 const ANAXIMANDER = 'Anaximander of Miletus (610 BC - 546 BC)'
 const ANAXIMENES = 'Anaximenes of Miletus (545 BC)'
+const HERACLITUS = 'Heraclitus of Ephesus (535 BC - 475 BC)'
 const IDEA_PHILOSOPHERS = [
   ...NAMED_IDEA_PHILOSOPHERS.map(([, label]) => label),
-  XUNZI, DONG, MOZI, HUI_SHI, GONGSUN_LONG, SHANG_YANG, HAN_FEI, LI_SI, THALES, ZIZEK, ANAXIMANDER, ANAXIMENES,
+  XUNZI, DONG, MOZI, HUI_SHI, GONGSUN_LONG, SHANG_YANG, HAN_FEI, LI_SI, THALES, ZIZEK, ANAXIMANDER, ANAXIMENES, HERACLITUS,
 ]
 const shortName = (label) => label.replace(/ \(.*$/, '').replace(/^Hanfeizi$/, 'Han Fei')
 
@@ -3501,4 +3502,36 @@ test('a quote the owner saved as a custom node is left to the live-map edit, not
   const { nodes } = normalize(before, appSummary)
   assert.deepEqual(nodes.filter((n) => n.label === oldQuote).map((n) => n.isCustom), [true])
   assert.equal(nodes.filter((n) => n.parentId === nodes.find((m) => m.label === movie).id).length, 1)
+})
+
+// Migration 29: Heraclitus's named ideas, grouped.
+test('Heraclitus lists 10 named ideas, each with a summary that does not name him', () => {
+  const ideas = namedIdeasOf(HERACLITUS)
+  assert.equal(ideas.length, 10)
+  for (const idea of ideas) {
+    assert.ok(appSummary(idea), `${idea} has no summary`)
+    assert.ok(!appSummary(idea).includes('Heraclitus'), `${idea} names Heraclitus`)
+  }
+})
+
+test('a map saved before Heraclitus\'s named ideas stores all 10 under his subcategories on load, once', () => {
+  const before = buildMap([HOP, [
+    ['Ancient Western Philosophy (6th c BC - 5th c AD)', [
+      ['Ancient Greek Philosophy (6th c BC - 1st c BC)', [
+        ['Pre-Socratic Philosophy (6th c BC - 5th c BC)', [
+          ['Milesian School/Ionian School (6th c BC)', [[HERACLITUS]]],
+        ]],
+      ]],
+    ]],
+  ]])
+  const { nodes, changed } = normalize(before, appSummary)
+  assert.equal(changed, true)
+  const heraclitus = philosopherIn(nodes, HERACLITUS)
+  assert.deepEqual(childLabels(nodes, heraclitus), [...TOPIC_SUBDIVISIONS[HERACLITUS]])
+  for (const sub of nodes.filter((n) => n.parentId === heraclitus.id)) {
+    assert.equal(sub.hidden, true, sub.label)
+    assert.deepEqual(childLabels(nodes, sub), [...TOPIC_SUBDIVISIONS[sub.label]])
+  }
+  assert.deepEqual(ideaLabels(nodes, heraclitus).sort(), namedIdeasOf(HERACLITUS).sort())
+  assert.equal(normalize(nodes, appSummary).changed, false)
 })

@@ -737,6 +737,13 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
     { rename: ['Memento', '"We all lie to ourselves to be happy."'], label: '"So you lie to yourself to be happy."' },
     { rename: ['Dune: Part Two', '"The world has made choices for us."'], label: '"You want to control people, you tell them a Messiah will come. Then they\'ll wait, for centuries."' },
     { rename: ['Raiders of the Lost Ark', '"It\'s a radio for speaking to God—and it\'s a transmitter, a radio for speaking to God!"'], label: '"It\'s a transmitter! It\'s a radio for speaking to God, and it\'s within my reach!"' },
+  ],  29: [
+    // Heraclitus's named ideas, grouped like migration 24's.
+    ...groupNamedIdeas([...PRE_SOCRATIC, 'Milesian School/Ionian School (6th c BC)', 'Heraclitus of Ephesus (535 BC - 475 BC)'], [
+      ['First Stuff|heraclitus', ['Ekpyrosis', 'Everliving Fire']],
+      ['Order and Change|heraclitus', ['Hidden Harmony', 'Logos|heraclitus', 'Panta Rhei', 'Polemos', 'Unity of Opposites']],
+      ['Knowledge and Character|heraclitus', ['Character Is Fate', 'Nature Loves to Hide', 'Polymathy']],
+    ]),
   ],
 }
 
