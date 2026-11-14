@@ -820,6 +820,17 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
       ],
     },
   ],
+  33: [
+    // Philolaus's named ideas, stored directly like migration 30's.
+    ...addEachToEveryCopy([...PRE_SOCRATIC, 'Italian School (6th c BC - 5th c BC)', 'Pythagorean School (6th - 5th c BC)', 'Philolaus (~470 BC - ~385 BC)'], [
+      'Limiters and Unlimiteds',
+      'Harmonia',
+      'Central Fire',
+      'Counter-Earth (Antichthon)',
+      'Soul as Harmonia',
+      'Soma Sema',
+    ]),
+  ],
 }
 
 // Each entry rewrites a stored summary on a node with `label` only while it
