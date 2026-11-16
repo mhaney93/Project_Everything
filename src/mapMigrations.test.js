@@ -2244,7 +2244,7 @@ test('migration 11 refiles the stored philosophy figures with their ids, notes a
 })
 
 test('migration 11 leaves an unexpanded History of Philosophy, and custom copies, alone', () => {
-  const unexpanded = buildMap(['Everything', [['Humanities', [['Philosophy', [[HOP]]]]]]])
+  const unexpanded = buildMap(['Everything', [['Humanities', [['Philosophy', TOPIC_SUBDIVISIONS.Philosophy.map((label) => [label])]]]]])
   assert.equal(normalize(unexpanded, appSummary).changed, false)
 
   const vedic = TOPIC_SUBDIVISIONS[HOP].filter((label) => !NEW_TRADITIONS.includes(label)).map((label) => [label])
@@ -2605,7 +2605,14 @@ test('production map 7 keeps one copy of each duplicated node', () => {
   const childrenOf = (id) => nodes.filter((n) => n.parentId === id).map((n) => n.id).sort((a, b) => a - b)
 
   for (const id of DEDUPE_REMOVED) assert.equal(node(id), undefined, byId.get(id).label)
-  assert.equal(nodes.length, before.length - DEDUPE_REMOVED.length)
+  // The only new nodes are built-in ones migration 34 adds under Philosophy and
+  // Computer Science, each where the taxonomy lists it.
+  const added = nodes.filter((n) => !byId.has(n.id))
+  for (const n of added) {
+    assert.ok(/ > (Philosophy|Computer Science) > /.test(pathOf(nodes, n)), pathOf(nodes, n))
+    assert.ok(TOPIC_SUBDIVISIONS[nodes.find((p) => p.id === n.parentId).label].includes(n.label), pathOf(nodes, n))
+  }
+  assert.equal(nodes.length - added.length, before.length - DEDUPE_REMOVED.length)
   for (const id of DEDUPE_KEPT) assert.ok(node(id), byId.get(id).label)
   assert.deepEqual(orphansOf(nodes), [])
 
@@ -3712,5 +3719,232 @@ test('a map saved before Philolaus\'s named ideas stores all 6 under him on load
     assert.equal(child.isCustom, undefined, child.label)
     assert.equal(child.hidden, true, child.label)
   }
+  assert.equal(normalize(nodes, appSummary).changed, false)
+})
+
+// Migration 34: category review, and named ideas cross-listed under their
+// Philosophy categories.
+const PHILOSOPHY_LABELS_OUTSIDE_HOP = (() => {
+  const labels = new Set()
+  const walk = (label) => {
+    for (const child of TOPIC_SUBDIVISIONS[label] || []) {
+      if (child === HOP || labels.has(child)) continue
+      labels.add(child)
+      walk(child)
+    }
+  }
+  walk('Philosophy')
+  return labels
+})()
+// The philosophers finished in Logos, whose children are their named ideas.
+const PHILOSOPHERS_WITH_IDEAS = [
+  'Ptahhotep (c. 24th c BC)', 'Anton Wilhelm Amo (c. 1703-c. 1759)', 'Frederick Douglass (1818-1895)', 'W. E. B. Du Bois (1868-1963)',
+  'Yajnavalkya (8th c BC)', 'Laozi (Lao Tzu) (6th c BC)', 'Zhuangzi (Chuang Tzu) (369 BC - 286 BC)', 'Confucius (Kong Fuzi) (551 BC - 479 BC)',
+  'Mencius (Mengzi) (372 BC - 289 BC)', 'Xunzi (Xun Kuang) (3rd c BC)', 'Dong Zhongshu (179 BC - 104 BC)', 'Mozi (Mo Di) (c. 470 BC - c. 391 BC)',
+  'Hui Shi (c. 370 BC - c. 310 BC)', 'Gongsun Long (c. 320 BC - c. 250 BC)', 'Shang Yang (390 BC - 338 BC)', 'Hanfeizi (Han Fei) (280 BC - 233 BC)',
+  'Li Si (280 BC - 208 BC)', 'Thales of Miletus (~624 BC - ~545 BC)', 'Anaximander of Miletus (610 BC - 546 BC)', 'Anaximenes of Miletus (545 BC)',
+  'Heraclitus of Ephesus (535 BC - 475 BC)', 'Archelaus (~450 BC)', 'Diogenes of Apollonia (~440 BC)', 'Philolaus (~470 BC - ~385 BC)',
+  'Slavoj Žižek (1949-present)',
+]
+
+test('every philosopher\'s named idea is also listed under a Philosophy category, except those with no philosophy in them', () => {
+  const uncategorized = ['Thales\'s Theorem', 'Sha Qiu Zhi Mou']
+  const ideas = PHILOSOPHERS_WITH_IDEAS.flatMap(namedIdeasOf)
+  assert.equal(ideas.length, 184)
+  for (const idea of ideas) {
+    if (uncategorized.includes(idea)) assert.ok(!PHILOSOPHY_LABELS_OUTSIDE_HOP.has(idea), idea)
+    else assert.ok(PHILOSOPHY_LABELS_OUTSIDE_HOP.has(idea), `${idea} has no Philosophy category`)
+  }
+})
+
+test('migration 34 adds only real taxonomy edges, and each new category has a summary', () => {
+  for (const { add, under } of STRUCTURAL_MIGRATIONS_BY_VERSION[34].filter((m) => m.add)) {
+    for (let i = 1; i < under.length; i++) assert.ok(TOPIC_SUBDIVISIONS[under[i - 1]].includes(under[i]), `${under[i - 1]} > ${under[i]}`)
+    assert.ok(TOPIC_SUBDIVISIONS[under.at(-1)].includes(add), `${under.at(-1)} > ${add}`)
+    assert.ok(appSummary(add), `${add} has no summary`)
+  }
+  for (const label of ['Language Families', 'Libertarianism|political', ...TOPIC_SUBDIVISIONS['Middle East Conflict (1945 - present)']]) {
+    assert.ok(appSummary(label), `${label} has no summary`)
+  }
+  for (const era of TOPIC_SUBDIVISIONS['Middle East Conflict (1945 - present)']) assert.ok(ORDERED_CHILDREN_PARENTS.has(era), era)
+})
+
+// Philosophy as it was stored before migration 34, every level expanded.
+const oldPhilosophy = () => buildMap(['Everything', [
+  ['Humanities', [
+    ['Philosophy', [
+      ['Aesthetics'],
+      ['Epistemology'],
+      ['Ethics/Moral Philosophy', [
+        ['Applied Ethics', [
+          ['Bioethics'], ['Business Ethics'], ['Computer Ethics'], ['Environmental Ethics'], ['Medical Ethics'],
+          ['Philosophy of Law', [['Justice before Mercy']]],
+        ]],
+        ['Metaethics'],
+        ['Normative Ethics', [
+          ['Aristotle\'s Virtue Ethics', [], { notes: [{ id: 'n1', text: 'Golden mean', level: 0 }] }],
+          ['Basic Moral Dilemmas'], ['Consequentialism'], ['Kant\'s Deontology'],
+          ['My Ethics', [], { isCustom: true }],
+        ]],
+      ]],
+      [HOP],
+      ['Metaphilosophy', [
+        ['Experimental Philosophy/x-phi'], ['Philosophical Quietism'], ['Philosophy of Logic'],
+        ['Philosophy of Language', [], { notes: [{ id: 'n2', text: 'Read Frege', level: 0 }] }],
+        ['Philosophy of Science'],
+      ]],
+      ['Metaphysics', [
+        ['Arguments for God\'s Existence', [['Aquinas\'s 5 Ways'], ['Descartes\' Arguments for the Existence of God']]],
+        ['Causality'],
+        ['Cosmology', [
+          ['Origin of Universe'], ['Structure of Universe'],
+          ['Big Bang', [], { notes: [{ id: 'n3', text: 'Lemaître', level: 0 }] }],
+          ['Black Holes'], ['Dark Matter'], ['Multiverse'],
+        ]],
+        ['Free Will vs. Determinism', [['Agency'], ['Compatibilism'], ['Determinism'], ['Free Will'], ['Indeterminism'], ['Libertarianism'], ['Responsibility']]],
+        ['Metaphysics of Modality'], ['Ontology'], ['Philosophy of Mind'], ['Substance Theory'], ['Time'],
+      ]],
+      ['Political Philosophy', [['Rights'], ['Democracy'], ['Authoritarianism'], ['Anarchism'], ['Libertarianism']]],
+    ]],
+  ]],
+  ['Sciences', [['Natural Sciences', [['Astronomy', [['The Big Bang']]]]]]],
+]])
+
+test('a saved map with the old Philosophy categories takes the new ones on load, keeping ids and notes, once', () => {
+  const before = oldPhilosophy()
+  const { nodes, changed } = normalize(before, appSummary)
+  assert.equal(changed, true)
+  assert.deepEqual(orphansOf(nodes), [])
+  const idOf = (path) => {
+    const matches = nodeAt(before, path)
+    assert.equal(matches.length, 1, path.join(' > '))
+    return matches[0].id
+  }
+  const at = (path) => {
+    const matches = nodeAt(nodes, path)
+    assert.equal(matches.length, 1, path.join(' > '))
+    return matches[0]
+  }
+  const sortedChildren = (path) => childLabels(nodes, at(path)).sort()
+  const builtInOf = (label) => [...TOPIC_SUBDIVISIONS[label]].sort()
+
+  // Philosophy of Language, Logic and Science move up, with their ids and notes.
+  assert.deepEqual(sortedChildren(['Humanities', 'Philosophy']), builtInOf('Philosophy'))
+  assert.deepEqual(sortedChildren(['Philosophy', 'Metaphilosophy']), builtInOf('Metaphilosophy'))
+  const language = at(['Humanities', 'Philosophy', 'Philosophy of Language'])
+  assert.equal(language.id, idOf(['Metaphilosophy', 'Philosophy of Language']))
+  assert.deepEqual(language.notes, [{ id: 'n2', text: 'Read Frege', level: 0 }])
+
+  // Arguments for God's Existence moves into Philosophy of Religion, which gets its built-in set.
+  assert.equal(at(['Philosophy', 'Philosophy of Religion', 'Arguments for God\'s Existence']).id, idOf(['Metaphysics', 'Arguments for God\'s Existence']))
+  assert.deepEqual(sortedChildren(['Philosophy', 'Philosophy of Religion']), builtInOf('Philosophy of Religion'))
+  assert.equal(at(['Philosophy of Religion', 'Arguments for God\'s Existence', 'Aquinas\'s 5 Ways']).id, idOf(['Arguments for God\'s Existence', 'Aquinas\'s 5 Ways']))
+
+  // Aristotle and Kant go under Virtue Ethics and Deontology; the owner's node stays put.
+  assert.deepEqual(sortedChildren(['Ethics/Moral Philosophy', 'Normative Ethics']), [...builtInOf('Normative Ethics'), 'My Ethics'].sort())
+  const aristotle = at(['Normative Ethics', 'Virtue Ethics', 'Aristotle\'s Virtue Ethics'])
+  assert.equal(aristotle.id, idOf(['Normative Ethics', 'Aristotle\'s Virtue Ethics']))
+  assert.deepEqual(aristotle.notes, [{ id: 'n1', text: 'Golden mean', level: 0 }])
+  assert.equal(at(['Normative Ethics', 'Deontology', 'Kant\'s Deontology']).id, idOf(['Normative Ethics', 'Kant\'s Deontology']))
+  // Virtue Ethics was stored with a built-in child, so its cross-listed ideas are stored too.
+  assert.deepEqual(sortedChildren(['Normative Ethics', 'Virtue Ethics']), builtInOf('Virtue Ethics'))
+  assert.deepEqual(sortedChildren(['Ethics/Moral Philosophy', 'Applied Ethics']), builtInOf('Applied Ethics'))
+
+  // Philosophy of Law joins Political Philosophy, whose Libertarianism is relabelled.
+  const law = at(['Philosophy', 'Political Philosophy', 'Philosophy of Law'])
+  assert.equal(law.id, idOf(['Applied Ethics', 'Philosophy of Law']))
+  assert.deepEqual(childLabels(nodes, law).sort(), builtInOf('Philosophy of Law'))
+  assert.equal(at(['Political Philosophy', 'Libertarianism|political']).id, idOf(['Political Philosophy', 'Libertarianism']))
+  assert.equal(at(['Free Will vs. Determinism', 'Libertarianism']).id, idOf(['Free Will vs. Determinism', 'Libertarianism']))
+  assert.deepEqual(sortedChildren(['Philosophy', 'Political Philosophy']), builtInOf('Political Philosophy'))
+
+  // Cosmology's physics topics move to Astronomy; Big Bang's note lands on The Big Bang.
+  assert.deepEqual(sortedChildren(['Metaphysics', 'Cosmology']), builtInOf('Cosmology'))
+  assert.equal(nodes.some((n) => n.label === 'Big Bang'), false)
+  const theBigBang = at(['Natural Sciences', 'Astronomy', 'The Big Bang'])
+  assert.equal(theBigBang.id, idOf(['Astronomy', 'The Big Bang']))
+  assert.deepEqual(theBigBang.notes, [{ id: 'n3', text: 'Lemaître', level: 0 }])
+  assert.equal(at(['Astronomy', 'Black Holes']).id, idOf(['Cosmology', 'Black Holes']))
+  assert.equal(at(['Astronomy', 'Dark Matter']).id, idOf(['Cosmology', 'Dark Matter']))
+  assert.deepEqual(sortedChildren(['Natural Sciences', 'Astronomy']), builtInOf('Astronomy'))
+
+  // Every stored built-in node sits where the taxonomy lists it.
+  const byId = new Map(nodes.map((n) => [n.id, n]))
+  for (const node of nodes.filter((n) => n.parentId !== null && !n.isCustom)) {
+    assert.ok(TOPIC_SUBDIVISIONS[byId.get(node.parentId).label].includes(node.label), pathOf(nodes, node))
+  }
+  assert.equal(normalize(nodes, appSummary).changed, false)
+})
+
+const MIDDLE_EAST = 'Middle East Conflict (1945 - present)'
+const OLD_LANGUAGES = ['Indo-European Languages', 'Sino-Tibetan Languages', 'Afro-Asiatic Languages', 'Austronesian Languages', 'Altaic Languages', 'Grammar', 'Linguistics', 'Translation', 'Phonetics', 'Semantics']
+
+test('saved Languages, AI and Middle East Conflict branches take their new groupings on load, once', () => {
+  const events = TOPIC_SUBDIVISIONS[MIDDLE_EAST].flatMap((era) => TOPIC_SUBDIVISIONS[era])
+  const deleted = 'Clean Break Report (1996)'
+  const before = buildMap(['Everything', [
+    ['Humanities', [
+      ['History', [
+        ['Modern Era (1453 - present)', [
+          ['Contemporary Period (1945 - present)', [
+            [MIDDLE_EAST, [
+              ...events.filter((label) => label !== deleted).map((label) => (label === 'Six-Day War (1967)'
+                ? [label, [], { notes: [{ id: 'n4', text: 'June 1967', level: 0 }] }]
+                : [label])),
+              ['My Event', [], { isCustom: true }],
+            ], { excludedChildLabels: [deleted] }],
+          ]],
+        ]],
+      ]],
+      ['Languages', OLD_LANGUAGES.map((label) => (label === 'Grammar'
+        ? [label, [], { notes: [{ id: 'n5', text: 'Syntax first', level: 0 }] }]
+        : [label]))],
+    ]],
+    ['Sciences', [
+      ['Applied Sciences', [['Engineering', [['Software Engineering', [
+        ['Artificial Intelligence (AI)', [['Machine Learning (ML)']]],
+        ['Operating System (OS)'],
+        ['Software Development/Programming'],
+      ]]]]]],
+    ]],
+  ]])
+  const { nodes, changed } = normalize(before, appSummary)
+  assert.equal(changed, true)
+  assert.deepEqual(orphansOf(nodes), [])
+  const byLabel = (label) => nodes.find((n) => n.label === label)
+  const was = (label) => before.find((n) => n.label === label)
+  const parentOf = (label) => nodes.find((n) => n.id === byLabel(label).parentId).label
+
+  // The Middle East Conflict's events go under their eras, keeping ids and notes.
+  const middleEast = byLabel(MIDDLE_EAST)
+  assert.deepEqual(childLabels(nodes, middleEast).filter((label) => label !== 'My Event'), [...TOPIC_SUBDIVISIONS[MIDDLE_EAST]])
+  assert.equal(parentOf('My Event'), MIDDLE_EAST)
+  for (const era of TOPIC_SUBDIVISIONS[MIDDLE_EAST]) {
+    for (const event of TOPIC_SUBDIVISIONS[era].filter((label) => label !== deleted)) {
+      assert.equal(parentOf(event), era, event)
+      assert.equal(byLabel(event).id, was(event).id, event)
+    }
+  }
+  assert.deepEqual(byLabel('Six-Day War (1967)').notes, [{ id: 'n4', text: 'June 1967', level: 0 }])
+  assert.equal(byLabel(deleted), undefined)
+  assert.deepEqual(byLabel('Peace Process and War on Terror (1991 - 2009)').excludedChildLabels, [deleted])
+
+  // Languages splits into families and Linguistics.
+  assert.deepEqual(childLabels(nodes, byLabel('Languages')).sort(), [...TOPIC_SUBDIVISIONS.Languages].sort())
+  for (const family of TOPIC_SUBDIVISIONS['Language Families']) assert.equal(parentOf(family), 'Language Families', family)
+  for (const label of ['Grammar', 'Phonetics', 'Semantics']) {
+    assert.equal(parentOf(label), 'Linguistics', label)
+    assert.equal(byLabel(label).id, was(label).id, label)
+  }
+  assert.equal(byLabel('Linguistics').id, was('Linguistics').id)
+  assert.deepEqual(byLabel('Grammar').notes, [{ id: 'n5', text: 'Syntax first', level: 0 }])
+
+  // AI moves to Computer Science, with its subtree.
+  assert.equal(pathOf(nodes, byLabel('Artificial Intelligence (AI)')), 'Everything > Sciences > Formal Sciences > Computer Science > Artificial Intelligence (AI)')
+  assert.equal(byLabel('Artificial Intelligence (AI)').id, was('Artificial Intelligence (AI)').id)
+  assert.equal(parentOf('Machine Learning (ML)'), 'Artificial Intelligence (AI)')
+  assert.deepEqual(childLabels(nodes, byLabel('Software Engineering')).sort(), [...TOPIC_SUBDIVISIONS['Software Engineering']].sort())
+  assert.deepEqual(childLabels(nodes, byLabel('Computer Science')).sort(), [...TOPIC_SUBDIVISIONS['Computer Science']].sort())
+
   assert.equal(normalize(nodes, appSummary).changed, false)
 })
