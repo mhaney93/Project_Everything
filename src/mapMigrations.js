@@ -1214,6 +1214,32 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
     ...addEach([...AESTHETICS, 'Philosophy of Music'], ['Fei Yue', 'Harmonia']),
     ...addEach([...AESTHETICS, 'Sublime'], ['Objet Petit a', 'The Thing']),
   ],
+  35: [
+    // Pythagoras's named ideas, grouped like migration 29's, and cross-listed
+    // under their Philosophy categories like migration 34's.
+    ...groupNamedIdeas([...PRE_SOCRATIC, 'Italian School (6th c BC - 5th c BC)', 'Pythagorean School (6th - 5th c BC)', 'Pythagoras of Samos (570 BC - 495 BC)'], [
+      ['Number and Harmony|pythagoras', ['All is Number', 'Harmony of the Spheres', 'Pythagorean Theorem', 'Table of Opposites', 'Tetractys']],
+      ['Soul and Recurrence|pythagoras', ['Eternal Recurrence', 'Metempsychosis']],
+      ['Way of Life|pythagoras', ['Acusmata', 'Echemythia', 'Friends Have All Things in Common', 'Ipse Dixit', 'Pythagorean Diet', 'Pythagorean Way of Life']],
+    ]),
+    ...addEach(PHILOSOPHY, ['Philosophy of Mathematics']),
+    ...addEach(APPLIED_ETHICS, ['Animal Ethics']),
+    ...addEach([...PHILOSOPHY, 'Philosophy of Mathematics'], ['All is Number', 'Tetractys']),
+    ...addEach([...APPLIED_ETHICS, 'Animal Ethics'], ['Pythagorean Diet']),
+    ...addEach([...ONTOLOGY, 'The Problem of the One and the Many', 'Monism'], ['All is Number']),
+    ...addEach([...ONTOLOGY, 'The Problem of the One and the Many'], ['Table of Opposites']),
+    ...addEach([...AESTHETICS, 'Philosophy of Music'], ['Tetractys', 'Harmony of the Spheres']),
+    ...addEach([...COSMOLOGY, 'Structure of Universe'], ['Harmony of the Spheres']),
+    ...addEach(COSMOLOGY, ['Eternal Recurrence']),
+    ...addEach([...METAPHYSICS, 'Time'], ['Eternal Recurrence']),
+    ...addEach([...PHILOSOPHY_OF_RELIGION, 'Afterlife and Rebirth'], ['Metempsychosis']),
+    ...addEach([...PHILOSOPHY_OF_MIND, 'The Mind-Body Problem', 'Dualism'], ['Metempsychosis']),
+    ...addEach([...NORMATIVE_ETHICS, 'The Good Life'], ['Acusmata', 'Pythagorean Way of Life']),
+    ...addEach([...METAETHICS, 'Divine Command Theory'], ['Acusmata']),
+    ...addEach([...EPISTEMOLOGY, 'Sources of Knowledge', 'Testimony'], ['Ipse Dixit']),
+    ...addEach([...EPISTEMOLOGY, 'Intellectual Virtues and Vices'], ['Echemythia']),
+    ...addEach([...POLITICAL_PHILOSOPHY, 'Political Economy'], ['Friends Have All Things in Common']),
+  ],
 }
 
 // Each entry rewrites a stored summary on a node with `label` only while it
