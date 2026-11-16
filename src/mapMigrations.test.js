@@ -3203,9 +3203,10 @@ const HERACLITUS = 'Heraclitus of Ephesus (535 BC - 475 BC)'
 const ARCHELAUS = 'Archelaus (~450 BC)'
 const DIOGENES_A = 'Diogenes of Apollonia (~440 BC)'
 const PHILOLAUS = 'Philolaus (~470 BC - ~385 BC)'
+const PYTHAGORAS = 'Pythagoras of Samos (570 BC - 495 BC)'
 const IDEA_PHILOSOPHERS = [
   ...NAMED_IDEA_PHILOSOPHERS.map(([, label]) => label),
-  XUNZI, DONG, MOZI, HUI_SHI, GONGSUN_LONG, SHANG_YANG, HAN_FEI, LI_SI, THALES, ZIZEK, ANAXIMANDER, ANAXIMENES, HERACLITUS, ARCHELAUS, DIOGENES_A, PHILOLAUS,
+  XUNZI, DONG, MOZI, HUI_SHI, GONGSUN_LONG, SHANG_YANG, HAN_FEI, LI_SI, THALES, ZIZEK, ANAXIMANDER, ANAXIMENES, HERACLITUS, ARCHELAUS, DIOGENES_A, PHILOLAUS, PYTHAGORAS,
 ]
 const shortName = (label) => label.replace(/ \(.*$/, '').replace(/^Hanfeizi$/, 'Han Fei')
 
@@ -3744,13 +3745,13 @@ const PHILOSOPHERS_WITH_IDEAS = [
   'Hui Shi (c. 370 BC - c. 310 BC)', 'Gongsun Long (c. 320 BC - c. 250 BC)', 'Shang Yang (390 BC - 338 BC)', 'Hanfeizi (Han Fei) (280 BC - 233 BC)',
   'Li Si (280 BC - 208 BC)', 'Thales of Miletus (~624 BC - ~545 BC)', 'Anaximander of Miletus (610 BC - 546 BC)', 'Anaximenes of Miletus (545 BC)',
   'Heraclitus of Ephesus (535 BC - 475 BC)', 'Archelaus (~450 BC)', 'Diogenes of Apollonia (~440 BC)', 'Philolaus (~470 BC - ~385 BC)',
-  'Slavoj Žižek (1949-present)',
+  'Pythagoras of Samos (570 BC - 495 BC)', 'Slavoj Žižek (1949-present)',
 ]
 
 test('every philosopher\'s named idea is also listed under a Philosophy category, except those with no philosophy in them', () => {
-  const uncategorized = ['Thales\'s Theorem', 'Sha Qiu Zhi Mou']
+  const uncategorized = ['Thales\'s Theorem', 'Sha Qiu Zhi Mou', 'Pythagorean Theorem']
   const ideas = PHILOSOPHERS_WITH_IDEAS.flatMap(namedIdeasOf)
-  assert.equal(ideas.length, 184)
+  assert.equal(ideas.length, 197)
   for (const idea of ideas) {
     if (uncategorized.includes(idea)) assert.ok(!PHILOSOPHY_LABELS_OUTSIDE_HOP.has(idea), idea)
     else assert.ok(PHILOSOPHY_LABELS_OUTSIDE_HOP.has(idea), `${idea} has no Philosophy category`)
@@ -3946,5 +3947,47 @@ test('saved Languages, AI and Middle East Conflict branches take their new group
   assert.deepEqual(childLabels(nodes, byLabel('Software Engineering')).sort(), [...TOPIC_SUBDIVISIONS['Software Engineering']].sort())
   assert.deepEqual(childLabels(nodes, byLabel('Computer Science')).sort(), [...TOPIC_SUBDIVISIONS['Computer Science']].sort())
 
+  assert.equal(normalize(nodes, appSummary).changed, false)
+})
+
+// Migration 35: Pythagoras's named ideas, grouped and cross-listed.
+test('Pythagoras lists 13 named ideas, each with a summary that does not name him', () => {
+  const ideas = namedIdeasOf(PYTHAGORAS)
+  assert.equal(ideas.length, 13)
+  for (const idea of ideas) {
+    assert.ok(appSummary(idea), `${idea} has no summary`)
+    assert.ok(!appSummary(idea).includes('Pythagoras'), `${idea} names Pythagoras`)
+  }
+})
+
+test('migration 35 adds only real taxonomy edges, and each new category has a summary', () => {
+  for (const { add, under } of STRUCTURAL_MIGRATIONS_BY_VERSION[35].filter((m) => m.add)) {
+    for (let i = 1; i < under.length; i++) assert.ok(TOPIC_SUBDIVISIONS[under[i - 1]].includes(under[i]), `${under[i - 1]} > ${under[i]}`)
+    assert.ok(TOPIC_SUBDIVISIONS[under.at(-1)].includes(add), `${under.at(-1)} > ${add}`)
+    assert.ok(appSummary(add), `${add} has no summary`)
+  }
+})
+
+test('a map saved before Pythagoras\'s named ideas stores all 13 under his subcategories on load, once', () => {
+  const before = buildMap([HOP, [
+    ['Ancient Western Philosophy (6th c BC - 5th c AD)', [
+      ['Ancient Greek Philosophy (6th c BC - 1st c BC)', [
+        ['Pre-Socratic Philosophy (6th c BC - 5th c BC)', [
+          ['Italian School (6th c BC - 5th c BC)', [
+            [PYTHAGOREAN_SCHOOL, [[PYTHAGORAS]]],
+          ]],
+        ]],
+      ]],
+    ]],
+  ]])
+  const { nodes, changed } = normalize(before, appSummary)
+  assert.equal(changed, true)
+  const pythagoras = philosopherIn(nodes, PYTHAGORAS)
+  assert.deepEqual(childLabels(nodes, pythagoras), [...TOPIC_SUBDIVISIONS[PYTHAGORAS]])
+  for (const sub of nodes.filter((n) => n.parentId === pythagoras.id)) {
+    assert.equal(sub.hidden, true, sub.label)
+    assert.deepEqual(childLabels(nodes, sub), [...TOPIC_SUBDIVISIONS[sub.label]])
+  }
+  assert.deepEqual(ideaLabels(nodes, pythagoras).sort(), namedIdeasOf(PYTHAGORAS).sort())
   assert.equal(normalize(nodes, appSummary).changed, false)
 })
