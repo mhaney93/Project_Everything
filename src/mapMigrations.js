@@ -116,6 +116,7 @@ const AESTHETICS = [...PHILOSOPHY, 'Aesthetics']
 const METAPHILOSOPHY = [...PHILOSOPHY, 'Metaphilosophy']
 const ASTRONOMY = ['Everything', 'Sciences', 'Natural Sciences', 'Astronomy']
 const COMPUTER_SCIENCE = ['Everything', 'Sciences', 'Formal Sciences', 'Computer Science']
+const MATHEMATICS = ['Everything', 'Sciences', 'Formal Sciences', 'Mathematics']
 const SOFTWARE_ENGINEERING = ['Engineering', 'Software Engineering']
 const LANGUAGES = ['Humanities', 'Languages']
 const MIDDLE_EAST_CONFLICT = ['Contemporary Period (1945 - present)', 'Middle East Conflict (1945 - present)']
@@ -1239,6 +1240,10 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
     ...addEach([...EPISTEMOLOGY, 'Sources of Knowledge', 'Testimony'], ['Ipse Dixit']),
     ...addEach([...EPISTEMOLOGY, 'Intellectual Virtues and Vices'], ['Echemythia']),
     ...addEach([...POLITICAL_PHILOSOPHY, 'Political Economy'], ['Friends Have All Things in Common']),
+  ],
+  36: [
+    // Game Theory joins Mathematics.
+    ...addEach(MATHEMATICS, ['Game Theory']),
   ],
 }
 

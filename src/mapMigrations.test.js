@@ -2605,11 +2605,11 @@ test('production map 7 keeps one copy of each duplicated node', () => {
   const childrenOf = (id) => nodes.filter((n) => n.parentId === id).map((n) => n.id).sort((a, b) => a - b)
 
   for (const id of DEDUPE_REMOVED) assert.equal(node(id), undefined, byId.get(id).label)
-  // The only new nodes are built-in ones migration 34 adds under Philosophy and
-  // Computer Science, each where the taxonomy lists it.
+  // The only new nodes are built-in ones migrations 34 and 36 add under
+  // Philosophy, Computer Science and Mathematics, each where the taxonomy lists it.
   const added = nodes.filter((n) => !byId.has(n.id))
   for (const n of added) {
-    assert.ok(/ > (Philosophy|Computer Science) > /.test(pathOf(nodes, n)), pathOf(nodes, n))
+    assert.ok(/ > (Philosophy|Computer Science|Mathematics) > /.test(pathOf(nodes, n)), pathOf(nodes, n))
     assert.ok(TOPIC_SUBDIVISIONS[nodes.find((p) => p.id === n.parentId).label].includes(n.label), pathOf(nodes, n))
   }
   assert.equal(nodes.length - added.length, before.length - DEDUPE_REMOVED.length)
@@ -3989,5 +3989,27 @@ test('a map saved before Pythagoras\'s named ideas stores all 13 under his subca
     assert.deepEqual(childLabels(nodes, sub), [...TOPIC_SUBDIVISIONS[sub.label]])
   }
   assert.deepEqual(ideaLabels(nodes, pythagoras).sort(), namedIdeasOf(PYTHAGORAS).sort())
+  assert.equal(normalize(nodes, appSummary).changed, false)
+})
+
+// Migration 36: Game Theory under Mathematics.
+test('Game Theory is one node under Mathematics, pointing to Collective Action Problems', () => {
+  const parents = Object.keys(TOPIC_SUBDIVISIONS).filter((k) => TOPIC_SUBDIVISIONS[k].includes('Game Theory'))
+  assert.deepEqual(parents, ['Mathematics'])
+  assert.match(appSummary('Game Theory'), /See: Collective Action Problems/)
+  for (const { add, under } of STRUCTURAL_MIGRATIONS_BY_VERSION[36]) {
+    for (let i = 1; i < under.length; i++) assert.ok(TOPIC_SUBDIVISIONS[under[i - 1]].includes(under[i]), `${under[i - 1]} > ${under[i]}`)
+    assert.ok(TOPIC_SUBDIVISIONS[under.at(-1)].includes(add))
+  }
+})
+
+test('a map saved before Game Theory stores it under Mathematics on load, once', () => {
+  const before = buildMap(['Everything', [['Sciences', [['Formal Sciences', [['Mathematics', [['Algebra']]]]]]]]])
+  const { nodes, changed } = normalize(before, appSummary)
+  assert.equal(changed, true)
+  const math = nodes.find((n) => n.label === 'Mathematics')
+  const gt = nodes.filter((n) => n.label === 'Game Theory')
+  assert.equal(gt.length, 1)
+  assert.equal(gt[0].parentId, math.id)
   assert.equal(normalize(nodes, appSummary).changed, false)
 })
