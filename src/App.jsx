@@ -6008,7 +6008,8 @@ function App() {
     'Developmental Biology': [],
     
     // Mathematics
-    'Mathematics': ['Algebra', 'Geometry', 'Calculus', 'Number Theory'],
+    'Mathematics': ['Algebra', 'Geometry', 'Calculus', 'Number Theory', 'Game Theory'],
+    'Game Theory': [],
     'Algebra': ['Linear Algebra', 'Abstract Algebra', 'Commutative Algebra', 'Homological Algebra', 'Representation Theory', 'Category Theory'],
     'Linear Algebra': [],
     'Abstract Algebra': [],
@@ -13388,6 +13389,7 @@ function App() {
       'Seismology': 'The study of earthquakes and the propagation of seismic waves.',
       'Paleontology': 'The study of fossils and ancient life forms.',
       'Mathematics': 'The abstract science of numbers, quantity, structure, space, and change, using logical reasoning and quantitative calculation.',
+      'Game Theory': 'The mathematical study of strategic decisions among interacting rational agents, where each one\'s payoff depends on the others\' choices, founded by von Neumann and Morgenstern (1944) and centered on the Nash equilibrium; central to economics. See: Collective Action Problems.',
       'Algebra': 'The branch of mathematics dealing with symbols and rules for manipulating them.',
       'Linear Algebra': 'The study of vectors, vector spaces, and linear transformations.',
       'Abstract Algebra': 'The study of algebraic structures such as groups, rings, and fields.',
