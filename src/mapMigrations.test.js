@@ -2556,7 +2556,7 @@ test('migration 13 adds the four Pre-Socratics to their schools in the built-in 
   for (const { add, under } of STRUCTURAL_MIGRATIONS_BY_VERSION[13]) {
     for (let i = 1; i < under.length; i++) assert.ok(TOPIC_SUBDIVISIONS[under[i - 1]].includes(under[i]), `${under[i - 1]} > ${under[i]}`)
     assert.ok(TOPIC_SUBDIVISIONS[under.at(-1)].includes(add), `${under.at(-1)} > ${add}`)
-    // A philosopher later given named ideas (Archelaus, Diogenes and Philolaus, migrations 30, 31 and 33) has those as children.
+    // A philosopher later given named ideas (Archelaus, Diogenes, Philolaus and Xenophanes, migrations 30, 31, 33 and 37) has those as children.
     if (!IDEA_PHILOSOPHERS.includes(add)) assert.equal(TOPIC_SUBDIVISIONS[add].length, 0)
     assert.ok(appSummary(add), `${add} has no summary`)
   }
@@ -3204,9 +3204,10 @@ const ARCHELAUS = 'Archelaus (~450 BC)'
 const DIOGENES_A = 'Diogenes of Apollonia (~440 BC)'
 const PHILOLAUS = 'Philolaus (~470 BC - ~385 BC)'
 const PYTHAGORAS = 'Pythagoras of Samos (570 BC - 495 BC)'
+const XENOPHANES = 'Xenophanes (~565 BC - 478 BC)'
 const IDEA_PHILOSOPHERS = [
   ...NAMED_IDEA_PHILOSOPHERS.map(([, label]) => label),
-  XUNZI, DONG, MOZI, HUI_SHI, GONGSUN_LONG, SHANG_YANG, HAN_FEI, LI_SI, THALES, ZIZEK, ANAXIMANDER, ANAXIMENES, HERACLITUS, ARCHELAUS, DIOGENES_A, PHILOLAUS, PYTHAGORAS,
+  XUNZI, DONG, MOZI, HUI_SHI, GONGSUN_LONG, SHANG_YANG, HAN_FEI, LI_SI, THALES, ZIZEK, ANAXIMANDER, ANAXIMENES, HERACLITUS, ARCHELAUS, DIOGENES_A, PHILOLAUS, PYTHAGORAS, XENOPHANES,
 ]
 const shortName = (label) => label.replace(/ \(.*$/, '').replace(/^Hanfeizi$/, 'Han Fei')
 
@@ -3745,13 +3746,13 @@ const PHILOSOPHERS_WITH_IDEAS = [
   'Hui Shi (c. 370 BC - c. 310 BC)', 'Gongsun Long (c. 320 BC - c. 250 BC)', 'Shang Yang (390 BC - 338 BC)', 'Hanfeizi (Han Fei) (280 BC - 233 BC)',
   'Li Si (280 BC - 208 BC)', 'Thales of Miletus (~624 BC - ~545 BC)', 'Anaximander of Miletus (610 BC - 546 BC)', 'Anaximenes of Miletus (545 BC)',
   'Heraclitus of Ephesus (535 BC - 475 BC)', 'Archelaus (~450 BC)', 'Diogenes of Apollonia (~440 BC)', 'Philolaus (~470 BC - ~385 BC)',
-  'Pythagoras of Samos (570 BC - 495 BC)', 'Slavoj Žižek (1949-present)',
+  'Pythagoras of Samos (570 BC - 495 BC)', 'Xenophanes (~565 BC - 478 BC)', 'Slavoj Žižek (1949-present)',
 ]
 
 test('every philosopher\'s named idea is also listed under a Philosophy category, except those with no philosophy in them', () => {
   const uncategorized = ['Thales\'s Theorem', 'Sha Qiu Zhi Mou', 'Pythagorean Theorem']
   const ideas = PHILOSOPHERS_WITH_IDEAS.flatMap(namedIdeasOf)
-  assert.equal(ideas.length, 197)
+  assert.equal(ideas.length, 201)
   for (const idea of ideas) {
     if (uncategorized.includes(idea)) assert.ok(!PHILOSOPHY_LABELS_OUTSIDE_HOP.has(idea), idea)
     else assert.ok(PHILOSOPHY_LABELS_OUTSIDE_HOP.has(idea), `${idea} has no Philosophy category`)
@@ -4011,5 +4012,43 @@ test('a map saved before Game Theory stores it under Mathematics on load, once',
   const gt = nodes.filter((n) => n.label === 'Game Theory')
   assert.equal(gt.length, 1)
   assert.equal(gt[0].parentId, math.id)
+  assert.equal(normalize(nodes, appSummary).changed, false)
+})
+
+// Migration 37: Xenophanes's named ideas, stored directly and cross-listed.
+test('Xenophanes lists 4 named ideas, each with a summary that does not name him', () => {
+  const ideas = namedIdeasOf(XENOPHANES)
+  assert.equal(ideas.length, 4)
+  for (const idea of ideas) {
+    assert.ok(appSummary(idea), `${idea} has no summary`)
+    assert.ok(!appSummary(idea).includes('Xenophanes'), `${idea} names Xenophanes`)
+  }
+})
+
+test('migration 37 adds only real taxonomy edges', () => {
+  for (const { add, under } of STRUCTURAL_MIGRATIONS_BY_VERSION[37]) {
+    for (let i = 1; i < under.length; i++) assert.ok(TOPIC_SUBDIVISIONS[under[i - 1]].includes(under[i]), `${under[i - 1]} > ${under[i]}`)
+    assert.ok(TOPIC_SUBDIVISIONS[under.at(-1)].includes(add), `${under.at(-1)} > ${add}`)
+  }
+})
+
+test('a map saved before Xenophanes\'s named ideas stores all 4 under him on load, once', () => {
+  const before = buildMap([HOP, [
+    ['Ancient Western Philosophy (6th c BC - 5th c AD)', [
+      ['Ancient Greek Philosophy (6th c BC - 1st c BC)', [
+        ['Pre-Socratic Philosophy (6th c BC - 5th c BC)', [
+          ['Italian School (6th c BC - 5th c BC)', [[XENOPHANES]]],
+        ]],
+      ]],
+    ]],
+  ]])
+  const { nodes, changed } = normalize(before, appSummary)
+  assert.equal(changed, true)
+  const xenophanes = philosopherIn(nodes, XENOPHANES)
+  assert.deepEqual(childLabels(nodes, xenophanes), [...TOPIC_SUBDIVISIONS[XENOPHANES]])
+  for (const child of nodes.filter((n) => n.parentId === xenophanes.id)) {
+    assert.equal(child.isCustom, undefined, child.label)
+    assert.equal(child.hidden, true, child.label)
+  }
   assert.equal(normalize(nodes, appSummary).changed, false)
 })

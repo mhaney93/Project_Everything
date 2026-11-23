@@ -1245,6 +1245,19 @@ export const STRUCTURAL_MIGRATIONS_BY_VERSION = {
     // Game Theory joins Mathematics.
     ...addEach(MATHEMATICS, ['Game Theory']),
   ],
+  37: [
+    // Xenophanes's named ideas, stored directly like migration 33's, and
+    // cross-listed under their Philosophy categories like migration 34's.
+    ...addEachToEveryCopy([...PRE_SOCRATIC, 'Italian School (6th c BC - 5th c BC)', 'Xenophanes (~565 BC - 478 BC)'], [
+      'Idea of Progress',
+      "Xenophanes' Critique of Anthropomorphism",
+      'One Greatest God',
+      "Xenophanes' Skepticism",
+    ]),
+    ...addEach([...PHILOSOPHY_OF_RELIGION, 'Nature of God'], ["Xenophanes' Critique of Anthropomorphism", 'One Greatest God']),
+    ...addEach([...EPISTEMOLOGY, 'The Nature of Knowledge', 'Skepticism'], ["Xenophanes' Skepticism"]),
+    ...addEach([...PHILOSOPHY, 'Philosophy of Science'], ['Idea of Progress']),
+  ],
 }
 
 // Each entry rewrites a stored summary on a node with `label` only while it
